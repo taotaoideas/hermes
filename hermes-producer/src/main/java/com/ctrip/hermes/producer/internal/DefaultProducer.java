@@ -2,11 +2,11 @@ package com.ctrip.hermes.producer.internal;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.message.MessageContext;
+import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.MessagePipeline;
 import com.ctrip.hermes.producer.Producer;
 
-public class DefaultProducer implements Producer {
+public class DefaultProducer extends Producer {
 	@Inject
 	private MessagePipeline m_pipe;
 
@@ -29,10 +29,10 @@ public class DefaultProducer implements Producer {
 
 		@Override
 		public void send() {
-			MessageContext<Object> ctx = new MessageContext<Object>();
+			Message<Object> ctx = new Message<Object>();
 
 			ctx.setTopic(m_topic);
-			ctx.setMessage(m_message);
+			ctx.setBody(m_message);
 			ctx.setKey(m_key);
 
 			m_pipe.put(ctx);
