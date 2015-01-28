@@ -1,0 +1,17 @@
+<plexus>
+	<components>
+		<component>
+			<role>com.ctrip.hermes.producer.Producer</role>
+			<implementation>com.ctrip.hermes.producer.internal.DefaultProducer</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.MessagePipeline</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.MessagePipeline</role>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessagePipeline</implementation>
+		</component>
+	</components>
+</plexus>
