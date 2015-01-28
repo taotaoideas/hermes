@@ -1,0 +1,34 @@
+<plexus>
+	<components>
+		<component>
+			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
+			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
+			<configuration>
+				<defaultModule>com.ctrip.hermes.broker.console.ConsoleModule</defaultModule>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.web.mvc.Module</role>
+			<role-hint>com.ctrip.hermes.broker.console.ConsoleModule</role-hint>
+			<implementation>com.ctrip.hermes.broker.console.ConsoleModule</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.console.home.Handler</role>
+			<implementation>com.ctrip.hermes.broker.console.home.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.console.home.JspViewer</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.console.home.JspViewer</role>
+			<implementation>com.ctrip.hermes.broker.console.home.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+	</components>
+</plexus>
