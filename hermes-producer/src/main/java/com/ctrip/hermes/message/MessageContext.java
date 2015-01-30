@@ -1,33 +1,35 @@
 package com.ctrip.hermes.message;
 
-public class MessageContext<T> {
-	private String m_topic;
+public class MessageContext {
 
-	private T m_message;
+	private MessageSink m_sink;
 
-	private String m_key;
+	private int m_index;
 
-	public String getKey() {
-		return m_key;
-	}
+	private Message<Object> m_message;
 
-	public T getMessage() {
-		return m_message;
-	}
-
-	public String getTopic() {
-		return m_topic;
-	}
-
-	public void setKey(String key) {
-		m_key = key;
-	}
-
-	public void setMessage(T message) {
+	public MessageContext(Message<Object> message) {
 		m_message = message;
 	}
 
-	public void setTopic(String topic) {
-		m_topic = topic;
+	public void setSink(MessageSink sink) {
+		m_sink = sink;
 	}
+
+	public int getIndex() {
+		return m_index;
+	}
+
+	public void setIndex(int index) {
+		m_index = index;
+	}
+
+	public MessageSink getSink() {
+		return m_sink;
+	}
+
+	public Message<Object> getMessage() {
+		return m_message;
+	}
+
 }

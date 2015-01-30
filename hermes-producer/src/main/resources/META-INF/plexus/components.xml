@@ -12,6 +12,27 @@
 		<component>
 			<role>com.ctrip.hermes.message.MessagePipeline</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessagePipeline</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.MessageRegistry</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.MessageSinkManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.MessageSinkManager</role>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSinkManager</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.MessageRegistry</role>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.spi.MessageValve</role>
+			<role-hint>tracing</role-hint>
+			<implementation>com.ctrip.hermes.spi.internal.TracingMessageValve</implementation>
 		</component>
 	</components>
 </plexus>
