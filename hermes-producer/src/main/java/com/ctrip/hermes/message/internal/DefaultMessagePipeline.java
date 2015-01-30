@@ -1,9 +1,5 @@
 package com.ctrip.hermes.message.internal;
 
-import java.util.List;
-
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.message.Message;
@@ -13,16 +9,13 @@ import com.ctrip.hermes.message.MessageRegistry;
 import com.ctrip.hermes.message.MessageSink;
 import com.ctrip.hermes.message.MessageSinkManager;
 import com.ctrip.hermes.message.MessageValveChain;
-import com.ctrip.hermes.spi.MessageValve;
 
-public class DefaultMessagePipeline implements MessagePipeline, Initializable {
+public class DefaultMessagePipeline implements MessagePipeline {
 	@Inject
 	private MessageRegistry m_registry;
 
 	@Inject
 	private MessageSinkManager m_sinkManager;
-
-	private MessageValveChain m_chain;
 
 	@Override
 	public void put(Message<Object> message) {
@@ -30,13 +23,7 @@ public class DefaultMessagePipeline implements MessagePipeline, Initializable {
 		MessageSink sink = m_sinkManager.getSink(message.getTopic());
 
 		ctx.setSink(sink);
-		m_chain.handle(ctx);
+		new MessageValveChain(m_registry.getValveList()).handle(ctx);
 	}
 
-	@Override
-	public void initialize() throws InitializationException {
-		List<MessageValve> valves = m_registry.getValveList();
-
-		m_chain = new MessageValveChain(valves);
-	}
 }
