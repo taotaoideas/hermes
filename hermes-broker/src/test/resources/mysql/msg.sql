@@ -1,3 +1,5 @@
+USE `hermes`;
+
 CREATE TABLE IF NOT EXISTS `meta_token` (
   `id` int(11) NOT NULL,
   `token` int(11) NOT NULL,
@@ -10,33 +12,33 @@ CREATE TABLE IF NOT EXISTS `msg_high_${topic}` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `body` blob NOT NULL,
   `source_ip` int(11) NOT NULL,
-  `token` varchar(50) NOT NULL,
+  `token` int(11) NOT NULL,
   `ref_key` varchar(50) DEFAULT NULL,
   `properties` blob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='Topic: testtopic;\r\nPriority: high.';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='Topic: testtopic\r\nPriority: high.';
 
 CREATE TABLE IF NOT EXISTS `msg_low_${topic}` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `body` blob NOT NULL,
   `source_ip` int(11) NOT NULL,
-  `token` varchar(50) NOT NULL,
+  `token` int(11) NOT NULL,
   `ref_key` varchar(50) DEFAULT NULL,
   `properties` blob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='Topic: TestTopic;\r\nPriority: log.';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='Topic: TestTopic\r\nPriority: log.';
 
 CREATE TABLE IF NOT EXISTS `msg_middle_${topic}` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `body` blob NOT NULL,
   `source_ip` int(11) NOT NULL,
-  `token` varchar(50) NOT NULL,
+  `token` int(11) NOT NULL,
   `ref_key` varchar(50) DEFAULT NULL,
   `properties` blob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Topic: testtopic;\r\nPriority: middle.';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Topic: ${topic}\r\nPriority: middle.';
 
-CREATE TABLE IF NOT EXISTS `offset_${topic}` (
+CREATE TABLE IF NOT EXISTS `msg_offset_${topic}` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `group_id` varchar(50) NOT NULL,
   `offset` int(11) NOT NULL COMMENT 'refer to msg_p_[topic]_[priority]:id',
