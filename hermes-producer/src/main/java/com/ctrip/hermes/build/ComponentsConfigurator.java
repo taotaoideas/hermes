@@ -16,10 +16,7 @@ import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
 import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.message.codec.internal.JsonCodec;
-import com.ctrip.hermes.message.internal.DefaultMessagePipeline;
-import com.ctrip.hermes.message.internal.DefaultMessageRegistry;
-import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
-import com.ctrip.hermes.message.internal.MemoryMessageSink;
+import com.ctrip.hermes.message.internal.*;
 import com.ctrip.hermes.meta.MetaManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.internal.DefaultMetaManager;
@@ -58,6 +55,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// sinks
 		all.add(C(MessageSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
 		      .req(CodecManager.class));
+		all.add(C(MessageSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
+				.req(CodecManager.class));
 		all.add(C(MessageSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 

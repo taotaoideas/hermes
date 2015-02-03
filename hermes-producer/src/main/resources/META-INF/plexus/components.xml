@@ -69,6 +69,16 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.message.MessageSink</role>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.BrokerMessageSink</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.message.MessageSinkManager</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSinkManager</implementation>
 			<requirements>

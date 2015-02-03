@@ -1,11 +1,10 @@
-package com.ctrip.hermes.broker.netty;
-
-import java.nio.channels.Channel;
+package com.ctrip.hermes.netty;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
-public class MsgSendHandler extends ChannelHandlerAdapter {
+public class MsgSenderHandler extends ChannelInboundHandlerAdapter {
 
     String PING = "PING";
 
