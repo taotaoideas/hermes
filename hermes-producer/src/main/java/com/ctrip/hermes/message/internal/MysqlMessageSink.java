@@ -3,9 +3,9 @@ package com.ctrip.hermes.message.internal;
 import com.ctrip.hermes.message.MessageContext;
 import com.ctrip.hermes.message.MessageSink;
 
-public class FileMessageSink implements MessageSink {
+public class MysqlMessageSink implements MessageSink {
 
-	public FileMessageSink() {
+	public MysqlMessageSink() {
 	   // TODO Auto-generated constructor stub
    }
 

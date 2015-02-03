@@ -1,6 +1,25 @@
 <plexus>
 	<components>
 		<component>
+			<role>org.unidal.initialization.Module</role>
+			<role-hint>hermes-producer</role-hint>
+			<implementation>com.ctrip.hermes.HermesProducerModule</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.meta.internal.MetaLoader</role>
+			<role-hint>local-meta-loader</role-hint>
+			<implementation>com.ctrip.hermes.meta.internal.LocalMetaLoader</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.meta.internal.MetaLoader</role>
+			<role-hint>remote-meta-loader</role-hint>
+			<implementation>com.ctrip.hermes.meta.internal.RemoteMetaLoader</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.meta.MetaManager</role>
+			<implementation>com.ctrip.hermes.meta.internal.DefaultMetaManager</implementation>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.producer.Producer</role>
 			<implementation>com.ctrip.hermes.producer.internal.DefaultProducer</implementation>
 			<requirements>
@@ -22,17 +41,46 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.MessageSinkManager</role>
-			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSinkManager</implementation>
+			<role>com.ctrip.hermes.message.codec.Codec</role>
+			<role-hint>JSON</role-hint>
+			<implementation>com.ctrip.hermes.message.codec.internal.JsonCodec</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.MessageRegistry</role>
-			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
+			<role>com.ctrip.hermes.message.codec.CodecManager</role>
+			<implementation>com.ctrip.hermes.message.codec.internal.DefaultCodecManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.meta.MetaManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.MessageSink</role>
+			<role-hint>MEMORY</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.MemoryMessageSink</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.MessageSinkManager</role>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSinkManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.meta.MetaManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.spi.MessageValve</role>
 			<role-hint>tracing</role-hint>
 			<implementation>com.ctrip.hermes.spi.internal.TracingMessageValve</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.MessageRegistry</role>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
 	</components>
 </plexus>

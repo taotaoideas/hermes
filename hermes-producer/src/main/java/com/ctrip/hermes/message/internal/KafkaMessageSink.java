@@ -3,9 +3,9 @@ package com.ctrip.hermes.message.internal;
 import com.ctrip.hermes.message.MessageContext;
 import com.ctrip.hermes.message.MessageSink;
 
-public class FileMessageSink implements MessageSink {
+public class KafkaMessageSink implements MessageSink {
 
-	public FileMessageSink() {
+	public KafkaMessageSink() {
 	   // TODO Auto-generated constructor stub
    }
 
