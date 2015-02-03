@@ -42,9 +42,8 @@ public class MessageValveChainTest extends ComponentTestCase {
 			}
 		}, "", 5);
 
-		MessageValveChain chain = new MessageValveChain(registry.getValveList());
+		MessageValveChain chain = new MessageValveChain(registry.getValveList(), mock(MessageSink.class));
 		MessageContext ctx = new MessageContext(msg);
-		ctx.setSink(mock(MessageSink.class));
 		chain.handle(ctx);
 
 		assertEquals(Arrays.asList(5, 10), resultList);

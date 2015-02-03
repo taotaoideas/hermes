@@ -5,22 +5,25 @@ import java.util.List;
 import com.ctrip.hermes.spi.MessageValve;
 
 public class MessageValveChain {
+	private MessageSink m_sink;
+
+	private int m_index;
+
 	private List<MessageValve> m_valves;
 
-	public MessageValveChain(List<MessageValve> valves) {
+	public MessageValveChain(List<MessageValve> valves, MessageSink sink) {
 		m_valves = valves;
+		m_sink = sink;
 	}
 
 	public void handle(MessageContext ctx) {
-		int index = ctx.getIndex();
+		if (m_index < m_valves.size()) {
+			MessageValve valve = m_valves.get(m_index);
 
-		if (index < m_valves.size()) {
-			MessageValve valve = m_valves.get(index);
-
-			ctx.setIndex(index + 1);
+			m_index++;
 			valve.handle(this, ctx);
 		} else {
-			ctx.getSink().handle(ctx);
+			m_sink.handle(ctx);
 		}
 	}
 }
