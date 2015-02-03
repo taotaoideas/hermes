@@ -4,8 +4,8 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
 
-import com.ctrip.hermes.meta.Meta;
 import com.ctrip.hermes.meta.MetaManager;
+import com.ctrip.hermes.meta.entity.Meta;
 
 public class DefaultMetaManager extends ContainerHolder implements Initializable, MetaManager {
 
@@ -14,11 +14,11 @@ public class DefaultMetaManager extends ContainerHolder implements Initializable
 	private MetaLoader m_remoteMeta;
 
 	@Override
-	public Meta getMeta(String topic) {
+	public Meta getMeta() {
 		if (isLocalMode()) {
-			return m_localMeta.load(topic);
+			return m_localMeta.load();
 		} else {
-			return m_remoteMeta.load(topic);
+			return m_remoteMeta.load();
 		}
 	}
 

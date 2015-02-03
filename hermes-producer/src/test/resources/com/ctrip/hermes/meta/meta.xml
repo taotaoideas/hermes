@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<meta dev-mode='true'>
+	<connector type='local'>
+		<storage type='memory' default='true'>
+		</storage>
+		<storage type='file'>
+			<property name='base-path' value='/data/mq' />
+			<topic name='topic.3' />
+			<topic name='topic.4' />
+		</storage>
+	</connector>
+	<connector type='broker'>
+		<property name='endpoints' value='1.1.1.1:4376,2.2.2.2:4376' />
+		<property name='other' value='...' />
+		<storage type='mysql'>
+			<property name='ds' value='flight' />
+			<property name='url' value='...' />
+			<property name='user' value='...' />
+			<topic name='topic.5'>
+				<property name='local-file-first' value='true' />
+				<property name='replicas' value='2' />
+				<property name='retry-policy' value='interval:60,300,900' />
+			</topic>
+			<topic name='topic.6' />
+		</storage>
+		<storage type='kafka'>
+			<property name='zk' value='1.1.1.1:2181,2.2.2.2:2181' />
+			<topic name='topic.6' />
+		</storage>
+	</connector>
+	<connector type='transaction'>
+		<storage type='mysql'>
+			<property name='ds' value='flight' />
+			<topic name='topic.6' />
+		</storage>
+	</connector>
+</meta>

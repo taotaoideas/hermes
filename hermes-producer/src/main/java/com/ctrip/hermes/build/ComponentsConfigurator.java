@@ -21,7 +21,9 @@ import com.ctrip.hermes.message.internal.DefaultMessageRegistry;
 import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
 import com.ctrip.hermes.message.internal.MemoryMessageSink;
 import com.ctrip.hermes.meta.MetaManager;
+import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.internal.DefaultMetaManager;
+import com.ctrip.hermes.meta.internal.DefaultMetaService;
 import com.ctrip.hermes.meta.internal.LocalMetaLoader;
 import com.ctrip.hermes.meta.internal.MetaLoader;
 import com.ctrip.hermes.meta.internal.RemoteMetaLoader;
@@ -41,6 +43,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(MetaLoader.class, LocalMetaLoader.ID, LocalMetaLoader.class));
 		all.add(C(MetaLoader.class, RemoteMetaLoader.ID, RemoteMetaLoader.class));
 		all.add(C(MetaManager.class, DefaultMetaManager.class));
+		all.add(C(MetaService.class, DefaultMetaService.class) //
+		      .req(MetaManager.class));
 
 		all.add(C(Producer.class, DefaultProducer.class) //
 		      .req(MessagePipeline.class));
@@ -49,14 +53,13 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// codecs
 		all.add(C(Codec.class, JsonCodec.ID, JsonCodec.class));
-		all.add(C(CodecManager.class, DefaultCodecManager.class) //
-		      .req(MetaManager.class));
+		all.add(C(CodecManager.class, DefaultCodecManager.class));
 
 		// sinks
 		all.add(C(MessageSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
 		      .req(CodecManager.class));
 		all.add(C(MessageSinkManager.class, DefaultMessageSinkManager.class) //
-		      .req(MetaManager.class));
+		      .req(MetaService.class));
 
 		// valves
 		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));

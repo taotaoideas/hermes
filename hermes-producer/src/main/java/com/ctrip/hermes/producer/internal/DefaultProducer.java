@@ -16,31 +16,29 @@ public class DefaultProducer extends Producer {
 	}
 
 	class DefaultHolder implements Holder {
-		private String m_topic;
+		private Message<Object> m_msg;
 
-		private Object m_message;
+		public DefaultHolder(String topic, Object body) {
+			m_msg = new Message<Object>();
 
-		private String m_key;
-
-		public DefaultHolder(String topic, Object message) {
-			m_topic = topic;
-			m_message = message;
+			m_msg.setTopic(topic);
+			m_msg.setBody(body);
 		}
 
 		@Override
 		public void send() {
-			Message<Object> ctx = new Message<Object>();
-
-			ctx.setTopic(m_topic);
-			ctx.setBody(m_message);
-			ctx.setKey(m_key);
-
-			m_pipe.put(ctx);
+			m_pipe.put(m_msg);
 		}
 
 		@Override
 		public Holder withKey(String key) {
-			m_key = key;
+			m_msg.setKey(key);
+			return this;
+		}
+
+		@Override
+		public Holder withPriority() {
+			m_msg.setPriority(true);
 			return this;
 		}
 	}
