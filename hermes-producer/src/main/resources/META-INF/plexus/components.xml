@@ -86,5 +86,52 @@
 			<role>com.ctrip.hermes.message.MessageRegistry</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyCommandHandler</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandHandler</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandRegistry</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyRemotingClient</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyRemotingClient</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyCommandDecoder</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandDecoder</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandCodec</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyCommandEncoder</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandEncoder</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandCodec</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandRegistry</role>
+			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandRegistry</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandCodec</role>
+			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandCodec</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>
+		</component>
 	</components>
 </plexus>

@@ -29,6 +29,16 @@ import com.ctrip.hermes.meta.internal.MetaLoader;
 import com.ctrip.hermes.meta.internal.RemoteMetaLoader;
 import com.ctrip.hermes.producer.Producer;
 import com.ctrip.hermes.producer.internal.DefaultProducer;
+import com.ctrip.hermes.remoting.CommandCodec;
+import com.ctrip.hermes.remoting.CommandProcessor;
+import com.ctrip.hermes.remoting.CommandRegistry;
+import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
+import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
+import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
+import com.ctrip.hermes.remoting.netty.NettyCommandDecoder;
+import com.ctrip.hermes.remoting.netty.NettyCommandEncoder;
+import com.ctrip.hermes.remoting.netty.NettyCommandHandler;
+import com.ctrip.hermes.remoting.netty.NettyRemotingClient;
 import com.ctrip.hermes.spi.MessageValve;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
@@ -64,6 +74,20 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// valves
 		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));
 		all.add(C(MessageRegistry.class, DefaultMessageRegistry.class));
+
+		all.add(C(NettyCommandHandler.class).is(PER_LOOKUP) //
+		      .req(CommandRegistry.class));
+		all.add(C(NettyRemotingClient.class).is(PER_LOOKUP));
+		all.add(C(NettyCommandDecoder.class).is(PER_LOOKUP) //
+				.req(CommandCodec.class));
+		all.add(C(NettyCommandEncoder.class).is(PER_LOOKUP) //
+				.req(CommandCodec.class));
+
+		all.add(C(CommandRegistry.class, DefaultCommandRegistry.class));
+		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
+
+		// command processors
+		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.class));
 
 		return all;
 	}
