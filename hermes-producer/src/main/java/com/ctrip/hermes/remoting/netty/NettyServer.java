@@ -8,23 +8,18 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-public class NettyRemotingServer extends ContainerHolder {
+public class NettyServer extends ContainerHolder {
 	@Inject
 	private NettyServerConfig m_serverConfig;
 
 	public void start() {
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-		final NettyCommandHandler cmdHandler = lookup(NettyCommandHandler.class);
-		final NettyCommandDecoder cmdDecoder = lookup(NettyCommandDecoder.class);
-		final NettyCommandEncoder cmdEncoder = lookup(NettyCommandEncoder.class);
 
 		try {
 			ServerBootstrap b = new ServerBootstrap();
@@ -34,11 +29,10 @@ public class NettyRemotingServer extends ContainerHolder {
 				      public void initChannel(SocketChannel ch) throws Exception {
 					      ch.pipeline().addLast( //
 					            // TODO set max frame length
-					            new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4), //
-					            cmdDecoder, //
+					            lookup(NettyDecoder.class), //
 					            new LengthFieldPrepender(4), //
-					            cmdEncoder, //
-					            cmdHandler);
+					            lookup(NettyEncoder.class), //
+					            lookup(NettyServerHandler.class));
 				      }
 			      }).option(ChannelOption.SO_BACKLOG, 128) //
 			      .childOption(ChannelOption.SO_KEEPALIVE, true);

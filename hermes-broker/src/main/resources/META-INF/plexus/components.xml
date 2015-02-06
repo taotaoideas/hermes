@@ -5,8 +5,8 @@
 			<implementation>com.ctrip.hermes.remoting.netty.NettyServerConfig</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyRemotingServer</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyRemotingServer</implementation>
+			<role>com.ctrip.hermes.remoting.netty.NettyServer</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyServer</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
@@ -15,7 +15,18 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
-			<implementation>com.ctrip.hermes.remoting.HandshakeRequestProcessor</implementation>
+			<role-hint>handshake-request</role-hint>
+			<implementation>com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<role-hint>send-message-request</role-hint>
+			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<role-hint>start-consumer-requesut</role-hint>
+			<implementation>com.ctrip.hermes.broker.remoting.StartConsumerRequest</implementation>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>

@@ -1,11 +1,13 @@
 package com.ctrip.hermes.producer;
 
+import java.io.IOException;
+
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 public class ProducerTest extends ComponentTestCase {
 	@Test
-	public void simpleSendWithoutLookup() {
+	public void simpleSendWithoutLookup() throws IOException {
 		Producer p = Producer.getInstance();
 
 		p.message("order.new", 12345L).send();

@@ -9,7 +9,7 @@ import org.unidal.lookup.annotation.Inject;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandCodec;
 
-public class NettyCommandEncoder extends MessageToByteEncoder<Command> {
+public class NettyEncoder extends MessageToByteEncoder<Command> {
 
 	@Inject
 	private CommandCodec m_codec;

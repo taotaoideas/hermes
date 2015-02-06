@@ -69,6 +69,19 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.message.MessageSink</role>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.BrokerMessageSink</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.netty.MessageChannelManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.message.MessageSinkManager</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSinkManager</implementation>
 			<requirements>
@@ -87,37 +100,60 @@
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyCommandHandler</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandHandler</implementation>
+			<role>com.ctrip.hermes.remoting.netty.MessageChannelManager</role>
+			<implementation>com.ctrip.hermes.remoting.netty.MessageChannelManager</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyClientHandler</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyClientHandler</implementation>
 			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandProcessorManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyServerHandler</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyServerHandler</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandProcessorManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyClient</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyClient</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyDecoder</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyDecoder</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandCodec</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyEncoder</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyEncoder</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandCodec</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessorManager</role>
+			<implementation>com.ctrip.hermes.remoting.CommandProcessorManager</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.remoting.CommandRegistry</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyRemotingClient</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyRemotingClient</implementation>
-			<instantiation-strategy>per-lookup</instantiation-strategy>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyCommandDecoder</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandDecoder</implementation>
-			<instantiation-strategy>per-lookup</instantiation-strategy>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.remoting.CommandCodec</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyCommandEncoder</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandEncoder</implementation>
-			<instantiation-strategy>per-lookup</instantiation-strategy>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.remoting.CommandCodec</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -131,6 +167,7 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>
 		</component>
 	</components>
