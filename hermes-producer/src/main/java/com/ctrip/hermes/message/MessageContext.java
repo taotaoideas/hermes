@@ -1,31 +1,18 @@
 package com.ctrip.hermes.message;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class MessageContext {
-
-	private MessageSink m_sink;
-
-	private int m_index;
 
 	private Message<Object> m_message;
 
+	private Map<String, String> m_reqHeaders = new LinkedHashMap<String, String>();
+
+	private Map<String, String> m_resHeaders = new LinkedHashMap<String, String>();
+
 	public MessageContext(Message<Object> message) {
 		m_message = message;
-	}
-
-	public void setSink(MessageSink sink) {
-		m_sink = sink;
-	}
-
-	public int getIndex() {
-		return m_index;
-	}
-
-	public void setIndex(int index) {
-		m_index = index;
-	}
-
-	public MessageSink getSink() {
-		return m_sink;
 	}
 
 	public Message<Object> getMessage() {

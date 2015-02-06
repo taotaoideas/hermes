@@ -22,8 +22,7 @@ public class DefaultMessagePipeline implements MessagePipeline {
 		MessageContext ctx = new MessageContext(message);
 		MessageSink sink = m_sinkManager.getSink(message.getTopic());
 
-		ctx.setSink(sink);
-		new MessageValveChain(m_registry.getValveList()).handle(ctx);
+		new MessageValveChain(m_registry.getValveList(), sink).handle(ctx);
 	}
 
 }

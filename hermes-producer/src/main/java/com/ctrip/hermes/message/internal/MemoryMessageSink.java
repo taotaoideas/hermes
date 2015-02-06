@@ -9,7 +9,7 @@ import com.ctrip.hermes.message.codec.CodecManager;
 
 public class MemoryMessageSink implements MessageSink {
 
-	public static final String ID = StorageType.MEMORY.name();
+	public static final String ID = "memory";
 
 	@Inject
 	private CodecManager m_codecManager;

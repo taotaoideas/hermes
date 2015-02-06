@@ -7,22 +7,18 @@ import java.util.Map.Entry;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
-import com.ctrip.hermes.meta.MetaManager;
 
 public class DefaultCodecManager extends ContainerHolder implements Initializable, CodecManager {
 
-	@Inject
-	MetaManager m_metaManager;
-
-	private Map<CodecType, Codec> m_codecs = new HashMap<CodecType, Codec>();
+	private Map<String, Codec> m_codecs = new HashMap<String, Codec>();
 
 	@Override
 	public Codec getCodec(String topic) {
-		return m_codecs.get(m_metaManager.getMeta(topic).getCodecType(topic));
+		// support json codec only
+		return m_codecs.get(JsonCodec.ID);
 	}
 
 	@Override
@@ -30,7 +26,7 @@ public class DefaultCodecManager extends ContainerHolder implements Initializabl
 		Map<String, Codec> codecs = lookupMap(Codec.class);
 
 		for (Entry<String, Codec> entry : codecs.entrySet()) {
-			m_codecs.put(CodecType.valueOf(entry.getKey()), entry.getValue());
+			m_codecs.put(entry.getKey(), entry.getValue());
 		}
 	}
 

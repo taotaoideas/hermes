@@ -18,5 +18,7 @@ public abstract class Producer {
 		public Holder withKey(String string);
 
 		public void send();
+
+		public Holder withPriority();
 	}
 }

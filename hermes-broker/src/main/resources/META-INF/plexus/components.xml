@@ -1,6 +1,23 @@
 <plexus>
 	<components>
 		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyServerConfig</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyRemotingServer</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyRemotingServer</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<implementation>com.ctrip.hermes.remoting.HandshakeRequestProcessor</implementation>
+		</component>
+		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>
