@@ -26,6 +26,8 @@ import com.ctrip.hermes.meta.internal.MetaLoader;
 import com.ctrip.hermes.meta.internal.RemoteMetaLoader;
 import com.ctrip.hermes.producer.Producer;
 import com.ctrip.hermes.producer.internal.DefaultProducer;
+import com.ctrip.hermes.range.DefaultRangeMonitor;
+import com.ctrip.hermes.range.RangeMonitor;
 import com.ctrip.hermes.spi.MessageValve;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
@@ -63,6 +65,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// valves
 		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));
 		all.add(C(MessageRegistry.class, DefaultMessageRegistry.class));
+
+		// rangeMonitor
+		all.add(C(RangeMonitor.class, DefaultRangeMonitor.class));
 
 		return all;
 	}

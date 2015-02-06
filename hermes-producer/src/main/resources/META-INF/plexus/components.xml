@@ -96,5 +96,9 @@
 			<role>com.ctrip.hermes.message.MessageRegistry</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.range.RangeMonitor</role>
+			<implementation>com.ctrip.hermes.range.DefaultRangeMonitor</implementation>
+		</component>
 	</components>
 </plexus>
