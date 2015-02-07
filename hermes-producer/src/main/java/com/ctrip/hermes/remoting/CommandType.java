@@ -6,7 +6,8 @@ import java.util.Map;
 public enum CommandType {
 
 	HandshakeRequest(1), HandshakeResponse(2), //
-	SendMessageRequest(3), StartConsumerRequest(5);
+	SendMessageRequest(3), StartConsumerRequest(4), //
+	ConsumeRequest(5);
 
 	private static Map<Integer, CommandType> m_types = new HashMap<Integer, CommandType>();
 

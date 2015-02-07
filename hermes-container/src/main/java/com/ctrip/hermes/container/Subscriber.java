@@ -8,12 +8,12 @@ public class Subscriber {
 
 	private String m_topicPattern;
 
-	private Class<? extends Consumer> m_consumerClass;
+	private Consumer<?> m_consumer;
 
-	public Subscriber(String groupId, String topicPattern, Class<? extends Consumer> consumerClass) {
+	public Subscriber(String groupId, String topicPattern, Consumer<?> consumer) {
 		m_groupId = groupId;
 		m_topicPattern = topicPattern;
-		m_consumerClass = consumerClass;
+		m_consumer = consumer;
 	}
 
 	public String getGroupId() {
@@ -24,8 +24,8 @@ public class Subscriber {
 		return m_topicPattern;
 	}
 
-	public Class<? extends Consumer> getConsumerClass() {
-		return m_consumerClass;
+	public Consumer<?> getConsumer() {
+		return m_consumer;
 	}
 
 }

@@ -16,4 +16,16 @@ public class ConsumerChannel {
 		this.groupId = groupId;
 	}
 
+	public ChannelHandlerContext getNettyCtx() {
+		return m_nettyCtx;
+	}
+
+	public String getTopic() {
+		return m_topic;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
 }

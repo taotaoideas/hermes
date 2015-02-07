@@ -26,7 +26,7 @@
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>start-consumer-requesut</role-hint>
-			<implementation>com.ctrip.hermes.broker.remoting.StartConsumerRequest</implementation>
+			<implementation>com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor</implementation>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>

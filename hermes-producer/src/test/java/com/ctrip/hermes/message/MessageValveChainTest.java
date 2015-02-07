@@ -8,16 +8,17 @@ import java.util.UUID;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.spi.MessageValve;
+import com.ctrip.hermes.message.internal.MessageValve;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class MessageValveChainTest extends ComponentTestCase {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void passAllValve() {
-		MessageRegistry registry = lookup(MessageRegistry.class);
+		ValveRegistry<Message<Object>> registry = lookup(ValveRegistry.class, "message");
 
 		final Message<Object> msg = new Message<Object>();
 		msg.setBody(UUID.randomUUID().toString());
@@ -26,7 +27,7 @@ public class MessageValveChainTest extends ComponentTestCase {
 		registry.registerValve(new MessageValve() {
 
 			@Override
-			public void handle(MessageValveChain chain, MessageContext ctx) {
+			public void handle(ValveChain<Message<Object>> chain, PipelineContext<Message<Object>> ctx) {
 				assertEquals(msg.getBody(), ctx.getMessage().getBody());
 				resultList.add(10);
 				chain.handle(ctx);
@@ -35,15 +36,15 @@ public class MessageValveChainTest extends ComponentTestCase {
 		registry.registerValve(new MessageValve() {
 
 			@Override
-			public void handle(MessageValveChain chain, MessageContext ctx) {
+			public void handle(ValveChain<Message<Object>> chain, PipelineContext<Message<Object>> ctx) {
 				assertEquals(msg.getBody(), ctx.getMessage().getBody());
 				resultList.add(5);
 				chain.handle(ctx);
 			}
 		}, "", 5);
 
-		MessageValveChain chain = new MessageValveChain(registry.getValveList(), mock(MessageSink.class));
-		MessageContext ctx = new MessageContext(msg);
+		ValveChain<Message<Object>> chain = new ValveChain<>(registry.getValveList(), mock(PipelineSink.class));
+		PipelineContext<Message<Object>> ctx = new PipelineContext<>(msg);
 		chain.handle(ctx);
 
 		assertEquals(Arrays.asList(5, 10), resultList);

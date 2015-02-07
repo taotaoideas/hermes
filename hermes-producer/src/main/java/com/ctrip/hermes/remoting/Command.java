@@ -73,8 +73,10 @@ public class Command {
 		return m_correlationId;
 	}
 
-	public void setCorrelationId(int correlationId) {
+	public Command setCorrelationId(int correlationId) {
 		m_correlationId = correlationId;
+		
+		return this;
 	}
 
 }

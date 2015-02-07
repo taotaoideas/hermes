@@ -2,7 +2,7 @@ package com.ctrip.hermes.consumer;
 
 import org.junit.Test;
 
-import com.ctrip.hermes.message.MessageContext;
+import com.ctrip.hermes.message.PipelineContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,7 +22,7 @@ public class ConsumerTest {
 	static class MockConsumer implements Consumer {
 
 		@Override
-		public void consume(MessageContext ctx) {
+		public void consume(PipelineContext ctx) {
 			// TODO Auto-generated method stub
 
 		}

@@ -14,8 +14,6 @@ public class HandshakeRequestProcessor implements CommandProcessor {
 
 	@Override
 	public void process(CommandContext ctx) {
-		System.out.println("New producer connected");
-
 		ctx.write(new Command(CommandType.HandshakeResponse));
 	}
 

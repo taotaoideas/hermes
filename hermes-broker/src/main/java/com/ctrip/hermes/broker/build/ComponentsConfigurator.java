@@ -8,7 +8,7 @@ import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
-import com.ctrip.hermes.broker.remoting.StartConsumerRequest;
+import com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.netty.NettyServer;
 import com.ctrip.hermes.remoting.netty.NettyServerConfig;
@@ -24,7 +24,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(CommandProcessor.class, HandshakeRequestProcessor.ID, HandshakeRequestProcessor.class));
 		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class));
-		all.add(C(CommandProcessor.class, StartConsumerRequest.ID, StartConsumerRequest.class));
+		all.add(C(CommandProcessor.class, StartConsumerRequestProcessor.ID, StartConsumerRequestProcessor.class));
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());

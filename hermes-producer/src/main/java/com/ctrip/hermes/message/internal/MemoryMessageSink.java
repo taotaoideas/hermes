@@ -2,12 +2,12 @@ package com.ctrip.hermes.message.internal;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.message.MessageContext;
-import com.ctrip.hermes.message.MessageSink;
+import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
 
-public class MemoryMessageSink implements MessageSink {
+public class MemoryMessageSink implements MessagePipelineSink {
 
 	public static final String ID = "memory";
 
@@ -19,7 +19,7 @@ public class MemoryMessageSink implements MessageSink {
 	}
 
 	@Override
-	public void handle(MessageContext ctx) {
+	public void handle(PipelineContext<Message<Object>> ctx) {
 		// TODO Auto-generated method stub
 		String topic = ctx.getMessage().getTopic();
 		Codec codec = m_codecManager.getCodec(topic);

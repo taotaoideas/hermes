@@ -33,16 +33,17 @@
 			<implementation>com.ctrip.hermes.producer.internal.DefaultProducer</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.MessagePipeline</role>
+					<role>com.ctrip.hermes.message.Pipeline</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.MessagePipeline</role>
+			<role>com.ctrip.hermes.message.Pipeline</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessagePipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.MessageRegistry</role>
+					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role-hint>message</role-hint>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.message.MessageSinkManager</role>
@@ -59,7 +60,7 @@
 			<implementation>com.ctrip.hermes.message.codec.internal.DefaultCodecManager</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.MessageSink</role>
+			<role>com.ctrip.hermes.message.internal.MessagePipelineSink</role>
 			<role-hint>memory</role-hint>
 			<implementation>com.ctrip.hermes.message.internal.MemoryMessageSink</implementation>
 			<requirements>
@@ -69,7 +70,7 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.MessageSink</role>
+			<role>com.ctrip.hermes.message.internal.MessagePipelineSink</role>
 			<role-hint>broker</role-hint>
 			<implementation>com.ctrip.hermes.message.internal.BrokerMessageSink</implementation>
 			<requirements>
@@ -91,12 +92,13 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.spi.MessageValve</role>
+			<role>com.ctrip.hermes.message.internal.MessageValve</role>
 			<role-hint>tracing</role-hint>
 			<implementation>com.ctrip.hermes.spi.internal.TracingMessageValve</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.MessageRegistry</role>
+			<role>com.ctrip.hermes.message.ValveRegistry</role>
+			<role-hint>message</role-hint>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
 		<component>
