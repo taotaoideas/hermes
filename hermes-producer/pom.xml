@@ -66,11 +66,11 @@
                      <manifest><![CDATA[
                         ${basedir}/src/main/resources/META-INF/dal/model/meta-manifest.xml,
                      ]]></manifest>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-   </build>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
 
