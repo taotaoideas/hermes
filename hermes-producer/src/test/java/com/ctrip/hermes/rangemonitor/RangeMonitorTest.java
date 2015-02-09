@@ -1,6 +1,6 @@
 package com.ctrip.hermes.rangemonitor;
 
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +13,7 @@ import com.ctrip.hermes.range.RangeMonitor;
 import com.ctrip.hermes.range.RangeStatusListener;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class RangeMonitorTest extends ComponentTestCase {
@@ -52,7 +53,7 @@ public class RangeMonitorTest extends ComponentTestCase {
         for (int i = 1; i <= batchSize; i++) {
             monitor.offsetDone(new Offset(id, i), true);
         }
-        System.out.println("all offset done: " + (new Date().getTime() - start) + "ms" );
+        System.out.println("all offset done: " + (new Date().getTime() - start) + "ms");
 
         assertTrue(latch.await(latchWaitSecond, TimeUnit.SECONDS));
     }
@@ -131,8 +132,99 @@ public class RangeMonitorTest extends ComponentTestCase {
     }
 
     @Test
-    public void multiThread() {
+    public void multiThreadMostSuccess() throws InterruptedException {
+        final RangeMonitor monitor = lookup(RangeMonitor.class);
+        final int batchMaxLength = 100;
 
+
+        final List<Integer> randomOrder = new ArrayList<>(batchSize);
+        for (int i = 0; i < batchSize; i++) {
+            randomOrder.add(i);
+        }
+//        Collections.shuffle(randomOrder);
+
+        final Set<Integer> doneSet = new HashSet<>();
+        final Set<Integer> failSet = new HashSet<>();
+        final Set<Integer> ackFailSet = new HashSet<>();
+
+
+        monitor.addListener(new RangeStatusListener() {
+            @Override
+            public void onRangeDone(Range range) {
+                for (long i = range.getStartOffset().getOffset(); i <= range.endOffset().getOffset(); i++)
+                    doneSet.add((int) i);
+            }
+
+            @Override
+            public void onRangeFail(Range range) {
+                for (long i = range.getStartOffset().getOffset(); i <= range.endOffset().getOffset(); i++)
+                    failSet.add((int) i);
+            }
+        });
+
+
+
+        Runnable receiveThread = new Runnable() {
+            @Override
+            public void run() {
+                //放入一批offset (随机的，离散的，不连续的)
+                for (int i = 0; i < randomOrder.size(); ) {
+                    int fromIndex = i, toIndex;
+                    int oneBatch = new Random().nextInt(batchMaxLength);
+                    if (fromIndex + oneBatch >= randomOrder.size()) {
+                        toIndex = randomOrder.size();
+                    } else {
+                        toIndex = fromIndex + oneBatch;
+                    }
+
+                    i = toIndex + 1;
+                    List<Integer> subOffsets = randomOrder.subList(fromIndex, toIndex);
+                    monitor.startNewOffsets(buildOffsets(subOffsets));
+                }
+
+
+            }
+        };
+
+        new Thread(receiveThread).start();
+        Runnable ackThread = new Runnable() {
+            @Override
+            public void run() {
+                for (Integer integer : randomOrder) {
+                    if (integer % 100 == 0) {
+                        monitor.offsetDone(new Offset(id, integer), false);
+                        ackFailSet.add(integer);
+                    } else {
+                        monitor.offsetDone(new Offset(id, integer), true);
+                    }
+                }
+            }
+        };
+        new Thread(ackThread).start();
+
+
+        Thread.sleep(2500);
+//        assertEquals(new HashSet<>(randomOrder), doneSet);
+
+        assertEquals(ackFailSet, failSet);
+    }
+
+    @Test
+    public void multiThreadMostFail() {
+
+    }
+
+    @Test
+    public void multiThreadMostTimeout() {
+
+    }
+
+    private Offset[] buildOffsets(List<Integer> offsets) {
+        Offset[] result = new Offset[offsets.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = new Offset(id, offsets.get(i));
+        }
+        return result;
     }
 
     private void assertOffsetEqual(Offset offset1, Offset offset2) {

@@ -8,6 +8,9 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
     private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
 
+    Map<Set, EWAHCompressedBitmap> maps = new HashMap<>();
+
+
     EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
     EWAHCompressedBitmap doneMap = EWAHCompressedBitmap.bitmapOf();
     EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
@@ -27,8 +30,11 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
     @Override
     public synchronized void startNewOffsets(Offset... offsets) {
+
         // TODO: 处理offset超过int最大值时的问题
         for (Offset offset : offsets) {
+
+
             sendMap.set((int) offset.getOffset());
 
             offsetIdMap.put((int) offset.getOffset(), offset.getId());
@@ -61,18 +67,14 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
         // 3. notify listeners.
         for (RangeStatusListener listener : m_listeners) {
-            System.out.println("doneRages: " + doneRanges.size() );
             for (Range range : doneRanges) {
                 listener.onRangeDone(range);
             }
-            System.out.println("failRanges: " + failedRanges.size());
 
             for (Range range : failedRanges) {
                 listener.onRangeFail(range);
             }
         }
-        System.out.println("notify end:" + new Date());
-
     }
 
     public EWAHCompressedBitmap calculateRanges(EWAHCompressedBitmap sendMap, EWAHCompressedBitmap doneMap,
@@ -87,12 +89,9 @@ public class DefaultRangeMonitor implements RangeMonitor {
         buildRangeByBitmap(failMap, failedRanges, defaultOffsetId);
 
         // 2 get timeoutMap
-        System.out.println("sendMap: " + sendMap.sizeInBits());
         EWAHCompressedBitmap remainMap = EWAHCompressedBitmap.bitmapOf();
 //        remainMap.setSizeInBits(sendMap.sizeInBits(), true);
         remainMap = sendMap.xor(doneMap);
-
-        System.out.println("remainMap: " + remainMap.sizeInBits());
 
         EWAHCompressedBitmap timeoutMap = EWAHCompressedBitmap.bitmapOf();
 

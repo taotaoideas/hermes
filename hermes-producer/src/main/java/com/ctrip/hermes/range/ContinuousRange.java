@@ -61,6 +61,16 @@ public class ContinuousRange implements Range {
     }
 
     @Override
+    public Offset getStartOffset() {
+        return m_start;
+    }
+
+    @Override
+    public Offset getEndOffset() {
+        return m_end;
+    }
+
+    @Override
     public String toString() {
         return "ContinuousRange [m_id=" + m_id + ", m_start=" + m_start + ", m_end=" + m_end + "]";
     }

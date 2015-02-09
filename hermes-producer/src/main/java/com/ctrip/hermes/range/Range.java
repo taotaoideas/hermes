@@ -12,4 +12,8 @@ public interface Range extends Locatable {
 
     boolean contains(Offset o);
 
+    public Offset getStartOffset();
+
+    public Offset getEndOffset();
+
 }
