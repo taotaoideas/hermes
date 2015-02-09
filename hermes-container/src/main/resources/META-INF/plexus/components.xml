@@ -1,7 +1,7 @@
 <plexus>
 	<components>
 		<component>
-			<role>com.ctrip.hermes.container.ConsumerManager</role>
+			<role>com.ctrip.hermes.engine.ConsumerManager</role>
 			<implementation>com.ctrip.hermes.container.DefaultConsumerManager</implementation>
 		</component>
 		<component>
@@ -10,7 +10,7 @@
 			<implementation>com.ctrip.hermes.container.remoting.ConsumeRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.container.ConsumerManager</role>
+					<role>com.ctrip.hermes.engine.ConsumerManager</role>
 				</requirement>
 			</requirements>
 		</component>

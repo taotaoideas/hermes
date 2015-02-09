@@ -14,6 +14,19 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.broker.MessageChannelManager</role>
+			<implementation>com.ctrip.hermes.broker.DefaultMessageChannelManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.MessageQueueManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.MessageQueueManager</role>
+			<implementation>com.ctrip.hermes.broker.DefaultMessageQueueManager</implementation>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>handshake-request</role-hint>
 			<implementation>com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor</implementation>
@@ -22,11 +35,21 @@
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>send-message-request</role-hint>
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.MessageChannelManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>start-consumer-requesut</role-hint>
 			<implementation>com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.MessageChannelManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>

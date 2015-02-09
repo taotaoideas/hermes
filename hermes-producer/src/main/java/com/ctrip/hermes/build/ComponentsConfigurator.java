@@ -38,7 +38,7 @@ import com.ctrip.hermes.remoting.CommandRegistry;
 import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
 import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
 import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
-import com.ctrip.hermes.remoting.netty.MessageChannelManager;
+import com.ctrip.hermes.remoting.netty.ClientManager;
 import com.ctrip.hermes.remoting.netty.NettyClient;
 import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 import com.ctrip.hermes.remoting.netty.NettyDecoder;
@@ -74,7 +74,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(MessagePipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
 		      .req(CodecManager.class));
 		all.add(C(MessagePipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
-		      .req(CodecManager.class, MessageChannelManager.class));
+		      .req(CodecManager.class, ClientManager.class));
 		all.add(C(MessageSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 
@@ -82,7 +82,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));
 		all.add(C(ValveRegistry.class, "message", DefaultMessageRegistry.class));
 
-		all.add(C(MessageChannelManager.class));
+		all.add(C(ClientManager.class));
 		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
 		      .req(CommandProcessorManager.class));
 		all.add(C(NettyServerHandler.class).is(PER_LOOKUP) //

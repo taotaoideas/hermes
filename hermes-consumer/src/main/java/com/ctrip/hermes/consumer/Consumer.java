@@ -1,9 +1,9 @@
 package com.ctrip.hermes.consumer;
 
-import com.ctrip.hermes.message.PipelineContext;
+import java.util.List;
 
 public interface Consumer<T> {
 
-	public void consume(PipelineContext<T> ctx);
+	public void consume(List<T> msgs);
 	
 }

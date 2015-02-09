@@ -1,11 +1,11 @@
 package com.ctrip.hermes.consumer;
 
-import org.junit.Test;
-
-import com.ctrip.hermes.message.PipelineContext;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
+
+import org.junit.Test;
 
 public class ConsumerTest {
 
@@ -19,12 +19,10 @@ public class ConsumerTest {
 	}
 
 	@Subscribe(topicPattern = "order.*", groupId = "search.order")
-	static class MockConsumer implements Consumer {
+	public static class MockConsumer implements Consumer<Object> {
 
 		@Override
-		public void consume(PipelineContext ctx) {
-			// TODO Auto-generated method stub
-
+		public void consume(List<Object> msgs) {
 		}
 
 	}

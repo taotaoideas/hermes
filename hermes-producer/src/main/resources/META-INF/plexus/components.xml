@@ -78,7 +78,7 @@
 					<role>com.ctrip.hermes.message.codec.CodecManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.remoting.netty.MessageChannelManager</role>
+					<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -102,8 +102,8 @@
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.MessageChannelManager</role>
-			<implementation>com.ctrip.hermes.remoting.netty.MessageChannelManager</implementation>
+			<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
+			<implementation>com.ctrip.hermes.remoting.netty.ClientManager</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.netty.NettyClientHandler</role>

@@ -1,13 +1,13 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.engine;
 
 import java.util.List;
 
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.container.scanner.Scanner;
+import com.ctrip.hermes.engine.scanner.Scanner;
 
-public class DefaultContainer extends ContainerHolder implements Container {
+public class DefaultEngine extends ContainerHolder implements Engine {
 
 	@Inject
 	private Scanner m_scanner;

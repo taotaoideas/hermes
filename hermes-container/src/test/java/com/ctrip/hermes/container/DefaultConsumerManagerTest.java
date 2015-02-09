@@ -1,5 +1,6 @@
 package com.ctrip.hermes.container;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -7,7 +8,8 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.message.PipelineContext;
+import com.ctrip.hermes.engine.ConsumerManager;
+import com.ctrip.hermes.engine.Subscriber;
 
 public class DefaultConsumerManagerTest extends ComponentTestCase {
 
@@ -20,22 +22,24 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 		}
 
 		@Override
-		public void consume(PipelineContext<Object> ctx) {
-			System.out.println("Receive message " + ctx.getMessage());
+		public void consume(List<Object> msgs) {
+			System.out.println("Receive message " + msgs);
 			m_latch.countDown();
 		}
 
 	}
 
 	@Test
-	public void test() throws InterruptedException {
+	public void test() throws Exception {
 		ConsumerManager m = lookup(ConsumerManager.class);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		Subscriber s = new Subscriber("groupId", "order.new", new TestConsumer(latch));
+		Subscriber s = new Subscriber("order.new", "groupId", new TestConsumer(latch));
 		m.startConsumer(s);
 
 		latch.await(2, TimeUnit.SECONDS);
+		
+		System.in.read();
 	}
 
 }

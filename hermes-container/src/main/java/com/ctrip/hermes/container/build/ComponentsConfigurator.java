@@ -6,9 +6,9 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
-import com.ctrip.hermes.container.ConsumerManager;
 import com.ctrip.hermes.container.DefaultConsumerManager;
 import com.ctrip.hermes.container.remoting.ConsumeRequestProcessor;
+import com.ctrip.hermes.engine.ConsumerManager;
 import com.ctrip.hermes.remoting.CommandProcessor;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {

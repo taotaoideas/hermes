@@ -17,21 +17,21 @@ public class ProducerTest extends ComponentTestCase {
 	public void simpleSend() {
 		Producer p = lookup(Producer.class);
 
-		p.message("order.new", 12345L).send();
+		p.message("order.new", 12346L).send();
 	}
 
 	@Test
 	public void sendWithKey() {
 		Producer p = lookup(Producer.class);
 
-		p.message("order.new", 12345L).withKey("key12345").send();
+		p.message("order.new", 12347L).withKey("key12345").send();
 	}
 
 	@Test
 	public void sendWithPriority() {
 		Producer p = lookup(Producer.class);
 
-		p.message("order.new", 12345L).withPriority().send();
+		p.message("order.new", 12348L).withPriority().send();
 	}
 
 }

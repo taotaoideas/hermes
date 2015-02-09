@@ -1,4 +1,4 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.engine;
 
 import com.ctrip.hermes.consumer.Consumer;
 
@@ -10,10 +10,10 @@ public class Subscriber {
 
 	private Consumer<?> m_consumer;
 
-	public Subscriber(String groupId, String topicPattern, Consumer<?> consumer) {
-		m_groupId = groupId;
-		m_topicPattern = topicPattern;
-		m_consumer = consumer;
+	public Subscriber(String m_topicPattern, String m_groupId, Consumer<?> m_consumer) {
+		this.m_topicPattern = m_topicPattern;
+		this.m_groupId = m_groupId;
+		this.m_consumer = m_consumer;
 	}
 
 	public String getGroupId() {

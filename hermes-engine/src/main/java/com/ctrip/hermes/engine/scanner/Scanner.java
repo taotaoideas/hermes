@@ -1,8 +1,8 @@
-package com.ctrip.hermes.container.scanner;
+package com.ctrip.hermes.engine.scanner;
 
 import java.util.List;
 
-import com.ctrip.hermes.container.Subscriber;
+import com.ctrip.hermes.engine.Subscriber;
 
 public interface Scanner {
 
