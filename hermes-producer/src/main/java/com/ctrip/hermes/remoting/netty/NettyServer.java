@@ -34,7 +34,7 @@ public class NettyServer extends ContainerHolder {
 					            lookup(NettyEncoder.class), //
 					            lookup(NettyServerHandler.class));
 				      }
-			      }).option(ChannelOption.SO_BACKLOG, 128) //
+			      }).option(ChannelOption.SO_BACKLOG, 128) // TODO set tcp options
 			      .childOption(ChannelOption.SO_KEEPALIVE, true);
 
 			// Bind and start to accept incoming connections.

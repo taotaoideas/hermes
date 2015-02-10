@@ -1,16 +1,16 @@
 package com.ctrip.hermes.remoting;
 
-import io.netty.channel.ChannelHandlerContext;
+import com.ctrip.hermes.remoting.netty.AbstractNettyHandler;
 
 public class CommandContext {
 
 	private Command m_cmd;
 
-	private ChannelHandlerContext m_nettyCtx;
+	private AbstractNettyHandler m_nettyHandler;
 
-	public CommandContext(Command cmd, ChannelHandlerContext nettyCtx) {
-		m_cmd = cmd;
-		m_nettyCtx = nettyCtx;
+	public CommandContext(Command m_cmd, AbstractNettyHandler m_nettyHandler) {
+		this.m_cmd = m_cmd;
+		this.m_nettyHandler = m_nettyHandler;
 	}
 
 	public Command getCommand() {
@@ -18,11 +18,11 @@ public class CommandContext {
 	}
 
 	public void write(Command cmd) {
-		m_nettyCtx.writeAndFlush(cmd);
+		m_nettyHandler.writeCommand(cmd);
 	}
 
-	public ChannelHandlerContext getNettyCtx() {
-		return m_nettyCtx;
+	public AbstractNettyHandler getNettyHandler() {
+		return m_nettyHandler;
 	}
 
 }

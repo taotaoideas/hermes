@@ -38,8 +38,6 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 		m.startConsumer(s);
 
 		latch.await(2, TimeUnit.SECONDS);
-		
-		System.in.read();
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.ctrip.hermes.remoting.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -8,6 +9,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldPrepender;
+
+import java.util.concurrent.TimeUnit;
 
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
@@ -43,9 +46,12 @@ public class NettyClient extends ContainerHolder {
 				}
 			});
 
-			b.connect("127.0.0.1", 4376).sync();
+			// TODO
+			ChannelFuture f = b.connect("127.0.0.1", 4376).sync();
 
-			m_cmdHandler.waitUntilActive();
+			if (!f.await(2, TimeUnit.SECONDS)) {
+				// TODO reconnect
+			}
 
 			// Wait until the connection is closed.
 			// f.channel().closeFuture().sync();

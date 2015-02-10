@@ -1,10 +1,14 @@
 package com.ctrip.hermes.broker.remoting;
 
+import io.netty.channel.Channel;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.broker.ConsumerChannel;
 import com.ctrip.hermes.broker.ConsumerChannelHandler;
 import com.ctrip.hermes.broker.MessageChannelManager;
 import com.ctrip.hermes.broker.storage.message.Message;
@@ -12,6 +16,7 @@ import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
+import com.ctrip.hermes.remoting.netty.ChannelEventListener;
 
 public class StartConsumerRequestProcessor implements CommandProcessor {
 
@@ -31,7 +36,20 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 		String topic = cmd.getHeader("topic");
 		String groupId = cmd.getHeader("groupId");
 
-		m_channelManager.newConsumerChannel(topic, groupId, new ConsumerChannelHandler() {
+		final ConsumerChannel consumerChannel = m_channelManager.newConsumerChannel(topic, groupId);
+
+		final AtomicBoolean m_open = new AtomicBoolean(true);
+		ctx.getNettyHandler().addChannelEventListener(new ChannelEventListener() {
+
+			@Override
+			public void onChannelClose(Channel channel) {
+				m_open.set(false);
+
+				consumerChannel.close();
+			}
+		});
+
+		consumerChannel.setHandler(new ConsumerChannelHandler() {
 
 			@Override
 			public void handle(List<Message> msgs) {
@@ -39,15 +57,16 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 				      .setCorrelationId(cmd.getCorrelationId()) //
 				      .setBody(encode(msgs));
 
-				ctx.getNettyCtx().writeAndFlush(consumeReq);
+				ctx.write(consumeReq);
 			}
 
 			public boolean isOpen() {
-				// TODO add listener to netty handler
-				return true;
+				return m_open.get();
 			}
 
 		});
+
+		consumerChannel.open();
 	}
 
 	private byte[] encode(List<Message> msgs) {
