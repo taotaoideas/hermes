@@ -49,7 +49,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 			}
 		});
 
-		consumerChannel.setHandler(new ConsumerChannelHandler() {
+		consumerChannel.start(new ConsumerChannelHandler() {
 
 			@Override
 			public void handle(List<Message> msgs) {
@@ -65,8 +65,6 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 			}
 
 		});
-
-		consumerChannel.open();
 	}
 
 	private byte[] encode(List<Message> msgs) {

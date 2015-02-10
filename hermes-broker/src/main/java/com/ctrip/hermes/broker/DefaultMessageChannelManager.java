@@ -29,21 +29,13 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId) {
 
 		return new ConsumerChannel() {
-			private ConsumerChannelHandler m_handler;
-
 			@Override
 			public void close() {
 				// TODO remove handler
-
 			}
 
 			@Override
-			public void setHandler(ConsumerChannelHandler handler) {
-				m_handler = handler;
-			}
-
-			@Override
-			public void open() {
+			public void start(ConsumerChannelHandler handler) {
 				synchronized (DefaultMessageChannelManager.this) {
 					Pair<String, String> pair = new Pair<>(topic, groupId);
 					List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
@@ -52,7 +44,7 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 						curHandlers = startQueuePuller(topic, groupId);
 						m_handlers.put(pair, curHandlers);
 					}
-					curHandlers.add(m_handler);
+					curHandlers.add(handler);
 				}
 			}
 		};
