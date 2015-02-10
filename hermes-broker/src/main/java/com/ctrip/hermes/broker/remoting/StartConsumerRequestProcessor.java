@@ -11,6 +11,7 @@ import org.unidal.lookup.annotation.Inject;
 import com.ctrip.hermes.broker.ConsumerChannel;
 import com.ctrip.hermes.broker.ConsumerChannelHandler;
 import com.ctrip.hermes.broker.MessageChannelManager;
+import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
 import com.ctrip.hermes.broker.storage.message.Message;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
@@ -32,24 +33,26 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	@Override
 	public void process(final CommandContext ctx) {
+		NettyServerHandler nettyHandler = (NettyServerHandler) ctx.getNettyHandler();
 		final Command cmd = ctx.getCommand();
 		String topic = cmd.getHeader("topic");
 		String groupId = cmd.getHeader("groupId");
 
-		final ConsumerChannel consumerChannel = m_channelManager.newConsumerChannel(topic, groupId);
+		final ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, groupId);
+		nettyHandler.addConsumerChannel(cmd.getCorrelationId(), cc);
 
 		final AtomicBoolean m_open = new AtomicBoolean(true);
-		ctx.getNettyHandler().addChannelEventListener(new ChannelEventListener() {
+		nettyHandler.addChannelEventListener(new ChannelEventListener() {
 
 			@Override
 			public void onChannelClose(Channel channel) {
 				m_open.set(false);
 
-				consumerChannel.close();
+				cc.close();
 			}
 		});
 
-		consumerChannel.start(new ConsumerChannelHandler() {
+		cc.start(new ConsumerChannelHandler() {
 
 			@Override
 			public void handle(List<Message> msgs) {

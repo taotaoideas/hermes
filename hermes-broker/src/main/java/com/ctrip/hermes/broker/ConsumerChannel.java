@@ -6,4 +6,6 @@ public interface ConsumerChannel {
 
 	public void start(ConsumerChannelHandler handler);
 
+	public void ack();
+
 }

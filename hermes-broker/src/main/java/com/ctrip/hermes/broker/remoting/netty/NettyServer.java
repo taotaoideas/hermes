@@ -1,4 +1,4 @@
-package com.ctrip.hermes.remoting.netty;
+package com.ctrip.hermes.broker.remoting.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -12,6 +12,9 @@ import io.netty.handler.codec.LengthFieldPrepender;
 
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
+
+import com.ctrip.hermes.remoting.netty.NettyDecoder;
+import com.ctrip.hermes.remoting.netty.NettyEncoder;
 
 public class NettyServer extends ContainerHolder {
 	@Inject

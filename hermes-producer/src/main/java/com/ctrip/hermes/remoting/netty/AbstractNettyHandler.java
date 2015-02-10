@@ -24,12 +24,12 @@ public abstract class AbstractNettyHandler extends SimpleChannelInboundHandler<C
 	@Inject
 	private CommandProcessorManager m_processorManager;
 
+	private Logger m_logger;
+
 	private List<ChannelEventListener> m_eventListeners = Collections
 	      .synchronizedList(new ArrayList<ChannelEventListener>());
 
 	private Channel m_channel;
-
-	private Logger m_logger;
 
 	public void writeCommand(Command cmd) {
 		ChannelFuture f = m_channel.writeAndFlush(cmd);

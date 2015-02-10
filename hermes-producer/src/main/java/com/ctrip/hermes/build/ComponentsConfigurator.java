@@ -43,7 +43,6 @@ import com.ctrip.hermes.remoting.netty.NettyClient;
 import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 import com.ctrip.hermes.remoting.netty.NettyDecoder;
 import com.ctrip.hermes.remoting.netty.NettyEncoder;
-import com.ctrip.hermes.remoting.netty.NettyServerHandler;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
@@ -84,8 +83,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ClientManager.class));
 		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
-		      .req(CommandProcessorManager.class));
-		all.add(C(NettyServerHandler.class).is(PER_LOOKUP) //
 		      .req(CommandProcessorManager.class));
 		all.add(C(NettyClient.class).is(PER_LOOKUP));
 		all.add(C(NettyDecoder.class).is(PER_LOOKUP) //

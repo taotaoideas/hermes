@@ -116,16 +116,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyServerHandler</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyServerHandler</implementation>
-			<instantiation-strategy>per-lookup</instantiation-strategy>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.remoting.CommandProcessorManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.remoting.netty.NettyClient</role>
 			<implementation>com.ctrip.hermes.remoting.netty.NettyClient</implementation>
 			<instantiation-strategy>per-lookup</instantiation-strategy>

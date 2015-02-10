@@ -47,6 +47,12 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 					curHandlers.add(handler);
 				}
 			}
+
+			@Override
+         public void ack() {
+	         // TODO Auto-generated method stub
+	         
+         }
 		};
 
 	}
