@@ -102,10 +102,6 @@
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.range.RangeMonitor</role>
-			<implementation>com.ctrip.hermes.range.DefaultRangeMonitor</implementation>
-			<role>com.ctrip.hermes.remoting.netty.NettyCommandHandler</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandHandler</implementation>
 			<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
 			<implementation>com.ctrip.hermes.remoting.netty.ClientManager</implementation>
 		</component>
@@ -170,6 +166,19 @@
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandCodec</role>
 			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandCodec</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyServerConfig</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.netty.NettyServer</role>
+			<implementation>com.ctrip.hermes.remoting.netty.NettyServer</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>

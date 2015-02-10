@@ -31,8 +31,6 @@ import com.ctrip.hermes.meta.internal.MetaLoader;
 import com.ctrip.hermes.meta.internal.RemoteMetaLoader;
 import com.ctrip.hermes.producer.Producer;
 import com.ctrip.hermes.producer.internal.DefaultProducer;
-import com.ctrip.hermes.range.DefaultRangeMonitor;
-import com.ctrip.hermes.range.RangeMonitor;
 import com.ctrip.hermes.remoting.CommandCodec;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandProcessorManager;
@@ -40,12 +38,7 @@ import com.ctrip.hermes.remoting.CommandRegistry;
 import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
 import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
 import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
-import com.ctrip.hermes.remoting.netty.ClientManager;
-import com.ctrip.hermes.remoting.netty.NettyClient;
-import com.ctrip.hermes.remoting.netty.NettyClientHandler;
-import com.ctrip.hermes.remoting.netty.NettyDecoder;
-import com.ctrip.hermes.remoting.netty.NettyEncoder;
-import com.ctrip.hermes.remoting.netty.NettyServerHandler;
+import com.ctrip.hermes.remoting.netty.*;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
@@ -84,8 +77,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));
 		all.add(C(ValveRegistry.class, "message", DefaultMessageRegistry.class));
 
-		// rangeMonitor
-		all.add(C(RangeMonitor.class, DefaultRangeMonitor.class));
 		all.add(C(ClientManager.class));
 		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
 		      .req(CommandProcessorManager.class));
@@ -101,6 +92,11 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(CommandRegistry.class));
 		all.add(C(CommandRegistry.class, DefaultCommandRegistry.class));
 		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
+
+		// server
+		all.add(C(NettyServerConfig.class));
+		all.add(C(NettyServer.class) //
+				.req(NettyServerConfig.class));
 
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));

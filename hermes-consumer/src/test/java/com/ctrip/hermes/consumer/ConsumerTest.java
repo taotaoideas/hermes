@@ -23,6 +23,7 @@ public class ConsumerTest {
 
 		@Override
 		public void consume(List<Object> msgs) {
+			System.out.println("Receive message: " + msgs);
 		}
 
 	}

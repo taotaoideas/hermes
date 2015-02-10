@@ -13,6 +13,7 @@
 		<module>hermes-broker</module>
 		<module>hermes-engine</module>
 		<module>hermes-container</module>
+		<module>hermes-example</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
