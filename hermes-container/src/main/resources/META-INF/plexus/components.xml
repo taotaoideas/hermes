@@ -1,6 +1,20 @@
 <plexus>
 	<components>
 		<component>
+			<role>com.ctrip.hermes.engine.ConsumerManager</role>
+			<implementation>com.ctrip.hermes.container.DefaultConsumerManager</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<role-hint>sonsume-request</role-hint>
+			<implementation>com.ctrip.hermes.container.remoting.ConsumeRequestProcessor</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.engine.ConsumerManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>

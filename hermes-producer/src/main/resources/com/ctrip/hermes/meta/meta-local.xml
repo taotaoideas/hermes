@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<meta>
+<meta dev-mode='false'>
 	<connector type='local'>
 		<storage type='memory' default='true'>
 		</storage>

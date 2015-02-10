@@ -9,7 +9,6 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.message.MessageSink;
 import com.ctrip.hermes.message.MessageSinkManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Connector;
@@ -19,11 +18,11 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 	@Inject
 	private MetaService m_meta;
 
-	private Map<String, MessageSink> m_sinks = new HashMap<String, MessageSink>();
+	private Map<String, MessagePipelineSink> m_sinks = new HashMap<>();
 
 	@Override
-	public MessageSink getSink(String topic) {
-		MessageSink sink = null;
+	public MessagePipelineSink getSink(String topic) {
+		MessagePipelineSink sink = null;
 
 		String connectorType = m_meta.getConnectorType(topic);
 		switch (connectorType) {
@@ -47,9 +46,9 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 
 	@Override
 	public void initialize() throws InitializationException {
-		Map<String, MessageSink> sinks = lookupMap(MessageSink.class);
+		Map<String, MessagePipelineSink> sinks = lookupMap(MessagePipelineSink.class);
 
-		for (Entry<String, MessageSink> entry : sinks.entrySet()) {
+		for (Entry<String, MessagePipelineSink> entry : sinks.entrySet()) {
 			m_sinks.put(entry.getKey(), entry.getValue());
 		}
 	}

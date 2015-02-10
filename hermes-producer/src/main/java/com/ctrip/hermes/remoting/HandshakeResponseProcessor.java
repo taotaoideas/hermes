@@ -5,9 +5,10 @@ import java.util.List;
 
 public class HandshakeResponseProcessor implements CommandProcessor {
 
+	public static final String ID = "handshake-response";
+
 	@Override
 	public void process(CommandContext ctx) {
-		System.out.println("Connected to broker");
 	}
 
 	@Override
