@@ -17,7 +17,7 @@ public class ProducerTest extends ComponentTestCase {
 	public void simpleSend() {
 		Producer p = lookup(Producer.class);
 
-		p.message("order.new", 12346L).send();
+		p.message("order.new", "hello").send();
 	}
 
 	@Test

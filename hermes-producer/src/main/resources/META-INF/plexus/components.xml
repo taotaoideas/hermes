@@ -103,9 +103,9 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.range.RangeMonitor</role>
-			<implementation>com.ctrip.hermes.range.DefaultRangeMonitor</implementation>
-			<role>com.ctrip.hermes.remoting.netty.NettyCommandHandler</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyCommandHandler</implementation>
+			<implementation>com.ctrip.hermes.range.MyDefaultRangeMonitor</implementation>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
 			<implementation>com.ctrip.hermes.remoting.netty.ClientManager</implementation>
 		</component>

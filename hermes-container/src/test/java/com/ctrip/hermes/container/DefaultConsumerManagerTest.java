@@ -23,7 +23,7 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 
 		@Override
 		public void consume(List<Object> msgs) {
-			System.out.println("Receive message " + msgs);
+			System.out.println("Receive message: " + msgs);
 			m_latch.countDown();
 		}
 

@@ -13,6 +13,8 @@ import com.ctrip.hermes.broker.MessageQueueManager;
 import com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
 import com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor;
+import com.ctrip.hermes.range.MyDefaultRangeMonitor;
+import com.ctrip.hermes.range.RangeMonitor;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.netty.NettyServer;
 import com.ctrip.hermes.remoting.netty.NettyServerConfig;
@@ -36,6 +38,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MessageChannelManager.class));
 		all.add(C(CommandProcessor.class, StartConsumerRequestProcessor.ID, StartConsumerRequestProcessor.class) //
 		      .req(MessageChannelManager.class));
+
+		// rangeMonitor
+//		all.add(C(RangeMonitor.class, MyDefaultRangeMonitor.class));
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());

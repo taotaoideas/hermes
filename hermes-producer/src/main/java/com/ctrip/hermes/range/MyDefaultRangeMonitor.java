@@ -4,7 +4,7 @@ import java.util.*;
 
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
-public class DefaultRangeMonitor implements RangeMonitor {
+public class MyDefaultRangeMonitor implements RangeMonitor {
 
     private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
     private final long TIMEOUT_THRESHOLD = 3000;
@@ -12,14 +12,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
     List<Batch> batches = new ArrayList<>();
     Set<Offset> failOffsetSet = new HashSet<>();
 
-    EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
-    //    EWAHCompressedBitmap doneMap = EWAHCompressedBitmap.bitmapOf();
-    EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
-    // 存放 offset.getOffset()--offset.getId();多为重复数据，可优化
-    private Map<Integer, String> offsetIdMap = new HashMap<>();
-
-
-    public DefaultRangeMonitor() {
+    public MyDefaultRangeMonitor() {
         Timer time = new Timer();
         time.schedule(new TimerTask() {
             @Override
@@ -38,9 +31,6 @@ public class DefaultRangeMonitor implements RangeMonitor {
         for (Offset offset : offsets) {
             offsetBatch.add(offset);
             bitmap.set((int) offset.getOffset());
-//            sendMap.set((int) offset.getOffset());
-
-//            offsetIdMap.put((int) offset.getOffset(), offset.getId());
         }
 
         batches.add(new Batch(offsetBatch, bitmap, new Date().getTime()));
@@ -53,7 +43,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
         findAndUpdate(batches, offset);
         if (!isAck) { //means failed
-            failMap.set((int) offset.getOffset());
+            failOffsetSet.add(offset);
         }
     }
 
@@ -75,8 +65,6 @@ public class DefaultRangeMonitor implements RangeMonitor {
     }
 
     private synchronized void notifyListener() {
-        // calculate
-//        sendMap = calculateRanges(sendMap, doneMap, failMap, doneRanges, failedRanges, timeoutRanges, null);
 
         List<Batch> doneBatches = removeDoneBatch(batches);
         List<Batch> timeoutBatches = removeTimeoutBatch(batches, new Date().getTime(), TIMEOUT_THRESHOLD);
@@ -84,7 +72,6 @@ public class DefaultRangeMonitor implements RangeMonitor {
         List<Range> doneRanges = calculateDoneRanges(doneBatches, timeoutBatches);
         List<Range> timeoutRanges = calculateTimeoutRanges(timeoutBatches);
         List<Range> failRanges = calculateFailRange(failOffsetSet);
-        failMap.clear();
 
         // 3. notify listeners.
         for (RangeStatusListener listener : m_listeners) {
@@ -188,7 +175,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
         return doneBatches;
     }
 
-    public EWAHCompressedBitmap calculateRanges(EWAHCompressedBitmap sendMap, EWAHCompressedBitmap doneMap,
+    /*public EWAHCompressedBitmap calculateRanges(EWAHCompressedBitmap sendMap, EWAHCompressedBitmap doneMap,
                                                 EWAHCompressedBitmap failMap,
                                                 List<Range> doneRanges, List<Range> failedRanges, List<Range> timeoutRanges, String
                                                         defaultOffsetId) {
@@ -268,10 +255,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
         }
         doneRanges.add(new ContinuousRange(start, end));
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        DefaultRangeMonitor monitor = new DefaultRangeMonitor();
-    }
+*/
 
     private class Batch {
         Set<Offset> offsets;
