@@ -10,7 +10,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
     private final long TIMEOUT_THRESHOLD = 3000;
 
     List<Batch> batches = new ArrayList<>();
-
+    Set<Offset> failOffsetSet = new HashSet<>();
 
     EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
     //    EWAHCompressedBitmap doneMap = EWAHCompressedBitmap.bitmapOf();
@@ -83,7 +83,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
         List<Range> doneRanges = calculateDoneRanges(doneBatches, timeoutBatches);
         List<Range> timeoutRanges = calculateTimeoutRanges(timeoutBatches);
-        List<Range> failRanges = calculateFailRange(failMap);
+        List<Range> failRanges = calculateFailRange(failOffsetSet);
         failMap.clear();
 
         // 3. notify listeners.
@@ -98,8 +98,24 @@ public class DefaultRangeMonitor implements RangeMonitor {
         }
     }
 
+    private List<Range> calculateFailRange(Set<Offset> failOffsetSet) {
+        List<Range> rangeList = buildRangeListByOffsets(new TreeSet<>(failOffsetSet));
+        return rangeList;
+    }
+
+
+    private List<Range> calculateTimeoutRanges(List<Batch> timeoutBatches) {
+        TreeSet<Offset> offsetSet = new TreeSet<>();
+        for (Batch batch : timeoutBatches) {
+            offsetSet.addAll(batch.getOffsets());
+        }
+
+        List<Range> rangeList = buildRangeListByOffsets(offsetSet);
+        return rangeList;
+    }
+
     private List<Range> calculateDoneRanges(List<Batch> doneBatches, List<Batch> timeoutBatches) {
-        TreeSet<Offset> offsetSet = new TreeSet<>(); // todo: implement Comparable on Offset
+        TreeSet<Offset> offsetSet = new TreeSet<>();
         for (Batch batch : doneBatches) {
             offsetSet.addAll(batch.getOffsets());
         }
@@ -115,9 +131,35 @@ public class DefaultRangeMonitor implements RangeMonitor {
             }
         }
 
+        List<Range> rangeList = buildRangeListByOffsets(offsetSet);
+        return rangeList;
+    }
 
+    private List<Range> buildRangeListByOffsets(TreeSet<Offset> offsetSet) {
+        List<Range> rangeList = new ArrayList<>();
+        Offset start = null;
+        Offset end = null;
+        for (Offset offset : offsetSet) {
+            if (null == start) {
+                start = offset;
+                end = offset;
+            } else {
+                if (offset.getOffset() == end.getOffset() + 1) {
+                    end = offset;
+                } else {
+                    Range tempRange = new ContinuousRange(start, end);
+                    rangeList.add(tempRange);
+                    start = null;
+                    end = null;
 
-
+                }
+            }
+        }
+        if (null != start && null != end) {
+            Range tempRange = new ContinuousRange(start, end);
+            rangeList.add(tempRange);
+        }
+        return rangeList;
     }
 
     private List<Batch> removeTimeoutBatch(List<Batch> batches, long time, long timeoutThreshold) {
@@ -211,18 +253,6 @@ public class DefaultRangeMonitor implements RangeMonitor {
         }
         if (-1 != rangeStart && -1 != rangeEnd) {
             addNewRange(doneRanges, rangeStart, rangeEnd, defaultOffsetId);
-        }
-    }
-
-    private List<Range> buildRangeList(TreeSet<Offset> offsetSet) {
-        List<Range> rangeList = new ArrayList<>();
-
-
-        int rangeStart = -1;
-        int rangeEnd = -1;
-        for (Offset offset : offsetSet) {
-            ...?
-
         }
     }
 
