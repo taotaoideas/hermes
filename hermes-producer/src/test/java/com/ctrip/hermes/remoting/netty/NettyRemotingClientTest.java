@@ -10,7 +10,7 @@ public class NettyRemotingClientTest extends ComponentTestCase {
 
 	@Test
 	public void test() {
-		NettyRemotingClient client = lookup(NettyRemotingClient.class);
+		NettyClient client = lookup(NettyClient.class);
 
 		client.start(new Command(CommandType.HandshakeRequest));
 	}

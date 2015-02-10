@@ -3,12 +3,12 @@ package com.ctrip.hermes.producer.internal;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.message.Message;
-import com.ctrip.hermes.message.MessagePipeline;
+import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.producer.Producer;
 
 public class DefaultProducer extends Producer {
 	@Inject
-	private MessagePipeline m_pipe;
+	private Pipeline<Message<Object>> m_pipe;
 
 	@Override
 	public DefaultHolder message(String topic, Object body) {

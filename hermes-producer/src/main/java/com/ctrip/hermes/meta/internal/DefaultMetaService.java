@@ -14,7 +14,7 @@ import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
-import com.ctrip.hermes.meta.transform.BaseVisitor;
+import com.ctrip.hermes.meta.transform.BaseVisitor2;
 
 public class DefaultMetaService implements Initializable, MetaService {
 
@@ -28,6 +28,8 @@ public class DefaultMetaService implements Initializable, MetaService {
 	private Map<String, Connector> m_connectors = new HashMap<String, Connector>();
 
 	private Map<String, Storage> m_storages = new HashMap<String, Storage>();
+
+	private Map<String, Storage> m_localStorages = new HashMap<String, Storage>();
 
 	@Override
 	public void initialize() throws InitializationException {
@@ -50,56 +52,65 @@ public class DefaultMetaService implements Initializable, MetaService {
 		}
 	}
 
-	class MetaVisitor extends BaseVisitor {
-
-		private Connector m_curConnector;
-
-		private Storage m_curStorage;
+	class MetaVisitor extends BaseVisitor2 {
 
 		@Override
-		public void visitConnector(Connector connector) {
-			m_curConnector = connector;
-			super.visitConnector(connector);
+		public void visitConnectorChildren(Connector connector) {
+			super.visitConnectorChildren(connector);
 		}
 
 		@Override
-		public void visitMeta(Meta meta) {
-			// TODO Auto-generated method stub
-			super.visitMeta(meta);
+		public void visitMetaChildren(Meta meta) {
+			super.visitMetaChildren(meta);
 		}
 
 		@Override
-		public void visitProperty(Property property) {
-			// TODO Auto-generated method stub
-			super.visitProperty(property);
+		public void visitPropertyChildren(Property property) {
+			super.visitPropertyChildren(property);
 		}
 
 		@Override
-		public void visitStorage(Storage storage) {
-			m_curStorage = storage;
+		public void visitStorageChildren(Storage storage) {
+			Connector connector = getAncestor(2);
 
-			if (Connector.LOCAL.equals(m_curConnector.getType()) && storage.isDefault()) {
+			if (Connector.LOCAL.equals(connector.getType()) && storage.isDefault()) {
 				m_defaultStorage = storage;
 			}
 
-			super.visitStorage(storage);
+			super.visitStorageChildren(storage);
 		}
 
 		@Override
-		public void visitTopic(Topic topic) {
-			m_connectors.put(topic.getName(), m_curConnector);
-			m_storages.put(topic.getName(), m_curStorage);
-			super.visitTopic(topic);
+		public void visitTopicChildren(Topic topic) {
+			Storage storage = getAncestor(2);
+			Connector connector = getAncestor(3);
+
+			m_connectors.put(topic.getName(), connector);
+			m_storages.put(topic.getName(), storage);
+
+			if (Connector.LOCAL.equals(connector.getType())) {
+				m_localStorages.put(topic.getName(), storage);
+			}
+
+			super.visitTopicChildren(topic);
 		}
 
 	}
 
 	@Override
 	public String getStorageType(String topic) {
-		Storage storage = m_storages.get(topic);
+		Storage storage = null;
+		if (m_meta.isDevMode()) {
+			storage = m_localStorages.get(topic);
+			if (storage == null) {
+				storage = m_defaultStorage;
+			}
+		} else {
+			storage = m_storages.get(topic);
+		}
 
 		if (storage == null) {
-			storage = m_defaultStorage;
+			throw new RuntimeException(String.format("Storage for topic %s is not found", topic));
 		}
 
 		return storage.getType();

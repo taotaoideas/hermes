@@ -8,18 +8,20 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
-import com.ctrip.hermes.message.MessagePipeline;
-import com.ctrip.hermes.message.MessageRegistry;
-import com.ctrip.hermes.message.MessageSink;
 import com.ctrip.hermes.message.MessageSinkManager;
+import com.ctrip.hermes.message.Pipeline;
+import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
 import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.message.codec.internal.JsonCodec;
+import com.ctrip.hermes.message.internal.BrokerMessageSink;
 import com.ctrip.hermes.message.internal.DefaultMessagePipeline;
 import com.ctrip.hermes.message.internal.DefaultMessageRegistry;
 import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
 import com.ctrip.hermes.message.internal.MemoryMessageSink;
+import com.ctrip.hermes.message.internal.MessagePipelineSink;
+import com.ctrip.hermes.message.internal.MessageValve;
 import com.ctrip.hermes.meta.MetaManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.internal.DefaultMetaManager;
@@ -31,15 +33,17 @@ import com.ctrip.hermes.producer.Producer;
 import com.ctrip.hermes.producer.internal.DefaultProducer;
 import com.ctrip.hermes.remoting.CommandCodec;
 import com.ctrip.hermes.remoting.CommandProcessor;
+import com.ctrip.hermes.remoting.CommandProcessorManager;
 import com.ctrip.hermes.remoting.CommandRegistry;
 import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
 import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
 import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
-import com.ctrip.hermes.remoting.netty.NettyCommandDecoder;
-import com.ctrip.hermes.remoting.netty.NettyCommandEncoder;
-import com.ctrip.hermes.remoting.netty.NettyCommandHandler;
-import com.ctrip.hermes.remoting.netty.NettyRemotingClient;
-import com.ctrip.hermes.spi.MessageValve;
+import com.ctrip.hermes.remoting.netty.ClientManager;
+import com.ctrip.hermes.remoting.netty.NettyClient;
+import com.ctrip.hermes.remoting.netty.NettyClientHandler;
+import com.ctrip.hermes.remoting.netty.NettyDecoder;
+import com.ctrip.hermes.remoting.netty.NettyEncoder;
+import com.ctrip.hermes.remoting.netty.NettyServerHandler;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
@@ -57,37 +61,45 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MetaManager.class));
 
 		all.add(C(Producer.class, DefaultProducer.class) //
-		      .req(MessagePipeline.class));
-		all.add(C(MessagePipeline.class, DefaultMessagePipeline.class) //
-		      .req(MessageRegistry.class, MessageSinkManager.class));
+		      .req(Pipeline.class));
+		all.add(C(Pipeline.class, DefaultMessagePipeline.class) //
+		      .req(ValveRegistry.class, "message") //
+		      .req(MessageSinkManager.class));
 
 		// codecs
 		all.add(C(Codec.class, JsonCodec.ID, JsonCodec.class));
 		all.add(C(CodecManager.class, DefaultCodecManager.class));
 
 		// sinks
-		all.add(C(MessageSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
+		all.add(C(MessagePipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
 		      .req(CodecManager.class));
+		all.add(C(MessagePipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
+		      .req(CodecManager.class, ClientManager.class));
 		all.add(C(MessageSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 
 		// valves
 		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));
-		all.add(C(MessageRegistry.class, DefaultMessageRegistry.class));
+		all.add(C(ValveRegistry.class, "message", DefaultMessageRegistry.class));
 
-		all.add(C(NettyCommandHandler.class).is(PER_LOOKUP) //
+		all.add(C(ClientManager.class));
+		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
+		      .req(CommandProcessorManager.class));
+		all.add(C(NettyServerHandler.class).is(PER_LOOKUP) //
+		      .req(CommandProcessorManager.class));
+		all.add(C(NettyClient.class).is(PER_LOOKUP));
+		all.add(C(NettyDecoder.class).is(PER_LOOKUP) //
+		      .req(CommandCodec.class));
+		all.add(C(NettyEncoder.class).is(PER_LOOKUP) //
+		      .req(CommandCodec.class));
+
+		all.add(C(CommandProcessorManager.class) //
 		      .req(CommandRegistry.class));
-		all.add(C(NettyRemotingClient.class).is(PER_LOOKUP));
-		all.add(C(NettyCommandDecoder.class).is(PER_LOOKUP) //
-				.req(CommandCodec.class));
-		all.add(C(NettyCommandEncoder.class).is(PER_LOOKUP) //
-				.req(CommandCodec.class));
-
 		all.add(C(CommandRegistry.class, DefaultCommandRegistry.class));
 		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
 
 		// command processors
-		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.class));
+		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
 
 		return all;
 	}

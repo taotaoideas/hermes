@@ -6,11 +6,11 @@ public class CommandContext {
 
 	private Command m_cmd;
 
-	private ChannelHandlerContext m_channelCtx;
+	private ChannelHandlerContext m_nettyCtx;
 
-	public CommandContext(Command cmd, ChannelHandlerContext ctx) {
+	public CommandContext(Command cmd, ChannelHandlerContext nettyCtx) {
 		m_cmd = cmd;
-		m_channelCtx = ctx;
+		m_nettyCtx = nettyCtx;
 	}
 
 	public Command getCommand() {
@@ -18,8 +18,11 @@ public class CommandContext {
 	}
 
 	public void write(Command cmd) {
-		// TODO write or writeAndFlush?
-		m_channelCtx.writeAndFlush(cmd);
+		m_nettyCtx.writeAndFlush(cmd);
+	}
+
+	public ChannelHandlerContext getNettyCtx() {
+		return m_nettyCtx;
 	}
 
 }
