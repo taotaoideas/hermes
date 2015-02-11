@@ -37,7 +37,7 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 		Subscriber s = new Subscriber("order.new", "groupId", new TestConsumer(latch));
 		m.startConsumer(s);
 
-		latch.await(2, TimeUnit.DAYS);
+		latch.await(2, TimeUnit.SECONDS);
 	}
 
 }
