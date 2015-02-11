@@ -1,7 +1,7 @@
 package com.ctrip.hermes.message;
 
-public interface PipelineSink<T> {
+public interface PipelineSink {
 
-	public void handle(PipelineContext<T> ctx);
+	public void handle(PipelineContext ctx, Object payload);
 
 }

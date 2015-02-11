@@ -50,6 +50,7 @@ public class NettyClient extends ContainerHolder {
 			ChannelFuture f = b.connect("127.0.0.1", 4376).sync();
 
 			if (!f.await(2, TimeUnit.SECONDS)) {
+				System.out.println("Can not connect to hermes server");
 				// TODO reconnect
 			}
 

@@ -11,6 +11,8 @@ public class ProducerTest extends ComponentTestCase {
 		Producer p = Producer.getInstance();
 
 		p.message("order.new", 123456L).send();
+
+		System.in.read();
 	}
 
 	@Test

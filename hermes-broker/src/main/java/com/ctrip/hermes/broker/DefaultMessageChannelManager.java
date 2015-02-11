@@ -102,7 +102,7 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 							break;
 						} else {
 							m_logger.info(String.format("Remove closed consumer handler %s", handler));
-							handlers.remove(curIdx);
+							handlers.remove(handler);
 							continue;
 						}
 					}

@@ -8,20 +8,19 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
-import com.ctrip.hermes.message.MessageSinkManager;
 import com.ctrip.hermes.message.Pipeline;
+import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerSinkManager;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
 import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.message.codec.internal.JsonCodec;
 import com.ctrip.hermes.message.internal.BrokerMessageSink;
-import com.ctrip.hermes.message.internal.DefaultMessagePipeline;
-import com.ctrip.hermes.message.internal.DefaultMessageRegistry;
 import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
 import com.ctrip.hermes.message.internal.MemoryMessageSink;
-import com.ctrip.hermes.message.internal.MessagePipelineSink;
-import com.ctrip.hermes.message.internal.MessageValve;
+import com.ctrip.hermes.message.internal.ProducerPipeline;
+import com.ctrip.hermes.message.internal.ProducerValveRegistry;
 import com.ctrip.hermes.meta.MetaManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.internal.DefaultMetaManager;
@@ -43,9 +42,14 @@ import com.ctrip.hermes.remoting.netty.NettyClient;
 import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 import com.ctrip.hermes.remoting.netty.NettyDecoder;
 import com.ctrip.hermes.remoting.netty.NettyEncoder;
+import com.ctrip.hermes.spi.Valve;
+import com.ctrip.hermes.spi.internal.EncodeMessageValve;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
+
+	private final static String PRODUCER = "producer";
+
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
@@ -61,25 +65,26 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(Producer.class, DefaultProducer.class) //
 		      .req(Pipeline.class));
-		all.add(C(Pipeline.class, DefaultMessagePipeline.class) //
-		      .req(ValveRegistry.class, "message") //
-		      .req(MessageSinkManager.class));
+		all.add(C(Pipeline.class, ProducerPipeline.class) //
+		      .req(ValveRegistry.class, PRODUCER) //
+		      .req(ProducerSinkManager.class));
 
 		// codecs
 		all.add(C(Codec.class, JsonCodec.ID, JsonCodec.class));
 		all.add(C(CodecManager.class, DefaultCodecManager.class));
 
 		// sinks
-		all.add(C(MessagePipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
-		      .req(CodecManager.class));
-		all.add(C(MessagePipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
-		      .req(CodecManager.class, ClientManager.class));
-		all.add(C(MessageSinkManager.class, DefaultMessageSinkManager.class) //
+		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class));
+		all.add(C(PipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
+		      .req(ClientManager.class));
+		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 
 		// valves
-		all.add(C(MessageValve.class, TracingMessageValve.ID, TracingMessageValve.class));
-		all.add(C(ValveRegistry.class, "message", DefaultMessageRegistry.class));
+		all.add(C(Valve.class, TracingMessageValve.ID, TracingMessageValve.class));
+		all.add(C(Valve.class, EncodeMessageValve.ID, EncodeMessageValve.class) //
+		      .req(CodecManager.class));
+		all.add(C(ValveRegistry.class, PRODUCER, ProducerValveRegistry.class));
 
 		all.add(C(ClientManager.class));
 		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
