@@ -1,4 +1,6 @@
-package com.ctrip.hermes.remoting.netty;
+package com.ctrip.hermes.broker.remoting.netty;
+
+import com.ctrip.hermes.remoting.netty.NettySystemConfig;
 
 public class NettyServerConfig {
 	private int listenPort = 4376;

@@ -1,9 +1,8 @@
 package com.ctrip.hermes.broker;
 
-
 public interface MessageChannelManager {
 
-	public void newConsumerChannel(String topic, String groupId, ConsumerChannelHandler handler);
+	public ConsumerChannel newConsumerChannel(String topic, String groupId);
 
 	public ProducerChannel newProducerChannel(String topic);
 

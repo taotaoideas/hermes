@@ -7,7 +7,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
@@ -17,22 +19,22 @@ import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessorManager;
 
-public class NettyServerHandler extends SimpleChannelInboundHandler<Command> implements LogEnabled {
+public abstract class AbstractNettyHandler extends SimpleChannelInboundHandler<Command> implements LogEnabled {
 
 	@Inject
 	private CommandProcessorManager m_processorManager;
 
 	private Logger m_logger;
 
+	private List<ChannelEventListener> m_eventListeners = Collections
+	      .synchronizedList(new ArrayList<ChannelEventListener>());
+
 	private Channel m_channel;
-
-	private Command m_initCmd;
-
-	private CountDownLatch m_activeLatch = new CountDownLatch(1);
 
 	public void writeCommand(Command cmd) {
 		ChannelFuture f = m_channel.writeAndFlush(cmd);
 
+		// TODO
 		f.addListener(new GenericFutureListener<Future<? super Void>>() {
 
 			@Override
@@ -46,41 +48,53 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Command> imp
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Command cmd) throws Exception {
-		m_processorManager.offer(new CommandContext(cmd, ctx));
+		m_processorManager.offer(new CommandContext(cmd, this));
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		cause.printStackTrace();
-		ctx.close();
+		Channel c = ctx.channel();
+		m_logger.error(String.format("Channel exception caught %s", NettyHelper.remoteAddr(c)), cause);
+		// TODO
+		c.close();
 	}
 
 	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+	public final void channelActive(ChannelHandlerContext ctx) throws Exception {
 		m_channel = ctx.channel();
 
-		m_logger.info("New channel connected " + m_channel.remoteAddress());
-
-		if (m_initCmd != null) {
-			m_channel.writeAndFlush(m_initCmd);
-		}
-
-		m_activeLatch.countDown();
+		doChannelActive(ctx);
 
 		super.channelActive(ctx);
 	}
 
-	public void setInitCmd(Command initCmd) {
-		m_initCmd = initCmd;
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		Channel c = ctx.channel();
+		m_logger.info(String.format("Channel inactive %s", NettyHelper.remoteAddr(c)));
+
+		for (ChannelEventListener l : m_eventListeners) {
+			try {
+				l.onChannelClose(ctx.channel());
+			} catch (RuntimeException e) {
+				m_logger.error("Listener error when processing channel event ", e);
+			}
+		}
+
+		super.channelInactive(ctx);
 	}
 
-	public void waitUntilActive() throws InterruptedException {
-		m_activeLatch.await();
+	public void addChannelEventListener(ChannelEventListener listener) {
+		m_eventListeners.add(listener);
 	}
 
 	@Override
 	public void enableLogging(Logger logger) {
 		m_logger = logger;
+	}
+
+	protected void doChannelActive(ChannelHandlerContext ctx) throws Exception {
+
 	}
 
 }

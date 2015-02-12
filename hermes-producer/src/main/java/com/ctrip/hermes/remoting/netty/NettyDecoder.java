@@ -4,8 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.nio.ByteBuffer;
-
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.remoting.CommandCodec;
@@ -28,10 +26,8 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 				return null;
 			}
 
-			ByteBuffer byteBuf = frame.nioBuffer();
-			byte[] data = new byte[byteBuf.limit()];
-
-			byteBuf.get(data);
+			byte[] data = new byte[frame.readableBytes()];
+			frame.readBytes(data);
 
 			return m_codec.decode(data);
 		} catch (Exception e) {

@@ -1,16 +1,13 @@
 package com.ctrip.hermes.message;
 
+public interface PipelineContext {
 
-public class PipelineContext<T> {
+	public <T> T getSource();
 
-	private T m_message;
+	public void next(Object payload);
 
-	public PipelineContext(T message) {
-		m_message = message;
-	}
+	public void put(String name, String value);
 
-	public T getMessage() {
-		return m_message;
-	}
+	public <T> T get(String name);
 
 }

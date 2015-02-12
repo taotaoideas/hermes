@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.ctrip.hermes.spi.Valve;
 
-public interface ValveRegistry<T> {
-	public void registerValve(Valve<T> valve, String name, int order);
+public interface ValveRegistry {
+	public void registerValve(Valve valve, String name, int order);
 
-	public List<Valve<T>> getValveList();
+	public List<Valve> getValveList();
 
 }

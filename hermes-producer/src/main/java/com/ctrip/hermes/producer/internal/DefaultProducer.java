@@ -8,7 +8,7 @@ import com.ctrip.hermes.producer.Producer;
 
 public class DefaultProducer extends Producer {
 	@Inject
-	private Pipeline<Message<Object>> m_pipe;
+	private Pipeline m_pipe;
 
 	@Override
 	public DefaultHolder message(String topic, Object body) {
