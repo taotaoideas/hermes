@@ -1,17 +1,16 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.engine;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.codehaus.plexus.logging.LogEnabled;
+import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.consumer.BackoffException;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
@@ -20,13 +19,15 @@ import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandType;
 import com.ctrip.hermes.remoting.netty.NettyClient;
 
-public class DefaultConsumerBootstrap extends ContainerHolder implements Initializable, ConsumerBootstrap {
+public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnabled, ConsumerBootstrap {
 
 	@Inject
 	private ValveRegistry m_valveRegistry;
 
 	@Inject
 	private Pipeline m_pipeline;
+
+	private Logger m_logger;
 
 	private Map<Integer, PipelineSink> m_consumerSinks = new ConcurrentHashMap<>();
 
@@ -47,22 +48,29 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements Initial
 	private PipelineSink newConsumerSink(final Subscriber s) {
 		return new PipelineSink() {
 
-			@SuppressWarnings({ "unchecked" })
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public void handle(PipelineContext ctx, Object payload) {
 				// TODO
-				s.getConsumer().consume(Arrays.asList(payload));
+				try {
+					s.getConsumer().consume((List) payload);
+				} catch (BackoffException e) {
+					// TODO send nack
+				} catch (Throwable e) {
+					// TODO add more message detail
+					m_logger.warn("Consumer throws exception when consuming messge", e);
+				}
 			}
 		};
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, byte[] body) {
+	public void deliverMessage(int correlationId, MessageContext ctx) {
 		// TODO make it async
 		PipelineSink sink = m_consumerSinks.get(correlationId);
 
 		if (sink != null) {
-			m_pipeline.put(new Pair<>(sink, body));
+			m_pipeline.put(new Pair<>(sink, ctx));
 		} else {
 			// TODO
 			System.out.println(String.format("Correlationid %s not found", correlationId));
@@ -70,7 +78,8 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements Initial
 	}
 
 	@Override
-	public void initialize() throws InitializationException {
+	public void enableLogging(Logger logger) {
+		m_logger = logger;
 	}
 
 }

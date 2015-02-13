@@ -9,11 +9,12 @@ import org.unidal.lookup.configuration.Component;
 import com.ctrip.hermes.container.ConsumerPipeline;
 import com.ctrip.hermes.container.ConsumerValveRegistry;
 import com.ctrip.hermes.container.DecodeMessageValve;
-import com.ctrip.hermes.container.DefaultConsumerBootstrap;
 import com.ctrip.hermes.container.remoting.ConsumeRequestProcessor;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
+import com.ctrip.hermes.engine.DefaultConsumerBootstrap;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.ValveRegistry;
+import com.ctrip.hermes.message.codec.CodecManager;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.spi.Valve;
 
@@ -30,7 +31,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(Pipeline.class, CONSUMER));
 
 		all.add(C(ValveRegistry.class, CONSUMER, ConsumerValveRegistry.class));
-		all.add(C(Valve.class, DecodeMessageValve.ID, DecodeMessageValve.class));
+		all.add(C(Valve.class, DecodeMessageValve.ID, DecodeMessageValve.class) //
+		      .req(CodecManager.class));
 
 		all.add(C(Pipeline.class, CONSUMER, ConsumerPipeline.class) //
 		      .req(ValveRegistry.class, CONSUMER));

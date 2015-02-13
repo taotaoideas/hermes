@@ -2,7 +2,7 @@
 	<components>
 		<component>
 			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
-			<implementation>com.ctrip.hermes.container.DefaultConsumerBootstrap</implementation>
+			<implementation>com.ctrip.hermes.engine.DefaultConsumerBootstrap</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.message.ValveRegistry</role>
@@ -23,6 +23,11 @@
 			<role>com.ctrip.hermes.spi.Valve</role>
 			<role-hint>decode-message</role-hint>
 			<implementation>com.ctrip.hermes.container.DecodeMessageValve</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.Pipeline</role>
