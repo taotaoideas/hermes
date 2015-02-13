@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.container;
 
 import java.util.List;
 import java.util.Map;
@@ -11,13 +11,17 @@ import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.consumer.BackoffException;
+import com.ctrip.hermes.engine.ConsumerBootstrap;
+import com.ctrip.hermes.engine.MessageContext;
+import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandType;
-import com.ctrip.hermes.remoting.netty.NettyClient;
+import com.ctrip.hermes.remoting.netty.ClientManager;
+import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 
 public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnabled, ConsumerBootstrap {
 
@@ -27,14 +31,16 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnab
 	@Inject
 	private Pipeline m_pipeline;
 
+	@Inject
+	private ClientManager m_clientManager;
+
 	private Logger m_logger;
 
 	private Map<Integer, PipelineSink> m_consumerSinks = new ConcurrentHashMap<>();
 
 	@Override
 	public void startConsumer(Subscriber s) {
-		// TODO client pool
-		NettyClient netty = lookup(NettyClient.class);
+		NettyClientHandler netty = m_clientManager.findConsumerClient(s.getTopicPattern(), s.getGroupId());
 
 		Command cmd = new Command(CommandType.StartConsumerRequest) //
 		      .addHeader("topic", s.getTopicPattern()) //
@@ -42,7 +48,7 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnab
 
 		m_consumerSinks.put(cmd.getCorrelationId(), newConsumerSink(s));
 
-		netty.start(cmd);
+		netty.writeCommand(cmd);
 	}
 
 	private PipelineSink newConsumerSink(final Subscriber s) {

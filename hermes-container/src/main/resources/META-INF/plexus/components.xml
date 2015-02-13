@@ -2,7 +2,7 @@
 	<components>
 		<component>
 			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
-			<implementation>com.ctrip.hermes.engine.DefaultConsumerBootstrap</implementation>
+			<implementation>com.ctrip.hermes.container.DefaultConsumerBootstrap</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.message.ValveRegistry</role>
@@ -11,6 +11,9 @@
 				<requirement>
 					<role>com.ctrip.hermes.message.Pipeline</role>
 					<role-hint>consumer</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
 				</requirement>
 			</requirements>
 		</component>
