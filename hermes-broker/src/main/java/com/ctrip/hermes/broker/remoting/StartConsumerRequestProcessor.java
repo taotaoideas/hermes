@@ -1,17 +1,23 @@
 package com.ctrip.hermes.broker.remoting;
 
+import io.netty.channel.Channel;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.broker.ConsumerChannel;
 import com.ctrip.hermes.broker.ConsumerChannelHandler;
 import com.ctrip.hermes.broker.MessageChannelManager;
+import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
 import com.ctrip.hermes.broker.storage.message.Message;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
+import com.ctrip.hermes.remoting.netty.ChannelEventListener;
 
 public class StartConsumerRequestProcessor implements CommandProcessor {
 
@@ -27,11 +33,26 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	@Override
 	public void process(final CommandContext ctx) {
+		NettyServerHandler nettyHandler = (NettyServerHandler) ctx.getNettyHandler();
 		final Command cmd = ctx.getCommand();
 		String topic = cmd.getHeader("topic");
 		String groupId = cmd.getHeader("groupId");
 
-		m_channelManager.newConsumerChannel(topic, groupId, new ConsumerChannelHandler() {
+		final ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, groupId);
+		nettyHandler.addConsumerChannel(cmd.getCorrelationId(), cc);
+
+		final AtomicBoolean m_open = new AtomicBoolean(true);
+		nettyHandler.addChannelEventListener(new ChannelEventListener() {
+
+			@Override
+			public void onChannelClose(Channel channel) {
+				m_open.set(false);
+
+				cc.close();
+			}
+		});
+
+		cc.start(new ConsumerChannelHandler() {
 
 			@Override
 			public void handle(List<Message> msgs) {
@@ -39,12 +60,11 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 				      .setCorrelationId(cmd.getCorrelationId()) //
 				      .setBody(encode(msgs));
 
-				ctx.getNettyCtx().writeAndFlush(consumeReq);
+				ctx.write(consumeReq);
 			}
 
 			public boolean isOpen() {
-				// TODO add listener to netty handler
-				return true;
+				return m_open.get();
 			}
 
 		});

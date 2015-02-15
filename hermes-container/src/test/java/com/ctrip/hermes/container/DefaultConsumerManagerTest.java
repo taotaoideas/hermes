@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.engine.ConsumerManager;
+import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 
 public class DefaultConsumerManagerTest extends ComponentTestCase {
@@ -31,15 +31,13 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
-		ConsumerManager m = lookup(ConsumerManager.class);
+		ConsumerBootstrap m = lookup(ConsumerBootstrap.class);
 
 		CountDownLatch latch = new CountDownLatch(1);
 		Subscriber s = new Subscriber("order.new", "groupId", new TestConsumer(latch));
 		m.startConsumer(s);
 
 		latch.await(2, TimeUnit.SECONDS);
-		
-		System.in.read();
 	}
 
 }

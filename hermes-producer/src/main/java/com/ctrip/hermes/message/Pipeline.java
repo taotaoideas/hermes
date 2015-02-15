@@ -1,6 +1,6 @@
 package com.ctrip.hermes.message;
 
-public interface Pipeline<T> {
+public interface Pipeline {
 
-	public void put(T message);
+	public void put(Object msg);
 }

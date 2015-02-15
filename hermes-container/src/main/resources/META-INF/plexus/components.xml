@@ -1,8 +1,39 @@
 <plexus>
 	<components>
 		<component>
-			<role>com.ctrip.hermes.engine.ConsumerManager</role>
-			<implementation>com.ctrip.hermes.container.DefaultConsumerManager</implementation>
+			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
+			<implementation>com.ctrip.hermes.container.DefaultConsumerBootstrap</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role-hint>consumer</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.Pipeline</role>
+					<role-hint>consumer</role-hint>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.ValveRegistry</role>
+			<role-hint>consumer</role-hint>
+			<implementation>com.ctrip.hermes.container.ConsumerValveRegistry</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.spi.Valve</role>
+			<role-hint>decode-message</role-hint>
+			<implementation>com.ctrip.hermes.container.DecodeMessageValve</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.Pipeline</role>
+			<role-hint>consumer</role-hint>
+			<implementation>com.ctrip.hermes.container.ConsumerPipeline</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role-hint>consumer</role-hint>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
@@ -10,7 +41,7 @@
 			<implementation>com.ctrip.hermes.container.remoting.ConsumeRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.engine.ConsumerManager</role>
+					<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
 				</requirement>
 			</requirements>
 		</component>

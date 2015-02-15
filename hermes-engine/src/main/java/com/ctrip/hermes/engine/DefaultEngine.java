@@ -13,7 +13,7 @@ public class DefaultEngine extends ContainerHolder implements Engine {
 	private Scanner m_scanner;
 
 	@Inject
-	private ConsumerManager m_consumerManager;
+	private ConsumerBootstrap m_consumerManager;
 
 	@Override
 	public void start() {

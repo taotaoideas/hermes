@@ -29,6 +29,7 @@ public class MemoryStorage<T> implements Storage<T> {
 			m_contents.addAll(payloads);
 
 			for (T c : payloads) {
+				System.out.println("Saving " + c + " to memory storage");
 				if (c instanceof Locatable) {
 					((Locatable) c).setOffset(new Offset(m_id, idx++));
 				}

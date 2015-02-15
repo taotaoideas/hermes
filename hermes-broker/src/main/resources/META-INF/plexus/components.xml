@@ -8,15 +8,15 @@
 
 
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyServerConfig</implementation>
+			<role>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</role>
+			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyServer</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyServer</implementation>
+			<role>com.ctrip.hermes.broker.remoting.netty.NettyServer</role>
+			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServer</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
+					<role>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -32,6 +32,16 @@
 		<component>
 			<role>com.ctrip.hermes.broker.MessageQueueManager</role>
 			<implementation>com.ctrip.hermes.broker.DefaultMessageQueueManager</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.remoting.netty.NettyServerHandler</role>
+			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServerHandler</implementation>
+			<instantiation-strategy>per-lookup</instantiation-strategy>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.CommandProcessorManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.plexus.logging.LogEnabled;
+import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
@@ -14,23 +16,45 @@ import com.ctrip.hermes.broker.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.broker.storage.message.Message;
 import com.ctrip.hermes.broker.storage.util.CollectionUtil;
 
-public class DefaultMessageChannelManager implements MessageChannelManager {
+public class DefaultMessageChannelManager implements MessageChannelManager, LogEnabled {
 
 	@Inject
 	private MessageQueueManager m_queueManager;
 
 	private Map<Pair<String, String>, List<ConsumerChannelHandler>> m_handlers = new HashMap<>();
 
-	@Override
-	public synchronized void newConsumerChannel(String topic, String groupId, ConsumerChannelHandler handler) {
-		Pair<String, String> pair = new Pair<>(topic, groupId);
-		List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
+	private Logger m_logger;
 
-		if (curHandlers == null) {
-			curHandlers = startQueuePuller(topic, groupId);
-			m_handlers.put(pair, curHandlers);
-		}
-		curHandlers.add(handler);
+	@Override
+	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId) {
+
+		return new ConsumerChannel() {
+			@Override
+			public void close() {
+				// TODO remove handler
+			}
+
+			@Override
+			public void start(ConsumerChannelHandler handler) {
+				synchronized (DefaultMessageChannelManager.this) {
+					Pair<String, String> pair = new Pair<>(topic, groupId);
+					List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
+
+					if (curHandlers == null) {
+						curHandlers = startQueuePuller(topic, groupId);
+						m_handlers.put(pair, curHandlers);
+					}
+					curHandlers.add(handler);
+				}
+			}
+
+			@Override
+         public void ack() {
+	         // TODO Auto-generated method stub
+	         
+         }
+		};
+
 	}
 
 	private List<ConsumerChannelHandler> startQueuePuller(String topic, String groupId) {
@@ -77,7 +101,8 @@ public class DefaultMessageChannelManager implements MessageChannelManager {
 							handler.handle(Arrays.asList(msg));
 							break;
 						} else {
-							handlers.remove(curIdx);
+							m_logger.info(String.format("Remove closed consumer handler %s", handler));
+							handlers.remove(handler);
 							continue;
 						}
 					}
@@ -107,6 +132,11 @@ public class DefaultMessageChannelManager implements MessageChannelManager {
 
 			}
 		};
+	}
+
+	@Override
+	public void enableLogging(Logger logger) {
+		m_logger = logger;
 	}
 
 }
