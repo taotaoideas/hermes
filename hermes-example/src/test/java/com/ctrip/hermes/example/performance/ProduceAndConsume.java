@@ -4,22 +4,42 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.engine.ConsumerManager;
+import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.producer.Producer;
-import com.ctrip.hermes.remoting.netty.NettyServer;
 
 public class ProduceAndConsume extends ComponentTestCase {
 
-    static AtomicInteger count = new AtomicInteger(0);
+    static AtomicInteger sendCount = new AtomicInteger(0);
+    static AtomicInteger receiveCount = new AtomicInteger(0);
+
+    final static long timeInterval = 3000;
+
+
+    private void printAndClean() {
+        int secondInTimeInterval = (int) timeInterval / 1000;
+        System.out.println(String.format("Throughput:Send:%8d items, Receive: %8d items in %d second",
+                sendCount.get(), receiveCount.get(), secondInTimeInterval));
+        sendCount.set(0);
+        receiveCount.set(0);
+    }
+
+    @Test
+    public void myTest() throws IOException {
+        startServer();
+        startCountTimer();
+        startProduceThread();
+        startConsumeThread();
+
+        System.in.read();
+    }
 
     private void startServer() {
         new Thread(new Runnable() {
@@ -36,66 +56,48 @@ public class ProduceAndConsume extends ComponentTestCase {
             public void run() {
                 printAndClean();
             }
-        }, 1000, 1000);
-    }
-
-    private void printAndClean() {
-        System.out.println(String.format("Throughput: %d", count));
-    }
-
-    @Test
-    public void myTest() throws IOException {
-        startServer();
-        startCountTimer();
-        startProduceThread();
-        startConsumeThread();
-
-    }
-
-    private void startConsumeThread() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Producer p = lookup(Producer.class);
-
-                for(int i = 1; i < 10; i++) {
-                    p.message("order.new", "some data...").send();
-                    count.addAndGet(1);
-                }
-            }
-        }).start();
+        }, 1000, timeInterval);
     }
 
     private void startProduceThread() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ConsumerManager m = lookup(ConsumerManager.class);
+                Producer p = lookup(Producer.class);
 
-                CountDownLatch latch = new CountDownLatch(1);
-                Subscriber s = new Subscriber("order.new", "groupId", new TestConsumer(latch));
-                m.startConsumer(s);
-
-                try {
-                    latch.await(2, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                for (; ; ) {
+                    p.message("order.new", sendCount.get()).send();
+                    sendCount.addAndGet(1);
+//                    try {
+//                        Thread.sleep(1);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                 }
             }
         }).start();
     }
 
-    public static class TestConsumer implements Consumer<Object> {
+    private void startConsumeThread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String topic = "order.new";
+                ConsumerBootstrap b = lookup(ConsumerBootstrap.class);
 
-        private CountDownLatch m_latch;
-        public TestConsumer(CountDownLatch latch) {
-            m_latch = latch;
-        }
+                Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
 
-        @Override
-        public void consume(List<Object> msgs) {
-            System.out.println("Receive message: " + msgs);
-            m_latch.countDown();
-        }
+                    @Override
+                    public void consume(List<String> msgs) {
+//                        for (String msg : msgs) {
+//                            System.out.print("|" + msg + "|");
+//                        }
+                        receiveCount.addAndGet(1);
+                    }
+                });
+
+                b.startConsumer(s);
+            }
+        }).start();
     }
 }

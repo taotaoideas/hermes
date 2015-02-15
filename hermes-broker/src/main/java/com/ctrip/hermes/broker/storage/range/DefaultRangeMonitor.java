@@ -9,7 +9,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
     private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
 
-    OffsetBitmap bitmap = new OffsetBitmap();
+    OldOffsetBitmap bitmap = new OldOffsetBitmap();
 
     public DefaultRangeMonitor() {
         Timer time = new Timer();
@@ -32,8 +32,8 @@ public class DefaultRangeMonitor implements RangeMonitor {
     }
 
     @Override
-    public void addListener(RangeStatusListener lisener) {
-        m_listeners.add(lisener);
+    public void addListener(RangeStatusListener listener) {
+        m_listeners.add(listener);
     }
 
     private void notifyListener() {
@@ -46,8 +46,8 @@ public class DefaultRangeMonitor implements RangeMonitor {
         List<RangeEvent> failList = buildContinuousRange(fail);
 
         // 3. get Timeout RangeEvent
-        List<OffsetRecord> timeout = bitmap.getAndRemoveTimeout();
-        List<RangeEvent> timeoutList = buildContinuousRange(timeout);
+        List<OffsetRecord> timeout = bitmap.getTimeoutAndRemove();
+//        List<RangeEvent> timeoutList = buildContinuousRange(timeout);
 
         // 4. notify listeners.
         for (RangeStatusListener listener : m_listeners) {

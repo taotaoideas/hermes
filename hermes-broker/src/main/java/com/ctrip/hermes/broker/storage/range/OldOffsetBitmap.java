@@ -10,6 +10,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
+/**
+ * 旧的实现，使用一个整体的Bitmap来记录所有的offset使用情况。
+ */
 public class OldOffsetBitmap {
 
     final long TIMEOUT_THRESHOLD = 3 * 1000; // 3s
