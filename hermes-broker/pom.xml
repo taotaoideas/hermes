@@ -62,6 +62,11 @@
 			<version>6.1.14</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>0.8.2.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
