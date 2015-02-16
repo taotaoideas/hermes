@@ -25,7 +25,12 @@
 		</storage>
 		<storage type='kafka'>
 			<property name='zk' value='1.1.1.1:2181,2.2.2.2:2181' />
-			<topic name='topic.6' partition-count='100' />
+			<topic name='topic.6' partition-count='100'>
+				<partition type='producer' start-index='0' end-index='50' endpoints='1.1.1.1:4376,2.2.2.2:4376' />
+				<partition type='producer' start-index='51' end-index='99' endpoints='1.1.1.1:4376,2.2.2.2:4376' />
+				<partition type='consumer' start-index='0' end-index='50' endpoints='1.1.1.1:4376,2.2.2.2:4376' />
+				<partition type='consumer' start-index='51' end-index='99' endpoints='1.1.1.1:4376,2.2.2.2:4376' />
+			</topic>
 		</storage>
 	</connector>
 	<connector type='transaction'>
