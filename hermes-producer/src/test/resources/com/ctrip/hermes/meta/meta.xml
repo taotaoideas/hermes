@@ -25,7 +25,7 @@
 		</storage>
 		<storage type='kafka'>
 			<property name='zk' value='1.1.1.1:2181,2.2.2.2:2181' />
-			<topic name='topic.6' />
+			<topic name='topic.6' partition-count='100' />
 		</storage>
 	</connector>
 	<connector type='transaction'>
