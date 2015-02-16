@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.MessageContext;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.codec.Codec;
@@ -27,7 +28,7 @@ public class DecodeMessageValve implements Valve {
 		List<Object> bodies = new ArrayList<>(bodyBytes.size());
 		for (byte[] buf : bodyBytes) {
 			// TODO get or bypass class info
-			bodies.add(codec.decode(buf, String.class));
+			bodies.add(new Message<Object>(codec.decode(buf, String.class)));
 		}
 
 		ctx.next(bodies);

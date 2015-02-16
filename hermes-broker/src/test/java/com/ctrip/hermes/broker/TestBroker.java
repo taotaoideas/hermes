@@ -6,7 +6,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 
-public class HermesTestServer extends ComponentTestCase {
+public class TestBroker extends ComponentTestCase {
 
 	@BeforeClass
 	public static void beforeClass() {

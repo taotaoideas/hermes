@@ -2,7 +2,9 @@ package com.ctrip.hermes.container;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
@@ -22,6 +24,8 @@ import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandType;
 import com.ctrip.hermes.remoting.netty.ClientManager;
 import com.ctrip.hermes.remoting.netty.NettyClientHandler;
+import com.ctrip.hermes.storage.message.Ack;
+import com.ctrip.hermes.storage.range.OffsetRecord;
 
 public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnabled, ConsumerBootstrap {
 
@@ -38,6 +42,8 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnab
 
 	private Map<Integer, PipelineSink> m_consumerSinks = new ConcurrentHashMap<>();
 
+	private Map<Integer, BlockingQueue<AckRecord>> m_acks = new ConcurrentHashMap<>();
+
 	@Override
 	public void startConsumer(Subscriber s) {
 		NettyClientHandler netty = m_clientManager.findConsumerClient(s.getTopicPattern(), s.getGroupId());
@@ -46,25 +52,32 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnab
 		      .addHeader("topic", s.getTopicPattern()) //
 		      .addHeader("groupId", s.getGroupId());
 
-		m_consumerSinks.put(cmd.getCorrelationId(), newConsumerSink(s));
+		LinkedBlockingQueue<AckRecord> ackQueue = new LinkedBlockingQueue<>();
+		m_acks.put(cmd.getCorrelationId(), ackQueue);
+		m_consumerSinks.put(cmd.getCorrelationId(), newConsumerSink(s, ackQueue));
 
 		netty.writeCommand(cmd);
 	}
 
-	private PipelineSink newConsumerSink(final Subscriber s) {
+	private PipelineSink newConsumerSink(final Subscriber s, final LinkedBlockingQueue<AckRecord> ackQueue) {
 		return new PipelineSink() {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public void handle(PipelineContext ctx, Object payload) {
 				// TODO
+				Ack ack = Ack.SUCCESS;
 				try {
 					s.getConsumer().consume((List) payload);
 				} catch (BackoffException e) {
-					// TODO send nack
+					ack = Ack.FAIL;
 				} catch (Throwable e) {
 					// TODO add more message detail
 					m_logger.warn("Consumer throws exception when consuming messge", e);
+				} finally {
+					// TODO extract offset record from payload
+					OffsetRecord offsetRecord = null;
+					ackQueue.offer(new AckRecord(offsetRecord, ack));
 				}
 			}
 		};
@@ -86,6 +99,18 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnab
 	@Override
 	public void enableLogging(Logger logger) {
 		m_logger = logger;
+	}
+
+	private static class AckRecord {
+		private OffsetRecord m_offsetRecord;
+
+		private Ack m_ack;
+
+		public AckRecord(OffsetRecord offsetRecord, Ack ack) {
+			m_offsetRecord = offsetRecord;
+			m_ack = ack;
+		}
+
 	}
 
 }
