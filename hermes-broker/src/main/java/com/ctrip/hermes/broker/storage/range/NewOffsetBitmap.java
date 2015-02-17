@@ -1,11 +1,13 @@
 package com.ctrip.hermes.broker.storage.range;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import com.ctrip.hermes.broker.storage.message.Ack;
 import com.ctrip.hermes.broker.storage.storage.Offset;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
@@ -32,12 +34,12 @@ public class NewOffsetBitmap {
         public void ackOffset(Offset offset, Ack ack) {
             switch (ack) {
                 case SUCCESS:
-                        sendMap.clear((int) offset.getOffset());
-                        successMap.set((int) offset.getOffset());
+                    sendMap.clear((int) offset.getOffset());
+                    successMap.set((int) offset.getOffset());
                     break;
                 case FAIL:
-                        sendMap.clear((int) offset.getOffset());
-                        failMap.set((int) offset.getOffset());
+                    sendMap.clear((int) offset.getOffset());
+                    failMap.set((int) offset.getOffset());
                     break;
             }
         }
@@ -47,7 +49,7 @@ public class NewOffsetBitmap {
         }
 
         public boolean canBeRemoved() {
-           // 根据success 和fail的都取完了，则可以从  batchTimestampMap中remove掉了。
+            // 根据isAllDone()之后，且success 和fail的都取完了，则可以从  batchTimestampMap中remove掉了。
         }
     }
 
@@ -59,12 +61,17 @@ public class NewOffsetBitmap {
 
     ArrayListMultimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = ArrayListMultimap.create();
 
-    ConcurrentHashMap<Long, Offset> offsetMap = new ConcurrentHashMap<>();
-    EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
-    EWAHCompressedBitmap successMap = EWAHCompressedBitmap.bitmapOf();
-    EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
-    // 2. timeout使用Map<List<Offset>, long>的结构，每次遍历检查timeout的Offset
-    ArrayListMultimap<Long /*timestamp*/, List<Long> /*offsets list*/> timeoutOffsetMap = ArrayListMultimap.create();
+    // maxSize is OK? If send too fast and ack too slow, this capacity will clean "old" data by LRU.
+    Cache<Long, Offset> remainSuccessOffsetCache = CacheBuilder.newBuilder()
+            .maximumSize(10 * 1000)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
+
+    Cache<Long, Offset> remainFailOffsetCache = CacheBuilder.newBuilder()
+            .maximumSize(10 * 1000)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
+
 
     public void putOffset(List<Offset> offsetList, long timestamp) {
         cleanSelf();
@@ -82,13 +89,12 @@ public class NewOffsetBitmap {
     }
 
     public List<OffsetRecord> getAndRemoveSuccess() {
-
-        List<Offset> doneOffsetList = new ArrayList<>();
+        List<Offset> successOffsetList = new ArrayList<>();
         Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
         while (iterator.hasNext()) {
             Batch batch = iterator.next().getValue();
             if (batch.isAllDone()) {
-                doneOffsetList.addAll(batch.getSuccessOffsets());
+                successOffsetList.addAll(batch.getSuccessOffsets());
                 // remove success
                 if (batch.canBeRemoved()) {
                     iterator.remove();
@@ -96,7 +102,10 @@ public class NewOffsetBitmap {
             }
         }
 
-        List<OffsetRecord> offsetRecordsList = buildContinuous(doneOffsetList);
+        successOffsetList.addAll(remainSuccessOffsetCache.asMap().values());
+        remainSuccessOffsetCache.cleanUp();
+
+        List<OffsetRecord> offsetRecordsList = buildContinuous(successOffsetList);
         return offsetRecordsList;
     }
 
@@ -110,38 +119,52 @@ public class NewOffsetBitmap {
     }
 
     public List<OffsetRecord> getAndRemoveFail() {
-        List<Integer> failOnes = failMap.toList();
-        Map<Long, Offset> newMap = getMapFromBitmap(offsetMap, failOnes);
-        // clear failMap!
-        failMap.clear();
-
-        return buildContinuous(new ArrayList<>(newMap.values()));
-    }
-
-    //todo: do remove timeout
-    public List<OffsetRecord> getTimeoutAndRemove() {
-        cleanSelf();
-
-        long nowTime = new Date().getTime();
-        List<Offset> timeoutOffset = Lists.newArrayList();
-        List<Long> allOffsetInBitmap = Lists.newArrayList();
-
-        for (Long ts : timeoutOffsetMap.keySet()) {
-            if (nowTime - ts > TIMEOUT_THRESHOLD) {
-                List<List<Long>> list = timeoutOffsetMap.get(ts);
-                for (List<Long> offsetsInBitmap : list) {
-                    allOffsetInBitmap.addAll(offsetsInBitmap);
+        List<Offset> failOffsetList = new ArrayList<>();
+        Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
+        while (iterator.hasNext()) {
+            Batch batch = iterator.next().getValue();
+            if (batch.isAllDone()) {
+                failOffsetList.addAll(batch.getFailOffests());
+                // remove success
+                if (batch.canBeRemoved()) {
+                    iterator.remove();
                 }
             }
         }
-        for (Long offset : allOffsetInBitmap) {
-            if (sendMap.get(offset.intValue())) {
-                timeoutOffset.add(offsetMap.get(offset));
+
+        failOffsetList.addAll(remainFailOffsetCache.asMap().values());
+        remainFailOffsetCache.invalidateAll();
+
+        List<OffsetRecord> offsetRecordsList = buildContinuous(failOffsetList);
+        return offsetRecordsList;
+    }
+
+
+    public List<OffsetRecord> getTimeoutAndRemove() {
+        cleanSelf();
+
+
+        long nowTime = new Date().getTime();
+        List<Offset> successOffsetList = new ArrayList<>();
+        List<Offset> failOffsetList = new ArrayList<>();
+        List<Offset> timeoutOffsetList = new ArrayList<>();
+        Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, Batch> entry = iterator.next();
+            Long ts = entry.getKey();
+            Batch batch = entry.getValue();
+            if (nowTime - ts > TIMEOUT_THRESHOLD) { // it is timeout
+                successOffsetList.addAll(batch.getSuccessOffsetst());
+                failOffsetList.addAll(batch.getFailOffsets());
+                timeoutOffsetList.add(batch.getTimetoutOffsets());
             }
         }
 
+        remainSuccessOffsetCache.putAll(successOffsetList);
+        remainFailOffsetList.addAll(failOffsetList);
+
         // todo: merge data with oldMap (generated in cleanSelf())
-        return buildContinuous(timeoutOffset);
+        return buildContinuous(timeoutOffsetList);
     }
 
     /**
@@ -157,16 +180,17 @@ public class NewOffsetBitmap {
 
                 List<Long> oldOffsetPointer = new ArrayList<>();
 
-                //  debug
-                System.out.println("TimeoutTreeMap Before Clean, Total Size: " + timeoutOffsetMap.size());
-                //  debug
-                Iterator<Long> iterator = timeoutOffsetMap.keySet().iterator();
+                Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
 
                 while (iterator.hasNext()) {
 
-                    Long timestamp = iterator.next();
+                    Map.Entry<Long, Batch> entry = iterator.next();
+                    Long timestamp = entry.getKey();
+
                     if (nowTime - timestamp > CLEAN_THRESHOLD) {
-                        for (List<Long> offsets : timeoutOffsetMap.get(timestamp)) {
+                        Batch batch = entry.getValue();
+                        // todo: 2.16: 继续搞定clean self.
+                        for (List<Long> offsets : batch.) {
                             oldOffsetPointer.addAll(offsets);
                         }
                         // clean timeoutOffsetMap
@@ -174,29 +198,6 @@ public class NewOffsetBitmap {
                     }
                 }
 
-                //  debug
-                System.out.println("TimeoutTreeMap After Clean, Total Size: " + timeoutOffsetMap.size());
-                //  debug
-
-                for (Long offset : oldOffsetPointer) {
-                    // 针对bitmap的clear可优化成bitmap的nor操作
-                    // clean sendMap
-                    sendMap.clear(offset.intValue());  // todo: 实际上没有清理掉
-                    // clean successMap
-                    successMap.clear(offset.intValue());
-                    // clean failMap
-                    failMap.clear(offset.intValue());
-                    // clean offsetMap
-                    offsetMap.remove(offset);  // todo: 实际没有清理掉
-                }
-
-                // output clean result
-                System.out.println(String.format("CLEAN RESULT:\n" +
-                                "\tOld Offsets (Cleaned Offsets): %d(items)\n" +
-                                "\tSendBitMap.sizeInBytes(): %d, SuccessBitMap.sizeInBytes(): %d, FailBitMap.sizeInBytes(): %d\n" +
-                                "\tOffsetMap: %d(items), TimeoutTreeMap: %d(items)",
-                        oldOffsetPointer.size(), sendMap.sizeInBytes(), successMap.sizeInBytes(), failMap.sizeInBytes(),
-                        offsetMap.size(), timeoutOffsetMap.size()));
             } finally {
                 semaphore.release();
             }
