@@ -9,7 +9,7 @@ public class DefaultRangeMonitor implements RangeMonitor {
 
     private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
 
-    OldOffsetBitmap bitmap = new OldOffsetBitmap();
+    NewOffsetBitmap bitmap = new NewOffsetBitmap();
 
     public DefaultRangeMonitor() {
         Timer time = new Timer();

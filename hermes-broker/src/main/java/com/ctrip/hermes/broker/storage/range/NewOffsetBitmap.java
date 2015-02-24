@@ -13,8 +13,7 @@ import com.google.common.collect.Lists;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
 /**
- * 有两种使用bitmap的策略：1),将所有offset存于一个bitmap中（因为，前提假设是会不重复的）
- * 2),基于每次batch将多个offset存放于各独立的bitmap中。
+ * 每次batch将多个offset存放于各独立的bitmap中。
  */
 public class NewOffsetBitmap {
 
@@ -65,12 +64,15 @@ public class NewOffsetBitmap {
         }
 
         public List<Offset> popTimeoutOffsets() {
+            // sendMap and ((not) ( successMap or failMap)) = remaining = timeoutMap
+            EWAHCompressedBitmap timeoutMap = sendMap.andNot(successMap.or(failMap));
+            List<Offset> result = new ArrayList<>();
 
-            // todo:
-            return null;
-
-
-            // clean maps
+            for (Integer index : timeoutMap.toList()) {
+                result.add(offsetMap.get((long)index));
+            }
+            // here is no need to clear related offsets in sendMap, as this node will be removed soon.
+            return result;
         }
 
         public boolean canBeRemoved() {
@@ -88,7 +90,6 @@ public class NewOffsetBitmap {
             // 直接从sendMap取，而不是从offsetMap。可以避免发了一个，后续又重发导致offsetMap里面会有重复的情况，
             // 因为sendMap ack会清空，只有后一个Batch的sendMap有该值。
             return sendMap.get((int)offset.getOffset());
-
         }
 
         /**
@@ -100,16 +101,12 @@ public class NewOffsetBitmap {
     }
 
     final long TIMEOUT_THRESHOLD = 3 * 1000; // 3s
-    final long CLEAN_THRESHOLD = 10 * 1000; // 10s
 
     static long lastCleanTime = -1;
     Semaphore semaphore = new Semaphore(1);
 
     ArrayListMultimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = ArrayListMultimap.create();
 
-    List<Offset> oldSuccessOffsets = new ArrayList<>();
-    List<Offset> oldFailOffsets = new ArrayList<>();
-    List<Offset> oldTimeoutOffsets = new ArrayList<>();
     // maxSize is OK? If send too fast and ack too slow, this capacity will clean "old" data by LRU.
     // use Offset as key, to avoid the overlap on Long(timestamp)
     Cache<Offset, Long> remainSuccessOffsetCache = CacheBuilder.newBuilder()
@@ -207,8 +204,7 @@ public class NewOffsetBitmap {
         failOffsetList.addAll(remainFailOffsetCache.asMap().keySet());
         remainFailOffsetCache.invalidateAll();
 
-        List<OffsetRecord> offsetRecordsList = buildContinuous(failOffsetList);
-        return offsetRecordsList;
+        return buildContinuous(failOffsetList);
     }
 
 
@@ -266,46 +262,6 @@ public class NewOffsetBitmap {
 
 
     private boolean shouldDoClean() {
-        return lastCleanTime == -1 || (new Date().getTime() - lastCleanTime) > CLEAN_THRESHOLD;
+        return lastCleanTime == -1 || (new Date().getTime() - lastCleanTime) > TIMEOUT_THRESHOLD;
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        NewOffsetBitmap bitmap = new NewOffsetBitmap();
-
-        EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
-        EWAHCompressedBitmap successMap = EWAHCompressedBitmap.bitmapOf();
-        EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
-
-
-        sendMap.set(3);
-        sendMap.set(5);
-        sendMap.set(7);
-
-        successMap.set(5);
-        failMap.set(7);
-
-        System.out.println(sendMap.xor(successMap.and(failMap)));
-
-
-//
-//        for (int i = 0; i < 10; i++) {
-//            List<Offset> offsetList = new ArrayList<>();
-//            for (int j = 0; j < 1000; j++) {
-//                offsetList.add(new Offset("id", j));
-//            }
-//
-//            bitmap.putOffset(offsetList, new Date().getTime());
-//            Thread.sleep(1000);
-//        }
-//
-//        for (int i = 0; i < 10; i++) {
-//            List<Offset> offsetList = new ArrayList<>();
-//            for (int j = 0; j < 1000; j++) {
-//                offsetList.add(new Offset("id", j));
-//            }
-//            bitmap.ackOffset(offsetList, Ack.SUCCESS);
-//            Thread.sleep(1000);
-//        }
-    }
-
 }
