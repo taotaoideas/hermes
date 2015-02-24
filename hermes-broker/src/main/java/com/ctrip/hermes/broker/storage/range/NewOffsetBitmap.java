@@ -44,12 +44,58 @@ public class NewOffsetBitmap {
             }
         }
 
-        public List<Offset> getAllOffset() {
+        public List<Offset> popSuccessOffsets() {
+            List<Offset> result = new ArrayList<>();
+            for (Integer index : successMap.toList()) {
+                result.add(offsetMap.get((long)index));
+            }
+
+            successMap.clear();
+            return result;
+        }
+
+        public List<Offset> popFailOffsets() {
+            List<Offset> result = new ArrayList<>();
+            for (Integer index : failMap.toList()) {
+                result.add(offsetMap.get((long)index));
+            }
+
+            failMap.clear();
+            return result;
+        }
+
+        public List<Offset> popTimeoutOffsets() {
+
+            // todo:
+            return null;
+
+
             // clean maps
         }
 
         public boolean canBeRemoved() {
             // 根据isAllDone()之后，且success 和fail的都取完了，则可以从  batchTimestampMap中remove掉了。
+            boolean canBeRemoved = false;
+            if (isAllDone()) {
+                if (successMap.isEmpty() && failMap.isEmpty()) {
+                    canBeRemoved = true;
+                }
+            }
+            return canBeRemoved;
+        }
+
+        public boolean contains(Offset offset) {
+            // 直接从sendMap取，而不是从offsetMap。可以避免发了一个，后续又重发导致offsetMap里面会有重复的情况，
+            // 因为sendMap ack会清空，只有后一个Batch的sendMap有该值。
+            return sendMap.get((int)offset.getOffset());
+
+        }
+
+        /**
+         * @return is all offsets of sendMap has been acked (whether success of fail)
+         */
+        public boolean isAllDone() {
+            return sendMap.isEmpty();
         }
     }
 
@@ -61,17 +107,25 @@ public class NewOffsetBitmap {
 
     ArrayListMultimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = ArrayListMultimap.create();
 
+    List<Offset> oldSuccessOffsets = new ArrayList<>();
+    List<Offset> oldFailOffsets = new ArrayList<>();
+    List<Offset> oldTimeoutOffsets = new ArrayList<>();
     // maxSize is OK? If send too fast and ack too slow, this capacity will clean "old" data by LRU.
-    Cache<Long, Offset> remainSuccessOffsetCache = CacheBuilder.newBuilder()
+    // use Offset as key, to avoid the overlap on Long(timestamp)
+    Cache<Offset, Long> remainSuccessOffsetCache = CacheBuilder.newBuilder()
             .maximumSize(10 * 1000)
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .build();
 
-    Cache<Long, Offset> remainFailOffsetCache = CacheBuilder.newBuilder()
+    Cache<Offset, Long> remainFailOffsetCache = CacheBuilder.newBuilder()
             .maximumSize(10 * 1000)
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .build();
 
+    Cache<Offset, Long> remainTimeoutOffsetCache = CacheBuilder.newBuilder()
+            .maximumSize(10 * 1000)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
 
     public void putOffset(List<Offset> offsetList, long timestamp) {
         cleanSelf();
@@ -83,9 +137,28 @@ public class NewOffsetBitmap {
         cleanSelf();
 
         for (Offset offset : offsetList) {
-            Batch batch = findBatch(batchTimestampMap);
-            batch.ackOffset(offset, ack);
+            Batch batch = findBatch(batchTimestampMap, offset);
+            if (null != batch) {
+                batch.ackOffset(offset, ack);
+            }
         }
+    }
+
+    /**
+     * 根据指定的Offset，找到相应的Batch。
+     *
+     * @param batchMap ：Batch的map
+     * @param offset   : 指定的offset
+     * @return 相应的batch，若未找到则返回null
+     */
+    private Batch findBatch(ArrayListMultimap<Long, Batch> batchMap, Offset offset) {
+        // Todo:如何更快的找到对应的offset
+        for (Batch batch : batchMap.values()) {
+            if (batch.contains(offset)) {
+                return batch;
+            }
+        }
+        return null;
     }
 
     public List<OffsetRecord> getAndRemoveSuccess() {
@@ -94,7 +167,7 @@ public class NewOffsetBitmap {
         while (iterator.hasNext()) {
             Batch batch = iterator.next().getValue();
             if (batch.isAllDone()) {
-                successOffsetList.addAll(batch.getSuccessOffsets());
+                successOffsetList.addAll(batch.popSuccessOffsets());
                 // remove success
                 if (batch.canBeRemoved()) {
                     iterator.remove();
@@ -102,11 +175,10 @@ public class NewOffsetBitmap {
             }
         }
 
-        successOffsetList.addAll(remainSuccessOffsetCache.asMap().values());
+        successOffsetList.addAll(remainSuccessOffsetCache.asMap().keySet());
         remainSuccessOffsetCache.cleanUp();
 
-        List<OffsetRecord> offsetRecordsList = buildContinuous(successOffsetList);
-        return offsetRecordsList;
+        return buildContinuous(successOffsetList);
     }
 
     private List<OffsetRecord> buildContinuous(List<Offset> offsets) {
@@ -124,7 +196,7 @@ public class NewOffsetBitmap {
         while (iterator.hasNext()) {
             Batch batch = iterator.next().getValue();
             if (batch.isAllDone()) {
-                failOffsetList.addAll(batch.getFailOffests());
+                failOffsetList.addAll(batch.popFailOffsets());
                 // remove success
                 if (batch.canBeRemoved()) {
                     iterator.remove();
@@ -132,7 +204,7 @@ public class NewOffsetBitmap {
             }
         }
 
-        failOffsetList.addAll(remainFailOffsetCache.asMap().values());
+        failOffsetList.addAll(remainFailOffsetCache.asMap().keySet());
         remainFailOffsetCache.invalidateAll();
 
         List<OffsetRecord> offsetRecordsList = buildContinuous(failOffsetList);
@@ -143,33 +215,16 @@ public class NewOffsetBitmap {
     public List<OffsetRecord> getTimeoutAndRemove() {
         cleanSelf();
 
-
-        long nowTime = new Date().getTime();
-        List<Offset> successOffsetList = new ArrayList<>();
-        List<Offset> failOffsetList = new ArrayList<>();
-        List<Offset> timeoutOffsetList = new ArrayList<>();
-        Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Long, Batch> entry = iterator.next();
-            Long ts = entry.getKey();
-            Batch batch = entry.getValue();
-            if (nowTime - ts > TIMEOUT_THRESHOLD) { // it is timeout
-                successOffsetList.addAll(batch.getSuccessOffsetst());
-                failOffsetList.addAll(batch.getFailOffsets());
-                timeoutOffsetList.add(batch.getTimetoutOffsets());
-            }
-        }
-
-        remainSuccessOffsetCache.putAll(successOffsetList);
-        remainFailOffsetList.addAll(failOffsetList);
-
-        // todo: merge data with oldMap (generated in cleanSelf())
-        return buildContinuous(timeoutOffsetList);
+        List<Offset> remainTimeoutOffsetList = new ArrayList<>(remainTimeoutOffsetCache.asMap().keySet());
+        return buildContinuous(remainTimeoutOffsetList);
     }
 
     /**
-     * avoid OOM, should clean self: remove "old" data,
-     * even if no put or ack or getAndRemove~ for long time.
+     * This function does these things:
+     * 1. find timeout Batch,
+     * 2. then find all success offsets into remainSuccessOffsetCache,
+     * 3. then all failed offsets
+     * 4. then all timeout offsets.
      */
     private void cleanSelf() {
         if (shouldDoClean() && semaphore.tryAcquire()) {
@@ -178,31 +233,37 @@ public class NewOffsetBitmap {
 
                 final long nowTime = new Date().getTime();
 
-                List<Long> oldOffsetPointer = new ArrayList<>();
-
                 Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
 
+                // 可根据采用Timestamp的TreeMap来优化筛选过程，就不用挨个遍历
                 while (iterator.hasNext()) {
-
                     Map.Entry<Long, Batch> entry = iterator.next();
                     Long timestamp = entry.getKey();
 
-                    if (nowTime - timestamp > CLEAN_THRESHOLD) {
+                    if (nowTime - timestamp > TIMEOUT_THRESHOLD) {
                         Batch batch = entry.getValue();
-                        // todo: 2.16: 继续搞定clean self.
-                        for (List<Long> offsets : batch.) {
-                            oldOffsetPointer.addAll(offsets);
-                        }
-                        // clean timeoutOffsetMap
+                        remainSuccessOffsetCache.putAll(buildOffsetMap(batch.popSuccessOffsets(), entry.getKey()));
+                        remainFailOffsetCache.putAll(buildOffsetMap(batch.popFailOffsets(), entry.getKey()));
+                        remainTimeoutOffsetCache.putAll(buildOffsetMap(batch.popTimeoutOffsets(), entry.getKey()));
+
                         iterator.remove();
                     }
                 }
-
             } finally {
                 semaphore.release();
             }
         }
     }
+
+
+    private Map<Offset, Long> buildOffsetMap(List<Offset> offsetList, Long timestamp) {
+        Map<Offset, Long> result = new HashMap<>();
+        for (Offset offset : offsetList) {
+            result.put(offset, timestamp);
+        }
+        return result;
+    }
+
 
     private boolean shouldDoClean() {
         return lastCleanTime == -1 || (new Date().getTime() - lastCleanTime) > CLEAN_THRESHOLD;
@@ -211,25 +272,40 @@ public class NewOffsetBitmap {
     public static void main(String[] args) throws InterruptedException {
         NewOffsetBitmap bitmap = new NewOffsetBitmap();
 
+        EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
+        EWAHCompressedBitmap successMap = EWAHCompressedBitmap.bitmapOf();
+        EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
 
-        for (int i = 0; i < 10; i++) {
-            List<Offset> offsetList = new ArrayList<>();
-            for (int j = 0; j < 1000; j++) {
-                offsetList.add(new Offset("id", j));
-            }
 
-            bitmap.putOffset(offsetList, new Date().getTime());
-            Thread.sleep(1000);
-        }
+        sendMap.set(3);
+        sendMap.set(5);
+        sendMap.set(7);
 
-        for (int i = 0; i < 10; i++) {
-            List<Offset> offsetList = new ArrayList<>();
-            for (int j = 0; j < 1000; j++) {
-                offsetList.add(new Offset("id", j));
-            }
-            bitmap.ackOffset(offsetList, Ack.SUCCESS);
-            Thread.sleep(1000);
-        }
+        successMap.set(5);
+        failMap.set(7);
+
+        System.out.println(sendMap.xor(successMap.and(failMap)));
+
+
+//
+//        for (int i = 0; i < 10; i++) {
+//            List<Offset> offsetList = new ArrayList<>();
+//            for (int j = 0; j < 1000; j++) {
+//                offsetList.add(new Offset("id", j));
+//            }
+//
+//            bitmap.putOffset(offsetList, new Date().getTime());
+//            Thread.sleep(1000);
+//        }
+//
+//        for (int i = 0; i < 10; i++) {
+//            List<Offset> offsetList = new ArrayList<>();
+//            for (int j = 0; j < 1000; j++) {
+//                offsetList.add(new Offset("id", j));
+//            }
+//            bitmap.ackOffset(offsetList, Ack.SUCCESS);
+//            Thread.sleep(1000);
+//        }
     }
 
 }
