@@ -62,6 +62,11 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<role-hint>ack-request</role-hint>
+			<implementation>com.ctrip.hermes.broker.remoting.AckRequestProcessor</implementation>
+		</component>
+		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>

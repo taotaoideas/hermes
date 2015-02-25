@@ -28,7 +28,7 @@ public class DecodeMessageValve implements Valve {
 		List<Object> bodies = new ArrayList<>(msgs.size());
 		for (com.ctrip.hermes.storage.message.Message msg : msgs) {
 			// TODO get or bypass class info
-			bodies.add(new Message<Object>(codec.decode(msg.getContent(), String.class)));
+			bodies.add(new Message<Object>(codec.decode(msg.getContent(), String.class), msg));
 		}
 
 		ctx.next(bodies);

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.range.DefaultRangeMonitor;
 import com.ctrip.hermes.storage.range.OffsetRecord;
@@ -62,8 +61,8 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
     }
 
     @Override
-    public void ack(OffsetRecord record, Ack ack) throws StorageException {
-        m_offsetHandler.offsetDone(record, ack);
+    public void ack(OffsetRecord record) throws StorageException {
+        m_offsetHandler.offsetDone(record);
     }
 
     @Override

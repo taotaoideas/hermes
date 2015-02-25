@@ -1,11 +1,11 @@
 package com.ctrip.hermes.broker;
 
-import com.ctrip.hermes.storage.impl.StorageMessageQueue;
+import com.ctrip.hermes.storage.MessageQueue;
 
 public interface MessageQueueManager {
 
-	public StorageMessageQueue findQueue(String topic, String groupId);
+	public MessageQueue findQueue(String topic, String groupId);
 
-	public StorageMessageQueue findQueue(String topic);
+	public MessageQueue findQueue(String topic);
 
 }

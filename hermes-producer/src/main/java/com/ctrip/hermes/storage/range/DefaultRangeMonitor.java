@@ -4,90 +4,90 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.storage.StorageException;
 
 public class DefaultRangeMonitor implements RangeMonitor {
 
-    private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
+	private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
 
-    private List<RecordStatus> m_records = new ArrayList<RecordStatus>();
+	private List<RecordStatus> m_records = new ArrayList<RecordStatus>();
 
-    static class RecordStatus {
-        private OffsetRecord m_record;
-        private int m_doneCnt = 0;
+	static class RecordStatus {
+		private OffsetRecord m_record;
 
-        public RecordStatus(OffsetRecord record) {
-            m_record = record;
-        }
+		private int m_doneCnt = 0;
 
-        public OffsetRecord getRecord() {
-            return m_record;
-        }
+		public RecordStatus(OffsetRecord record) {
+			m_record = record;
+		}
 
-        public boolean isDone() {
-            return m_doneCnt == m_record.getToBeDone().size();
-        }
+		public OffsetRecord getRecord() {
+			return m_record;
+		}
 
-        public void newDone() {
-            m_doneCnt++;
-        }
+		public boolean isDone() {
+			return m_doneCnt == m_record.getToBeDone().size();
+		}
 
-    }
+		public void newDone() {
+			m_doneCnt++;
+		}
 
-    @Override
-    public void startNewRange(OffsetRecord record) {
-        m_records.add(new RecordStatus(record));
-    }
+	}
 
-    @Override
-    public void offsetDone(OffsetRecord record, Ack ack) throws StorageException {
-        // TODO merge to continuous range
-        RecordStatus rs = findRecord(record);
+	@Override
+	public void startNewRange(OffsetRecord record) {
+		m_records.add(new RecordStatus(record));
+	}
 
-        if (rs != null) {
-            OffsetRecord owningRecord = rs.getRecord();
-            switch (ack) {
-            case SUCCESS:
-                for (RangeStatusListener l : m_listeners) {
-                    l.onRangeSuccess(new RangeEvent(owningRecord));
-                }
-                break;
+	@Override
+	public void offsetDone(OffsetRecord record) throws StorageException {
+		// TODO merge to continuous range
+		RecordStatus rs = findRecord(record);
 
-            case FAIL:
-                for (RangeStatusListener l : m_listeners) {
-                    l.onRangeFail(new RangeEvent(owningRecord));
-                }
-                break;
+		if (rs != null) {
+			OffsetRecord owningRecord = rs.getRecord();
+			switch (record.getAck()) {
+			case SUCCESS:
+				for (RangeStatusListener l : m_listeners) {
+					l.onRangeSuccess(new RangeEvent(owningRecord));
+				}
+				break;
 
-            default:
-                break;
-            }
-        } else {
-            System.out.println("xx");
-        }
-    }
+			case FAIL:
+				for (RangeStatusListener l : m_listeners) {
+					l.onRangeFail(new RangeEvent(owningRecord));
+				}
+				break;
 
-    private RecordStatus findRecord(OffsetRecord record) {
-        Iterator<RecordStatus> iter = m_records.iterator();
+			default:
+				break;
+			}
+		} else {
+			System.out.println("xx");
+		}
+	}
 
-        while (iter.hasNext()) {
-            RecordStatus s = iter.next();
-            if (s.getRecord().contains(record)) {
-                // TODO
-                s.newDone();
-                if (s.isDone()) {
-                    iter.remove();
-                }
-                return s;
-            }
-        }
-        return null;
-    }
+	private RecordStatus findRecord(OffsetRecord record) {
+		Iterator<RecordStatus> iter = m_records.iterator();
 
-    @Override
-    public void addListener(RangeStatusListener lisener) {
-        m_listeners.add(lisener);
-    }
+		while (iter.hasNext()) {
+			RecordStatus s = iter.next();
+			if (s.getRecord().contains(record)) {
+				// TODO
+				s.newDone();
+				if (s.isDone()) {
+					iter.remove();
+				}
+				return s;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void addListener(RangeStatusListener lisener) {
+		m_listeners.add(lisener);
+	}
 
 }

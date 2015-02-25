@@ -6,6 +6,7 @@ import java.util.List;
 import org.unidal.lookup.annotation.Inject;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.MessageContext;
 import com.ctrip.hermes.remoting.Command;
@@ -32,8 +33,9 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 		String topic = cmd.getHeader("topic");
 
 		// TODO parse cmd.getBody() to multiple message bytes
-		Message msg = JSON.parseObject(cmd.getBody(), Message.class);
-		MessageContext msgCtx = new MessageContext(topic, Arrays.asList(msg));
+		List<Message> msgs = JSON.parseObject(cmd.getBody(), new TypeReference<List<Message>>() {
+		}.getType());
+		MessageContext msgCtx = new MessageContext(topic, msgs);
 
 		m_consumerManager.deliverMessage(cmd.getCorrelationId(), msgCtx);
 	}

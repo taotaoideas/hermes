@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.ctrip.hermes.storage.MessageQueue;
-import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.StoragePair;
@@ -83,9 +82,9 @@ public class StorageMessageQueue implements MessageQueue {
 	// TODO consumer with same groupId should connect to the same message queue
 	// to mediate message dispatch
 	@Override
-	public void ack(List<OffsetRecord> records, Ack ack) throws StorageException {
+	public void ack(List<OffsetRecord> records) throws StorageException {
 		for (OffsetRecord rec : records) {
-			m_id2Pair.get(rec.getToUpdate().getId()).ack(rec, ack);
+			m_id2Pair.get(rec.getToUpdate().getId()).ack(rec);
 		}
 	}
 

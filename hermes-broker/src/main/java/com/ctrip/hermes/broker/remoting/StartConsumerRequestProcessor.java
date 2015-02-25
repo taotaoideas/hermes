@@ -73,7 +73,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	private byte[] encode(List<Message> msgs) {
 		// TODO
-		return JSON.toJSONBytes(msgs.get(0));
+		return JSON.toJSONBytes(msgs);
 	}
 
 }
