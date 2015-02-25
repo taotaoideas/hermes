@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.broker.ConsumerChannel;
 import com.ctrip.hermes.broker.ConsumerChannelHandler;
 import com.ctrip.hermes.broker.MessageChannelManager;
@@ -72,7 +73,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	private byte[] encode(List<Message> msgs) {
 		// TODO
-		return msgs.get(0).getContent();
+		return JSON.toJSONBytes(msgs);
 	}
 
 }

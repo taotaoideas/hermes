@@ -10,6 +10,7 @@ import com.ctrip.hermes.broker.DefaultMessageChannelManager;
 import com.ctrip.hermes.broker.DefaultMessageQueueManager;
 import com.ctrip.hermes.broker.MessageChannelManager;
 import com.ctrip.hermes.broker.MessageQueueManager;
+import com.ctrip.hermes.broker.remoting.AckRequestProcessor;
 import com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
 import com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor;
@@ -41,6 +42,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MessageChannelManager.class));
 		all.add(C(CommandProcessor.class, StartConsumerRequestProcessor.ID, StartConsumerRequestProcessor.class) //
 		      .req(MessageChannelManager.class));
+		all.add(C(CommandProcessor.class, AckRequestProcessor.ID, AckRequestProcessor.class));
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());
