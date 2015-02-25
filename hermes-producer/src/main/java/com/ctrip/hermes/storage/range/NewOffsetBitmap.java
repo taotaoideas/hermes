@@ -4,12 +4,14 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import com.ctrip.hermes.broker.storage.message.Ack;
-import com.ctrip.hermes.broker.storage.storage.Offset;
+import com.ctrip.hermes.storage.message.Ack;
+import com.ctrip.hermes.storage.storage.Offset;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
 /**
@@ -46,7 +48,7 @@ public class NewOffsetBitmap {
         public List<Offset> popSuccessOffsets() {
             List<Offset> result = new ArrayList<>();
             for (Integer index : successMap.toList()) {
-                result.add(offsetMap.get((long)index));
+                result.add(offsetMap.get((long) index));
             }
 
             successMap.clear();
@@ -56,7 +58,7 @@ public class NewOffsetBitmap {
         public List<Offset> popFailOffsets() {
             List<Offset> result = new ArrayList<>();
             for (Integer index : failMap.toList()) {
-                result.add(offsetMap.get((long)index));
+                result.add(offsetMap.get((long) index));
             }
 
             failMap.clear();
@@ -69,7 +71,7 @@ public class NewOffsetBitmap {
             List<Offset> result = new ArrayList<>();
 
             for (Integer index : timeoutMap.toList()) {
-                result.add(offsetMap.get((long)index));
+                result.add(offsetMap.get((long) index));
             }
             // here is no need to clear related offsets in sendMap, as this node will be removed soon.
             return result;
@@ -89,7 +91,7 @@ public class NewOffsetBitmap {
         public boolean contains(Offset offset) {
             // 直接从sendMap取，而不是从offsetMap。可以避免发了一个，后续又重发导致offsetMap里面会有重复的情况，
             // 因为sendMap ack会清空，只有后一个Batch的sendMap有该值。
-            return sendMap.get((int)offset.getOffset());
+            return sendMap.get((int) offset.getOffset());
         }
 
         /**
@@ -105,7 +107,8 @@ public class NewOffsetBitmap {
     static long lastCleanTime = -1;
     Semaphore semaphore = new Semaphore(1);
 
-    ArrayListMultimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = ArrayListMultimap.create();
+    Multimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = Multimaps.synchronizedMultimap(ArrayListMultimap
+            .<Long, Batch>create());
 
     // maxSize is OK? If send too fast and ack too slow, this capacity will clean "old" data by LRU.
     // use Offset as key, to avoid the overlap on Long(timestamp)
@@ -148,7 +151,7 @@ public class NewOffsetBitmap {
      * @param offset   : 指定的offset
      * @return 相应的batch，若未找到则返回null
      */
-    private Batch findBatch(ArrayListMultimap<Long, Batch> batchMap, Offset offset) {
+    private Batch findBatch(Multimap<Long, Batch> batchMap, Offset offset) {
         // Todo:如何更快的找到对应的offset
         for (Batch batch : batchMap.values()) {
             if (batch.contains(offset)) {

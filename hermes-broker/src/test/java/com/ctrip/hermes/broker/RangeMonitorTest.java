@@ -8,10 +8,6 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 
-import com.ctrip.hermes.broker.storage.range.RangeMonitor;
-import com.ctrip.hermes.broker.storage.range.RangeStatusListener;
-import com.ctrip.hermes.broker.storage.storage.Offset;
-import com.ctrip.hermes.broker.storage.storage.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

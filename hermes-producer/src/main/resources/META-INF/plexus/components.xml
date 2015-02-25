@@ -160,19 +160,6 @@
 			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandCodec</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyServerConfig</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.netty.NettyServer</role>
-			<implementation>com.ctrip.hermes.remoting.netty.NettyServer</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.remoting.netty.NettyServerConfig</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>

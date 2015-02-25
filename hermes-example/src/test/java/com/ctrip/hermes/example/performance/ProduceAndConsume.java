@@ -10,7 +10,9 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
+import com.ctrip.hermes.consumer.BackoffException;
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.producer.Producer;
@@ -33,7 +35,7 @@ public class ProduceAndConsume extends ComponentTestCase {
 
     @Test
     public void myTest() throws IOException {
-        startServer();
+        startBroker();
         startCountTimer();
         startProduceThread();
         startConsumeThread();
@@ -41,7 +43,7 @@ public class ProduceAndConsume extends ComponentTestCase {
         System.in.read();
     }
 
-    private void startServer() {
+    private void startBroker() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -68,11 +70,11 @@ public class ProduceAndConsume extends ComponentTestCase {
                 for (; ; ) {
                     p.message("order.new", sendCount.get()).send();
                     sendCount.addAndGet(1);
-//                    try {
-//                        Thread.sleep(1);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
@@ -86,12 +88,8 @@ public class ProduceAndConsume extends ComponentTestCase {
                 ConsumerBootstrap b = lookup(ConsumerBootstrap.class);
 
                 Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
-
                     @Override
-                    public void consume(List<String> msgs) {
-//                        for (String msg : msgs) {
-//                            System.out.print("|" + msg + "|");
-//                        }
+                    public void consume(List<Message<String>> msgs) throws BackoffException {
                         receiveCount.addAndGet(1);
                     }
                 });

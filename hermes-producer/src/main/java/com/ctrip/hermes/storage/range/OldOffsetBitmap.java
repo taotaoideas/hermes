@@ -4,8 +4,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
-import com.ctrip.hermes.broker.storage.message.Ack;
-import com.ctrip.hermes.broker.storage.storage.Offset;
+import com.ctrip.hermes.storage.message.Ack;
+import com.ctrip.hermes.storage.storage.Offset;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.googlecode.javaewah.EWAHCompressedBitmap;

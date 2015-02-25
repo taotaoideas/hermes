@@ -7,9 +7,11 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.ctrip.hermes.broker.storage.message.Ack;
-import com.ctrip.hermes.broker.storage.storage.Offset;
-import com.ctrip.hermes.broker.storage.storage.StorageException;
+import com.ctrip.hermes.storage.message.Ack;
+import com.ctrip.hermes.storage.range.*;
+import com.ctrip.hermes.storage.storage.Offset;
+import com.ctrip.hermes.storage.storage.StorageException;
+
 
 public class DefaultRangeMonitorPerformanceTest {
 
