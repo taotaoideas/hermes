@@ -5,8 +5,12 @@
 		<snippet lang='java'>
 			public final static String LOCAL = "local";
 			public final static String BROKER = "broker";
-			public final static
-			String TRANSACTION = "transaction";
+			public final static String TRANSACTION = "transaction";
+		</snippet>
+	</entity>
+	<entity name="storage">
+		<snippet lang='java'>
+			public final static String MEMORY = "memory";
 		</snippet>
 	</entity>
 </model>

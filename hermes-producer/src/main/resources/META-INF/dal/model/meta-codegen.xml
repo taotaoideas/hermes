@@ -23,6 +23,13 @@
     <attribute name="name" value-type="String" />
     <attribute name="partition-count" value-type="int" />
     <entity-ref name="property" type="list" names="properties" />
+    <entity-ref name="partition" type="list" names="partitions" />
+  </entity>
+  <entity name="partition">
+    <attribute name="type" value-type="String" />
+    <attribute name="start-index" value-type="int" />
+    <attribute name="end-index" value-type="int" />
+    <attribute name="endpoints" value-type="String" />
   </entity>
 </model>
 

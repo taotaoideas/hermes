@@ -5,7 +5,7 @@
 		</storage>
 	</connector>
 	<connector type='broker'>
-		<storage type='mysql'>
+		<storage type='memory'>
 			<topic name="order.new" />
 		</storage>
 	</connector>
