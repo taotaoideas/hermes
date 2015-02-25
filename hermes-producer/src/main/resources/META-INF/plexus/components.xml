@@ -105,7 +105,7 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
-			<implementation>com.ctrip.hermes.remoting.netty.ClientManager</implementation>
+			<implementation>com.ctrip.hermes.remoting.netty.DefaultClientManager</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.netty.NettyClientHandler</role>

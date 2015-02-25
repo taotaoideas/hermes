@@ -6,6 +6,7 @@ import java.util.List;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.engine.ConsumerBootstrap;
+import com.ctrip.hermes.engine.MessageContext;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
@@ -26,8 +27,13 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 	@Override
 	public void process(CommandContext ctx) {
 		Command cmd = ctx.getCommand();
+		String topic = cmd.getHeader("topic");
 
-		m_consumerManager.deliverMessage(cmd.getCorrelationId(), cmd.getBody());
+		// TODO parse cmd.getBody() to multiple message bytes
+		List<byte[]> msgs = Arrays.asList(cmd.getBody());
+		MessageContext msgCtx = new MessageContext(topic, msgs);
+		
+		m_consumerManager.deliverMessage(cmd.getCorrelationId(), msgCtx);
 	}
 
 }

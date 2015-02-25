@@ -8,7 +8,9 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.ctrip.hermes.consumer.BackoffException;
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.consumer.Subscribe;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.engine.scanner.DefaultScanner;
@@ -19,7 +21,7 @@ public class DefaultScannerTest {
 	public static class MockConsumer implements Consumer<Object> {
 
 		@Override
-		public void consume(List<Object> msgs) {
+		public void consume(List<Message<Object>> msgs) throws BackoffException {
 		}
 
 	}

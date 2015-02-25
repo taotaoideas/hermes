@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.storage.impl.StorageMessageQueue;
+import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 
 public class DefaultMessageQueueManagerTest extends ComponentTestCase {
 

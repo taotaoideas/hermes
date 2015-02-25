@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.producer.Producer;
@@ -23,9 +24,9 @@ public class IntegrationTest extends ComponentTestCase {
 		Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
 
 			@Override
-			public void consume(List<String> msgs) {
-				for (String msg : msgs) {
-					System.out.println("<<< " + msg);
+			public void consume(List<Message<String>> msgs) {
+				for (Message<String> msg : msgs) {
+					System.out.println("<<< " + msg.getBody());
 				}
 			}
 		});

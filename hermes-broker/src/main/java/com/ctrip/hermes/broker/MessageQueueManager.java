@@ -1,6 +1,6 @@
 package com.ctrip.hermes.broker;
 
-import com.ctrip.hermes.broker.storage.impl.StorageMessageQueue;
+import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 
 public interface MessageQueueManager {
 
