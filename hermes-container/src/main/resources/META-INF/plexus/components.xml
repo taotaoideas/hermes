@@ -12,6 +12,9 @@
 					<role>com.ctrip.hermes.message.Pipeline</role>
 					<role-hint>consumer</role-hint>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
@@ -23,6 +26,11 @@
 			<role>com.ctrip.hermes.spi.Valve</role>
 			<role-hint>decode-message</role-hint>
 			<implementation>com.ctrip.hermes.container.DecodeMessageValve</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.Pipeline</role>

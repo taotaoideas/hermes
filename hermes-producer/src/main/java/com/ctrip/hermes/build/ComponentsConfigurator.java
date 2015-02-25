@@ -38,6 +38,7 @@ import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
 import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
 import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
 import com.ctrip.hermes.remoting.netty.ClientManager;
+import com.ctrip.hermes.remoting.netty.DefaultClientManager;
 import com.ctrip.hermes.remoting.netty.NettyClient;
 import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 import com.ctrip.hermes.remoting.netty.NettyDecoder;
@@ -86,7 +87,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(CodecManager.class));
 		all.add(C(ValveRegistry.class, PRODUCER, ProducerValveRegistry.class));
 
-		all.add(C(ClientManager.class));
+		all.add(C(ClientManager.class, DefaultClientManager.class));
 		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
 		      .req(CommandProcessorManager.class));
 		all.add(C(NettyClient.class).is(PER_LOOKUP));

@@ -12,12 +12,12 @@ import com.ctrip.hermes.broker.ConsumerChannel;
 import com.ctrip.hermes.broker.ConsumerChannelHandler;
 import com.ctrip.hermes.broker.MessageChannelManager;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
-import com.ctrip.hermes.broker.storage.message.Message;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
 import com.ctrip.hermes.remoting.netty.ChannelEventListener;
+import com.ctrip.hermes.storage.message.Message;
 
 public class StartConsumerRequestProcessor implements CommandProcessor {
 

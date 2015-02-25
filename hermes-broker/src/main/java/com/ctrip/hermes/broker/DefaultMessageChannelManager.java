@@ -12,9 +12,9 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.broker.storage.impl.StorageMessageQueue;
-import com.ctrip.hermes.broker.storage.message.Message;
-import com.ctrip.hermes.broker.storage.util.CollectionUtil;
+import com.ctrip.hermes.storage.impl.StorageMessageQueue;
+import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.util.CollectionUtil;
 
 public class DefaultMessageChannelManager implements MessageChannelManager, LogEnabled {
 

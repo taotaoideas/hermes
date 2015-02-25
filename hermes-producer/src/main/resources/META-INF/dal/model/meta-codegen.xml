@@ -21,6 +21,7 @@
   </entity>
   <entity name="topic">
     <attribute name="name" value-type="String" />
+    <attribute name="partition-count" value-type="int" />
     <entity-ref name="property" type="list" names="properties" />
   </entity>
 </model>

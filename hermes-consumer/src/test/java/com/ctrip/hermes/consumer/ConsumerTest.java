@@ -22,7 +22,7 @@ public class ConsumerTest {
 	public static class MockConsumer implements Consumer<Object> {
 
 		@Override
-		public void consume(List<Object> msgs) {
+		public void consume(List<Message<Object>> msgs) {
 		}
 
 	}

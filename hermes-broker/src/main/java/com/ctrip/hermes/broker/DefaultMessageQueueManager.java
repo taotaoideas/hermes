@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.broker.storage.impl.StorageMessageQueue;
-import com.ctrip.hermes.broker.storage.message.Message;
-import com.ctrip.hermes.broker.storage.message.Resend;
-import com.ctrip.hermes.broker.storage.pair.StoragePair;
-import com.ctrip.hermes.broker.storage.storage.memory.MemoryGroup;
-import com.ctrip.hermes.broker.storage.storage.memory.MemoryGroupConfig;
-import com.ctrip.hermes.broker.storage.storage.memory.MemoryStorageFactory;
+import com.ctrip.hermes.storage.impl.StorageMessageQueue;
+import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Resend;
+import com.ctrip.hermes.storage.pair.StoragePair;
+import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
+import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
+import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
 
 public class DefaultMessageQueueManager implements MessageQueueManager {
 

@@ -1,7 +1,10 @@
 package com.ctrip.hermes.remoting;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
@@ -12,7 +15,7 @@ public class CommandProcessorManager implements Initializable {
 	@Inject
 	private CommandRegistry m_registry;
 
-	private BlockingQueue<CommandContext> m_toProcess = new LinkedBlockingQueue<CommandContext>();
+	private ExecutorService m_executor;
 
 	private void process(CommandContext ctx) {
 		Command cmd = ctx.getCommand();
@@ -29,26 +32,20 @@ public class CommandProcessorManager implements Initializable {
 		}
 	}
 
-	public void offer(CommandContext ctx) {
-		m_toProcess.offer(ctx);
+	public void offer(final CommandContext ctx) {
+		m_executor.submit(new Runnable() {
+
+			@Override
+			public void run() {
+				process(ctx);
+			}
+		});
 	}
 
 	@Override
 	public void initialize() throws InitializationException {
 		// TODO
-		new Thread() {
-
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						process(m_toProcess.take());
-					} catch (InterruptedException e) {
-						return;
-					}
-				}
-			}
-
-		}.start();
+		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
+		m_executor = new ThreadPoolExecutor(10, 10, Integer.MAX_VALUE, TimeUnit.SECONDS, workQueue);
 	}
 }
