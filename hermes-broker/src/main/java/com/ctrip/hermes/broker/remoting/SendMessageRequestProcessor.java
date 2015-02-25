@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.broker.MessageChannelManager;
-import com.ctrip.hermes.broker.ProducerChannel;
+import com.ctrip.hermes.channel.MessageChannelManager;
+import com.ctrip.hermes.channel.ProducerChannel;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;

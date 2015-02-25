@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker;
+package com.ctrip.hermes.channel;
 
 import java.util.List;
 

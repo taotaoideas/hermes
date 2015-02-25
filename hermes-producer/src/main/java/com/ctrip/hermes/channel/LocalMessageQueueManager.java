@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker;
+package com.ctrip.hermes.channel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
 
-public class DefaultMessageQueueManager implements MessageQueueManager {
+public class LocalMessageQueueManager implements MessageQueueManager {
 
 	@Inject
 	private MetaService m_meta;

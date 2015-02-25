@@ -160,6 +160,24 @@
 			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandCodec</implementation>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+			<implementation>com.ctrip.hermes.channel.LocalMessageChannelManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+			<implementation>com.ctrip.hermes.channel.LocalMessageQueueManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>

@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker;
+package com.ctrip.hermes.channel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 
-public class DefaultMessageChannelManager implements MessageChannelManager, LogEnabled {
+public class LocalMessageChannelManager implements MessageChannelManager, LogEnabled {
 
 	@Inject
 	private MessageQueueManager m_queueManager;
@@ -40,7 +40,7 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 
 			@Override
 			public void start(ConsumerChannelHandler handler) {
-				synchronized (DefaultMessageChannelManager.this) {
+				synchronized (LocalMessageChannelManager.this) {
 					Pair<String, String> pair = new Pair<>(topic, groupId);
 					List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
 

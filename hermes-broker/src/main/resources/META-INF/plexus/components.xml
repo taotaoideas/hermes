@@ -14,19 +14,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.MessageChannelManager</role>
-			<implementation>com.ctrip.hermes.broker.DefaultMessageChannelManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.broker.MessageQueueManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.MessageQueueManager</role>
-			<implementation>com.ctrip.hermes.broker.DefaultMessageQueueManager</implementation>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.broker.remoting.netty.NettyServerHandler</role>
 			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServerHandler</implementation>
 			<instantiation-strategy>per-lookup</instantiation-strategy>
@@ -47,7 +34,7 @@
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.MessageChannelManager</role>
+					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -57,7 +44,7 @@
 			<implementation>com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.MessageChannelManager</role>
+					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
 				</requirement>
 			</requirements>
 		</component>
