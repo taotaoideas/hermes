@@ -39,8 +39,6 @@ public abstract class AbstractMemoryStorage<T> implements Storage<T> {
 	}
 
 	public synchronized Browser<T> createBrowser(long offset) {
-		// memory storage will start from zero instead of largest offset plus 1
-		// effectively treat every consumer as 'old' consumer
 		long nextReadIdx = 0;
 
 		if (offset > 0) {
