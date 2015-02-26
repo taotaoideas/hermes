@@ -42,7 +42,7 @@ public class OneBoxTest extends ComponentTestCase {
 			String groupId = entry.getKey();
 			Map<String, Integer> nacks = findNacks(groupId);
 			for (String id : entry.getValue()) {
-				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id));
+				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class);
 				System.out.println("Starting consumer " + groupId + ":" + id);
 				b.startConsumer(s);
 			}
@@ -75,7 +75,7 @@ public class OneBoxTest extends ComponentTestCase {
 					String id = parts[2];
 					Map<String, Integer> nacks = findNacks(groupId);
 					System.out.println(String.format("Starting consumer with groupId %s and id %s", groupId, id));
-					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id)));
+					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class));
 				}
 			} else {
 				send(topic, prefix);
@@ -92,9 +92,10 @@ public class OneBoxTest extends ComponentTestCase {
 	}
 
 	private void send(String topic, String prefix) {
-		String msg = prefix + UUID.randomUUID().toString();
+		String uuid = UUID.randomUUID().toString();
+		String msg = prefix + uuid;
 		System.out.println(">>> " + msg);
-		Producer.getInstance().message(topic, msg).send();
+		Producer.getInstance().message(topic, msg).withKey(uuid).send();
 	}
 
 	static class MyConsumer implements Consumer<String> {

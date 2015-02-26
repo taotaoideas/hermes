@@ -33,7 +33,7 @@ public class IntegrationTest extends ComponentTestCase {
 		for (Map.Entry<String, List<String>> entry : subscribers.entrySet()) {
 			String groupId = entry.getKey();
 			for (String id : entry.getValue()) {
-				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id));
+				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class);
 				System.out.println("Starting consumer " + groupId + ":" + id);
 				b.startConsumer(s);
 			}

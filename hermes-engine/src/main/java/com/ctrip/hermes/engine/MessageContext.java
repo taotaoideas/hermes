@@ -10,9 +10,12 @@ public class MessageContext {
 
 	private String m_topic;
 
-	public MessageContext(String topic, List<Message> messages) {
+	private Class<?> m_messageClass;
+
+	public MessageContext(String topic, List<Message> messages, Class<?> messageClass) {
 		m_messages = messages;
 		m_topic = topic;
+		m_messageClass = messageClass;
 	}
 
 	public List<Message> getMessages() {
@@ -21,6 +24,10 @@ public class MessageContext {
 
 	public String getTopic() {
 		return m_topic;
+	}
+
+	public Class<?> getMessageClass() {
+		return m_messageClass;
 	}
 
 }

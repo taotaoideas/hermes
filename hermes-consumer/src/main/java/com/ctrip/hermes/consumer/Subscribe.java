@@ -4,13 +4,16 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 public @interface Subscribe {
 
 	public String topicPattern();
-	
+
 	public String groupId();
+
+	public Class<?> messageClass() default Map.class;
 
 }
