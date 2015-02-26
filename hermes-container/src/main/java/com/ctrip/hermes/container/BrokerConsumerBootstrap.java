@@ -29,7 +29,9 @@ import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 
-public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnabled, ConsumerBootstrap, Initializable {
+public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabled, ConsumerBootstrap, Initializable {
+
+	public static final String ID = "broker";
 
 	@Inject
 	private ValveRegistry m_valveRegistry;
@@ -96,7 +98,7 @@ public class DefaultConsumerBootstrap extends ContainerHolder implements LogEnab
 			m_pipeline.put(new Pair<>(sink, ctx));
 		} else {
 			// TODO
-			System.out.println(String.format("Correlationid %s not found", correlationId));
+			m_logger.error(String.format("Correlationid %s not found", correlationId));
 		}
 	}
 

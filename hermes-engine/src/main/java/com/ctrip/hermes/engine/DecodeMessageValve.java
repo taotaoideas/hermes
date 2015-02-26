@@ -1,4 +1,4 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.engine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.List;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.consumer.Message;
-import com.ctrip.hermes.engine.MessageContext;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;

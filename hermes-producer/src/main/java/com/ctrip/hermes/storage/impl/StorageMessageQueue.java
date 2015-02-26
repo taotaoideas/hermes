@@ -59,7 +59,6 @@ public class StorageMessageQueue implements MessageQueue {
 				List<Message> resendMsgs = m_msgPair.readMain(r);
 
 				for (Message msg : resendMsgs) {
-					System.out.println("resend offset " + resend.getOffset());
 					msg.setAckOffset(resend.getOffset());
 				}
 
@@ -84,7 +83,11 @@ public class StorageMessageQueue implements MessageQueue {
 	@Override
 	public void ack(List<OffsetRecord> records) throws StorageException {
 		for (OffsetRecord rec : records) {
-			m_id2Pair.get(rec.getToUpdate().getId()).ack(rec);
+			StoragePair<?> pair = m_id2Pair.get(rec.getToUpdate().getId());
+			if (pair == null) {
+				throw new RuntimeException(rec.getToUpdate().getId() + " not found in " + m_id2Pair);
+			}
+			pair.ack(rec);
 		}
 	}
 

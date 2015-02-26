@@ -1,4 +1,4 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.example;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,28 +9,36 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
+import com.ctrip.hermes.engine.LocalConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.producer.Producer;
 
-public class IntegrationTest extends ComponentTestCase {
+public class OneBoxTest extends ComponentTestCase {
+
+	@BeforeClass
+	public static void beforeClass() {
+		System.setProperty("devMode", "true");
+	}
 
 	@Test
 	public void test() throws Exception {
 		String topic = "order.new";
-		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
+		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, LocalConsumerBootstrap.ID);
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
 		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
 		subscribers.put("group2", Arrays.asList("2-a", "2-b"));
 
-		Map<String, Integer> nacks = new ConcurrentHashMap<String, Integer>();
 		for (Map.Entry<String, List<String>> entry : subscribers.entrySet()) {
+			Map<String, Integer> nacks = new ConcurrentHashMap<String, Integer>();
 			String groupId = entry.getKey();
 			for (String id : entry.getValue()) {
 				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id));

@@ -20,7 +20,7 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 	public static final String ID = "sonsume-request";
 
 	@Inject
-	private ConsumerBootstrap m_consumerManager;
+	private ConsumerBootstrap m_bootstrap;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -37,7 +37,7 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 		}.getType());
 		MessageContext msgCtx = new MessageContext(topic, msgs);
 
-		m_consumerManager.deliverMessage(cmd.getCorrelationId(), msgCtx);
+		m_bootstrap.deliverMessage(cmd.getCorrelationId(), msgCtx);
 	}
 
 }

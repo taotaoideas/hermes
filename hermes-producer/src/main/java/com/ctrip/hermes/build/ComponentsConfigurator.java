@@ -79,7 +79,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(CodecManager.class, DefaultCodecManager.class));
 
 		// sinks
-		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class));
+		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
+		      .req(MessageChannelManager.class, LocalMessageChannelManager.ID));
 		all.add(C(PipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
 		      .req(ClientManager.class));
 		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
@@ -106,7 +107,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
 
 		// channel
-		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.class) //
+		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.ID, LocalMessageChannelManager.class) //
 		      .req(MessageQueueManager.class));
 		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.class) //
 		      .req(MetaService.class));

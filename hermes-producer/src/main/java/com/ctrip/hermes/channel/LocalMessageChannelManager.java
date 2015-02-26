@@ -19,6 +19,8 @@ import com.ctrip.hermes.storage.util.CollectionUtil;
 
 public class LocalMessageChannelManager implements MessageChannelManager, LogEnabled {
 
+	public static final String ID = "local";
+
 	@Inject
 	private MessageQueueManager m_queueManager;
 
@@ -45,7 +47,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 					List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
 
 					if (curHandlers == null) {
-						curHandlers = startQueuePuller(m_q);
+						curHandlers = startQueuePuller(m_q, groupId);
 						m_handlers.put(pair, curHandlers);
 					}
 					curHandlers.add(handler);
@@ -55,13 +57,14 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 			@Override
 			public void ack(List<OffsetRecord> recs) {
 				m_logger.info("ACK..." + recs);
+
 				m_q.ack(recs);
 			}
 		};
 
 	}
 
-	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q) {
+	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q, final String groupId) {
 		// TODO
 		final List<ConsumerChannelHandler> handlers = Collections
 		      .synchronizedList(new ArrayList<ConsumerChannelHandler>());
