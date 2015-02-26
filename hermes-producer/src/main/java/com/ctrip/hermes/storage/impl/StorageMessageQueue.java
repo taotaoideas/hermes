@@ -1,8 +1,11 @@
 package com.ctrip.hermes.storage.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Message;
@@ -22,6 +25,8 @@ public class StorageMessageQueue implements MessageQueue {
 	private StoragePair<Resend> m_resendPair;
 
 	private Map<String, StoragePair<?>> m_id2Pair = new HashMap<String, StoragePair<?>>();
+
+	private BlockingQueue<Resend> m_resendCache = new LinkedBlockingQueue<Resend>();
 
 	public StorageMessageQueue(StoragePair<Message> main, StoragePair<Resend> resend) {
 		m_msgPair = main;
@@ -48,26 +53,44 @@ public class StorageMessageQueue implements MessageQueue {
 		remain -= result.size();
 
 		if (remain > 0) {
-			List<Resend> resends = m_resendPair.readMain(remain);
+			List<Resend> resends = new ArrayList<Resend>();
+
+			while (remain > 0) {
+				Resend cr = m_resendCache.poll();
+				if (cr != null) {
+					resends.add(cr);
+					remain--;
+				} else {
+					break;
+				}
+			}
+
+			if (remain > 0) {
+				resends.addAll(m_resendPair.readMain(remain));
+			}
 
 			for (Resend resend : resends) {
 				if (remain <= 0) {
 					break;
 				}
 
-				Range r = resend.getRange();
-				List<Message> resendMsgs = m_msgPair.readMain(r);
+				if (resend.getDue() <= System.currentTimeMillis()) {
 
-				for (Message msg : resendMsgs) {
-					System.out.println("resend offset " + resend.getOffset());
-					msg.setAckOffset(resend.getOffset());
+					Range r = resend.getRange();
+					List<Message> resendMsgs = m_msgPair.readMain(r);
+
+					for (Message msg : resendMsgs) {
+						msg.setAckOffset(resend.getOffset());
+					}
+
+					m_resendPair.waitForAck(resendMsgs, resend.getOffset());
+
+					result.addAll(resendMsgs);
+					// TODO maybe more than batch size
+					remain -= resendMsgs.size();
+				} else {
+					m_resendCache.offer(resend);
 				}
-
-				m_resendPair.waitForAck(resendMsgs, resend.getOffset());
-
-				result.addAll(resendMsgs);
-				// TODO maybe more than batch size
-				remain -= resendMsgs.size();
 			}
 		}
 
@@ -84,7 +107,11 @@ public class StorageMessageQueue implements MessageQueue {
 	@Override
 	public void ack(List<OffsetRecord> records) throws StorageException {
 		for (OffsetRecord rec : records) {
-			m_id2Pair.get(rec.getToUpdate().getId()).ack(rec);
+			StoragePair<?> pair = m_id2Pair.get(rec.getToUpdate().getId());
+			if (pair == null) {
+				throw new RuntimeException(rec.getToUpdate().getId() + " not found in " + m_id2Pair);
+			}
+			pair.ack(rec);
 		}
 	}
 
@@ -104,7 +131,8 @@ public class StorageMessageQueue implements MessageQueue {
 			@Override
 			public void onRangeFail(RangeEvent event) throws StorageException {
 				// TODO
-				resendPair.appendMain(new Resend(event.getRecord().getToBeDone(), 100));
+				long due = System.currentTimeMillis() + 1000;
+				resendPair.appendMain(new Resend(event.getRecord().getToBeDone(), due));
 			}
 		});
 
@@ -117,7 +145,8 @@ public class StorageMessageQueue implements MessageQueue {
 			@Override
 			public void onRangeFail(RangeEvent event) throws StorageException {
 				// TODO dead letter
-				resendPair.appendMain(new Resend(event.getRecord().getToBeDone(), 100));
+				long due = System.currentTimeMillis() + 1000;
+				resendPair.appendMain(new Resend(event.getRecord().getToBeDone(), due));
 			}
 		});
 	}

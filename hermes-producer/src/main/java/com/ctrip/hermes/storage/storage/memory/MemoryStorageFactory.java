@@ -5,23 +5,49 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryStorageFactory {
 
-	private Map<String, MemoryStorage<?>> m_storages = new ConcurrentHashMap<String, MemoryStorage<?>>();
+	private Map<String, AbstractMemoryStorage<?>> m_storages = new ConcurrentHashMap<String, AbstractMemoryStorage<?>>();
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <T> MemoryStorage<T> findStorage(String id) {
-		MemoryStorage<?> storage = m_storages.get(id);
+	public MemoryOffsetStorage findOffsetStorage(String id) {
+		return (MemoryOffsetStorage) findStorage(id, "offset");
+	}
+
+	public MemoryResendStorage findResendStorage(String id) {
+		return (MemoryResendStorage) findStorage(id, "resend");
+
+	}
+
+	public MemoryMessageStorage findMessageStorage(String id) {
+		return (MemoryMessageStorage) findStorage(id, "message");
+
+	}
+
+	private AbstractMemoryStorage<?> findStorage(String id, String type) {
+		AbstractMemoryStorage<?> storage = m_storages.get(id);
 
 		if (storage == null) {
 			synchronized (this) {
 				storage = m_storages.get(id);
 				if (storage == null) {
-					storage = new MemoryStorage(id);
+					switch (type) {
+					case "message":
+						storage = new MemoryMessageStorage(id);
+						break;
+					case "resend":
+						storage = new MemoryResendStorage(id);
+						break;
+					case "offset":
+						storage = new MemoryOffsetStorage(id);
+						break;
+
+					default:
+						throw new RuntimeException("Unknown memory storage type");
+					}
 					m_storages.put(id, storage);
 				}
 			}
 		}
 
-		return (MemoryStorage<T>) storage;
+		return storage;
 	}
 
 }

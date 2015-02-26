@@ -8,6 +8,10 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
+import com.ctrip.hermes.channel.LocalMessageChannelManager;
+import com.ctrip.hermes.channel.LocalMessageQueueManager;
+import com.ctrip.hermes.channel.MessageChannelManager;
+import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.ProducerSinkManager;
@@ -75,7 +79,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(CodecManager.class, DefaultCodecManager.class));
 
 		// sinks
-		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class));
+		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
+		      .req(MessageChannelManager.class, LocalMessageChannelManager.ID));
 		all.add(C(PipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
 		      .req(ClientManager.class));
 		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
@@ -100,6 +105,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(CommandRegistry.class));
 		all.add(C(CommandRegistry.class, DefaultCommandRegistry.class));
 		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
+
+		// channel
+		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.ID, LocalMessageChannelManager.class) //
+		      .req(MessageQueueManager.class));
+		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.class) //
+		      .req(MetaService.class));
 
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));

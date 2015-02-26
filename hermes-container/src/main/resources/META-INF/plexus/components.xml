@@ -2,15 +2,16 @@
 	<components>
 		<component>
 			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
-			<implementation>com.ctrip.hermes.container.DefaultConsumerBootstrap</implementation>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.container.BrokerConsumerBootstrap</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.message.ValveRegistry</role>
-					<role-hint>consumer</role-hint>
+					<role-hint>broker-consumer</role-hint>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.message.Pipeline</role>
-					<role-hint>consumer</role-hint>
+					<role-hint>broker-consumer</role-hint>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
@@ -19,27 +20,17 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.ValveRegistry</role>
-			<role-hint>consumer</role-hint>
+			<role-hint>broker-consumer</role-hint>
 			<implementation>com.ctrip.hermes.container.ConsumerValveRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.spi.Valve</role>
-			<role-hint>decode-message</role-hint>
-			<implementation>com.ctrip.hermes.container.DecodeMessageValve</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.message.codec.CodecManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.message.Pipeline</role>
-			<role-hint>consumer</role-hint>
-			<implementation>com.ctrip.hermes.container.ConsumerPipeline</implementation>
+			<role-hint>broker-consumer</role-hint>
+			<implementation>com.ctrip.hermes.engine.ConsumerPipeline</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.message.ValveRegistry</role>
-					<role-hint>consumer</role-hint>
+					<role-hint>broker-consumer</role-hint>
 				</requirement>
 			</requirements>
 		</component>
@@ -50,6 +41,7 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
+					<role-hint>broker</role-hint>
 				</requirement>
 			</requirements>
 		</component>

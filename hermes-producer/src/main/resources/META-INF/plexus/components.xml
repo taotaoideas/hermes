@@ -63,6 +63,12 @@
 			<role>com.ctrip.hermes.message.PipelineSink</role>
 			<role-hint>memory</role-hint>
 			<implementation>com.ctrip.hermes.message.internal.MemoryMessageSink</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+					<role-hint>local</role-hint>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.PipelineSink</role>
@@ -158,6 +164,25 @@
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandCodec</role>
 			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandCodec</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+			<role-hint>local</role-hint>
+			<implementation>com.ctrip.hermes.channel.LocalMessageChannelManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+			<implementation>com.ctrip.hermes.channel.LocalMessageQueueManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.meta.MetaService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>

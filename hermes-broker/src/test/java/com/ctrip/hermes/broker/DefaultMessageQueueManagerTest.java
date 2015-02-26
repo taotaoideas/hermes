@@ -5,13 +5,15 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.channel.LocalMessageQueueManager;
+import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.storage.MessageQueue;
 
 public class DefaultMessageQueueManagerTest extends ComponentTestCase {
 
 	@Test
 	public void sameQueue() {
-		DefaultMessageQueueManager m = (DefaultMessageQueueManager) lookup(MessageQueueManager.class);
+		LocalMessageQueueManager m = (LocalMessageQueueManager) lookup(MessageQueueManager.class);
 
 		String topic = "order.new";
 		String groupId = "group1";

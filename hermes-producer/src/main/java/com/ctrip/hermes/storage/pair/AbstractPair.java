@@ -21,91 +21,104 @@ import com.google.common.collect.Lists;
 
 public abstract class AbstractPair<T extends Locatable> implements StoragePair<T>, RangeStatusListener {
 
-    protected Storage<T> m_main;
-    protected Storage<Offset> m_offset;
-    private RangeMonitor m_offsetHandler;
+	protected Storage<T> m_main;
 
-    private Browser<T> m_mainBrowser;
+	protected Storage<Offset> m_offset;
 
-    public AbstractPair(Storage<T> main, Storage<Offset> offset) {
-        m_main = main;
-        m_offset = offset;
+	private RangeMonitor m_offsetHandler;
 
-        m_offsetHandler = new DefaultRangeMonitor();
-        m_offsetHandler.addListener(this);
+	private Browser<T> m_mainBrowser;
 
-        Offset lastOffset = m_offset.top();
-        m_mainBrowser = main.createBrowser(lastOffset == null ? Offset.OLDEST : lastOffset.getOffset() + 1);
-    }
+	public AbstractPair(Storage<T> main, Storage<Offset> offset) {
+		m_main = main;
+		m_offset = offset;
 
-    @Override
-    public List<T> readMain(int batchSize) throws StorageException {
-        List<T> entities = Collections.emptyList();
-        try {
-            entities = m_mainBrowser.read(batchSize);
-        } catch (Exception e) {
-            throw new StorageException("", e);
-        }
+		m_offsetHandler = new DefaultRangeMonitor();
+		m_offsetHandler.addListener(this);
 
-        return entities;
-    }
+		long startingOffset = Offset.OLDEST;
 
-    @Override
-    public List<T> readMain(Range r) throws StorageException {
-        return m_main.read(r);
-    }
+		Offset lastOffset = m_offset.top();
+		if (lastOffset != null) {
+			startingOffset = lastOffset.getOffset() + 1;
+		} else {
+			T mainTop = m_main.top();
+			if (mainTop != null) {
+				startingOffset = mainTop.getOffset().getOffset() + 1;
+			}
+		}
 
-    @Override
-    public void appendMain(List<T> payloads) throws StorageException {
-        m_main.append(payloads);
-    }
+		m_mainBrowser = main.createBrowser(startingOffset);
+	}
 
-    @Override
-    public void ack(OffsetRecord record) throws StorageException {
-        m_offsetHandler.offsetDone(record);
-    }
+	@Override
+	public List<T> readMain(int batchSize) throws StorageException {
+		List<T> entities = Collections.emptyList();
+		try {
+			entities = m_mainBrowser.read(batchSize);
+		} catch (Exception e) {
+			throw new StorageException("", e);
+		}
 
-    @Override
-    public List<String> getStorageIds() {
-        return Arrays.asList(m_main.getId(), m_offset.getId());
-    }
+		return entities;
+	}
 
-    @Override
-    public void addRangeStatusListener(RangeStatusListener listener) {
-        m_offsetHandler.addListener(listener);
-    }
+	@Override
+	public List<T> readMain(Range r) throws StorageException {
+		return m_main.read(r);
+	}
 
-    @Override
-    public void appendMain(T payload) throws StorageException {
-        m_main.append(Arrays.asList(payload));
-    }
+	@Override
+	public void appendMain(List<T> payloads) throws StorageException {
+		m_main.append(payloads);
+	}
 
-    @Override
-    public void onRangeSuccess(RangeEvent event) throws StorageException {
-        m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
-    }
+	@Override
+	public void ack(OffsetRecord record) throws StorageException {
+		m_offsetHandler.offsetDone(record);
+	}
 
-    @Override
-    public void onRangeFail(RangeEvent event) throws StorageException {
-        m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
-    }
+	@Override
+	public List<String> getStorageIds() {
+		return Arrays.asList(m_main.getId(), m_offset.getId());
+	}
 
-    @Override
-    public void waitForAck(List<Message> msgs) {
-        for (Message m : msgs) {
-            m_offsetHandler.startNewRange(new OffsetRecord(m.getOffset(), m.getOffset()));
-        }
-    }
+	@Override
+	public void addRangeStatusListener(RangeStatusListener listener) {
+		m_offsetHandler.addListener(listener);
+	}
 
-    @Override
-    public void waitForAck(List<Message> msgs, Offset offset) {
-        m_offsetHandler.startNewRange(new OffsetRecord(Lists.transform(msgs, new Function<Message, Offset>() {
+	@Override
+	public void appendMain(T payload) throws StorageException {
+		m_main.append(Arrays.asList(payload));
+	}
 
-            @Override
-            public Offset apply(Message m) {
-                return m.getOffset();
-            }
-        }), offset));
-    }
+	@Override
+	public void onRangeSuccess(RangeEvent event) throws StorageException {
+		m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
+	}
+
+	@Override
+	public void onRangeFail(RangeEvent event) throws StorageException {
+		m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
+	}
+
+	@Override
+	public void waitForAck(List<Message> msgs) {
+		for (Message m : msgs) {
+			m_offsetHandler.startNewRange(new OffsetRecord(m.getOffset(), m.getOffset()));
+		}
+	}
+
+	@Override
+	public void waitForAck(List<Message> msgs, Offset offset) {
+		m_offsetHandler.startNewRange(new OffsetRecord(Lists.transform(msgs, new Function<Message, Offset>() {
+
+			@Override
+			public Offset apply(Message m) {
+				return m.getOffset();
+			}
+		}), offset));
+	}
 
 }

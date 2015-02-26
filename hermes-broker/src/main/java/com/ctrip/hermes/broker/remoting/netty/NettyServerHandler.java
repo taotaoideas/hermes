@@ -3,7 +3,7 @@ package com.ctrip.hermes.broker.remoting.netty;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ctrip.hermes.broker.ConsumerChannel;
+import com.ctrip.hermes.channel.ConsumerChannel;
 import com.ctrip.hermes.remoting.netty.AbstractNettyHandler;
 
 public class NettyServerHandler extends AbstractNettyHandler {

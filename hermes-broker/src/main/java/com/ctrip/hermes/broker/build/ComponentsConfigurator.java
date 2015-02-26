@@ -6,10 +6,6 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
-import com.ctrip.hermes.broker.DefaultMessageChannelManager;
-import com.ctrip.hermes.broker.DefaultMessageQueueManager;
-import com.ctrip.hermes.broker.MessageChannelManager;
-import com.ctrip.hermes.broker.MessageQueueManager;
 import com.ctrip.hermes.broker.remoting.AckRequestProcessor;
 import com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
@@ -17,6 +13,7 @@ import com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
+import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandProcessorManager;
 
@@ -28,10 +25,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(NettyServerConfig.class));
 		all.add(C(NettyServer.class) //
 		      .req(NettyServerConfig.class));
-
-		all.add(C(MessageChannelManager.class, DefaultMessageChannelManager.class) //
-		      .req(MessageQueueManager.class));
-		all.add(C(MessageQueueManager.class, DefaultMessageQueueManager.class));
 
 		all.add(C(NettyServerHandler.class).is(PER_LOOKUP) //
 		      .req(CommandProcessorManager.class));

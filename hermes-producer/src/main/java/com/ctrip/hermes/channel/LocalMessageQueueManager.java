@@ -1,10 +1,13 @@
-package com.ctrip.hermes.broker;
+package com.ctrip.hermes.channel;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Message;
@@ -14,7 +17,10 @@ import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
 
-public class DefaultMessageQueueManager implements MessageQueueManager {
+public class LocalMessageQueueManager implements MessageQueueManager {
+
+	@Inject
+	private MetaService m_meta;
 
 	private Map<Pair<String, String>, StorageMessageQueue> m_queues = new HashMap<Pair<String, String>, StorageMessageQueue>();
 
@@ -22,7 +28,12 @@ public class DefaultMessageQueueManager implements MessageQueueManager {
 
 	@Override
 	public MessageQueue findQueue(String topic, String groupId) {
-		return findMemoryQueue(topic, groupId);
+		if (Storage.MEMORY.equals(m_meta.getStorageType(topic))) {
+			return findMemoryQueue(topic, groupId);
+		} else {
+			// TODO
+			throw new RuntimeException("Unsupported storage type");
+		}
 	}
 
 	@Override
