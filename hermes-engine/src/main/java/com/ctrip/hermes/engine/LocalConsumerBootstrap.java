@@ -67,7 +67,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 						}
 					}
 				});
-				pair.setValue(new MessageContext(topic, smsgs));
+				pair.setValue(new MessageContext(topic, smsgs, s.getMessageClass()));
 
 				m_pipeline.put(pair);
 			}
@@ -75,13 +75,14 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, MessageContext ctx) {
-		// won't get called
+	public void enableLogging(Logger logger) {
+		m_logger = logger;
 	}
 
 	@Override
-	public void enableLogging(Logger logger) {
-		m_logger = logger;
+	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Message> msgs) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

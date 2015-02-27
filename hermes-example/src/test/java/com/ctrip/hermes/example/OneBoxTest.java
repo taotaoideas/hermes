@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
@@ -31,6 +32,9 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
+		lookup(MessageQueueMonitor.class);
+
+
 		String topic = "order.new";
 		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, LocalConsumerBootstrap.ID);
 
@@ -42,7 +46,7 @@ public class OneBoxTest extends ComponentTestCase {
 			String groupId = entry.getKey();
 			Map<String, Integer> nacks = findNacks(groupId);
 			for (String id : entry.getValue()) {
-				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id));
+				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class);
 				System.out.println("Starting consumer " + groupId + ":" + id);
 				b.startConsumer(s);
 			}
@@ -75,7 +79,7 @@ public class OneBoxTest extends ComponentTestCase {
 					String id = parts[2];
 					Map<String, Integer> nacks = findNacks(groupId);
 					System.out.println(String.format("Starting consumer with groupId %s and id %s", groupId, id));
-					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id)));
+					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class));
 				}
 			} else {
 				send(topic, prefix);
@@ -92,9 +96,10 @@ public class OneBoxTest extends ComponentTestCase {
 	}
 
 	private void send(String topic, String prefix) {
-		String msg = prefix + UUID.randomUUID().toString();
+		String uuid = UUID.randomUUID().toString();
+		String msg = prefix + uuid;
 		System.out.println(">>> " + msg);
-		Producer.getInstance().message(topic, msg).send();
+		Producer.getInstance().message(topic, msg).withKey(uuid).send();
 	}
 
 	static class MyConsumer implements Consumer<String> {

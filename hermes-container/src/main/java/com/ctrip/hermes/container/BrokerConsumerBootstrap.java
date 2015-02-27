@@ -44,7 +44,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 
 	private Logger m_logger;
 
-	private Map<Integer, PipelineSink> m_consumerSinks = new ConcurrentHashMap<>();
+	private Map<Integer, SinkContext> m_consumerSinks = new ConcurrentHashMap<>();
 
 	private Map<Integer, AckContext> m_acks = new ConcurrentHashMap<>();
 
@@ -58,7 +58,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 
 		LinkedBlockingQueue<OffsetRecord> ackQueue = new LinkedBlockingQueue<>();
 		m_acks.put(cmd.getCorrelationId(), new AckContext(ackQueue, netty));
-		m_consumerSinks.put(cmd.getCorrelationId(), newConsumerSink(s, ackQueue));
+		m_consumerSinks.put(cmd.getCorrelationId(), new SinkContext(s, newConsumerSink(s, ackQueue)));
 
 		netty.writeCommand(cmd);
 	}
@@ -90,11 +90,14 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, MessageContext ctx) {
+	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Message> msgs) {
 		// TODO make it async
-		PipelineSink sink = m_consumerSinks.get(correlationId);
+		SinkContext sinkCtx = m_consumerSinks.get(correlationId);
+		PipelineSink sink = sinkCtx.getSink();
+		Subscriber s = sinkCtx.getSubscriber();
 
 		if (sink != null) {
+			MessageContext ctx = new MessageContext(s.getTopicPattern(), msgs, s.getMessageClass());
 			m_pipeline.put(new Pair<>(sink, ctx));
 		} else {
 			// TODO
@@ -127,6 +130,27 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 			}
 
 		}.start();
+
+	}
+
+	private static class SinkContext {
+
+		private Subscriber m_subscriber;
+
+		private PipelineSink m_sink;
+
+		public SinkContext(Subscriber subscriber, PipelineSink sink) {
+			m_subscriber = subscriber;
+			m_sink = sink;
+		}
+
+		public Subscriber getSubscriber() {
+			return m_subscriber;
+		}
+
+		public PipelineSink getSink() {
+			return m_sink;
+		}
 
 	}
 

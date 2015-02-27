@@ -84,6 +84,11 @@ public abstract class AbstractMemoryStorage<T> implements Storage<T> {
 			m_nextReadIdx = offset;
 		}
 
+		@Override
+      public long currentOffset() {
+	      return m_nextReadIdx;
+      }
+
 	}
 
 	private void attachOffset(T c, int i) {

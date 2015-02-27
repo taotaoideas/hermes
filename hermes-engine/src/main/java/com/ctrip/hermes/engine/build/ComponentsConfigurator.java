@@ -11,6 +11,7 @@ import com.ctrip.hermes.HermesProducerModule;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerPipeline;
+import com.ctrip.hermes.engine.ConsumerTracingValve;
 import com.ctrip.hermes.engine.DecodeMessageValve;
 import com.ctrip.hermes.engine.LocalConsumerBootstrap;
 import com.ctrip.hermes.engine.LocalConsumerValveRegistry;
@@ -32,6 +33,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(ValveRegistry.class, LOCAL_CONSUMER, LocalConsumerValveRegistry.class));
 		all.add(C(Valve.class, DecodeMessageValve.ID, DecodeMessageValve.class) //
 		      .req(CodecManager.class));
+		all.add(C(Valve.class, ConsumerTracingValve.ID, ConsumerTracingValve.class));
 
 		all.add(C(Pipeline.class, LOCAL_CONSUMER, ConsumerPipeline.class) //
 		      .req(ValveRegistry.class, LOCAL_CONSUMER));

@@ -7,4 +7,6 @@ public interface Browser<T> {
 	List<T> read(int batchSize) throws Exception;
 
 	void seek(long offset);
+
+	long currentOffset();
 }

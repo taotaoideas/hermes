@@ -21,6 +21,7 @@ import com.ctrip.hermes.storage.util.CollectionUtil;
 public class MysqlMessageStorage implements MessageStorage {
 
 	private Connection m_conn;
+
 	private String m_id;
 
 	public MysqlMessageStorage(Connection conn, String id) {
@@ -37,9 +38,8 @@ public class MysqlMessageStorage implements MessageStorage {
 	}
 
 	private void doAppend(List<Message> msgs) throws IOException, SQLException {
-		PreparedStatement stmt = m_conn.prepareStatement(
-				"insert into msg (c) values (?)",
-				Statement.RETURN_GENERATED_KEYS);
+		PreparedStatement stmt = m_conn.prepareStatement("insert into msg (c) values (?)",
+		      Statement.RETURN_GENERATED_KEYS);
 		for (Message m : msgs) {
 			stmt.setBlob(1, new ByteArrayInputStream(m.getContent()));
 			stmt.addBatch();
@@ -78,7 +78,7 @@ public class MysqlMessageStorage implements MessageStorage {
 			@Override
 			public List<Message> read(int batchSize) throws Exception {
 				PreparedStatement stmt = m_conn
-						.prepareStatement("select id,c from msg where id >= ? order by id asc limit ?");
+				      .prepareStatement("select id,c from msg where id >= ? order by id asc limit ?");
 				stmt.setLong(1, m_offset);
 				stmt.setInt(2, batchSize);
 
@@ -91,8 +91,7 @@ public class MysqlMessageStorage implements MessageStorage {
 
 			private void updateOffset(List<Message> msgs) {
 				if (CollectionUtil.notEmpty(msgs)) {
-					m_offset = msgs.get(msgs.size() - 1).getOffset()
-							.getOffset() + 1;
+					m_offset = msgs.get(msgs.size() - 1).getOffset().getOffset() + 1;
 				}
 			}
 
@@ -100,13 +99,17 @@ public class MysqlMessageStorage implements MessageStorage {
 			public void seek(long offset) {
 
 			}
+
+			@Override
+			public long currentOffset() {
+				return offset;
+			}
 		};
 	}
 
 	public List<Message> read(Range range) throws StorageException {
 		String sqlTpl = "select id,c from msg where id  >= ? and id <= ?";
-		String sql = String.format(sqlTpl, range.startOffset().getOffset(),
-				range.endOffset().getOffset());
+		String sql = String.format(sqlTpl, range.startOffset().getOffset(), range.endOffset().getOffset());
 
 		try {
 			ResultSet rs = m_conn.createStatement().executeQuery(sql);

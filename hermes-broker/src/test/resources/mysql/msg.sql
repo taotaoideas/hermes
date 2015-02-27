@@ -28,21 +28,11 @@ CREATE TABLE IF NOT EXISTS `msg_low_${topic}` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='Topic: TestTopic\r\nPriority: log.';
 
-CREATE TABLE IF NOT EXISTS `msg_middle_${topic}` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `body` blob NOT NULL,
-  `source_ip` int(11) NOT NULL,
-  `token` int(11) NOT NULL,
-  `ref_key` varchar(50) DEFAULT NULL,
-  `properties` blob,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Topic: ${topic}\r\nPriority: middle.';
-
 CREATE TABLE IF NOT EXISTS `msg_offset_${topic}` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `group_id` varchar(50) NOT NULL,
   `offset` int(11) NOT NULL COMMENT 'refer to msg_p_[topic]_[priority]:id',
-  `priority` enum('low','midddle','high') NOT NULL,
+  `priority` TINYINT(4) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `group_id` (`group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='consume offset.';
@@ -64,19 +54,11 @@ CREATE TABLE IF NOT EXISTS `resend_low_${topic}` (
   `timestamp` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='resend middle priority messages.';
 
-CREATE TABLE IF NOT EXISTS `resend_middle_${topic}` (
-  `id` int(11) DEFAULT NULL,
-  `group_id` varchar(50) DEFAULT NULL,
-  `start` int(11) DEFAULT NULL,
-  `end` int(11) DEFAULT NULL,
-  `timestamp` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='resend middle priority messages.';
-
 CREATE TABLE IF NOT EXISTS `resend_offset_${topic}` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `group_id` varchar(50) NOT NULL,
   `offset` int(11) NOT NULL COMMENT 'refer to msg_p_[topic]_[priority]:id',
-  `priority` enum('low','midddle','high') NOT NULL,
+  `priority` TINYINT(4) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `group_id` (`group_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='consume offset.';

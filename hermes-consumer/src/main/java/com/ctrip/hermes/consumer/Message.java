@@ -8,7 +8,9 @@ public class Message<T> {
 
 	private com.ctrip.hermes.storage.message.Message m_storageMsg;
 
-	private boolean success = true;
+	private boolean m_success = true;
+
+	private String m_key;
 
 	public Message(T body, com.ctrip.hermes.storage.message.Message msg) {
 		m_body = body;
@@ -28,11 +30,19 @@ public class Message<T> {
 	}
 
 	public void nack() {
-		success = false;
+		m_success = false;
 	}
 
 	public boolean isSuccess() {
-		return success;
+		return m_success;
+	}
+
+	public String getKey() {
+		return m_key;
+	}
+
+	public void setKey(String key) {
+		m_key = key;
 	}
 
 }
