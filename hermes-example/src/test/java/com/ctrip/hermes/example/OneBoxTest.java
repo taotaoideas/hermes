@@ -34,6 +34,7 @@ public class OneBoxTest extends ComponentTestCase {
 	public void test() throws Exception {
 		lookup(MessageQueueMonitor.class);
 
+
 		String topic = "order.new";
 		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, LocalConsumerBootstrap.ID);
 

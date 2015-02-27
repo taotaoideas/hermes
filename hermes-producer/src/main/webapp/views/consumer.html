@@ -1,0 +1,31 @@
+<div >
+
+
+
+    <div class="consumer" ng-controller="ConsumerCtrl">
+        <h2>Consumer: ID-{{consumer.id}}, Name-{{consumer.name}}</h2>
+
+        <div class="consumer-msg-table">
+            <h3>Consume Status</h3>
+            <table class="table cond">
+                <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>Timestamp</th>
+                    <th>Content</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody ng-repeat="msg in consumer.msgs">
+                <tr>
+                    <td>{{msg.index}}</td>
+                    <td>{{msg.timestamp}}</td>
+                    <td>{{msg.content}}</td>
+                    <td><span class="label label-{{msg.isOK}}">{{msg.status}}</span></td>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>

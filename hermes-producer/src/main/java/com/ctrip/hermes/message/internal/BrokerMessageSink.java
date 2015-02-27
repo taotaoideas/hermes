@@ -35,5 +35,4 @@ public class BrokerMessageSink implements PipelineSink {
 
 		client.writeCommand(cmd);
 	}
-
 }
