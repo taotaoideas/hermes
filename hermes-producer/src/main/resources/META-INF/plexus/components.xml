@@ -199,5 +199,14 @@
 			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.channel.MessageQueueMonitor</role>
+			<implementation>com.ctrip.hermes.channel.MessageQueueMonitor</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+				</requirement>
+			</requirements>
+		</component>
 	</components>
 </plexus>

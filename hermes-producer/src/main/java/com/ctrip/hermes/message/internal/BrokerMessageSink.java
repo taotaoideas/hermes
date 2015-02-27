@@ -2,7 +2,9 @@ package com.ctrip.hermes.message.internal;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.remoting.Command;
@@ -23,12 +25,12 @@ public class BrokerMessageSink implements PipelineSink {
 	@Override
 	public void handle(PipelineContext ctx, Object input) {
 		Message<Object> msg = ctx.getSource();
-		byte[] bodyBuf = (byte[]) input;
+		MessagePackage pkg = (MessagePackage) input;
 		String topic = msg.getTopic();
 
 		NettyClientHandler client = m_channelManager.findProducerClient(topic);
 		Command cmd = new Command(CommandType.SendMessageRequest) //
-		      .setBody(bodyBuf) //
+		      .setBody(JSON.toJSONBytes(pkg)) //
 		      .addHeader("topic", topic);
 
 		client.writeCommand(cmd);

@@ -121,4 +121,16 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
 		}), offset));
 	}
 
+	public Storage<T> getMain() {
+		return m_main;
+	}
+
+	public Storage<Offset> getOffset() {
+		return m_offset;
+	}
+
+	public Browser<T> getMainBrowser() {
+		return m_mainBrowser;
+	}
+
 }
