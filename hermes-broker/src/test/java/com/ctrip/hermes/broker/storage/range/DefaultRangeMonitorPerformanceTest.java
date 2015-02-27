@@ -70,7 +70,8 @@ public class DefaultRangeMonitorPerformanceTest {
 
         for (OffsetRecord record : recordList) {
             Ack ack = new Random().nextInt(2) == 1 ? Ack.SUCCESS : Ack.FAIL;
-            rangeMonitor.offsetDone(record, ack);
+            record.setAck(ack);
+            rangeMonitor.offsetDone(record);
         }
 
         Thread.sleep(3000);

@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
-import com.ctrip.hermes.consumer.BackoffException;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
@@ -89,10 +88,10 @@ public class ProduceAndConsume extends ComponentTestCase {
 
                 Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
                     @Override
-                    public void consume(List<Message<String>> msgs) throws BackoffException {
+                    public void consume(List<Message<String>> msgs){
                         receiveCount.addAndGet(1);
                     }
-                });
+                }, String.class);
 
                 b.startConsumer(s);
             }
