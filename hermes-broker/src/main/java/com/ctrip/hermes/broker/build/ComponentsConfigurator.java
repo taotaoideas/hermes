@@ -37,9 +37,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MessageChannelManager.class));
 		all.add(C(CommandProcessor.class, AckRequestProcessor.ID, AckRequestProcessor.class));
 
-		// rangeMonitor
-//		all.add(C(RangeMonitor.class, MyDefaultRangeMonitor.class));
-
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());
 
