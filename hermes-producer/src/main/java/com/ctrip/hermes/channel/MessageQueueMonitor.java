@@ -1,5 +1,8 @@
 package com.ctrip.hermes.channel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +17,7 @@ import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.AbstractPair;
 import com.ctrip.hermes.storage.pair.ClusteredPair;
 import com.ctrip.hermes.storage.pair.StoragePair;
+import com.ctrip.hermes.storage.spi.Storage;
 import com.ctrip.hermes.storage.storage.Locatable;
 
 public class MessageQueueMonitor implements Initializable {
@@ -21,20 +25,22 @@ public class MessageQueueMonitor implements Initializable {
 	@Inject
 	private MessageQueueManager m_queueManager;
 
-	public void status() throws Exception {
+	public MessageQueueStatus status() throws Exception {
 		LocalMessageQueueManager m = (LocalMessageQueueManager) m_queueManager;
 		Map<Pair<String, String>, StorageMessageQueue> queues = m.getQueues();
+
+		MessageQueueStatus result = new MessageQueueStatus();
 
 		for (Map.Entry<Pair<String, String>, StorageMessageQueue> entry : queues.entrySet()) {
 			String topic = entry.getKey().getKey();
 			String groupId = entry.getKey().getValue();
+			StorageMessageQueue q = entry.getValue();
 
 			if ("invalid".equals(groupId)) {
-				// ignore producer message queue
-				continue;
+				// producer message queue
+				result.addTopic(topic, readTopMessages(q));
 			}
 
-			StorageMessageQueue q = entry.getValue();
 			StoragePair<Message> msgPair = q.getMsgPair();
 			StoragePair<Resend> resendPair = q.getResendPair();
 
@@ -49,19 +55,52 @@ public class MessageQueueMonitor implements Initializable {
 			inspect(msgPair, s1);
 			inspect(resendPair, s2);
 
-			report(s1, s2);
+			result.addConsumerStatus(s1, s2);
 		}
+
+		return result;
 	}
 
-	private void report(ConsumerStatus<Message> s1, ConsumerStatus<Resend> s2) {
-		System.out.println(String.format("=====Topic: %s, GroupId: %s=====", s1.getTopic(), s1.getGroupId()));
-		System.out.println(String.format("\tMain: Top: %s, Next: %s", s1.getTopOffset(), s1.getNextConsumeOffset()));
-		System.out.println(String.format("\tResend: Top: %s, Next: %s", s2.getTopOffset(), s2.getNextConsumeOffset()));
-		for (Message msg : s1.getNearbyMessages()) {
-			System.out.println(msg.getOffset().getOffset() + ":" + new String(msg.getContent()));
+	@SuppressWarnings("unchecked")
+	private List<Message> readTopMessages(StorageMessageQueue q) throws Exception {
+		ClusteredPair<?> msgPair = (ClusteredPair<?>) q.getMsgPair();
+		List<? extends StoragePair<?>> childPairs = msgPair.getChildPairs();
+
+		List<Message> result = new ArrayList<Message>();
+		for (StoragePair<?> p : childPairs) {
+			Storage<?> main = ((AbstractPair<?>) p).getMain();
+			Message top = (Message) main.top();
+			if (top != null) {
+				result.addAll((Collection<? extends Message>) main.createBrowser(top.getOffset().getOffset() - 10).read(10));
+			}
 		}
-		for (Resend resend : s2.getNearbyMessages()) {
-			System.out.println(resend.getOffset().getOffset() + ":" + resend.getRange());
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void report(MessageQueueStatus status) {
+		for (Map.Entry<String, List<Message>> entry : status.getTopics().entrySet()) {
+			System.out.println(String.format("+++++%s+++++", entry.getKey()));
+			for (Message msg : entry.getValue()) {
+				System.out.println(msg.getOffset().getOffset() + ":" + new String(((Message) msg).getContent()));
+			}
+			System.out.println(String.format("-----%s-----", entry.getKey()));
+			System.out.println();
+		}
+
+		for (Pair<?, ?> pair : status.getConsumers()) {
+			ConsumerStatus<Message> s1 = (ConsumerStatus<Message>) pair.getKey();
+			ConsumerStatus<Message> s2 = (ConsumerStatus<Message>) pair.getValue();
+
+			System.out.println(String.format("=====Topic: %s, GroupId: %s=====", s1.getTopic(), s1.getGroupId()));
+			System.out.println(String.format("\tMain: Top: %s, Next: %s", s1.getTopOffset(), s1.getNextConsumeOffset()));
+			System.out.println(String.format("\tResend: Top: %s, Next: %s", s2.getTopOffset(), s2.getNextConsumeOffset()));
+			for (Locatable msg : s1.getNearbyMessages()) {
+				System.out.println(msg.getOffset().getOffset() + ":" + new String(((Message) msg).getContent()));
+			}
+			for (Locatable resend : s2.getNearbyMessages()) {
+				System.out.println(resend.getOffset().getOffset() + ":" + ((Resend) resend).getRange());
+			}
 		}
 	}
 
@@ -69,6 +108,7 @@ public class MessageQueueMonitor implements Initializable {
 		if (pair instanceof ClusteredPair<?>) {
 			List<? extends StoragePair<?>> childPairs = ((ClusteredPair<?>) pair).getChildPairs();
 			for (StoragePair<?> cp : childPairs) {
+				// only one pair will be recorded
 				inspect(cp, s);
 			}
 		} else if (pair instanceof AbstractPair<?>) {
@@ -91,7 +131,7 @@ public class MessageQueueMonitor implements Initializable {
 			public void run() {
 				while (true) {
 					try {
-						status();
+						report(status());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -101,7 +141,30 @@ public class MessageQueueMonitor implements Initializable {
 					}
 				}
 			}
-		}.start();
+		};
+	}
+
+	public static class MessageQueueStatus {
+		private Map<String /* topic */, List<Message>> m_topics = new HashMap<>();
+
+		private List<Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>> m_consumers = new ArrayList<>();
+
+		public void addTopic(String topic, List<Message> topMessages) {
+			m_topics.put(topic, topMessages);
+		}
+
+		public void addConsumerStatus(ConsumerStatus<Message> s1, ConsumerStatus<Resend> s2) {
+			m_consumers.add(new Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>(s1, s2));
+		}
+
+		public Map<String, List<Message>> getTopics() {
+			return m_topics;
+		}
+
+		public List<Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>> getConsumers() {
+			return m_consumers;
+		}
+
 	}
 
 	public static class ConsumerStatus<T> {
@@ -113,7 +176,7 @@ public class MessageQueueMonitor implements Initializable {
 
 		private long m_nextConsumeOffset;
 
-		private List<T> m_nearbyMessages;
+		private List<Locatable> m_nearbyMessages;
 
 		public String getTopic() {
 			return m_topic;
@@ -147,13 +210,13 @@ public class MessageQueueMonitor implements Initializable {
 			m_nextConsumeOffset = nextConsumeOffset;
 		}
 
-		public List<T> getNearbyMessages() {
+		public List<? extends Locatable> getNearbyMessages() {
 			return m_nearbyMessages;
 		}
 
 		@SuppressWarnings("unchecked")
 		public void setNearbyMessages(List<?> nearbyMessages) {
-			m_nearbyMessages = (List<T>) nearbyMessages;
+			m_nearbyMessages = (List<Locatable>) nearbyMessages;
 		}
 
 	}
