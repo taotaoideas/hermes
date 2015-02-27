@@ -11,6 +11,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.message.Resend;
@@ -27,14 +28,13 @@ public class MessageQueueMonitor implements Initializable {
 
 	public MessageQueueStatus status() throws Exception {
 		LocalMessageQueueManager m = (LocalMessageQueueManager) m_queueManager;
-		Map<Pair<String, String>, StorageMessageQueue> queues = m.getQueues();
+		Map<Pair<String, String>, MessageQueue> queues = m.getQueues();
 
 		MessageQueueStatus result = new MessageQueueStatus();
-
-		for (Map.Entry<Pair<String, String>, StorageMessageQueue> entry : queues.entrySet()) {
+		for (Map.Entry<Pair<String, String>, MessageQueue> entry : queues.entrySet()) {
 			String topic = entry.getKey().getKey();
 			String groupId = entry.getKey().getValue();
-			StorageMessageQueue q = entry.getValue();
+			StorageMessageQueue q = (StorageMessageQueue) entry.getValue();
 
 			if ("invalid".equals(groupId)) {
 				// producer message queue
@@ -43,7 +43,7 @@ public class MessageQueueMonitor implements Initializable {
 
 			StoragePair<Message> msgPair = q.getMsgPair();
 			StoragePair<Resend> resendPair = q.getResendPair();
-
+			
 			ConsumerStatus<Message> s1 = new ConsumerStatus<>();
 			s1.setGroupId(groupId);
 			s1.setTopic(topic);
@@ -54,7 +54,7 @@ public class MessageQueueMonitor implements Initializable {
 
 			inspect(msgPair, s1);
 			inspect(resendPair, s2);
-
+				
 			result.addConsumerStatus(s1, s2);
 		}
 

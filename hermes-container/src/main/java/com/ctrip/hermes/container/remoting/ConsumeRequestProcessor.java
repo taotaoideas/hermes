@@ -16,7 +16,7 @@ import com.ctrip.hermes.storage.message.Message;
 
 public class ConsumeRequestProcessor implements CommandProcessor {
 
-	public static final String ID = "sonsume-request";
+	public static final String ID = "consume-request";
 
 	@Inject
 	private ConsumerBootstrap m_bootstrap;

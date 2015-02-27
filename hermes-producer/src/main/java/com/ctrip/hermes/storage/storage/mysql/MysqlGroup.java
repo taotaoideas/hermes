@@ -25,7 +25,7 @@ public class MysqlGroup {
         }
     }
 
-    public ClusteredMessagePair createMessagePairs() {
+    public ClusteredMessagePair createMessagePair() {
         MysqlMessageStorage main = new MysqlMessageStorage(m_conn, "msg");
 
         String offsetTable = "msg_offset_" + m_uid;

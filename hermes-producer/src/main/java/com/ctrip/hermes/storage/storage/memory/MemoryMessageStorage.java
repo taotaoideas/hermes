@@ -3,8 +3,9 @@ package com.ctrip.hermes.storage.storage.memory;
 import java.util.Map;
 
 import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.spi.typed.MessageStorage;
 
-public class MemoryMessageStorage extends AbstractMemoryStorage<Message> {
+public class MemoryMessageStorage extends AbstractMemoryStorage<Message> implements MessageStorage{
 
 	public MemoryMessageStorage(String id) {
 		super(id);

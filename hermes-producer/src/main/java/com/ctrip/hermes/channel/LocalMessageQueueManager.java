@@ -13,23 +13,33 @@ import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.StoragePair;
+import com.ctrip.hermes.storage.storage.kafka.KafkaGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
+import com.ctrip.hermes.storage.storage.mysql.MysqlGroup;
 
 public class LocalMessageQueueManager implements MessageQueueManager {
 
 	@Inject
 	private MetaService m_meta;
 
-	private Map<Pair<String, String>, StorageMessageQueue> m_queues = new HashMap<Pair<String, String>, StorageMessageQueue>();
+	private Map<Pair<String, String>, MessageQueue> m_queues = new HashMap<Pair<String, String>, MessageQueue>();
 
 	private MemoryStorageFactory storageFactory = new MemoryStorageFactory();
 
 	@Override
 	public MessageQueue findQueue(String topic, String groupId) {
-		if (Storage.MEMORY.equals(m_meta.getStorage(topic).getType())) {
+		Storage storage = m_meta.getStorage(topic);
+		if (storage == null) {
+			throw new RuntimeException("Undefined topic: " + topic);
+		}
+		if (Storage.MEMORY.equals(storage.getType())) {
 			return findMemoryQueue(topic, groupId);
+		} else if (Storage.KAFKA.equals(storage.getType())) {
+			return findKafkaQueue(topic, groupId);
+		} else if (Storage.MYSQL.equals(storage.getType())) {
+			return findMySQLQueue(topic, groupId);
 		} else {
 			// TODO
 			throw new RuntimeException("Unsupported storage type");
@@ -44,7 +54,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 	private synchronized MessageQueue findMemoryQueue(String topic, String groupId) {
 		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
 
-		StorageMessageQueue q = m_queues.get(pair);
+		MessageQueue q = m_queues.get(pair);
 
 		if (q == null) {
 			MemoryGroupConfig gc = new MemoryGroupConfig();
@@ -63,7 +73,43 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 	}
 
-	public Map<Pair<String, String>, StorageMessageQueue> getQueues() {
+	private synchronized MessageQueue findKafkaQueue(String topic, String groupId) {
+		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
+
+		MessageQueue q = m_queues.get(pair);
+
+		if (q == null) {
+			KafkaGroup kg = new KafkaGroup(topic, groupId);
+			
+			StoragePair<Message> main = kg.createMessagePair();
+			StoragePair<Resend> resend = kg.createResendPair();
+			q = new StorageMessageQueue(main, resend);
+			
+			m_queues.put(pair, q);
+		}
+
+		return q;
+	}
+	
+	private synchronized MessageQueue findMySQLQueue(String topic, String groupId) {
+		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
+
+		MessageQueue q = m_queues.get(pair);
+
+		if (q == null) {
+			MysqlGroup mg = new MysqlGroup(groupId);
+			
+			StoragePair<Message> main = mg.createMessagePair();
+			StoragePair<Resend> resend = mg.createResendPair();
+			q = new StorageMessageQueue(main, resend);
+
+			m_queues.put(pair, q);
+		}
+
+		return q;
+	}
+	
+	public Map<Pair<String, String>, MessageQueue> getQueues() {
 		return m_queues;
 	}
 
