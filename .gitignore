@@ -8,3 +8,4 @@
 /*.bat
 !.travis.yml
 *.iml
+.idea

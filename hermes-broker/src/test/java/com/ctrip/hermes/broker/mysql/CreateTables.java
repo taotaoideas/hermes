@@ -25,7 +25,6 @@ public class CreateTables {
 
     private String m_path = "/data/appdatas/paas";
 
-    private String m_datasourcePath = m_path + File.separator + "datasources.xml";
 
     @Test
     public void setupMysql() throws Exception {
