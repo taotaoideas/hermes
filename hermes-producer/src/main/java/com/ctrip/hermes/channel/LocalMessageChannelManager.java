@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker;
+package com.ctrip.hermes.channel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,11 +12,14 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.storage.impl.StorageMessageQueue;
+import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 
-public class DefaultMessageChannelManager implements MessageChannelManager, LogEnabled {
+public class LocalMessageChannelManager implements MessageChannelManager, LogEnabled {
+
+	public static final String ID = "local";
 
 	@Inject
 	private MessageQueueManager m_queueManager;
@@ -29,6 +32,9 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId) {
 
 		return new ConsumerChannel() {
+
+			private MessageQueue m_q = m_queueManager.findQueue(topic, groupId);
+
 			@Override
 			public void close() {
 				// TODO remove handler
@@ -36,12 +42,12 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 
 			@Override
 			public void start(ConsumerChannelHandler handler) {
-				synchronized (DefaultMessageChannelManager.this) {
+				synchronized (LocalMessageChannelManager.this) {
 					Pair<String, String> pair = new Pair<>(topic, groupId);
 					List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
 
 					if (curHandlers == null) {
-						curHandlers = startQueuePuller(topic, groupId);
+						curHandlers = startQueuePuller(m_q, groupId);
 						m_handlers.put(pair, curHandlers);
 					}
 					curHandlers.add(handler);
@@ -49,20 +55,20 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 			}
 
 			@Override
-         public void ack() {
-	         // TODO Auto-generated method stub
-	         
-         }
+			public void ack(List<OffsetRecord> recs) {
+				m_logger.info("ACK..." + recs);
+
+				m_q.ack(recs);
+			}
 		};
 
 	}
 
-	private List<ConsumerChannelHandler> startQueuePuller(String topic, String groupId) {
+	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q, final String groupId) {
 		// TODO
 		final List<ConsumerChannelHandler> handlers = Collections
 		      .synchronizedList(new ArrayList<ConsumerChannelHandler>());
 
-		final StorageMessageQueue q = m_queueManager.findQueue(topic, groupId);
 		new Thread() {
 
 			private int m_idx = 0;
@@ -116,7 +122,7 @@ public class DefaultMessageChannelManager implements MessageChannelManager, LogE
 
 	@Override
 	public ProducerChannel newProducerChannel(String topic) {
-		final StorageMessageQueue q = m_queueManager.findQueue(topic);
+		final MessageQueue q = m_queueManager.findQueue(topic);
 
 		// TODO
 		return new ProducerChannel() {

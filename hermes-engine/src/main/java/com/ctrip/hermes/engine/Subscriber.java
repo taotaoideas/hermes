@@ -11,10 +11,13 @@ public class Subscriber {
 
 	private Consumer m_consumer;
 
-	public Subscriber(String m_topicPattern, String m_groupId, Consumer m_consumer) {
-		this.m_topicPattern = m_topicPattern;
-		this.m_groupId = m_groupId;
-		this.m_consumer = m_consumer;
+	private Class<?> m_messageClass;
+
+	public Subscriber(String topicPattern, String groupId, Consumer consumer, Class<?> messageClass) {
+		m_topicPattern = topicPattern;
+		m_groupId = groupId;
+		m_consumer = consumer;
+		m_messageClass = messageClass;
 	}
 
 	public String getGroupId() {
@@ -27,6 +30,10 @@ public class Subscriber {
 
 	public Consumer getConsumer() {
 		return m_consumer;
+	}
+
+	public Class<?> getMessageClass() {
+		return m_messageClass;
 	}
 
 }

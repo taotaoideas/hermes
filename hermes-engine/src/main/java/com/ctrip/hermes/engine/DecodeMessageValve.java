@@ -1,12 +1,13 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.engine;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.consumer.Message;
-import com.ctrip.hermes.engine.MessageContext;
+import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
@@ -23,14 +24,18 @@ public class DecodeMessageValve implements Valve {
 	public void handle(PipelineContext ctx, Object payload) {
 		MessageContext msgCtx = (MessageContext) payload;
 		Codec codec = m_codecManager.getCodec(msgCtx.getTopic());
-		List<byte[]> bodyBytes = msgCtx.getMessages();
+		List<com.ctrip.hermes.storage.message.Message> msgs = msgCtx.getMessages();
 
-		List<Object> bodies = new ArrayList<>(bodyBytes.size());
-		for (byte[] buf : bodyBytes) {
+		List<Object> bodies = new ArrayList<>(msgs.size());
+		for (com.ctrip.hermes.storage.message.Message msg : msgs) {
+			MessagePackage pkg = JSON.parseObject(msg.getContent(), MessagePackage.class);
 			// TODO get or bypass class info
-			bodies.add(new Message<Object>(codec.decode(buf, String.class)));
+			Message<Object> cmsg = new Message<Object>(codec.decode(pkg.getMessage(), msgCtx.getMessageClass()), msg);
+			cmsg.setKey(pkg.getKey());
+			bodies.add(cmsg);
 		}
 
+		ctx.put("topic", msgCtx.getTopic());
 		ctx.next(bodies);
 	}
 

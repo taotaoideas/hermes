@@ -9,50 +9,62 @@ import com.ctrip.hermes.storage.util.StringUtil;
 
 public class Message implements Locatable {
 
-    private static final int DEFAULT_PRIORITY = -1;
-    private byte[] m_content;
-    private Map<String, String> m_properties = new HashMap<String, String>();
-    private Offset m_offset;
-    private Offset m_ackOffset;
+	private static final int DEFAULT_PRIORITY = -1;
 
-    public Offset getAckOffset() {
-        return m_ackOffset == null ? m_offset : m_ackOffset;
-    }
+	private byte[] m_content;
 
-    public void setAckOffset(Offset ackOffset) {
-        m_ackOffset = ackOffset;
-    }
+	private Map<String, String> m_properties = new HashMap<String, String>();
 
-    public Offset getOffset() {
-        return m_offset;
-    }
+	private Offset m_offset;
 
-    public void setOffset(Offset offset) {
-        m_offset = offset;
-    }
+	private Offset m_ackOffset;
 
-    public byte[] getContent() {
-        return m_content;
-    }
+	public Offset getAckOffset() {
+		return m_ackOffset == null ? m_offset : m_ackOffset;
+	}
 
-    public void setContent(byte[] content) {
-        m_content = content;
-    }
+	public void setAckOffset(Offset ackOffset) {
+		m_ackOffset = ackOffset;
+	}
 
-    public void setProperty(String key, String value) {
-        m_properties.put(key, value);
-    }
+	public Offset getOffset() {
+		return m_offset;
+	}
 
-    public String getProperty(String key) {
-        return m_properties.get(key);
-    }
+	public void setOffset(Offset offset) {
+		m_offset = offset;
+	}
 
-    public void setPriority(int priority) {
-        setProperty(MessageConstants.PROP_PRIORITY, Integer.toString(priority));
-    }
+	public byte[] getContent() {
+		return m_content;
+	}
 
-    public int getPriority() {
-        return StringUtil.safeToInt(getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
-    }
+	public void setContent(byte[] content) {
+		m_content = content;
+	}
+
+	public void setProperty(String key, String value) {
+		m_properties.put(key, value);
+	}
+
+	public String getProperty(String key) {
+		return m_properties.get(key);
+	}
+
+	public Map<String, String> getProperties() {
+		return m_properties;
+	}
+
+	public void setProperties(Map<String, String> properties) {
+		m_properties = properties;
+	}
+
+	public void setPriority(int priority) {
+		setProperty(MessageConstants.PROP_PRIORITY, Integer.toString(priority));
+	}
+
+	public int getPriority() {
+		return StringUtil.safeToInt(getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
+	}
 
 }

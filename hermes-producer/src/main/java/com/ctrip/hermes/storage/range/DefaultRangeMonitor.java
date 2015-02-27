@@ -26,10 +26,10 @@ public class DefaultRangeMonitor implements RangeMonitor {
         bitmap.putOffset(record.getToBeDone(), new Date().getTime());
     }
 
-    @Override
-    public void offsetDone(OffsetRecord record, Ack ack) throws StorageException {
-        bitmap.ackOffset(record.getToBeDone(), ack);
-    }
+	@Override
+	public void offsetDone(OffsetRecord record) throws StorageException {
+		bitmap.ackOffset(record.getToBeDone(), record.getAck());
+	}
 
     @Override
     public void addListener(RangeStatusListener listener) {

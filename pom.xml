@@ -15,6 +15,7 @@
 		<module>hermes-container</module>
 		<module>hermes-example</module>
 		<module>hermes-metaserver</module>
+		<module>hermes-example</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

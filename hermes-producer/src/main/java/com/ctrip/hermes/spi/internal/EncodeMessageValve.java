@@ -3,6 +3,7 @@ package com.ctrip.hermes.spi.internal;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
@@ -21,7 +22,8 @@ public class EncodeMessageValve implements Valve {
 		Message<Object> msg = (Message<Object>) payload;
 		Codec codec = m_codecManager.getCodec(msg.getTopic());
 
-		ctx.next(codec.encode(msg.getBody()));
+		// TODO encode all msg properties
+		ctx.next(new MessagePackage(codec.encode(msg.getBody()), msg.getKey()));
 	}
 
 }

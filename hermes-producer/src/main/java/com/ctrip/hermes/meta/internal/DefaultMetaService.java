@@ -39,15 +39,17 @@ public class DefaultMetaService implements Initializable, MetaService {
 	}
 
 	@Override
-	public String getConnectorType(String topic) {
+	public Connector getConnector(String topic) {
 		if (m_meta.isDevMode()) {
-			return Connector.LOCAL;
+			Connector localConnector = new Connector();
+			localConnector.setType(Connector.LOCAL);
+			return localConnector;
 		} else {
 			Connector connector = m_connectors.get(topic);
 			if (connector == null) {
 				throw new RuntimeException(String.format("Connector for topic %s is not found", topic));
 			} else {
-				return connector.getType();
+				return connector;
 			}
 		}
 	}
@@ -98,7 +100,7 @@ public class DefaultMetaService implements Initializable, MetaService {
 	}
 
 	@Override
-	public String getStorageType(String topic) {
+	public Storage getStorage(String topic) {
 		Storage storage = null;
 		if (m_meta.isDevMode()) {
 			storage = m_localStorages.get(topic);
@@ -113,7 +115,7 @@ public class DefaultMetaService implements Initializable, MetaService {
 			throw new RuntimeException(String.format("Storage for topic %s is not found", topic));
 		}
 
-		return storage.getType();
+		return storage;
 	}
 
 }

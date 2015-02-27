@@ -1,9 +1,11 @@
 package com.ctrip.hermes.meta;
 
+import com.ctrip.hermes.meta.entity.Connector;
+import com.ctrip.hermes.meta.entity.Storage;
+
 public interface MetaService {
 
-	String getConnectorType(String topic);
+	Connector getConnector(String topic);
 
-	String getStorageType(String topic);
-
+	Storage getStorage(String topic);
 }

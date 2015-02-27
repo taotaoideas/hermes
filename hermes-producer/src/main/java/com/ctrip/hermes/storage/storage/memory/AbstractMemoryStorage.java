@@ -10,13 +10,13 @@ import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 
-public class MemoryStorage<T> implements Storage<T> {
+public abstract class AbstractMemoryStorage<T> implements Storage<T> {
 
 	private String m_id;
 
 	private List<T> m_contents = new ArrayList<T>();
 
-	public MemoryStorage(String id) {
+	public AbstractMemoryStorage(String id) {
 		m_id = id;
 	}
 
@@ -29,7 +29,6 @@ public class MemoryStorage<T> implements Storage<T> {
 			m_contents.addAll(payloads);
 
 			for (T c : payloads) {
-//				System.out.println("Saving " + c + " to memory storage");
 				if (c instanceof Locatable) {
 					((Locatable) c).setOffset(new Offset(m_id, idx++));
 				}
@@ -40,8 +39,6 @@ public class MemoryStorage<T> implements Storage<T> {
 	}
 
 	public synchronized Browser<T> createBrowser(long offset) {
-		// memory storage will start from zero instead of largest offset plus 1
-		// effectively treat every consumer as 'old' consumer
 		long nextReadIdx = 0;
 
 		if (offset > 0) {
@@ -100,7 +97,7 @@ public class MemoryStorage<T> implements Storage<T> {
 		List<T> result = new ArrayList<T>();
 
 		for (long i = range.startOffset().getOffset(); i <= range.endOffset().getOffset(); i++) {
-			T c = m_contents.get((int) i);
+			T c = clone(m_contents.get((int) i));
 			attachOffset(c, (int) i);
 
 			result.add(c);
@@ -118,5 +115,7 @@ public class MemoryStorage<T> implements Storage<T> {
 	public synchronized T top() {
 		return CollectionUtil.last(m_contents);
 	}
+	
+	protected abstract T clone(T input);
 
 }

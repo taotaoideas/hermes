@@ -49,12 +49,18 @@
 		   <artifactId>mysql-connector-java</artifactId>
 		   <version>5.1.25</version>
 	   </dependency>
+       <!--kafka-->
+	   <dependency>
+		   <groupId>org.apache.kafka</groupId>
+		   <artifactId>kafka_2.10</artifactId>
+		   <version>0.8.2.0</version>
+	   </dependency>
+
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
          <scope>test</scope>
       </dependency>
-
       <dependency>
          <groupId>org.unidal.framework</groupId>
          <artifactId>test-framework</artifactId>

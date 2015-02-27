@@ -8,10 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.broker.ConsumerChannel;
-import com.ctrip.hermes.broker.ConsumerChannelHandler;
-import com.ctrip.hermes.broker.MessageChannelManager;
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
+import com.ctrip.hermes.channel.ConsumerChannel;
+import com.ctrip.hermes.channel.ConsumerChannelHandler;
+import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
@@ -72,7 +73,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	private byte[] encode(List<Message> msgs) {
 		// TODO
-		return msgs.get(0).getContent();
+		return JSON.toJSONBytes(msgs);
 	}
 
 }

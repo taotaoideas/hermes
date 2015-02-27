@@ -24,7 +24,7 @@ public class DefaultScanner implements Scanner {
 			Consumer<?> consumer;
 			try {
 				consumer = (Consumer<?>) clazz.newInstance();
-				subscribers.add(new Subscriber(anno.topicPattern(), anno.groupId(), consumer));
+				subscribers.add(new Subscriber(anno.topicPattern(), anno.groupId(), consumer, anno.messageClass()));
 			} catch (Exception e) {
 				throw new RuntimeException(String.format("Can not create instance of class %s via reflection",
 				      clazz.getName()), e);
