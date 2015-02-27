@@ -25,17 +25,17 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 	public PipelineSink getSink(String topic) {
 		PipelineSink sink = null;
 
-		String connectorType = m_meta.getConnectorType(topic);
-		switch (connectorType) {
+		Connector connector = m_meta.getConnector(topic);
+		switch (connector.getType()) {
 		case Connector.BROKER:
 		case Connector.TRANSACTION:
-			sink = m_sinks.get(connectorType);
+			sink = m_sinks.get(connector.getType());
 			break;
 		case Connector.LOCAL:
-			sink = m_sinks.get(m_meta.getStorageType(topic));
+			sink = m_sinks.get(m_meta.getStorage(topic).getType());
 			break;
 		default:
-			throw new RuntimeException(String.format("Unknown connector type %s of topic %s", connectorType, topic));
+			throw new RuntimeException(String.format("Unknown connector type %s of topic %s", connector.getType(), topic));
 		}
 
 		if (sink == null) {

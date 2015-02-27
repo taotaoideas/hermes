@@ -8,6 +8,7 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
+import com.ctrip.hermes.channel.KafkaMessageChannelManager;
 import com.ctrip.hermes.channel.LocalMessageChannelManager;
 import com.ctrip.hermes.channel.LocalMessageQueueManager;
 import com.ctrip.hermes.channel.MessageChannelManager;
@@ -111,7 +112,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MessageQueueManager.class));
 		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.class) //
 		      .req(MetaService.class));
-
+		all.add(C(MessageChannelManager.class, KafkaMessageChannelManager.ID, KafkaMessageChannelManager.class) //
+				.req(MetaService.class));
+		
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
 
