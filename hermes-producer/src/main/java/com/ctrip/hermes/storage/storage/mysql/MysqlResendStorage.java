@@ -20,6 +20,7 @@ import com.ctrip.hermes.storage.util.CollectionUtil;
 public class MysqlResendStorage implements ResendStorage {
 
 	private String m_table;
+
 	private Connection m_conn;
 
 	public MysqlResendStorage(Connection conn, String table) {
@@ -37,10 +38,8 @@ public class MysqlResendStorage implements ResendStorage {
 	}
 
 	private void doAppend(List<Resend> resends) throws SQLException {
-		String sql = String.format(
-				"insert into %s (start, end, sid) values (?,?,?)", m_table);
-		PreparedStatement stmt = m_conn.prepareStatement(sql,
-				Statement.RETURN_GENERATED_KEYS);
+		String sql = String.format("insert into %s (start, end, sid) values (?,?,?)", m_table);
+		PreparedStatement stmt = m_conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		for (Resend resend : resends) {
 			Range r = resend.getRange();
 			stmt.setLong(1, r.startOffset().getOffset());
@@ -55,8 +54,7 @@ public class MysqlResendStorage implements ResendStorage {
 		ResultSet rs = stmt.getGeneratedKeys();
 		int i = 0;
 		while (rs.next()) {
-			resends.get(i).getRange()
-					.setOffset(new Offset(m_table, rs.getLong(1)));
+			resends.get(i).getRange().setOffset(new Offset(m_table, rs.getLong(1)));
 		}
 	}
 
@@ -87,9 +85,8 @@ public class MysqlResendStorage implements ResendStorage {
 
 			@Override
 			public List<Resend> read(int batchSize) throws Exception {
-				String sql = String
-						.format("select id,start,end,sid,due from %s where id >= ? order by id asc limit ?",
-								m_table);
+				String sql = String.format("select id,start,end,sid,due from %s where id >= ? order by id asc limit ?",
+				      m_table);
 				PreparedStatement stmt = m_conn.prepareStatement(sql);
 				stmt.setLong(1, m_offset);
 				stmt.setInt(2, batchSize);
@@ -103,14 +100,18 @@ public class MysqlResendStorage implements ResendStorage {
 
 			private void updateOffset(List<Resend> resends) {
 				if (CollectionUtil.notEmpty(resends)) {
-					m_offset = CollectionUtil.last(resends).getRange()
-							.getOffset().getOffset() + 1;
+					m_offset = CollectionUtil.last(resends).getRange().getOffset().getOffset() + 1;
 				}
 			}
 
 			@Override
 			public void seek(long offset) {
 
+			}
+
+			@Override
+			public long currentOffset() {
+				return offset;
 			}
 		};
 	}

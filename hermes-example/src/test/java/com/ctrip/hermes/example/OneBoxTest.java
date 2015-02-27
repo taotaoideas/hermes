@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
@@ -31,6 +32,8 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
+		lookup(MessageQueueMonitor.class);
+
 		String topic = "order.new";
 		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, LocalConsumerBootstrap.ID);
 

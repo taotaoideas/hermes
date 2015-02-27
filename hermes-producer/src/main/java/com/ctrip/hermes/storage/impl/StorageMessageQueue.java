@@ -151,4 +151,12 @@ public class StorageMessageQueue implements MessageQueue {
 		});
 	}
 
+	public StoragePair<Message> getMsgPair() {
+		return m_msgPair;
+	}
+
+	public StoragePair<Resend> getResendPair() {
+		return m_resendPair;
+	}
+
 }

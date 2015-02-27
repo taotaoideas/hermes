@@ -63,4 +63,8 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 	}
 
+	public Map<Pair<String, String>, StorageMessageQueue> getQueues() {
+		return m_queues;
+	}
+
 }

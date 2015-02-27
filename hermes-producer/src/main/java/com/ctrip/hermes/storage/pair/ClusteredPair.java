@@ -115,6 +115,10 @@ public abstract class ClusteredPair<T extends Locatable> implements StoragePair<
 		}
 	}
 
+	public List<? extends StoragePair<T>> getChildPairs() {
+		return m_childPairs;
+	}
+
 	protected abstract int findPair(T payloads);
 
 }
