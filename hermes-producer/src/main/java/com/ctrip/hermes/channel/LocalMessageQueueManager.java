@@ -28,7 +28,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 	@Override
 	public MessageQueue findQueue(String topic, String groupId) {
-		if (Storage.MEMORY.equals(m_meta.getStorageType(topic))) {
+		if (Storage.MEMORY.equals(m_meta.getStorage(topic).getType())) {
 			return findMemoryQueue(topic, groupId);
 		} else {
 			// TODO
