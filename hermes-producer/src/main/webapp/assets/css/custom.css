@@ -1,0 +1,38 @@
+.producer {
+    height: 600px;
+    padding: 30px 15px;
+    margin-bottom: 30px;
+    color: inherit;
+    background-color: #eee;
+}
+
+.queue {
+    height: 600px;
+    padding: 30px 15px;
+    margin-bottom: 30px;
+    color: inherit;
+    background-color: #eee;
+}
+
+.consumer {
+    height: 300px;
+    width: 300px;
+    padding: 30px 15px;
+    margin-bottom: 30px;
+    color: inherit;
+    background-color: #eee;
+}
+
+.producer-msg-hisorty-table {
+    height: 400px !important;
+    overflow: auto;
+}
+
+.queue-msg-table {
+    height: 400px !important;
+    overflow: auto;
+}
+.consumer-msg-table {
+    height: 400px !important;
+    overflow: auto;
+}

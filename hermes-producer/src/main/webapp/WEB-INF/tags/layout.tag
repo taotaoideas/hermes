@@ -59,6 +59,6 @@
 	</div>
 	<!--/.fluid-container-->
 
-	<script src="${model.webapp}/js/bootstrap.js" type="text/javascript"></script>
+	<script src="${model.webapp}/assets/js/bootstrap.js" type="text/javascript"></script>
 </body>
 </html>

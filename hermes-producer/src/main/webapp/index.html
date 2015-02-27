@@ -1,10 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="Hermes">
 <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
+    <title>Hermes LocalDev</title>
+    <!-- Bootstrap core CSS -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="assets/css/custom.css" rel="stylesheet">
 </head>
 <body>
-hello, index!
+
+<!--Nav Bar-->
+<nav class="navbar navbar-inverse ">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Hermes LocalDev</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Main</a></li>
+                <li><a href="#about">Help</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</nav>
+
+<div class="container">
+    <!--Producer and Queue-->
+    <div class="row">
+        <div class="col-md-2" ng-controller="DropdownCtrl">
+            <div class="btn-group-vertical" role="group" aria-label="...">
+                <!--AppId DropDown-->
+                <button type="button" class="btn btn-md btn-default" data-animation="am-flip-x"
+                        bs-dropdown="appid_dropdown">
+                    Current AppId: <span class="caret"></span>
+                </button>
+                <!--Topic DropDown-->
+                <button type="button" class="btn btn-md btn-default" data-animation="am-flip-x"
+                        bs-dropdown="topic_dropdown">
+                    Current Topic: <span class="caret"></span>
+                </button>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <!--Producer-->
+            <div class="producer" ng-controller="ProducerCtrl">
+                <h2>Producer: details...</h2>
+                <label>Topic: {Selected Topic}(editable)</label>
+                <label>AppId: {Selected AppId}(editable)</label>
+
+                <input type="text" class="form-control" data-placement="right" data-type="info"
+                           data-container="body" placeholder="Send a Message..."
+                           data-trigger="focus" bs-tooltip="tooltip">
+                <!--Message Sent History-->
+                <div class="producer-msg-hisorty-table">
+                    <h3>Message Send History</h3>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>Timestamp</th>
+                            <th>Content</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody ng-repeat="msg in sent_msgs">
+                        <tr>
+                            <td>{{msg.index}}</td>
+                            <td>{{msg.timestamp}}</td>
+                            <td>{{msg.content}}</td>
+                            <td><span class="label label-{{msg.isOK}}">{{msg.status}}</span></td>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <!--Queue-->
+                <div class="queue" ng-controller="QueueCtrl">
+                    <h2>Queue: details...</h2>
+
+                    <div class="queue-msg-table">
+                        <h3>Message in the Queue</h3>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th>Timestamp</th>
+                                <th>Content</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody ng-repeat="msg in msgs">
+                            <tr>
+                                <td>{{msg.index}}</td>
+                                <td>{{msg.timestamp}}</td>
+                                <td>{{msg.content}}</td>
+                                <td><span class="label label-{{msg.isOK}}">{{msg.status}}</span></td>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+        </div>
+    </div>
+
+    <!--Consumer Groups-->
+    <div ng-controller="ConsumerTabCtrl">
+        <div bs-active-pane="tabs.activeTab" bs-tabs>
+            <div ng-repeat="tab in tabs" title="{{ tab.title }}"  bs-pane>
+                <div ng-repeat="consumer in tab.content">
+                    <div consumer info="consumer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!--Placed at the end of the document so the pages load faster -->
+<script src="assets/js/jquery-2.1.3.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/angular.min.js"></script>
+<script src="assets/js/angular-route.min.js"></script>
+<script src="assets/js/angular-sanitize.min.js"></script>
+<script src="assets/js/angular-animate.min.js"></script>
+<script src="assets/js/angular-strap.min.js"></script>
+<script src="assets/js/angular-strap.tpl.min.js"></script>
+<script src="assets/js/angularjs-strap-helper-dimensions.js"></script>
+
+<!--Custom Scripts-->
+<script src="scripts/mainController.js"></script>
+<script src="scripts/mainService.js"></script>
+<script src="scripts/consumer/consumerController.js"></script>
+<script src="scripts/consumer/consumerService.js"></script>
+<script src="scripts/producer/producerController.js"></script>
+<script src="scripts/producer/producerService.js"></script>
+<script src="scripts/queue/queueController.js"></script>
+<script src="scripts/queue/queueService.js"></script>
+
 </body>
 </html>
