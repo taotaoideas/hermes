@@ -34,6 +34,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 		final String topic = s.getTopicPattern();
 		final ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, s.getGroupId());
 
+		System.out.printf("LocalConsumerBootstrap:startConsumer Topic--"+ topic);
 		cc.start(new ConsumerChannelHandler() {
 
 			@Override
@@ -46,7 +47,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 				Pair<PipelineSink, Object> pair = new Pair<>();
 				pair.setKey(new PipelineSink() {
 
-					@SuppressWarnings({ "rawtypes", "unchecked" })
+					@SuppressWarnings({"rawtypes", "unchecked"})
 					@Override
 					public void handle(PipelineContext ctx, Object payload) {
 						List<Message> msgs = (List<Message>) payload;

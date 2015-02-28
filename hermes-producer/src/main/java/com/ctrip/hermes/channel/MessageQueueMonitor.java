@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
@@ -78,7 +80,7 @@ public class MessageQueueMonitor implements Initializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void report(MessageQueueStatus status) {
+	public void report(MessageQueueStatus status) {
 		for (Map.Entry<String, List<Message>> entry : status.getTopics().entrySet()) {
 			System.out.println(String.format("+++++%s+++++", entry.getKey()));
 			for (Message msg : entry.getValue()) {
@@ -144,6 +146,7 @@ public class MessageQueueMonitor implements Initializable {
 		};
 	}
 
+//	@XmlRootElement
 	public static class MessageQueueStatus {
 		private Map<String /* topic */, List<Message>> m_topics = new HashMap<>();
 

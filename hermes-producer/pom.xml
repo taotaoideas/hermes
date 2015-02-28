@@ -55,8 +55,29 @@
 		   <artifactId>kafka_2.10</artifactId>
 		   <version>0.8.2.0</version>
 	   </dependency>
-      <!--jersey-->
+
+
       <dependency>
+         <groupId>org.glassfish.jersey.containers</groupId>
+         <artifactId>jersey-container-grizzly2-http</artifactId>
+         <version>2.16</version>
+      </dependency>
+      <dependency>
+         <groupId>org.glassfish.jersey.media</groupId>
+         <artifactId>jersey-media-moxy</artifactId>
+         <version>2.16</version>
+      </dependency>
+      <dependency>
+         <groupId>org.glassfish.jersey.containers</groupId>
+         <artifactId>jersey-container-servlet-core</artifactId>
+         <version>2.16</version>
+      </dependency>
+      <dependency>
+         <groupId>com.sun.jersey</groupId>
+         <artifactId>jersey-servlet</artifactId>
+         <version>1.19</version>
+      </dependency>
+       <dependency>
          <groupId>javax.ws.rs</groupId>
          <artifactId>javax.ws.rs-api</artifactId>
          <version>2.0.1</version>
@@ -72,7 +93,17 @@
          <artifactId>jersey-server</artifactId>
          <version>1.19</version>
       </dependency>
-
+      <dependency>
+         <groupId>com.owlike</groupId>
+         <artifactId>genson</artifactId>
+         <version>0.99</version>
+      </dependency>
+<!--      <dependency>
+         <groupId>com.sun.jersey</groupId>
+         <artifactId>jersey-json</artifactId>
+         <version>1.8</version>
+      </dependency>-->
+      <!--jersey END-->
 
       <dependency>
          <groupId>junit</groupId>

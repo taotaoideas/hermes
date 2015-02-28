@@ -208,5 +208,14 @@
 				</requirement>
 			</requirements>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.localDev.LocalDevServer</role>
+			<implementation>com.ctrip.hermes.localDev.LocalDevServer</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.channel.MessageQueueMonitor</role>
+				</requirement>
+			</requirements>
+		</component>
 	</components>
 </plexus>
