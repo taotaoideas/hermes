@@ -63,11 +63,8 @@ public class LocalDevServer extends JettyServer {
         return monitor.status();
     }
 
-
     public void sendMsg(String topic, String msg) {
         String uuid = UUID.randomUUID().toString();
         Producer.getInstance().message(topic, msg).withKey(uuid).send();
     }
-
-
 }

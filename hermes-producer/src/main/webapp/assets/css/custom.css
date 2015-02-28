@@ -14,14 +14,6 @@
     background-color: #eee;
 }
 
-.consumer {
-    height: 300px;
-    width: 300px;
-    padding: 30px 15px;
-    margin-bottom: 30px;
-    color: inherit;
-    background-color: #eee;
-}
 
 .producer-msg-hisorty-table {
     height: 400px !important;
@@ -32,7 +24,20 @@
     height: 400px !important;
     overflow: auto;
 }
+
+.consumer-group {
+    float: left;
+}
+
+.consumer {
+    height: 100%;
+    width: 300px;
+    padding: 30px 15px;
+    margin-bottom: 30px;
+    color: inherit;
+    background-color: #eee;
+}
 .consumer-msg-table {
-    height: 400px !important;
     overflow: auto;
 }
+
