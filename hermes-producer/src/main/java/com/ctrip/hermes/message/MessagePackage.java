@@ -34,5 +34,12 @@ public class MessagePackage {
 	public String getKey() {
 		return (String) m_headers.get(KEY);
 	}
-
+	
+	public void addHeader(String key, Object value) {
+		m_headers.put(key, value);
+	}
+	
+	public Object getHeader(String key) {
+		return m_headers.get(key);
+	}
 }
