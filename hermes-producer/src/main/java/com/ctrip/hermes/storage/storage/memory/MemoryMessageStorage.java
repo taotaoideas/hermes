@@ -19,6 +19,7 @@ public class MemoryMessageStorage extends AbstractMemoryStorage<Message> impleme
 		newMsg.setContent(msg.getContent());
 		newMsg.setOffset(msg.getOffset());
 		newMsg.setPriority(msg.getPriority());
+		newMsg.setPartition(msg.getPartition());
 
 		for (Map.Entry<String, String> entry : newMsg.getProperties().entrySet()) {
 			newMsg.setProperty(entry.getKey(), entry.getValue());

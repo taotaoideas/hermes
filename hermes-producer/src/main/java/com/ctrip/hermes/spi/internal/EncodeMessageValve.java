@@ -23,7 +23,9 @@ public class EncodeMessageValve implements Valve {
 		Codec codec = m_codecManager.getCodec(msg.getTopic());
 
 		// TODO encode all msg properties
-		ctx.next(new MessagePackage(codec.encode(msg.getBody()), msg.getKey()));
+		MessagePackage pkg = new MessagePackage(codec.encode(msg.getBody()), msg.getKey());
+		pkg.addHeader("partition", msg.getPartition());
+		ctx.next(pkg);
 	}
 
 }

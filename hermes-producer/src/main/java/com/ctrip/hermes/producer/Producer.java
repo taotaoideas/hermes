@@ -15,7 +15,7 @@ public abstract class Producer {
 	}
 
 	public interface Holder {
-		public Holder withKey(String string);
+		public Holder withKey(String key);
 
 		public void send();
 

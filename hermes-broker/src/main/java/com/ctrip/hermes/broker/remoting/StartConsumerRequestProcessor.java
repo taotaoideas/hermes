@@ -38,8 +38,9 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 		final Command cmd = ctx.getCommand();
 		String topic = cmd.getHeader("topic");
 		String groupId = cmd.getHeader("groupId");
+		String partition = cmd.getHeader("partition");
 
-		final ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, groupId);
+		final ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, groupId, partition);
 		nettyHandler.addConsumerChannel(cmd.getCorrelationId(), cc);
 
 		final AtomicBoolean m_open = new AtomicBoolean(true);

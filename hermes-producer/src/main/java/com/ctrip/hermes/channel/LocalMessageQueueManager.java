@@ -6,10 +6,12 @@ import java.util.Properties;
 
 import kafka.consumer.ConsumerConfig;
 import kafka.producer.ProducerConfig;
+import kafka.serializer.StringEncoder;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.message.codec.kafka.KafkaEncoder;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
@@ -34,7 +36,10 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 	private MemoryStorageFactory storageFactory = new MemoryStorageFactory();
 
 	@Override
-	public MessageQueue findQueue(String topic, String groupId) {
+	public MessageQueue findQueue(String topic, String groupId, String partition) {
+		if (partition == null) {
+			partition = "invalid";
+		}
 		Storage storage = m_meta.getStorage(topic);
 		if (storage == null) {
 			throw new RuntimeException("Undefined topic: " + topic);
@@ -42,13 +47,18 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 		if (Storage.MEMORY.equals(storage.getType())) {
 			return findMemoryQueue(topic, groupId);
 		} else if (Storage.KAFKA.equals(storage.getType())) {
-			return findKafkaQueue(topic, groupId);
+			return findKafkaQueue(topic, groupId, partition);
 		} else if (Storage.MYSQL.equals(storage.getType())) {
 			return findMySQLQueue(topic, groupId);
 		} else {
 			// TODO
 			throw new RuntimeException("Unsupported storage type");
 		}
+	}
+
+	@Override
+	public MessageQueue findQueue(String topic, String groupId) {
+		return findQueue(topic, groupId, "invalid");
 	}
 
 	@Override
@@ -78,7 +88,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 	}
 
-	private synchronized MessageQueue findKafkaQueue(String topic, String groupId) {
+	private synchronized MessageQueue findKafkaQueue(String topic, String groupId, String partition) {
 		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
 
 		MessageQueue q = m_queues.get(pair);
@@ -89,13 +99,13 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			for (Property prop : storage.getProperties()) {
 				props.put(prop.getName(), prop.getValue());
 			}
-			props.put("serializer.class", "com.ctrip.hermes.message.codec.kafka.KafkaEncoder");
-			props.put("key.serializer.class", "kafka.serializer.DefaultEncoder");
+			props.put("serializer.class", KafkaEncoder.class.getCanonicalName());
+			props.put("key.serializer.class", StringEncoder.class.getCanonicalName());
 			props.put("group.id", groupId);
 			ProducerConfig pc = new ProducerConfig(props);
 			ConsumerConfig cc = new ConsumerConfig(props);
 
-			KafkaGroup kg = new KafkaGroup(topic, groupId, pc, cc);
+			KafkaGroup kg = new KafkaGroup(topic, groupId, partition, pc, cc);
 
 			StoragePair<Message> main = kg.createMessagePair();
 			StoragePair<Resend> resend = kg.createResendPair();

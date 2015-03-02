@@ -4,6 +4,8 @@ import com.ctrip.hermes.storage.MessageQueue;
 
 public interface MessageQueueManager {
 
+	public MessageQueue findQueue(String topic, String groupId, String partition);
+	
 	/**
 	 * The Queue for Consumer
 	 * @param topic
