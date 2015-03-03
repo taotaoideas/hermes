@@ -43,7 +43,7 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 		MessagePackage pkg = JSON.parseObject(body, MessagePackage.class);
 		// TODO
 		Message msg = new Message();
-		msg.setContent(pkg.getMessage());
+		msg.setContent(body);
 		msg.setPartition((String) pkg.getHeader(MessagePackage.PARTITION));
 		msg.setKey((String) pkg.getHeader(MessagePackage.KEY));
 

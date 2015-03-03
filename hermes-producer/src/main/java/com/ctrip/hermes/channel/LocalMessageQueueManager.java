@@ -6,12 +6,12 @@ import java.util.Properties;
 
 import kafka.consumer.ConsumerConfig;
 import kafka.producer.ProducerConfig;
+import kafka.serializer.DefaultEncoder;
 import kafka.serializer.StringEncoder;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.message.codec.kafka.KafkaEncoder;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
@@ -99,7 +99,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			for (Property prop : storage.getProperties()) {
 				props.put(prop.getName(), prop.getValue());
 			}
-			props.put("serializer.class", KafkaEncoder.class.getCanonicalName());
+			props.put("serializer.class", DefaultEncoder.class.getCanonicalName());
 			props.put("key.serializer.class", StringEncoder.class.getCanonicalName());
 			props.put("group.id", groupId);
 			ProducerConfig pc = new ProducerConfig(props);
