@@ -171,12 +171,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 	private void appendCatEvent(Transaction t, List<Message> msgs, String topic) {
 		for (Message msg : msgs) {
-			Event event = Cat.newEvent("Message", topic);
-			event.addData("key", msg.getKey());
-			event.setStatus(Event.SUCCESS);
-			event.complete();
-
-			t.addChild(event);
+			Cat.logEvent("Message", topic, Event.SUCCESS, msg.getKey());
 		}
 	}
 
