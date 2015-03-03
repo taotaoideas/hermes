@@ -13,8 +13,6 @@ import kafka.producer.ProducerConfig;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.storage.spi.Storage;
-import com.ctrip.hermes.storage.storage.Range;
-import com.ctrip.hermes.storage.storage.StorageException;
 
 public abstract class AbstractKafkaStorage<T> implements Storage<T> {
 
@@ -66,18 +64,6 @@ public abstract class AbstractKafkaStorage<T> implements Storage<T> {
 		String clientName = "Client_" + m_topic + "_" + m_partition_id;
 
 		m_consumer = new SimpleConsumer(leadBroker, metadata.leader().port(), bufferSize, 64 * 1024, clientName);
-	}
-
-	@Override
-	public List<T> read(Range range) throws StorageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public T top() throws StorageException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

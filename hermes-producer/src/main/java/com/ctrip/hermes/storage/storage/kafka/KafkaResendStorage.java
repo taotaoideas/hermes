@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.spi.typed.ResendStorage;
 import com.ctrip.hermes.storage.storage.Browser;
+import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
 
 public class KafkaResendStorage extends AbstractKafkaStorage<Resend> implements ResendStorage {
@@ -122,5 +123,17 @@ public class KafkaResendStorage extends AbstractKafkaStorage<Resend> implements 
 			return m_nextReadIdx;
 		}
 
+	}
+	
+	@Override
+	public List<Resend> read(Range range) throws StorageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Resend top() throws StorageException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

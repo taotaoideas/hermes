@@ -20,6 +20,7 @@ import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.spi.typed.MessageStorage;
 import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Offset;
+import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
 
 public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implements MessageStorage {
@@ -104,7 +105,6 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 
 					byte[] bytes = new byte[payload.limit()];
 					payload.get(bytes);
-					// System.out.println(String.valueOf(messageAndOffset.offset()) + ": " + new String(bytes));
 					Message msg = new Message();
 					msg.setContent(bytes);
 					msg.setOffset(new Offset(m_topic, currentOffset));
@@ -125,5 +125,93 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 			return m_nextReadIdx;
 		}
 
+	}
+
+	@Override
+	public List<Message> read(Range range) throws StorageException {
+		List<Message> result = new ArrayList<>();
+
+		int numErrors = 0;
+		long startOffset = range.startOffset().getOffset();
+		long endOffset = range.endOffset().getOffset();
+		while (true) {
+			FetchRequest req = new FetchRequestBuilder().clientId(m_consumer.clientId())
+			      .addFetch(m_topic, m_partition_id, startOffset, bufferSize).build();
+			FetchResponse fetchResponse = m_consumer.fetch(req);
+			if (fetchResponse.hasError()) {
+				numErrors++;
+				short code = fetchResponse.errorCode(m_topic, m_partition_id);
+				System.out.println("Error fetching data Reason: " + code);
+				if (numErrors > 5)
+					break;
+				if (code == ErrorMapping.OffsetOutOfRangeCode()) {
+					startOffset = SimpleConsumerUtil.getLastOffset(m_consumer, m_topic, m_partition_id,
+					      kafka.api.OffsetRequest.LatestTime(), m_consumer.clientId());
+					continue;
+				}
+				m_consumer.close();
+				PartitionMetadata metadata = SimpleConsumerUtil.findLeader(brokers, m_topic, m_partition_id);
+				String leadBroker = metadata.leader().host();
+				String clientName = "Client_" + m_topic + "_" + m_partition_id;
+
+				m_consumer = new SimpleConsumer(leadBroker, metadata.leader().port(), bufferSize, 64 * 1024, clientName);
+				continue;
+			}
+			numErrors = 0;
+
+			ByteBufferMessageSet messageSet = fetchResponse.messageSet(m_topic, m_partition_id);
+			if (messageSet.sizeInBytes() == 0) {
+				break;
+			}
+			for (MessageAndOffset messageAndOffset : messageSet) {
+				long currentOffset = messageAndOffset.offset();
+				if (currentOffset < startOffset) {
+					System.out.println("Found an old offset: " + currentOffset + " Expecting: " + startOffset);
+					continue;
+				}
+				if (currentOffset == endOffset)
+					break;
+				startOffset = messageAndOffset.nextOffset();
+				ByteBuffer payload = messageAndOffset.message().payload();
+
+				byte[] bytes = new byte[payload.limit()];
+				payload.get(bytes);
+				Message msg = new Message();
+				msg.setContent(bytes);
+				msg.setOffset(new Offset(m_topic, currentOffset));
+				result.add(msg);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Message top() throws StorageException {
+		long topOffset = SimpleConsumerUtil.getLastOffset(m_consumer, m_topic, m_partition_id,
+		      kafka.api.OffsetRequest.LatestTime() - 1, m_consumer.clientId());
+		FetchRequest req = new FetchRequestBuilder().clientId(m_consumer.clientId())
+		      .addFetch(m_topic, m_partition_id, topOffset, bufferSize).build();
+		FetchResponse fetchResponse = m_consumer.fetch(req);
+		ByteBufferMessageSet messageSet = fetchResponse.messageSet(m_topic, m_partition_id);
+		if (messageSet.sizeInBytes() == 0) {
+			return null;
+		}
+		Message msg = null;
+		for (MessageAndOffset messageAndOffset : messageSet) {
+			long currentOffset = messageAndOffset.offset();
+			if (currentOffset < topOffset) {
+				System.out.println("Found an old offset: " + currentOffset + " Expecting: " + topOffset);
+				continue;
+			}
+			topOffset = messageAndOffset.nextOffset();
+			ByteBuffer payload = messageAndOffset.message().payload();
+
+			byte[] bytes = new byte[payload.limit()];
+			payload.get(bytes);
+			msg = new Message();
+			msg.setContent(bytes);
+			msg.setOffset(new Offset(m_topic, currentOffset));
+		}
+		return msg;
 	}
 }
