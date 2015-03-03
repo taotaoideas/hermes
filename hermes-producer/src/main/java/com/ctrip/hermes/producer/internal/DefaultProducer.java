@@ -41,5 +41,11 @@ public class DefaultProducer extends Producer {
 			m_msg.setPriority(true);
 			return this;
 		}
+
+		@Override
+		public Holder withPartition(String partition) {
+			m_msg.setPartition(partition);
+			return this;
+		}
 	}
 }

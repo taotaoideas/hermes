@@ -50,5 +50,9 @@
 				</requirement>
 			</requirements>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.engine.scanner.Scanner</role>
+			<implementation>com.ctrip.hermes.engine.scanner.DefaultScanner</implementation>
+		</component>
 	</components>
 </plexus>

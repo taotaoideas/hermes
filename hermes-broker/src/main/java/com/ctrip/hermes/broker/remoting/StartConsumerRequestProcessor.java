@@ -36,7 +36,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 	public void process(final CommandContext ctx) {
 		NettyServerHandler nettyHandler = (NettyServerHandler) ctx.getNettyHandler();
 		final Command cmd = ctx.getCommand();
-		String topic = cmd.getHeader("topic");
+		final String topic = cmd.getHeader("topic");
 		String groupId = cmd.getHeader("groupId");
 		String partition = cmd.getHeader("partition");
 

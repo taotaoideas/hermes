@@ -57,7 +57,6 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 							// TODO add more message detail
 							m_logger.warn("Consumer throws exception when consuming messge", e);
 						} finally {
-							// TODO extract offset record from payload
 							for (Message msg : msgs) {
 								OffsetRecord offsetRecord = new OffsetRecord(msg.getOffset(), msg.getAckOffset());
 								Ack ack = msg.isSuccess() ? Ack.SUCCESS : Ack.FAIL;
@@ -81,8 +80,8 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 
 	@Override
 	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Message> msgs) {
-		// TODO Auto-generated method stub
-
+		// TODO
+		throw new RuntimeException("Unsupported operation");
 	}
 
 }

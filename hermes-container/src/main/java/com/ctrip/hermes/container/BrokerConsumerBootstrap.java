@@ -1,5 +1,7 @@
 package com.ctrip.hermes.container;
 
+import io.netty.channel.ChannelFuture;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +62,10 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 		m_acks.put(cmd.getCorrelationId(), new AckContext(ackQueue, netty));
 		m_consumerSinks.put(cmd.getCorrelationId(), new SinkContext(s, newConsumerSink(s, ackQueue)));
 
-		netty.writeCommand(cmd);
+		ChannelFuture future = netty.writeCommand(cmd);
+		
+		// TODO
+		future.awaitUninterruptibly();
 	}
 
 	private PipelineSink newConsumerSink(final Subscriber s, final LinkedBlockingQueue<OffsetRecord> ackQueue) {

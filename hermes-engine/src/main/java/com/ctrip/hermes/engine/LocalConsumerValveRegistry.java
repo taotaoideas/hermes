@@ -10,7 +10,6 @@ public class LocalConsumerValveRegistry extends AbstractValveRegistry implements
 	@Override
 	public void initialize() throws InitializationException {
 		doRegister(DecodeMessageValve.ID, 0);
-		doRegister(ConsumerTracingValve.ID, 1);
 	}
 
 }

@@ -16,7 +16,8 @@ public class DefaultScanner implements Scanner {
 	public List<Subscriber> scan() {
 		List<Subscriber> subscribers = new ArrayList<Subscriber>();
 
-		Reflections r = new Reflections();
+		// TODO remove hard code for demo
+		Reflections r = new Reflections("com.ctrip.hermes.example.demo");
 		Set<Class<?>> classes = r.getTypesAnnotatedWith(Subscribe.class);
 
 		for (Class<?> clazz : classes) {

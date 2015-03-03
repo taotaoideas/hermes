@@ -31,7 +31,7 @@ public abstract class AbstractNettyHandler extends SimpleChannelInboundHandler<C
 
 	private Channel m_channel;
 
-	public void writeCommand(Command cmd) {
+	public ChannelFuture writeCommand(Command cmd) {
 		ChannelFuture f = m_channel.writeAndFlush(cmd);
 
 		// TODO
@@ -44,6 +44,8 @@ public abstract class AbstractNettyHandler extends SimpleChannelInboundHandler<C
 				}
 			}
 		});
+
+		return f;
 	}
 
 	@Override

@@ -20,5 +20,7 @@ public abstract class Producer {
 		public void send();
 
 		public Holder withPriority();
+		
+		public Holder withPartition(String partition);
 	}
 }

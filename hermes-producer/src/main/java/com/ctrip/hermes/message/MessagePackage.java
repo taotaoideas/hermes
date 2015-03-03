@@ -5,7 +5,11 @@ import java.util.Map;
 
 public class MessagePackage {
 
-	private final static String KEY = "key";
+	public final static String KEY = "key";
+
+	public final static String PARTITION = "partition";
+
+	public final static String TOPIC = "topic";
 
 	private byte[] m_message;
 
@@ -34,12 +38,21 @@ public class MessagePackage {
 	public String getKey() {
 		return (String) m_headers.get(KEY);
 	}
-	
+
 	public void addHeader(String key, Object value) {
 		m_headers.put(key, value);
 	}
-	
+
 	public Object getHeader(String key) {
 		return m_headers.get(key);
 	}
+
+	public Map<String, Object> getHeaders() {
+		return m_headers;
+	}
+
+	public void setHeaders(Map<String, Object> headers) {
+		m_headers = headers;
+	}
+
 }

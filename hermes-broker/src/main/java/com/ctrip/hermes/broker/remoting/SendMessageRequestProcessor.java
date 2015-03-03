@@ -44,8 +44,9 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 		// TODO
 		Message msg = new Message();
 		msg.setContent(pkg.getMessage());
-		msg.setPartition((String) pkg.getHeader("partition"));
-		
+		msg.setPartition((String) pkg.getHeader(MessagePackage.PARTITION));
+		msg.setKey((String) pkg.getHeader(MessagePackage.KEY));
+
 		return Arrays.asList(msg);
 	}
 

@@ -2,12 +2,12 @@
 <meta dev-mode='false'>
 	<connector type='local'>
 		<storage type='memory' default='true'>
-			<topic name='order.new' />
+			<topic name='local.order.new' />
 		</storage>
 	</connector>
 	<connector type='broker'>
 		<storage type='memory'>
-			<topic name="local.order.new" />
+			<topic name="order.new" />
 		</storage>
 		<storage type='kafka'>
 			<property name='zookeeper.connect'

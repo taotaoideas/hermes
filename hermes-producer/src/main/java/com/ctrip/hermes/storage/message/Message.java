@@ -66,12 +66,20 @@ public class Message implements Locatable {
 	public int getPriority() {
 		return StringUtil.safeToInt(getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
 	}
-	
+
 	public void setPartition(String partition) {
 		setProperty(MessageConstants.PROP_PARTITION, partition);
 	}
-	
+
 	public String getPartition() {
 		return getProperty(MessageConstants.PROP_PARTITION);
+	}
+
+	public void setKey(String key) {
+		setProperty(MessageConstants.PROP_KEY, key);
+	}
+
+	public String getKey() {
+		return getProperty(MessageConstants.PROP_KEY);
 	}
 }
