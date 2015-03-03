@@ -16,6 +16,7 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Message;
+import com.ctrip.hermes.container.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.LocalConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;

@@ -14,7 +14,6 @@ import com.ctrip.hermes.channel.LocalMessageQueueManager;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.channel.MessageQueueMonitor;
-import com.ctrip.hermes.localDev.LocalDevServer;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.ProducerSinkManager;
@@ -122,8 +121,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(MessageQueueMonitor.class) //
 		      .req(MessageQueueManager.class));
-		// LocalDevServer
-		all.add(C(LocalDevServer.class).req(MessageQueueMonitor.class));
 
 		return all;
 	}

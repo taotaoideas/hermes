@@ -59,11 +59,14 @@
 
                 <input type="text" class="form-control" data-placement="right" data-type="info"
                        data-container="body" placeholder="Send a Message..."
-                       data-trigger="focus" bs-tooltip="tooltip">
-                <!--Message Sent History-->
+                       data-trigger="focus" bs-tooltip="tooltip" ng-model="tooltip.message"
+                       ng-keypress= sendByEnter()>
+                <button type="submit" class="btn btn-xs btn-primary btn-search" ng-click=send() >Send!</button>
                 <div class="producer-msg-hisorty-table">
+
+
                     <h3>Message Send History</h3>
-                    <table class="table table-striped">
+                    <table class="table table-striped" ng-cloak>
                         <thead>
                         <tr>
                             <th>Index</th>
@@ -72,7 +75,7 @@
                             <th>Status</th>
                         </tr>
                         </thead>
-                        <tbody ng-repeat="msg in sent_msgs">
+                        <tbody ng-repeat="msg in sent_msgs | limitTo:50 | orderBy: '-index'">
                         <tr>
                             <td>{{msg.index}}</td>
                             <td>{{msg.timestamp}}</td>
@@ -91,7 +94,7 @@
 
                 <div class="queue-msg-table">
                     <h3>Message in the Queue</h3>
-                    <table class="table table-striped">
+                    <table class="table table-striped" ng-cloak>
                         <thead>
                         <tr>
                             <th>Index</th>
@@ -100,7 +103,7 @@
                             <th>Status</th>
                         </tr>
                         </thead>
-                        <tbody ng-repeat="msg in msgs">
+                        <tbody ng-repeat="msg in msgs | limitTo:50 | orderBy: '-index'">
                         <tr>
                             <td>{{msg.index}}</td>
                             <td>{{msg.timestamp}}</td>
@@ -117,8 +120,9 @@
     <!--Consumer Groups-->
     <div ng-controller="ConsumerTabCtrl">
         <div bs-active-pane="tabs.activeTab" bs-tabs>
-            <div ng-repeat="tab in tabs" title="{{ tab.title }}" bs-pane>
-                <div class="consumer-group" ng-repeat="consumer in tab.content">
+            <div ng-repeat="tab in tabs" title="{{ tab.groupName }}" bs-pane>
+                SEND: next Offset {{tab.send}} , RESEND: next Offset {{tab.resend}}.
+                <div class="consumer-group" ng-repeat="consumer in tab.consumers">
                     <div consumer info="consumer"></div>
                 </div>
             </div>

@@ -34,7 +34,6 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 		final String topic = s.getTopicPattern();
 		final ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, s.getGroupId());
 
-		System.out.printf("LocalConsumerBootstrap:startConsumer Topic--"+ topic);
 		cc.start(new ConsumerChannelHandler() {
 
 			@Override
@@ -56,7 +55,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 							s.getConsumer().consume(msgs);
 						} catch (Throwable e) {
 							// TODO add more message detail
-							m_logger.warn("Consumer throws exception when consuming messge", e);
+							m_logger.warn("Consumer throws exception when consuming message", e);
 						} finally {
 							// TODO extract offset record from payload
 							for (Message msg : msgs) {

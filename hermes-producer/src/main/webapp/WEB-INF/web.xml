@@ -52,12 +52,12 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>HelloWorldServlet</servlet-name>
-        <servlet-class>com.ctrip.hermes.localDev.LocalDevServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>HelloWorldServlet</servlet-name>
-        <url-pattern>/test</url-pattern>
-    </servlet-mapping>
+    <filter>
+        <filter-name>ApiOriginFilter</filter-name>
+        <filter-class>com.ctrip.hermes.localDev.ApiOriginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ApiOriginFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 </web-app>

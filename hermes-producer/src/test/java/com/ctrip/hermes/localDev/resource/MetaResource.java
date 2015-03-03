@@ -6,18 +6,18 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
+import org.unidal.lookup.ContainerLoader;
 
 import com.ctrip.hermes.channel.MessageQueueMonitor;
-import com.ctrip.hermes.localDev.LocalDevServer;
 
 @Path("/meta")
 public class MetaResource {
+    PlexusContainer container = ContainerLoader.getDefaultContainer();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public MessageQueueMonitor.MessageQueueStatus getIt() throws Exception {
-        return new LocalDevServer().getQueueStatus();
+    public MessageQueueMonitor.MessageQueueStatus getMeta() throws Exception {
+        return container.lookup(MessageQueueMonitor.class).status();
     }
 }

@@ -13,6 +13,8 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.alibaba.fastjson.JSON;
+import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.message.Resend;
@@ -84,7 +86,10 @@ public class MessageQueueMonitor implements Initializable {
 		for (Map.Entry<String, List<Message>> entry : status.getTopics().entrySet()) {
 			System.out.println(String.format("+++++%s+++++", entry.getKey()));
 			for (Message msg : entry.getValue()) {
-				System.out.println(msg.getOffset().getOffset() + ":" + new String(((Message) msg).getContent()));
+				MessagePackage pkg = JSON.parseObject(((Message) msg).getContent(),
+						MessagePackage.class);
+				System.out.println(msg.getOffset().getOffset() + ":" + JSON.parseObject(pkg.getMessage(), String
+						.class));
 			}
 			System.out.println(String.format("-----%s-----", entry.getKey()));
 			System.out.println();
@@ -98,7 +103,8 @@ public class MessageQueueMonitor implements Initializable {
 			System.out.println(String.format("\tMain: Top: %s, Next: %s", s1.getTopOffset(), s1.getNextConsumeOffset()));
 			System.out.println(String.format("\tResend: Top: %s, Next: %s", s2.getTopOffset(), s2.getNextConsumeOffset()));
 			for (Locatable msg : s1.getNearbyMessages()) {
-				System.out.println(msg.getOffset().getOffset() + ":" + new String(((Message) msg).getContent()));
+				System.out.println(msg.getOffset().getOffset() + ":" + JSON.parseObject(((Message)msg).getContent(),
+						String.class));
 			}
 			for (Locatable resend : s2.getNearbyMessages()) {
 				System.out.println(resend.getOffset().getOffset() + ":" + ((Resend) resend).getRange());
@@ -146,7 +152,6 @@ public class MessageQueueMonitor implements Initializable {
 		};
 	}
 
-//	@XmlRootElement
 	public static class MessageQueueStatus {
 		private Map<String /* topic */, List<Message>> m_topics = new HashMap<>();
 
@@ -157,7 +162,7 @@ public class MessageQueueMonitor implements Initializable {
 		}
 
 		public void addConsumerStatus(ConsumerStatus<Message> s1, ConsumerStatus<Resend> s2) {
-			m_consumers.add(new Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>(s1, s2));
+			m_consumers.add(new Pair<>(s1, s2));
 		}
 
 		public Map<String, List<Message>> getTopics() {
