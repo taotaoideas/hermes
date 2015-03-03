@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
+import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
@@ -38,10 +40,12 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 	}
 
 	private List<Message> decode(byte[] body) {
+		MessagePackage pkg = JSON.parseObject(body, MessagePackage.class);
 		// TODO
 		Message msg = new Message();
-		msg.setContent(body);
-
+		msg.setContent(pkg.getMessage());
+		msg.setPartition((String) pkg.getHeader("partition"));
+		
 		return Arrays.asList(msg);
 	}
 

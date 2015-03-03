@@ -10,7 +10,7 @@ import java.util.Map;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
-import org.unidal.tuple.Pair;
+import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Message;
@@ -24,16 +24,20 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 	@Inject
 	private MessageQueueManager m_queueManager;
 
-	private Map<Pair<String, String>, List<ConsumerChannelHandler>> m_handlers = new HashMap<>();
+	private Map<Triple<String, String, String>, List<ConsumerChannelHandler>> m_handlers = new HashMap<>();
 
 	private Logger m_logger;
 
 	@Override
 	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId) {
+		return newConsumerChannel(topic, groupId, "invalid");
+	}
 
+	@Override
+	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId, final String partition) {
 		return new ConsumerChannel() {
 
-			private MessageQueue m_q = m_queueManager.findQueue(topic, groupId);
+			private MessageQueue m_q = m_queueManager.findQueue(topic, groupId, partition);
 
 			@Override
 			public void close() {
@@ -43,12 +47,12 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 			@Override
 			public void start(ConsumerChannelHandler handler) {
 				synchronized (LocalMessageChannelManager.this) {
-					Pair<String, String> pair = new Pair<>(topic, groupId);
-					List<ConsumerChannelHandler> curHandlers = m_handlers.get(pair);
+					Triple<String, String, String> triple = new Triple<>(topic, groupId, partition);
+					List<ConsumerChannelHandler> curHandlers = m_handlers.get(triple);
 
 					if (curHandlers == null) {
-						curHandlers = startQueuePuller(m_q, groupId);
-						m_handlers.put(pair, curHandlers);
+						curHandlers = startQueuePuller(m_q);
+						m_handlers.put(triple, curHandlers);
 					}
 					curHandlers.add(handler);
 				}
@@ -61,10 +65,10 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				m_q.ack(recs);
 			}
 		};
-
+		
 	}
-
-	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q, final String groupId) {
+	
+	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q) {
 		// TODO
 		final List<ConsumerChannelHandler> handlers = Collections
 		      .synchronizedList(new ArrayList<ConsumerChannelHandler>());

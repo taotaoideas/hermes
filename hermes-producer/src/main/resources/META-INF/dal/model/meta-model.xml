@@ -11,6 +11,8 @@
 	<entity name="storage">
 		<snippet lang='java'>
 			public final static String MEMORY = "memory";
+			public final static String KAFKA = "kafka";
+			public final static String MYSQL = "mysql";
 		</snippet>
 	</entity>
 </model>

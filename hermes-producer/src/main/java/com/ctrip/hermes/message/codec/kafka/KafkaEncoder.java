@@ -13,6 +13,7 @@ public class KafkaEncoder implements Encoder<Message> {
 
 	@Override
 	public byte[] toBytes(Message msg) {
+		//TODO Convert header properties into bytes
 		return msg.getContent();
 	}
 

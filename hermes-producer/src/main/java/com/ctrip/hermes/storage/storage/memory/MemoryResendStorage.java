@@ -1,8 +1,9 @@
 package com.ctrip.hermes.storage.storage.memory;
 
 import com.ctrip.hermes.storage.message.Resend;
+import com.ctrip.hermes.storage.spi.typed.ResendStorage;
 
-public class MemoryResendStorage extends AbstractMemoryStorage<Resend> {
+public class MemoryResendStorage extends AbstractMemoryStorage<Resend> implements ResendStorage{
 
 	public MemoryResendStorage(String id) {
 		super(id);

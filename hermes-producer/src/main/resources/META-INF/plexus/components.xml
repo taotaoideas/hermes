@@ -185,16 +185,6 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.channel.MessageChannelManager</role>
-			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.channel.KafkaMessageChannelManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>

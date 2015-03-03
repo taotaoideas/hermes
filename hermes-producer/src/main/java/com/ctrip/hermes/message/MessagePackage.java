@@ -1,17 +1,22 @@
 package com.ctrip.hermes.message;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MessagePackage {
+
+	private final static String KEY = "key";
 
 	private byte[] m_message;
 
-	private String m_key;
+	private Map<String, Object> m_headers = new HashMap<String, Object>();
 
 	public MessagePackage() {
 	}
 
 	public MessagePackage(byte[] message, String key) {
 		m_message = message;
-		m_key = key;
+		setKey(key);
 	}
 
 	public void setMessage(byte[] message) {
@@ -19,7 +24,7 @@ public class MessagePackage {
 	}
 
 	public void setKey(String key) {
-		m_key = key;
+		m_headers.put(KEY, key);
 	}
 
 	public byte[] getMessage() {
@@ -27,7 +32,14 @@ public class MessagePackage {
 	}
 
 	public String getKey() {
-		return m_key;
+		return (String) m_headers.get(KEY);
 	}
-
+	
+	public void addHeader(String key, Object value) {
+		m_headers.put(key, value);
+	}
+	
+	public Object getHeader(String key) {
+		return m_headers.get(key);
+	}
 }

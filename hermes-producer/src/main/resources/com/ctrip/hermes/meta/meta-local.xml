@@ -15,6 +15,7 @@
 			<property name='metadata.broker.list'
 				value='fx-message01:9092,fx-message02:9092,fx-message03:9092' />
 			<property name='request.required.acks' value='1' />
+			<property name='offsets.storage' value='kafka' />
 			<topic name='order.kafka' />
 		</storage>
 	</connector>
