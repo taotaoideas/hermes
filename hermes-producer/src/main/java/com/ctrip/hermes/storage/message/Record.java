@@ -7,7 +7,7 @@ import com.ctrip.hermes.storage.storage.Locatable;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.util.StringUtil;
 
-public class Message implements Locatable {
+public class Record implements Locatable {
 
 	private static final int DEFAULT_PRIORITY = -1;
 
@@ -18,6 +18,16 @@ public class Message implements Locatable {
 	private Offset m_offset;
 
 	private Offset m_ackOffset;
+
+	public Record(com.ctrip.hermes.message.Message<byte[]> msg) {
+		setContent(msg.getBody());
+		setPartition(msg.getPartition());
+		setPriority(msg.isPriority() ? 0 : 1);
+		setKey(msg.getKey());
+	}
+
+	public Record() {
+	}
 
 	public Offset getAckOffset() {
 		return m_ackOffset == null ? m_offset : m_ackOffset;

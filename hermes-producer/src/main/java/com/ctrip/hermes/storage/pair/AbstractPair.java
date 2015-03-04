@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.DefaultRangeMonitor;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.range.RangeEvent;
@@ -104,18 +104,18 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
 	}
 
 	@Override
-	public void waitForAck(List<Message> msgs) {
-		for (Message m : msgs) {
+	public void waitForAck(List<Record> msgs) {
+		for (Record m : msgs) {
 			m_offsetHandler.startNewRange(new OffsetRecord(m.getOffset(), m.getOffset()));
 		}
 	}
 
 	@Override
-	public void waitForAck(List<Message> msgs, Offset offset) {
-		m_offsetHandler.startNewRange(new OffsetRecord(Lists.transform(msgs, new Function<Message, Offset>() {
+	public void waitForAck(List<Record> msgs, Offset offset) {
+		m_offsetHandler.startNewRange(new OffsetRecord(Lists.transform(msgs, new Function<Record, Offset>() {
 
 			@Override
-			public Offset apply(Message m) {
+			public Offset apply(Record m) {
 				return m.getOffset();
 			}
 		}), offset));

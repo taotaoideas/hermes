@@ -68,6 +68,9 @@
 					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
 					<role-hint>local</role-hint>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
@@ -100,7 +103,7 @@
 			<implementation>com.ctrip.hermes.spi.internal.EncodeMessageValve</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -188,6 +191,19 @@
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+			<implementation>com.ctrip.hermes.message.codec.DefaultMessageCodec</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
+			<implementation>com.ctrip.hermes.message.codec.DefaultStoredMessageCodec</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.channel.MessageQueueMonitor</role>

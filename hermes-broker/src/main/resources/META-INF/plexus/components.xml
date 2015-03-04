@@ -36,6 +36,9 @@
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
@@ -45,6 +48,9 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
 				</requirement>
 			</requirements>
 		</component>

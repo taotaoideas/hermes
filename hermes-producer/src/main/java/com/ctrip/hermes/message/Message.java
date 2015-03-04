@@ -7,7 +7,7 @@ public class Message<T> {
 
 	private String m_key;
 
-	private boolean m_priority;
+	private boolean m_priority = false;
 
 	private String m_partition;
 

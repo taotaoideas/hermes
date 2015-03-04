@@ -1,7 +1,6 @@
 package com.ctrip.hermes.localDev.resource;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -12,12 +11,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.codehaus.plexus.PlexusContainer;
 import org.unidal.lookup.ContainerLoader;
-import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.localDev.MockConsumers;
-import com.ctrip.hermes.storage.message.Message;
-import com.ctrip.hermes.storage.message.Resend;
 
 @Path("/consumer")
 public class ConsumerResource {

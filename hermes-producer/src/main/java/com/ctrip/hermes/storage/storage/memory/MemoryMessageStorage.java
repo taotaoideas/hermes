@@ -2,18 +2,18 @@ package com.ctrip.hermes.storage.storage.memory;
 
 import java.util.Map;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.spi.typed.MessageStorage;
 
-public class MemoryMessageStorage extends AbstractMemoryStorage<Message> implements MessageStorage {
+public class MemoryMessageStorage extends AbstractMemoryStorage<Record> implements MessageStorage {
 
 	public MemoryMessageStorage(String id) {
 		super(id);
 	}
 
 	@Override
-	protected Message clone(Message msg) {
-		Message newMsg = new Message();
+	protected Record clone(Record msg) {
+		Record newMsg = new Record();
 
 		newMsg.setAckOffset(msg.getAckOffset());
 		newMsg.setContent(msg.getContent());

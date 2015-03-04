@@ -6,18 +6,18 @@ import java.util.Properties;
 
 import kafka.consumer.ConsumerConfig;
 import kafka.producer.ProducerConfig;
+import kafka.serializer.DefaultEncoder;
 import kafka.serializer.StringEncoder;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.message.codec.kafka.KafkaEncoder;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.StoragePair;
 import com.ctrip.hermes.storage.storage.kafka.KafkaGroup;
@@ -80,7 +80,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			gc.setResendGroupId("resend_" + topic + "_" + groupId, "offset_resend_" + topic + "_" + groupId);
 			MemoryGroup mg = new MemoryGroup(storageFactory, gc);
 
-			StoragePair<Message> main = mg.createMessagePair();
+			StoragePair<Record> main = mg.createMessagePair();
 			StoragePair<Resend> resend = mg.createResendPair();
 			q = new StorageMessageQueue(main, resend);
 
@@ -102,7 +102,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			for (Property prop : storage.getProperties()) {
 				props.put(prop.getName(), prop.getValue());
 			}
-			props.put("serializer.class", KafkaEncoder.class.getCanonicalName());
+			props.put("serializer.class", DefaultEncoder.class.getCanonicalName());
 			props.put("key.serializer.class", StringEncoder.class.getCanonicalName());
 			props.put("group.id", groupId);
 			ProducerConfig pc = new ProducerConfig(props);
@@ -110,7 +110,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 			KafkaGroup kg = new KafkaGroup(topic, groupId, partition, pc, cc);
 
-			StoragePair<Message> main = kg.createMessagePair();
+			StoragePair<Record> main = kg.createMessagePair();
 			StoragePair<Resend> resend = kg.createResendPair();
 			q = new StorageMessageQueue(main, resend);
 
@@ -128,7 +128,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 		if (q == null) {
 			MysqlGroup mg = new MysqlGroup(groupId);
 
-			StoragePair<Message> main = mg.createMessagePair();
+			StoragePair<Record> main = mg.createMessagePair();
 			StoragePair<Resend> resend = mg.createResendPair();
 			q = new StorageMessageQueue(main, resend);
 

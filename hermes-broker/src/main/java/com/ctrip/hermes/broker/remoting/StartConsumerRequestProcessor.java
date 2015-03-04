@@ -8,17 +8,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
 import com.ctrip.hermes.channel.ConsumerChannel;
 import com.ctrip.hermes.channel.ConsumerChannelHandler;
 import com.ctrip.hermes.channel.MessageChannelManager;
+import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
 import com.ctrip.hermes.remoting.netty.ChannelEventListener;
-import com.ctrip.hermes.storage.message.Message;
 
 public class StartConsumerRequestProcessor implements CommandProcessor {
 
@@ -26,6 +26,9 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	@Inject
 	private MessageChannelManager m_channelManager;
+	
+	@Inject
+	private StoredMessageCodec m_codec;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -57,7 +60,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 		cc.start(new ConsumerChannelHandler() {
 
 			@Override
-			public void handle(List<Message> msgs) {
+			public void handle(List<StoredMessage<byte[]>> msgs) {
 				Command consumeReq = new Command(CommandType.ConsumeRequest) //
 				      .setCorrelationId(cmd.getCorrelationId()) //
 				      .setBody(encode(msgs));
@@ -72,9 +75,8 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 		});
 	}
 
-	private byte[] encode(List<Message> msgs) {
-		// TODO
-		return JSON.toJSONBytes(msgs);
+	private byte[] encode(List<StoredMessage<byte[]>> msgs) {
+		return m_codec.encode(msgs);
 	}
 
 }

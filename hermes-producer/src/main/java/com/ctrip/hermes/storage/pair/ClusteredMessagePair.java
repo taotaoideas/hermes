@@ -2,9 +2,9 @@ package com.ctrip.hermes.storage.pair;
 
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 
-public class ClusteredMessagePair extends ClusteredPair<Message> {
+public class ClusteredMessagePair extends ClusteredPair<Record> {
 
 	private int m_priorities;
 
@@ -23,7 +23,7 @@ public class ClusteredMessagePair extends ClusteredPair<Message> {
 	}
 
 	@Override
-	protected int findPair(Message msg) {
+	protected int findPair(Record msg) {
 		return findSlot(msg.getPriority());
 	}
 

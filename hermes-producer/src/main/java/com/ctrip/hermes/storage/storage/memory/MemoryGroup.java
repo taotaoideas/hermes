@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.ClusteredMessagePair;
 import com.ctrip.hermes.storage.pair.MessagePair;
@@ -29,7 +29,7 @@ public class MemoryGroup {
 		List<Pair<String, String>> mainIdPairs = m_groupConfig.mainGroupIds();
 
 		for (Pair<String, String> idPair : mainIdPairs) {
-			AbstractMemoryStorage<Message> m = m_storageFactory.findMessageStorage(idPair.getKey());
+			AbstractMemoryStorage<Record> m = m_storageFactory.findMessageStorage(idPair.getKey());
 			AbstractMemoryStorage<Offset> o = m_storageFactory.findOffsetStorage(idPair.getValue());
 			pairs.add(new MessagePair(m, o));
 		}

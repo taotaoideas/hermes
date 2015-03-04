@@ -11,8 +11,9 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Triple;
 
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.MessageQueue;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
@@ -83,7 +84,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 			@Override
 			public void run() {
 				while (true) {
-					List<Message> msgs = q.read(100);
+					List<Record> msgs = q.read(100);
 
 					if (CollectionUtil.notEmpty(msgs)) {
 						dispatchMessage(msgs);
@@ -96,7 +97,8 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				}
 			}
 
-			private void dispatchMessage(List<Message> msgs) {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			private void dispatchMessage(List<Record> records) {
 				while (true) {
 					if (handlers.isEmpty()) {
 						// TODO shutdown and cleanup
@@ -111,13 +113,19 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 							Transaction t = Cat.newTransaction("Deliver", topic);
 
 							try {
-								appendCatEvent(t, msgs, topic);
+								appendCatEvent(t, records, topic);
+
+								List<StoredMessage<byte[]>> msgs = new ArrayList<>(records.size());
+								for (Record r : records) {
+									msgs.add(new StoredMessage(r, topic));
+								}
 
 								handler.handle(msgs);
 
 								t.setStatus(Transaction.SUCCESS);
 							} catch (Exception e) {
 								// TODO handle exception
+								m_logger.error("", e);
 								t.setStatus(e);
 							} finally {
 								t.complete();
@@ -145,13 +153,19 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		return new ProducerChannel() {
 
 			@Override
-			public void send(List<Message> msgs) {
+			public void send(List<com.ctrip.hermes.message.Message<byte[]>> pMsgs) {
 				Transaction t = Cat.newTransaction("Receive", topic);
 
 				try {
-					appendCatEvent(t, msgs, topic);
 
-					q.write(msgs);
+					List<Record> cMsgs = new ArrayList<Record>();
+					for (com.ctrip.hermes.message.Message<byte[]> pMsg : pMsgs) {
+						cMsgs.add(new Record(pMsg));
+					}
+
+					appendCatEvent(t, cMsgs, topic);
+
+					q.write(cMsgs);
 
 					t.setStatus(Transaction.SUCCESS);
 				} catch (Throwable e) {
@@ -169,8 +183,8 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		};
 	}
 
-	private void appendCatEvent(Transaction t, List<Message> msgs, String topic) {
-		for (Message msg : msgs) {
+	private void appendCatEvent(Transaction t, List<Record> msgs, String topic) {
+		for (Record msg : msgs) {
 			Cat.logEvent("Message", topic, Event.SUCCESS, msg.getKey());
 		}
 	}

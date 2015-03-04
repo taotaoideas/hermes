@@ -13,6 +13,7 @@ import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerPipeline;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.ValveRegistry;
+import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.netty.ClientManager;
 
@@ -35,7 +36,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(ValveRegistry.class, BROKER_CONSUMER));
 
 		all.add(C(CommandProcessor.class, ConsumeRequestProcessor.ID, ConsumeRequestProcessor.class) //
-		      .req(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID));
+		      .req(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID) //
+		      .req(StoredMessageCodec.class));
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());
