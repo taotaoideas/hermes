@@ -14,7 +14,7 @@ import org.unidal.tuple.Pair;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.AbstractPair;
 import com.ctrip.hermes.storage.pair.ClusteredPair;
@@ -42,10 +42,10 @@ public class MessageQueueMonitor implements Initializable {
 				result.addTopic(topic, readTopMessages(q));
 			}
 
-			StoragePair<Message> msgPair = q.getMsgPair();
+			StoragePair<Record> msgPair = q.getMsgPair();
 			StoragePair<Resend> resendPair = q.getResendPair();
 
-			ConsumerStatus<Message> s1 = new ConsumerStatus<>();
+			ConsumerStatus<Record> s1 = new ConsumerStatus<>();
 			s1.setGroupId(groupId);
 			s1.setTopic(topic);
 
@@ -63,16 +63,16 @@ public class MessageQueueMonitor implements Initializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Message> readTopMessages(StorageMessageQueue q) throws Exception {
+	private List<Record> readTopMessages(StorageMessageQueue q) throws Exception {
 		ClusteredPair<?> msgPair = (ClusteredPair<?>) q.getMsgPair();
 		List<? extends StoragePair<?>> childPairs = msgPair.getChildPairs();
 
-		List<Message> result = new ArrayList<Message>();
+		List<Record> result = new ArrayList<Record>();
 		for (StoragePair<?> p : childPairs) {
 			Storage<?> main = ((AbstractPair<?>) p).getMain();
-			Message top = (Message) main.top();
+			Record top = (Record) main.top();
 			if (top != null) {
-				result.addAll((Collection<? extends Message>) main.createBrowser(top.getOffset().getOffset() - 10).read(10));
+				result.addAll((Collection<? extends Record>) main.createBrowser(top.getOffset().getOffset() - 10).read(10));
 			}
 		}
 		return result;
@@ -80,9 +80,9 @@ public class MessageQueueMonitor implements Initializable {
 
 	@SuppressWarnings("unchecked")
 	public void report(MessageQueueStatus status) {
-		for (Map.Entry<String, List<Message>> entry : status.getTopics().entrySet()) {
+		for (Map.Entry<String, List<Record>> entry : status.getTopics().entrySet()) {
 			System.out.println(String.format("+++++%s+++++", entry.getKey()));
-			for (Message msg : entry.getValue()) {
+			for (Record msg : entry.getValue()) {
 				// TODO
 				System.out.println(msg.getOffset().getOffset() + ":" + new String(msg.getContent()));
 			}
@@ -91,15 +91,15 @@ public class MessageQueueMonitor implements Initializable {
 		}
 
 		for (Pair<?, ?> pair : status.getConsumers()) {
-			ConsumerStatus<Message> s1 = (ConsumerStatus<Message>) pair.getKey();
-			ConsumerStatus<Message> s2 = (ConsumerStatus<Message>) pair.getValue();
+			ConsumerStatus<Record> s1 = (ConsumerStatus<Record>) pair.getKey();
+			ConsumerStatus<Record> s2 = (ConsumerStatus<Record>) pair.getValue();
 
 			System.out.println(String.format("=====Topic: %s, GroupId: %s=====", s1.getTopic(), s1.getGroupId()));
 			System.out.println(String.format("\tMain: Top: %s, Next: %s", s1.getTopOffset(), s1.getNextConsumeOffset()));
 			System.out.println(String.format("\tResend: Top: %s, Next: %s", s2.getTopOffset(), s2.getNextConsumeOffset()));
 			for (Locatable msg : s1.getNearbyMessages()) {
 				System.out.println(msg.getOffset().getOffset() + ":"
-				      + JSON.parseObject(((Message) msg).getContent(), String.class));
+				      + JSON.parseObject(((Record) msg).getContent(), String.class));
 			}
 			for (Locatable resend : s2.getNearbyMessages()) {
 				System.out.println(resend.getOffset().getOffset() + ":" + ((Resend) resend).getRange());
@@ -148,23 +148,23 @@ public class MessageQueueMonitor implements Initializable {
 	}
 
 	public static class MessageQueueStatus {
-		private Map<String /* topic */, List<Message>> m_topics = new HashMap<>();
+		private Map<String /* topic */, List<Record>> m_topics = new HashMap<>();
 
-		private List<Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>> m_consumers = new ArrayList<>();
+		private List<Pair<ConsumerStatus<Record>, ConsumerStatus<Resend>>> m_consumers = new ArrayList<>();
 
-		public void addTopic(String topic, List<Message> topMessages) {
+		public void addTopic(String topic, List<Record> topMessages) {
 			m_topics.put(topic, topMessages);
 		}
 
-		public void addConsumerStatus(ConsumerStatus<Message> s1, ConsumerStatus<Resend> s2) {
+		public void addConsumerStatus(ConsumerStatus<Record> s1, ConsumerStatus<Resend> s2) {
 			m_consumers.add(new Pair<>(s1, s2));
 		}
 
-		public Map<String, List<Message>> getTopics() {
+		public Map<String, List<Record>> getTopics() {
 			return m_topics;
 		}
 
-		public List<Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>> getConsumers() {
+		public List<Pair<ConsumerStatus<Record>, ConsumerStatus<Resend>>> getConsumers() {
 			return m_consumers;
 		}
 

@@ -10,7 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.spi.typed.MessageStorage;
 import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Offset;
@@ -29,7 +29,7 @@ public class MysqlMessageStorage implements MessageStorage {
 		m_id = id;
 	}
 
-	public void append(List<Message> msgs) throws StorageException {
+	public void append(List<Record> msgs) throws StorageException {
 		try {
 			doAppend(msgs);
 		} catch (Exception e) {
@@ -37,10 +37,10 @@ public class MysqlMessageStorage implements MessageStorage {
 		}
 	}
 
-	private void doAppend(List<Message> msgs) throws IOException, SQLException {
+	private void doAppend(List<Record> msgs) throws IOException, SQLException {
 		PreparedStatement stmt = m_conn.prepareStatement("insert into msg (c) values (?)",
 		      Statement.RETURN_GENERATED_KEYS);
-		for (Message m : msgs) {
+		for (Record m : msgs) {
 			stmt.setBlob(1, new ByteArrayInputStream(m.getContent()));
 			stmt.addBatch();
 		}
@@ -55,11 +55,11 @@ public class MysqlMessageStorage implements MessageStorage {
 
 	}
 
-	private List<Message> rsToMessage(ResultSet rs) throws SQLException {
-		List<Message> result = new ArrayList<Message>();
+	private List<Record> rsToMessage(ResultSet rs) throws SQLException {
+		List<Record> result = new ArrayList<Record>();
 
 		while (rs.next()) {
-			Message msg = new Message();
+			Record msg = new Record();
 			msg.setOffset(new Offset(m_id, rs.getLong(1)));
 			msg.setContent(rs.getBytes(2));
 
@@ -69,27 +69,27 @@ public class MysqlMessageStorage implements MessageStorage {
 		return result;
 	}
 
-	public Browser<Message> createBrowser(final long offset) {
+	public Browser<Record> createBrowser(final long offset) {
 
-		return new Browser<Message>() {
+		return new Browser<Record>() {
 
 			private long m_offset = offset;
 
 			@Override
-			public List<Message> read(int batchSize) throws Exception {
+			public List<Record> read(int batchSize) throws Exception {
 				PreparedStatement stmt = m_conn
 				      .prepareStatement("select id,c from msg where id >= ? order by id asc limit ?");
 				stmt.setLong(1, m_offset);
 				stmt.setInt(2, batchSize);
 
-				List<Message> msgs = rsToMessage(stmt.executeQuery());
+				List<Record> msgs = rsToMessage(stmt.executeQuery());
 				updateOffset(msgs);
 
 				return msgs;
 
 			}
 
-			private void updateOffset(List<Message> msgs) {
+			private void updateOffset(List<Record> msgs) {
 				if (CollectionUtil.notEmpty(msgs)) {
 					m_offset = msgs.get(msgs.size() - 1).getOffset().getOffset() + 1;
 				}
@@ -107,7 +107,7 @@ public class MysqlMessageStorage implements MessageStorage {
 		};
 	}
 
-	public List<Message> read(Range range) throws StorageException {
+	public List<Record> read(Range range) throws StorageException {
 		String sqlTpl = "select id,c from msg where id  >= ? and id <= ?";
 		String sql = String.format(sqlTpl, range.startOffset().getOffset(), range.endOffset().getOffset());
 
@@ -125,7 +125,7 @@ public class MysqlMessageStorage implements MessageStorage {
 	}
 
 	@Override
-	public Message top() {
+	public Record top() {
 		// TODO
 		throw new UnsupportedOperationException();
 	}

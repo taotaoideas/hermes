@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
 public class OutputMessage {
@@ -31,7 +31,7 @@ public class OutputMessage {
 		this.timestamp = timestamp;
 	}
 
-	public static OutputMessage convert(Message msg) {
+	public static OutputMessage convert(Record msg) {
 		String body = null, key = null;
 		body = new String(msg.getContent());
 		key = msg.getKey();

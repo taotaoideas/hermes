@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.range.RangeStatusListener;
 import com.ctrip.hermes.storage.storage.Locatable;
@@ -95,14 +95,14 @@ public abstract class ClusteredPair<T extends Locatable> implements StoragePair<
 	}
 
 	@Override
-	public void waitForAck(List<Message> msgs) {
+	public void waitForAck(List<Record> msgs) {
 		if (CollectionUtil.notEmpty(msgs)) {
 			m_id2Pair.get(CollectionUtil.first(msgs).getOffset().getId()).waitForAck(msgs);
 		}
 	}
 
 	@Override
-	public void waitForAck(List<Message> msgs, Offset offset) {
+	public void waitForAck(List<Record> msgs, Offset offset) {
 		if (CollectionUtil.notEmpty(msgs)) {
 			m_id2Pair.get(CollectionUtil.first(msgs).getOffset().getId()).waitForAck(msgs, offset);
 		}

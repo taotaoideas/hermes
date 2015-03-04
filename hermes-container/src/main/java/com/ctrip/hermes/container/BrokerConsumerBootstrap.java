@@ -95,7 +95,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Message> msgs) {
+	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Record> msgs) {
 		// TODO make it async
 		SinkContext sinkCtx = m_consumerSinks.get(correlationId);
 		PipelineSink sink = sinkCtx.getSink();

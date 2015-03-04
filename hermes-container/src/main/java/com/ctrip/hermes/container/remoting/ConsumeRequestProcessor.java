@@ -12,7 +12,7 @@ import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 
 public class ConsumeRequestProcessor implements CommandProcessor {
 
@@ -31,7 +31,7 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 		Command cmd = ctx.getCommand();
 
 		// TODO parse cmd.getBody() to multiple message bytes
-		List<Message> msgs = JSON.parseObject(cmd.getBody(), new TypeReference<List<Message>>() {
+		List<Record> msgs = JSON.parseObject(cmd.getBody(), new TypeReference<List<Record>>() {
 		}.getType());
 
 		m_bootstrap.deliverMessage(cmd.getCorrelationId(), msgs);

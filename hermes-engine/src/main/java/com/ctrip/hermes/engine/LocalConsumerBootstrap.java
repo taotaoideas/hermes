@@ -42,7 +42,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 			}
 
 			@Override
-			public void handle(List<com.ctrip.hermes.storage.message.Message> smsgs) {
+			public void handle(List<com.ctrip.hermes.storage.message.Record> smsgs) {
 				Pair<PipelineSink, Object> pair = new Pair<>();
 				pair.setKey(new PipelineSink() {
 
@@ -79,7 +79,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Message> msgs) {
+	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Record> msgs) {
 		// TODO
 		throw new RuntimeException("Unsupported operation");
 	}

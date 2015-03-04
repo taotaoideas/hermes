@@ -23,10 +23,10 @@ public class DecodeMessageValve implements Valve {
 		MessageContext msgCtx = (MessageContext) payload;
 		String topic = msgCtx.getTopic();
 		Codec codec = m_codecManager.getCodec(topic);
-		List<com.ctrip.hermes.storage.message.Message> msgs = msgCtx.getMessages();
+		List<com.ctrip.hermes.storage.message.Record> msgs = msgCtx.getMessages();
 
 		List<Object> bodies = new ArrayList<>(msgs.size());
-		for (com.ctrip.hermes.storage.message.Message msg : msgs) {
+		for (com.ctrip.hermes.storage.message.Record msg : msgs) {
 			// TODO get or bypass class info
 			Message<Object> cmsg = new Message<Object>(codec.decode(msg.getContent(), msgCtx.getMessageClass()), msg);
 			cmsg.setKey(msg.getKey());

@@ -13,7 +13,7 @@ import com.ctrip.hermes.channel.ConsumerChannel;
 import com.ctrip.hermes.channel.ConsumerChannelHandler;
 import com.ctrip.hermes.channel.LocalMessageChannelManager;
 import com.ctrip.hermes.channel.MessageChannelManager;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 
 
 public class LocalDevServer extends JettyServer {
@@ -76,8 +76,8 @@ public class LocalDevServer extends JettyServer {
         ConsumerChannel cc = cm.newConsumerChannel(topic, group);
         cc.start(new ConsumerChannelHandler() {
             @Override
-            public void handle(List<Message> msgs) {
-                for (Message msg : msgs) {
+            public void handle(List<Record> msgs) {
+                for (Record msg : msgs) {
                     MockConsumers.getInstance().consumeOneMsg(topic, group, msg);
                 }
             }

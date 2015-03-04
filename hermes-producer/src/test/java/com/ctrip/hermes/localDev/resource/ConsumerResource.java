@@ -16,7 +16,7 @@ import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.localDev.MockConsumers;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 
 @Path("/consumer")
@@ -26,7 +26,7 @@ public class ConsumerResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ConsumerStatus> getMessages(@QueryParam("topic") String topic) throws Exception {
-        List<Pair<MessageQueueMonitor.ConsumerStatus<Message>, MessageQueueMonitor.ConsumerStatus<Resend>>>
+        List<Pair<MessageQueueMonitor.ConsumerStatus<Record>, MessageQueueMonitor.ConsumerStatus<Resend>>>
                 consumers = container.lookup(MessageQueueMonitor.class).status().getConsumers();
 
         System.out.println("Consumers Group:" + consumers.size());
@@ -44,10 +44,10 @@ public class ConsumerResource {
     }
 
     private List<ConsumerStatus> buildConsumerStatus(
-            List<Pair<MessageQueueMonitor.ConsumerStatus<Message>,
+            List<Pair<MessageQueueMonitor.ConsumerStatus<Record>,
                     MessageQueueMonitor.ConsumerStatus<Resend>>> consumers, String topic) {
         List<ConsumerStatus> result = new ArrayList<>();
-        for (Pair<MessageQueueMonitor.ConsumerStatus<Message>, MessageQueueMonitor.ConsumerStatus<Resend>> consumer : consumers) {
+        for (Pair<MessageQueueMonitor.ConsumerStatus<Record>, MessageQueueMonitor.ConsumerStatus<Resend>> consumer : consumers) {
             if (consumer.getKey().getTopic().equals(topic)) {  //check topic
                 String group = consumer.getKey().getGroupId();
                 long sendNextOffset = consumer.getKey().getNextConsumeOffset();

@@ -5,11 +5,11 @@ import com.ctrip.hermes.storage.storage.Offset;
 // TODO extends com.ctrip.hermes.message and rename and remove duplicate fields
 public class Message<T> extends com.ctrip.hermes.message.Message<T> {
 
-	private com.ctrip.hermes.storage.message.Message m_storageMsg;
+	private com.ctrip.hermes.storage.message.Record m_storageMsg;
 
 	private boolean m_success = true;
 
-	public Message(T body, com.ctrip.hermes.storage.message.Message msg) {
+	public Message(T body, com.ctrip.hermes.storage.message.Record msg) {
 		setBody(body);
 		m_storageMsg = msg;
 	}

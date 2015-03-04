@@ -12,7 +12,7 @@ import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.storage.MessageQueue;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
@@ -83,7 +83,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 			@Override
 			public void run() {
 				while (true) {
-					List<Message> msgs = q.read(100);
+					List<Record> msgs = q.read(100);
 
 					if (CollectionUtil.notEmpty(msgs)) {
 						dispatchMessage(msgs);
@@ -96,7 +96,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				}
 			}
 
-			private void dispatchMessage(List<Message> msgs) {
+			private void dispatchMessage(List<Record> msgs) {
 				while (true) {
 					if (handlers.isEmpty()) {
 						// TODO shutdown and cleanup
@@ -151,9 +151,9 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 				try {
 
-					List<Message> cMsgs = new ArrayList<Message>();
+					List<Record> cMsgs = new ArrayList<Record>();
 					for (com.ctrip.hermes.message.Message<byte[]> pMsg : pMsgs) {
-						cMsgs.add(new Message(pMsg));
+						cMsgs.add(new Record(pMsg));
 					}
 
 					appendCatEvent(t, cMsgs, topic);
@@ -176,8 +176,8 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		};
 	}
 
-	private void appendCatEvent(Transaction t, List<Message> msgs, String topic) {
-		for (Message msg : msgs) {
+	private void appendCatEvent(Transaction t, List<Record> msgs, String topic) {
+		for (Record msg : msgs) {
 			Cat.logEvent("Message", topic, Event.SUCCESS, msg.getKey());
 		}
 	}

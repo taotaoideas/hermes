@@ -16,22 +16,22 @@ import kafka.message.MessageAndOffset;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.spi.typed.MessageStorage;
 import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
 
-public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implements MessageStorage {
+public class KafkaMessageStorage extends AbstractKafkaStorage<Record> implements MessageStorage {
 
 	public KafkaMessageStorage(String id, String partition, ProducerConfig pc, ConsumerConfig cc) {
 		super(id, partition, pc, cc);
 	}
 
 	@Override
-	public void append(List<Message> payloads) throws StorageException {
-		for (Message payload : payloads) {
+	public void append(List<Record> payloads) throws StorageException {
+		for (Record payload : payloads) {
 			KeyedMessage<String, byte[]> kafkaMsg = new KeyedMessage<>(m_topic, payload.getPartition(),
 			      payload.getContent());
 			m_producer.send(kafkaMsg);
@@ -39,7 +39,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 	}
 
 	@Override
-	public Browser<Message> createBrowser(long offset) {
+	public Browser<Record> createBrowser(long offset) {
 		long nextReadIdx = 0;
 
 		if (offset > 0) {
@@ -52,7 +52,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 		return new KafkaMessageBrowser(nextReadIdx);
 	}
 
-	class KafkaMessageBrowser implements Browser<Message> {
+	class KafkaMessageBrowser implements Browser<Record> {
 
 		private long m_nextReadIdx;
 
@@ -61,8 +61,8 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 		}
 
 		@Override
-		public synchronized List<Message> read(int batchSize) {
-			List<Message> result = new ArrayList<>();
+		public synchronized List<Record> read(int batchSize) {
+			List<Record> result = new ArrayList<>();
 			int remain = batchSize;
 			int numErrors = 0;
 			while (remain > 0) {
@@ -105,7 +105,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 
 					byte[] bytes = new byte[payload.limit()];
 					payload.get(bytes);
-					Message msg = new Message();
+					Record msg = new Record();
 					msg.setContent(bytes);
 					msg.setOffset(new Offset(m_topic, currentOffset));
 					result.add(msg);
@@ -128,8 +128,8 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 	}
 
 	@Override
-	public List<Message> read(Range range) throws StorageException {
-		List<Message> result = new ArrayList<>();
+	public List<Record> read(Range range) throws StorageException {
+		List<Record> result = new ArrayList<>();
 
 		int numErrors = 0;
 		long startOffset = range.startOffset().getOffset();
@@ -176,7 +176,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 
 				byte[] bytes = new byte[payload.limit()];
 				payload.get(bytes);
-				Message msg = new Message();
+				Record msg = new Record();
 				msg.setContent(bytes);
 				msg.setOffset(new Offset(m_topic, currentOffset));
 				result.add(msg);
@@ -186,7 +186,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 	}
 
 	@Override
-	public Message top() throws StorageException {
+	public Record top() throws StorageException {
 		long topOffset = SimpleConsumerUtil.getLastOffset(m_consumer, m_topic, m_partition_id,
 		      kafka.api.OffsetRequest.LatestTime() - 1, m_consumer.clientId());
 		FetchRequest req = new FetchRequestBuilder().clientId(m_consumer.clientId())
@@ -196,7 +196,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 		if (messageSet.sizeInBytes() == 0) {
 			return null;
 		}
-		Message msg = null;
+		Record msg = null;
 		for (MessageAndOffset messageAndOffset : messageSet) {
 			long currentOffset = messageAndOffset.offset();
 			if (currentOffset < topOffset) {
@@ -208,7 +208,7 @@ public class KafkaMessageStorage extends AbstractKafkaStorage<Message> implement
 
 			byte[] bytes = new byte[payload.limit()];
 			payload.get(bytes);
-			msg = new Message();
+			msg = new Record();
 			msg.setContent(bytes);
 			msg.setOffset(new Offset(m_topic, currentOffset));
 		}

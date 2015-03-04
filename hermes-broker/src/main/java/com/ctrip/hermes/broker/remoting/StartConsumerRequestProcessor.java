@@ -18,7 +18,7 @@ import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
 import com.ctrip.hermes.remoting.netty.ChannelEventListener;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 
 public class StartConsumerRequestProcessor implements CommandProcessor {
 
@@ -57,7 +57,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 		cc.start(new ConsumerChannelHandler() {
 
 			@Override
-			public void handle(List<Message> msgs) {
+			public void handle(List<Record> msgs) {
 				Command consumeReq = new Command(CommandType.ConsumeRequest) //
 				      .setCorrelationId(cmd.getCorrelationId()) //
 				      .setBody(encode(msgs));
@@ -72,7 +72,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 		});
 	}
 
-	private byte[] encode(List<Message> msgs) {
+	private byte[] encode(List<Record> msgs) {
 		// TODO
 		return JSON.toJSONBytes(msgs);
 	}

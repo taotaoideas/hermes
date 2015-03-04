@@ -5,7 +5,7 @@ import java.util.Arrays;
 import kafka.consumer.ConsumerConfig;
 import kafka.producer.ProducerConfig;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.ClusteredMessagePair;
 import com.ctrip.hermes.storage.pair.MessagePair;
@@ -32,7 +32,7 @@ public class KafkaGroup {
 		m_cc = cc;
 	}
 
-	public StoragePair<Message> createMessagePair() {
+	public StoragePair<Record> createMessagePair() {
 		KafkaMessageStorage main = new KafkaMessageStorage(m_topic, m_partition, m_pc, m_cc);
 		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_" + m_topic + "_" + m_groupId, m_partition, m_pc, m_cc);
 
