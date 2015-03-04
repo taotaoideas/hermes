@@ -11,6 +11,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Triple;
 
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
@@ -96,7 +97,8 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				}
 			}
 
-			private void dispatchMessage(List<Record> msgs) {
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			private void dispatchMessage(List<Record> records) {
 				while (true) {
 					if (handlers.isEmpty()) {
 						// TODO shutdown and cleanup
@@ -111,7 +113,12 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 							Transaction t = Cat.newTransaction("Deliver", topic);
 
 							try {
-								appendCatEvent(t, msgs, topic);
+								appendCatEvent(t, records, topic);
+
+								List<StoredMessage<byte[]>> msgs = new ArrayList<>(records.size());
+								for (Record r : records) {
+									msgs.add(new StoredMessage(r, topic));
+								}
 
 								handler.handle(msgs);
 

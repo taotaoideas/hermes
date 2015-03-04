@@ -68,6 +68,9 @@
 					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
 					<role-hint>local</role-hint>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
@@ -197,6 +200,10 @@
 					<role>com.ctrip.hermes.message.codec.CodecManager</role>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
+			<implementation>com.ctrip.hermes.message.codec.DefaultStoredMessageCodec</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.channel.MessageQueueMonitor</role>

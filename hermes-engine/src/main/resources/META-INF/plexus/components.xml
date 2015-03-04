@@ -18,6 +18,9 @@
 				<requirement>
 					<role>com.ctrip.hermes.message.codec.CodecManager</role>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
@@ -39,6 +40,17 @@ public class OutputMessage {
 		// todo: get timestamp from <Message>msg
 
 		return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), msg.getProperties(),
+		      new Date().getTime());
+	}
+
+	public static OutputMessage convert(StoredMessage<byte[]> msg) {
+		String body = null, key = null;
+		body = new String(msg.getBody());
+		key = msg.getKey();
+
+		// todo: get timestamp from <Message>msg
+
+		return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), new HashMap<String, String>(),
 		      new Date().getTime());
 	}
 }

@@ -18,8 +18,6 @@ public class TestBroker extends ComponentTestCase {
 	public void test() throws Exception {
 		lookup(MessageQueueMonitor.class);
 		lookup(NettyServer.class).start();
-		
-		System.in.read();
 	}
 
 }

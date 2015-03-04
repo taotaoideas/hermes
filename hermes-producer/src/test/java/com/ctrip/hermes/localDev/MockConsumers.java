@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.ctrip.hermes.localDev.pojo.OutputMessage;
-import com.ctrip.hermes.storage.message.Record;
+import com.ctrip.hermes.message.StoredMessage;
 import com.google.common.collect.ArrayListMultimap;
 
 
@@ -43,7 +43,7 @@ public class MockConsumers {
         return groups;
     }
 
-    public void consumeOneMsg(String topic, String group, Record msg) {
+    public void consumeOneMsg(String topic, String group, StoredMessage<byte[]> msg) {
         List<MockConsumer> consumers = consumerMap.get(topic + SPLITER + group);
 
         consumers.get(new Random().nextInt(consumers.size())).consumeOneMsg(msg);
@@ -70,7 +70,7 @@ public class MockConsumers {
             this.name = name;
         }
 
-        public void consumeOneMsg(Record msg) {
+        public void consumeOneMsg(StoredMessage<byte[]> msg) {
             messages.add(OutputMessage.convert(msg));
         }
     }

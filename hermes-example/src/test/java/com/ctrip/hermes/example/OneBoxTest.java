@@ -15,7 +15,6 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.container.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.StoredMessage;
@@ -29,7 +28,7 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@BeforeClass
 	public static void beforeClass() {
-		System.setProperty("devMode", "true");
+		System.setProperty("devMode", "false");
 	}
 
 	@Test

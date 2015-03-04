@@ -63,7 +63,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 		m_consumerSinks.put(cmd.getCorrelationId(), new SinkContext(s, newConsumerSink(s, ackQueue)));
 
 		ChannelFuture future = netty.writeCommand(cmd);
-		
+
 		// TODO
 		future.awaitUninterruptibly();
 	}
@@ -95,7 +95,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, List<com.ctrip.hermes.storage.message.Record> msgs) {
+	public void deliverMessage(int correlationId, List<StoredMessage<byte[]>> msgs) {
 		// TODO make it async
 		SinkContext sinkCtx = m_consumerSinks.get(correlationId);
 		PipelineSink sink = sinkCtx.getSink();
