@@ -2,6 +2,7 @@ package com.ctrip.hermes.consumer;
 
 import java.util.List;
 
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
@@ -9,11 +10,11 @@ import com.dianping.cat.message.Transaction;
 public abstract class BaseConsumer<T> implements Consumer<T> {
 
 	@Override
-	public void consume(List<Message<T>> msgs) {
+	public void consume(List<StoredMessage<T>> msgs) {
 		if (CollectionUtil.notEmpty(msgs)) {
 			String topic = msgs.get(0).getTopic();
 
-			for (Message<T> msg : msgs) {
+			for (StoredMessage<T> msg : msgs) {
 				Transaction t = Cat.newTransaction("Consume", topic);
 				try {
 					t.addData("topic", topic);
@@ -45,6 +46,6 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 		}
 	}
 
-	protected abstract void consume(Message<T> msg);
+	protected abstract void consume(StoredMessage<T> msg);
 
 }

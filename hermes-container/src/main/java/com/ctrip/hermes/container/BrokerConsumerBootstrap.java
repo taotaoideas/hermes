@@ -16,13 +16,13 @@ import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
 import com.alibaba.fastjson.JSON;
-import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.MessageContext;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandType;
@@ -74,7 +74,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public void handle(PipelineContext ctx, Object payload) {
-				List<Message> msgs = (List<Message>) payload;
+				List<StoredMessage> msgs = (List<StoredMessage>) payload;
 				// TODO
 				try {
 					s.getConsumer().consume(msgs);
@@ -83,7 +83,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 					m_logger.warn("Consumer throws exception when consuming messge", e);
 				} finally {
 					// TODO extract offset record from payload
-					for (Message msg : msgs) {
+					for (StoredMessage msg : msgs) {
 						OffsetRecord offsetRecord = new OffsetRecord(msg.getOffset(), msg.getAckOffset());
 						Ack ack = msg.isSuccess() ? Ack.SUCCESS : Ack.FAIL;
 						offsetRecord.setAck(ack);

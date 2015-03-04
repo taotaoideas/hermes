@@ -11,9 +11,9 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.producer.Producer;
 
 public class TestKafka extends ComponentTestCase {
@@ -27,8 +27,8 @@ public class TestKafka extends ComponentTestCase {
 			private Set<String> m_nacks = new HashSet<String>();
 
 			@Override
-			public void consume(List<Message<String>> msgs) {
-				for (Message<String> msg : msgs) {
+			public void consume(List<StoredMessage<String>> msgs) {
+				for (StoredMessage<String> msg : msgs) {
 					String body = msg.getBody();
 					System.out.println("<<< " + body);
 					if (body.startsWith("NACK-")) {

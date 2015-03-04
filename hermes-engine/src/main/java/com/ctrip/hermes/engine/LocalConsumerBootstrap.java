@@ -11,9 +11,9 @@ import org.unidal.tuple.Pair;
 import com.ctrip.hermes.channel.ConsumerChannel;
 import com.ctrip.hermes.channel.ConsumerChannelHandler;
 import com.ctrip.hermes.channel.MessageChannelManager;
-import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 
@@ -49,7 +49,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 					@SuppressWarnings({"rawtypes", "unchecked"})
 					@Override
 					public void handle(PipelineContext ctx, Object payload) {
-						List<Message> msgs = (List<Message>) payload;
+						List<StoredMessage> msgs = (List<StoredMessage>) payload;
 						// TODO
 						try {
 							s.getConsumer().consume(msgs);
@@ -57,7 +57,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 							// TODO add more message detail
 							m_logger.warn("Consumer throws exception when consuming message", e);
 						} finally {
-							for (Message msg : msgs) {
+							for (StoredMessage msg : msgs) {
 								OffsetRecord offsetRecord = new OffsetRecord(msg.getOffset(), msg.getAckOffset());
 								Ack ack = msg.isSuccess() ? Ack.SUCCESS : Ack.FAIL;
 								offsetRecord.setAck(ack);
