@@ -46,7 +46,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 				Pair<PipelineSink, Object> pair = new Pair<>();
 				pair.setKey(new PipelineSink() {
 
-					@SuppressWarnings({ "rawtypes", "unchecked" })
+					@SuppressWarnings({"rawtypes", "unchecked"})
 					@Override
 					public void handle(PipelineContext ctx, Object payload) {
 						List<Message> msgs = (List<Message>) payload;
@@ -55,7 +55,7 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 							s.getConsumer().consume(msgs);
 						} catch (Throwable e) {
 							// TODO add more message detail
-							m_logger.warn("Consumer throws exception when consuming messge", e);
+							m_logger.warn("Consumer throws exception when consuming message", e);
 						} finally {
 							for (Message msg : msgs) {
 								OffsetRecord offsetRecord = new OffsetRecord(msg.getOffset(), msg.getAckOffset());

@@ -44,6 +44,9 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 		if (storage == null) {
 			throw new RuntimeException("Undefined topic: " + topic);
 		}
+		/**
+		 * if can't find following constance, try run "mvn generate-sources" in command line.
+		 */
 		if (Storage.MEMORY.equals(storage.getType())) {
 			return findMemoryQueue(topic, groupId);
 		} else if (Storage.KAFKA.equals(storage.getType())) {
