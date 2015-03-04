@@ -14,55 +14,21 @@ LocalDev.service("MainService", ['$http', '$q', function ($http, $q) {
         errorCallback: function (response) { //Gracefully handle service error here. } } });
         },
 
-
-        getAppIdDropdown : function () {
-            return  [
-                {
-                    "text": "<i class=\"fa fa-download\"></i>&nbsp;All AppId",
-                    "href": "#anotherAction"
-                },
-                {
-                    "text": "<i class=\"fa fa-globe\"></i>&nbsp;340101",
-                    "click": "$alert(\"Holy guacamole!\")"
-                },
-                {
-                    "text": "<i class=\"fa fa-external-link\"></i>&nbsp;920101",
-                    "href": "/auth/facebook",
-                    "target": "_self"
-                },
-                {
-                    "divider": true
-                },
-                {
-                    "text": "Separated link",
-                    "href": "#separatedLink"
-                }
-            ];
+        getTopicDropDown: function () {
+           return $http.get("http://localhost:2765/api" + "/meta/topic");
         },
+        handleTopicDropdown: function (data) {
+            var dropdowns = [];
 
-        getTopicDropDown : function() {
-            return [
-                {
-                    "text": "<i class=\"fa fa-download\"></i>&nbsp;All Topic",
-                    "href": "#anotherAction"
-                },
-                {
-                    "text": "<i class=\"fa fa-globe\"></i>&nbsp;order.new",
-                    "click": "$alert(\"Holy guacamole!\")"
-                },
-                {
-                    "text": "<i class=\"fa fa-external-link\"></i>&nbsp;order.confirm",
-                    "href": "/auth/facebook",
-                    "target": "_self"
-                },
-                {
-                    "divider": true
-                },
-                {
-                    "text": "Separated link",
-                    "href": "#separatedLink"
+            for (var i = 0; i < data.length; i++) {
+                var topic = data[i];
+                var dropdown = {
+                    "text": topic,
+                    "click": null
                 }
-            ];
+                dropdowns.push(dropdown)
+            }
+            return dropdowns;
         }
 
     };

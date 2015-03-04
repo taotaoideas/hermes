@@ -118,6 +118,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 								t.setStatus(Transaction.SUCCESS);
 							} catch (Exception e) {
 								// TODO handle exception
+								m_logger.error("", e);
 								t.setStatus(e);
 							} finally {
 								t.complete();
@@ -145,13 +146,19 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		return new ProducerChannel() {
 
 			@Override
-			public void send(List<Message> msgs) {
+			public void send(List<com.ctrip.hermes.message.Message<byte[]>> pMsgs) {
 				Transaction t = Cat.newTransaction("Receive", topic);
 
 				try {
-					appendCatEvent(t, msgs, topic);
 
-					q.write(msgs);
+					List<Message> cMsgs = new ArrayList<Message>();
+					for (com.ctrip.hermes.message.Message<byte[]> pMsg : pMsgs) {
+						cMsgs.add(new Message(pMsg));
+					}
+
+					appendCatEvent(t, cMsgs, topic);
+
+					q.write(cMsgs);
 
 					t.setStatus(Transaction.SUCCESS);
 				} catch (Throwable e) {

@@ -1,6 +1,8 @@
 package com.ctrip.hermes.storage.range;
 
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -24,8 +26,10 @@ public class NewOffsetBitmap {
         EWAHCompressedBitmap sendMap = EWAHCompressedBitmap.bitmapOf();
         EWAHCompressedBitmap successMap = EWAHCompressedBitmap.bitmapOf();
         EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
+        long timestamp;
 
-        public Batch(List<Offset> offsetList) {
+        public Batch(List<Offset> offsetList, long timestamp) {
+            this.timestamp = timestamp;
             for (Offset offset : offsetList) {
                 offsetMap.put(offset.getOffset(), offset);
                 sendMap.set((int) offset.getOffset());
@@ -107,30 +111,27 @@ public class NewOffsetBitmap {
     static long lastCleanTime = -1;
     Semaphore semaphore = new Semaphore(1);
 
-    Multimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = Multimaps.synchronizedMultimap(ArrayListMultimap
+    Multimap<Long /*timestamp*/, Batch /*offsets list*/> batchTimestampMap = Multimaps.synchronizedListMultimap(ArrayListMultimap
             .<Long, Batch>create());
 
     // maxSize is OK? If send too fast and ack too slow, this capacity will clean "old" data by LRU.
     // use Offset as key, to avoid the overlap on Long(timestamp)
     Cache<Offset, Long> remainSuccessOffsetCache = CacheBuilder.newBuilder()
-            .maximumSize(10 * 1000)
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .build();
-
+            .maximumSize(10 * 1000).expireAfterWrite(10, TimeUnit.MINUTES).build();
     Cache<Offset, Long> remainFailOffsetCache = CacheBuilder.newBuilder()
-            .maximumSize(10 * 1000)
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .build();
-
+            .maximumSize(10 * 1000).expireAfterWrite(10, TimeUnit.MINUTES).build();
     Cache<Offset, Long> remainTimeoutOffsetCache = CacheBuilder.newBuilder()
-            .maximumSize(10 * 1000)
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .build();
+            .maximumSize(10 * 1000).expireAfterWrite(10, TimeUnit.MINUTES).build();
+
+    BlockingDeque<Batch> batchBlockingDeque = new LinkedBlockingDeque<>();
+    long lastPutTime = -1;
+    long putTimeInterval = 500; // 500ms
+    int batchSize = 500; // push blockingqueue to batchTimestampMap when size over 500;
 
     public void putOffset(List<Offset> offsetList, long timestamp) {
         cleanSelf();
 
-        batchTimestampMap.put(timestamp, new Batch(offsetList));
+        batchTimestampMap.put(timestamp, new Batch(offsetList, timestamp));
     }
 
     public void ackOffset(List<Offset> offsetList, Ack ack) {
@@ -151,7 +152,7 @@ public class NewOffsetBitmap {
      * @param offset   : 指定的offset
      * @return 相应的batch，若未找到则返回null
      */
-    private Batch findBatch(Multimap<Long, Batch> batchMap, Offset offset) {
+    private synchronized Batch findBatch(Multimap<Long, Batch> batchMap, Offset offset) {
         // Todo:如何更快的找到对应的offset
         for (Batch batch : batchMap.values()) {
             if (batch.contains(offset)) {
@@ -181,15 +182,6 @@ public class NewOffsetBitmap {
         return buildContinuous(successOffsetList);
     }
 
-    private List<OffsetRecord> buildContinuous(List<Offset> offsets) {
-        // now: only one OffsetRecord;
-        if (offsets.size() > 0) {
-            return Arrays.asList(new OffsetRecord(offsets, offsets.get(0)));
-        } else {
-            return Lists.newArrayList();
-        }
-    }
-
     public List<OffsetRecord> getAndRemoveFail() {
         List<Offset> failOffsetList = new ArrayList<>();
         Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
@@ -216,6 +208,15 @@ public class NewOffsetBitmap {
 
         List<Offset> remainTimeoutOffsetList = new ArrayList<>(remainTimeoutOffsetCache.asMap().keySet());
         return buildContinuous(remainTimeoutOffsetList);
+    }
+
+    private List<OffsetRecord> buildContinuous(List<Offset> offsets) {
+        // now: only one OffsetRecord;
+        if (offsets.size() > 0) {
+            return Arrays.asList(new OffsetRecord(offsets, offsets.get(0)));
+        } else {
+            return Lists.newArrayList();
+        }
     }
 
     /**

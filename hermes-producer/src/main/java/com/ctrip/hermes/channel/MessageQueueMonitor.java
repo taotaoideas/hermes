@@ -11,6 +11,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Message;
@@ -43,7 +44,7 @@ public class MessageQueueMonitor implements Initializable {
 
 			StoragePair<Message> msgPair = q.getMsgPair();
 			StoragePair<Resend> resendPair = q.getResendPair();
-			
+
 			ConsumerStatus<Message> s1 = new ConsumerStatus<>();
 			s1.setGroupId(groupId);
 			s1.setTopic(topic);
@@ -54,7 +55,7 @@ public class MessageQueueMonitor implements Initializable {
 
 			inspect(msgPair, s1);
 			inspect(resendPair, s2);
-				
+
 			result.addConsumerStatus(s1, s2);
 		}
 
@@ -78,11 +79,12 @@ public class MessageQueueMonitor implements Initializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void report(MessageQueueStatus status) {
+	public void report(MessageQueueStatus status) {
 		for (Map.Entry<String, List<Message>> entry : status.getTopics().entrySet()) {
 			System.out.println(String.format("+++++%s+++++", entry.getKey()));
 			for (Message msg : entry.getValue()) {
-				System.out.println(msg.getOffset().getOffset() + ":" + new String(((Message) msg).getContent()));
+				// TODO
+				System.out.println(msg.getOffset().getOffset() + ":" + new String(msg.getContent()));
 			}
 			System.out.println(String.format("-----%s-----", entry.getKey()));
 			System.out.println();
@@ -96,7 +98,8 @@ public class MessageQueueMonitor implements Initializable {
 			System.out.println(String.format("\tMain: Top: %s, Next: %s", s1.getTopOffset(), s1.getNextConsumeOffset()));
 			System.out.println(String.format("\tResend: Top: %s, Next: %s", s2.getTopOffset(), s2.getNextConsumeOffset()));
 			for (Locatable msg : s1.getNearbyMessages()) {
-				System.out.println(msg.getOffset().getOffset() + ":" + new String(((Message) msg).getContent()));
+				System.out.println(msg.getOffset().getOffset() + ":"
+				      + JSON.parseObject(((Message) msg).getContent(), String.class));
 			}
 			for (Locatable resend : s2.getNearbyMessages()) {
 				System.out.println(resend.getOffset().getOffset() + ":" + ((Resend) resend).getRange());
@@ -154,7 +157,7 @@ public class MessageQueueMonitor implements Initializable {
 		}
 
 		public void addConsumerStatus(ConsumerStatus<Message> s1, ConsumerStatus<Resend> s2) {
-			m_consumers.add(new Pair<ConsumerStatus<Message>, ConsumerStatus<Resend>>(s1, s2));
+			m_consumers.add(new Pair<>(s1, s2));
 		}
 
 		public Map<String, List<Message>> getTopics() {

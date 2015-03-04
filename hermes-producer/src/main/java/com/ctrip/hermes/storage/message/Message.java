@@ -19,6 +19,16 @@ public class Message implements Locatable {
 
 	private Offset m_ackOffset;
 
+	public Message(com.ctrip.hermes.message.Message<byte[]> msg) {
+		setContent(msg.getBody());
+		setPartition(msg.getPartition());
+		setPriority(msg.isPriority() ? 0 : 1);
+		setKey(msg.getKey());
+	}
+
+	public Message() {
+	}
+
 	public Offset getAckOffset() {
 		return m_ackOffset == null ? m_offset : m_ackOffset;
 	}

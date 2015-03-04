@@ -31,18 +31,7 @@ LocalDev
         });
     })
     .controller("DropdownCtrl", function ($scope, $q, $alert, MainService) {
-        $scope.appid_dropdown = MainService.getAppIdDropdown();
-        $scope.topic_dropdown = MainService.getTopicDropDown();
-
-        $scope.$alert = function (title) {
-            $alert({
-                title: title,
-                content: 'Best check yo self, you\'re not looking too good.',
-                placement: 'top',
-                type: 'info',
-                keyboard: true,
-                show: true
-            });
-        };
-
+        MainService.getTopicDropDown().success(function(data, status, headers, config) {
+            $scope.topic_dropdown = MainService.handleTopicDropdown(data);
+        })
     })

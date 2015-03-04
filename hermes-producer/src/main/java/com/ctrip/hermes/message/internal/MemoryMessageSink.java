@@ -8,7 +8,7 @@ import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.message.codec.MessageCodec;
 
 public class MemoryMessageSink implements PipelineSink {
 
@@ -17,6 +17,9 @@ public class MemoryMessageSink implements PipelineSink {
 	@Inject
 	private MessageChannelManager m_channelManager;
 
+	@Inject
+	private MessageCodec m_msgCodec;
+
 	@Override
 	public void handle(PipelineContext ctx, Object input) {
 		byte[] encodedMsg = (byte[]) input;
@@ -24,10 +27,7 @@ public class MemoryMessageSink implements PipelineSink {
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
 
-		Message msg = new Message();
-		msg.setContent(encodedMsg);
-
-		channel.send(Arrays.asList(msg));
+		channel.send(Arrays.asList(m_msgCodec.decode(encodedMsg)));
 	}
 
 }
