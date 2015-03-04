@@ -13,38 +13,30 @@ LocalDev
     .controller("ConsumerTabCtrl", function ($scope, $q, ConsumerService) {
 
         $scope.topic = "order.new";
+        $scope.tabs = [];
 
-        setTimeout(function(){
-            ConsumerService.getConsumerStatus($scope.topic).success(function(data, status, headers, config){
-                $scope.tabs = ConsumerService.handleData(data);
-                $scope.tabs.activeTab = 0;
-            });
-        },1000);
+        setInterval(function() {
+            updateTabs($scope.tabs);
+        }, 1000)
 
-        //$scope.tabs = [
-        //    {
-        //        "groupName": $scope.tabName,
-        //        "consumers": [],
-        //        "send" : {"nextOffset": 0},
-        //        "resend": {"nextOffset": 0}
-        //    },
-        //    {
-        //        "groupName": "Group Name1",
-        //        "consumers": [],
-        //        "send" : {"nextOffset": 1},
-        //        "resend": {"nextOffset": 1}
-        //    },
-        //    {
-        //        "groupName": "Group Name2",
-        //        "consumers": [],
-        //        "send" : {"nextOffset": 2},
-        //        "resend": {"nextOffset": 2}
-        //    }
-        //];
-        //$scope.tabs.activeTab = 0;
+        function updateTabs(tabs) {
+            if (tabs.length == 0) {
+                ConsumerService.getConsumerStatus($scope.topic).success(function(data, status, headers, config){
+                    $scope.tabs=ConsumerService.handleData(data);
+                    $scope.tabs.activeTab = 0;
+                });
+            } else {
+                ConsumerService.getConsumerStatus($scope.topic).success(function(data, status, headers, config){
+                    var d = ConsumerService.handleData(data)[$scope.tabs.activeTab];
 
+                    $scope.tabs[$scope.tabs.activeTab].groupName = d.groupName;
+                    $scope.tabs[$scope.tabs.activeTab].consumers = d.consumers;
+                    $scope.tabs[$scope.tabs.activeTab].send = d.send;
+                    $scope.tabs[$scope.tabs.activeTab].resend = d.resend;
+                });
+            }
+        }
     })
     .controller("ConsumerCtrl", function ($scope) {
-
 
     })

@@ -1,6 +1,6 @@
 <div>
     <div class="consumer" ng-controller="ConsumerCtrl">
-        <h2>Consumer: ID-{{consumer.id}}, Name-{{consumer.name}}</h2>
+        <h2>Consumer: Name-{{consumer.name}}</h2>
 
         <div class="consumer-msg-table">
             <h3>Consume Status</h3>
@@ -18,7 +18,7 @@
                     <td>{{msg.index}}</td>
                     <td>{{msg.timestamp}}</td>
                     <td>{{msg.content}}</td>
-                    <td><span class="label label-{{msg.isOK}}">{{msg.status}}</span></td>
+                    <td><span class="label">{{msg.status}}</span></td>
                 </tbody>
             </table>
         </div>

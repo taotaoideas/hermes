@@ -15,6 +15,7 @@ import org.unidal.lookup.ContainerLoader;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.channel.MessageQueueMonitor;
+import com.ctrip.hermes.localDev.MockConsumers;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.message.Resend;
 
@@ -28,10 +29,18 @@ public class ConsumerResource {
         List<Pair<MessageQueueMonitor.ConsumerStatus<Message>, MessageQueueMonitor.ConsumerStatus<Resend>>>
                 consumers = container.lookup(MessageQueueMonitor.class).status().getConsumers();
 
-        System.out.println("Consumers:" + consumers.size());
+        System.out.println("Consumers Group:" + consumers.size());
 
         List<ConsumerStatus> result = buildConsumerStatus(consumers, topic);
         return result;
+    }
+
+    @Path("/all")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<MockConsumers.MockConsumerGroup> getDetails()  {
+
+        return MockConsumers.getInstance().getAllGroup();
     }
 
     private List<ConsumerStatus> buildConsumerStatus(

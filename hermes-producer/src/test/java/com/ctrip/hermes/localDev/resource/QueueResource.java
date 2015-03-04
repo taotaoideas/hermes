@@ -17,6 +17,7 @@ import org.unidal.lookup.ContainerLoader;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageQueueMonitor;
+import com.ctrip.hermes.localDev.pojo.OutputMessage;
 import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.storage.Offset;
@@ -40,34 +41,8 @@ public class QueueResource {
     private List<OutputMessage> buildOutputMessage(List<Message> messages) {
         List<OutputMessage> result = new ArrayList<>();
         for (Message msg : messages) {
-
-            MessagePackage pkg = JSON.parseObject(((Message) msg).getContent(),
-                    MessagePackage.class);
-            String body = null, key = null;
-            if (null != pkg) {
-                body = JSON.parseObject(pkg.getMessage(), String.class);
-                key = JSON.parseObject(pkg.getKey(), String.class);
-            }
-            result.add(new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), msg.getProperties()));
+            result.add(OutputMessage.convert(msg));
         }
         return result;
-    }
-
-
-    private class OutputMessage {
-
-        public String message;
-        public String key;
-        public Offset offset;
-        public Offset ackOffset;
-        public Map<String, String> properties = new HashMap<String, String>();
-
-        public OutputMessage(String message, String key, Offset offset, Offset ackOffset, Map<String, String> properties) {
-            this.message = message;
-            this.key = key;
-            this.offset = offset;
-            this.ackOffset = ackOffset;
-            this.properties = properties;
-        }
     }
 }
