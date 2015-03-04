@@ -26,7 +26,7 @@ public abstract class AbstractKafkaStorage<T> implements Storage<T> {
 
 	protected SimpleConsumer m_consumer;
 
-	protected int bufferSize = 100;
+	protected int bufferSize = 10000;
 
 	protected List<Pair<String, Integer>> brokers = new ArrayList<>();
 
