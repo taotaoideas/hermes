@@ -1,12 +1,5 @@
 <plexus>
 	<components>
-
-		<component>
-			<role>com.ctrip.hermes.range.RangeMonitor</role>
-			<implementation>com.ctrip.hermes.range.MyDefaultRangeMonitor</implementation>
-		</component>
-
-
 		<component>
 			<role>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</role>
 			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</implementation>
@@ -42,6 +35,9 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
 				</requirement>
 			</requirements>
 		</component>

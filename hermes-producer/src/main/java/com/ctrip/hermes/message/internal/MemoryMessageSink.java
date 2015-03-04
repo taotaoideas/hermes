@@ -4,10 +4,8 @@ import java.util.Arrays;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
-import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.storage.message.Message;
@@ -21,13 +19,13 @@ public class MemoryMessageSink implements PipelineSink {
 
 	@Override
 	public void handle(PipelineContext ctx, Object input) {
-		MessagePackage pkg = (MessagePackage) input;
+		byte[] encodedMsg = (byte[]) input;
 		String topic = ctx.get("topic");
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
 
 		Message msg = new Message();
-		msg.setContent(JSON.toJSONBytes(pkg));
+		msg.setContent(encodedMsg);
 
 		channel.send(Arrays.asList(msg));
 	}

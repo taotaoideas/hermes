@@ -14,6 +14,7 @@ import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
 import com.ctrip.hermes.channel.MessageChannelManager;
+import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandProcessorManager;
 
@@ -32,7 +33,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// processors
 		all.add(C(CommandProcessor.class, HandshakeRequestProcessor.ID, HandshakeRequestProcessor.class));
 		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class) //
-		      .req(MessageChannelManager.class));
+		      .req(MessageChannelManager.class, MessageCodec.class));
 		all.add(C(CommandProcessor.class, StartConsumerRequestProcessor.ID, StartConsumerRequestProcessor.class) //
 		      .req(MessageChannelManager.class));
 		all.add(C(CommandProcessor.class, AckRequestProcessor.ID, AckRequestProcessor.class));

@@ -5,10 +5,9 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
-import com.ctrip.hermes.message.MessagePackage;
+import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
@@ -21,6 +20,9 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 	@Inject
 	private MessageChannelManager m_channelManager;
+
+	@Inject
+	private MessageCodec m_msgCodec;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -40,12 +42,13 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 	}
 
 	private List<Message> decode(byte[] body) {
-		MessagePackage pkg = JSON.parseObject(body, MessagePackage.class);
+		com.ctrip.hermes.message.Message<byte[]> pMsg = m_msgCodec.decode(body);
 		// TODO
 		Message msg = new Message();
-		msg.setContent(pkg.getMessage());
-		msg.setPartition((String) pkg.getHeader(MessagePackage.PARTITION));
-		msg.setKey((String) pkg.getHeader(MessagePackage.KEY));
+		msg.setContent(pMsg.getBody());
+		msg.setPartition(pMsg.getPartition());
+		msg.setKey(pMsg.getKey());
+		msg.setPriority(pMsg.isPriority() ? 0 : 1);
 
 		return Arrays.asList(msg);
 	}

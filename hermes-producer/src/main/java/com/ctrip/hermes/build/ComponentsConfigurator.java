@@ -19,6 +19,8 @@ import com.ctrip.hermes.message.ProducerSinkManager;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
+import com.ctrip.hermes.message.codec.DefaultMessageCodec;
+import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.message.codec.internal.JsonCodec;
 import com.ctrip.hermes.message.internal.BrokerMessageSink;
@@ -90,7 +92,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// valves
 		all.add(C(Valve.class, TracingMessageValve.ID, TracingMessageValve.class));
 		all.add(C(Valve.class, EncodeMessageValve.ID, EncodeMessageValve.class) //
-		      .req(CodecManager.class));
+		      .req(MessageCodec.class));
 		all.add(C(ValveRegistry.class, PRODUCER, ProducerValveRegistry.class));
 
 		all.add(C(ClientManager.class, DefaultClientManager.class));
@@ -115,6 +117,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
+
+		all.add(C(MessageCodec.class, DefaultMessageCodec.class) //
+		      .req(CodecManager.class));
 
 		all.add(C(MessageQueueMonitor.class) //
 		      .req(MessageQueueManager.class));
