@@ -47,24 +47,30 @@
                 </button>
             </div>
         </div>
-        <div class="col-lg-5">
+        <div class="col-md-5">
             <!--Producer-->
             <div class="producer" ng-controller="ProducerCtrl">
                 <h2>Producer: details...</h2>
-                <label>Topic: {{selectedTopic}}(editable)
+
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">Topic:</span>
+
                     <input type="text" class="form-control" data-placement="top" data-type="info"
                            data-container="body" placeholder={{selectedTopic}}
-                           data-trigger="manual"  ng-model="selectedTopic"
+                           data-trigger="manual" ng-model="selectedTopic"
                            ng-keypress=sendByEnter() style=" display: inline-block; width: 40%;">
-                </label>
-                <div class="">
+                </div>
+
+                <div class="input-group">
                     <input type="text" class="form-control" data-placement="top" data-type="info"
                            data-container="body" placeholder="Send a Message..."
                            data-trigger="manual" bs-tooltip="tooltip" ng-model="tooltip.message"
                            data-animation="am-flip-x"
-                           ng-keypress=sendByEnter() style=" display: inline-block; width: 80%;">
-                    <button type="submit" class="btn btn-sm btn-primary " ng-click=send()
-                            >Send!</button>
+                           ng-keypress=sendByEnter()>
+                     <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary " ng-click=send()>Send!
+                    </button>
+                         </span>
 
                 </div>
                 <div class="producer-msg-hisorty-table">
@@ -92,7 +98,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
+        <div class="col-md-5">
             <!--Queue-->
             <div class="queue" ng-controller="QueueCtrl">
                 <h2>Queue: details...</h2>
@@ -128,7 +134,7 @@
 
         <div bs-active-pane="tabs.activeTab" bs-tabs>
             <div ng-repeat="tab in tabs " title="{{ tab.groupName }}" bs-pane ng-if="checkTopic(tab)">
-                <div class="consumer-group" ng-repeat="consumer in tab.consumers" >
+                <div class="consumer-group" ng-repeat="consumer in tab.consumers">
                     <div consumer info="consumer"></div>
                 </div>
             </div>

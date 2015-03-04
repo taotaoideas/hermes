@@ -2,7 +2,7 @@ package com.ctrip.hermes.storage.pair;
 
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.range.RangeStatusListener;
 import com.ctrip.hermes.storage.storage.Locatable;
@@ -25,7 +25,7 @@ public interface StoragePair<T extends Locatable> {
 
 	public void addRangeStatusListener(RangeStatusListener listener);
 
-	public void waitForAck(List<Message> msgs);
+	public void waitForAck(List<Record> msgs);
 
-	public void waitForAck(List<Message> msgs, Offset offset);
+	public void waitForAck(List<Record> msgs, Offset offset);
 }

@@ -36,12 +36,15 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
-			<role-hint>sonsume-request</role-hint>
+			<role-hint>consume-request</role-hint>
 			<implementation>com.ctrip.hermes.container.remoting.ConsumeRequestProcessor</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
 					<role-hint>broker</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
 				</requirement>
 			</requirements>
 		</component>

@@ -11,9 +11,9 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.producer.Producer;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +46,7 @@ public class OneProducer extends ComponentTestCase {
         ConsumerBootstrap b = lookup(ConsumerBootstrap.class);
         Subscriber s = new Subscriber(TOPIC, "group1", new Consumer<String>() {
             @Override
-            public void consume(List<Message<String>> msgs) {
+            public void consume(List<StoredMessage<String>> msgs) {
                 assertEquals(msgs.size(), 1);
                 assertEquals(msgs.get(0).getBody(), msg);
                 latch.countDown();

@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.ctrip.hermes.storage.MessageQueue;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.StoragePair;
 import com.ctrip.hermes.storage.range.OffsetRecord;
@@ -20,7 +20,7 @@ import com.ctrip.hermes.storage.storage.StorageException;
 
 public class StorageMessageQueue implements MessageQueue {
 
-	private StoragePair<Message> m_msgPair;
+	private StoragePair<Record> m_msgPair;
 
 	private StoragePair<Resend> m_resendPair;
 
@@ -28,7 +28,7 @@ public class StorageMessageQueue implements MessageQueue {
 
 	private BlockingQueue<Resend> m_resendCache = new LinkedBlockingQueue<Resend>();
 
-	public StorageMessageQueue(StoragePair<Message> main, StoragePair<Resend> resend) {
+	public StorageMessageQueue(StoragePair<Record> main, StoragePair<Resend> resend) {
 		m_msgPair = main;
 		m_resendPair = resend;
 
@@ -45,10 +45,10 @@ public class StorageMessageQueue implements MessageQueue {
 	}
 
 	@Override
-	public List<Message> read(int batchSize) throws StorageException {
+	public List<Record> read(int batchSize) throws StorageException {
 		int remain = batchSize;
 
-		List<Message> result = m_msgPair.readMain(batchSize);
+		List<Record> result = m_msgPair.readMain(batchSize);
 		m_msgPair.waitForAck(result);
 		remain -= result.size();
 
@@ -77,9 +77,9 @@ public class StorageMessageQueue implements MessageQueue {
 				if (resend.getDue() <= System.currentTimeMillis()) {
 
 					Range r = resend.getRange();
-					List<Message> resendMsgs = m_msgPair.readMain(r);
+					List<Record> resendMsgs = m_msgPair.readMain(r);
 
-					for (Message msg : resendMsgs) {
+					for (Record msg : resendMsgs) {
 						msg.setAckOffset(resend.getOffset());
 					}
 
@@ -98,7 +98,7 @@ public class StorageMessageQueue implements MessageQueue {
 	}
 
 	@Override
-	public void write(List<Message> msgs) throws StorageException {
+	public void write(List<Record> msgs) throws StorageException {
 		m_msgPair.appendMain(msgs);
 	}
 
@@ -121,7 +121,7 @@ public class StorageMessageQueue implements MessageQueue {
 
 	}
 
-	private void connectPairs(StoragePair<Message> mainPair, final StoragePair<Resend> resendPair) {
+	private void connectPairs(StoragePair<Record> mainPair, final StoragePair<Resend> resendPair) {
 		mainPair.addRangeStatusListener(new RangeStatusListener() {
 
 			@Override
@@ -151,7 +151,7 @@ public class StorageMessageQueue implements MessageQueue {
 		});
 	}
 
-	public StoragePair<Message> getMsgPair() {
+	public StoragePair<Record> getMsgPair() {
 		return m_msgPair;
 	}
 

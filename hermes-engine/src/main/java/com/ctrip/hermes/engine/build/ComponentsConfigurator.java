@@ -20,6 +20,7 @@ import com.ctrip.hermes.engine.scanner.Scanner;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.message.codec.CodecManager;
+import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.spi.Valve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
@@ -34,7 +35,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(ValveRegistry.class, LOCAL_CONSUMER, LocalConsumerValveRegistry.class));
 		all.add(C(Valve.class, DecodeMessageValve.ID, DecodeMessageValve.class) //
-		      .req(CodecManager.class));
+		      .req(CodecManager.class, StoredMessageCodec.class));
 		all.add(C(Valve.class, ConsumerTracingValve.ID, ConsumerTracingValve.class));
 
 		all.add(C(Pipeline.class, LOCAL_CONSUMER, ConsumerPipeline.class) //

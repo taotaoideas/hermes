@@ -4,13 +4,11 @@ import java.util.Arrays;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
-import com.ctrip.hermes.message.MessagePackage;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.message.codec.MessageCodec;
 
 public class MemoryMessageSink implements PipelineSink {
 
@@ -19,17 +17,17 @@ public class MemoryMessageSink implements PipelineSink {
 	@Inject
 	private MessageChannelManager m_channelManager;
 
+	@Inject
+	private MessageCodec m_msgCodec;
+
 	@Override
 	public void handle(PipelineContext ctx, Object input) {
-		MessagePackage pkg = (MessagePackage) input;
+		byte[] encodedMsg = (byte[]) input;
 		String topic = ctx.get("topic");
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
 
-		Message msg = new Message();
-		msg.setContent(JSON.toJSONBytes(pkg));
-
-		channel.send(Arrays.asList(msg));
+		channel.send(Arrays.asList(m_msgCodec.decode(encodedMsg)));
 	}
 
 }

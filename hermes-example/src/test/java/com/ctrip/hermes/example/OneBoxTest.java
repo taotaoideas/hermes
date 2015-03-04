@@ -15,11 +15,11 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.consumer.Message;
-import com.ctrip.hermes.container.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.engine.LocalConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.meta.entity.Connector;
 import com.ctrip.hermes.producer.Producer;
 
 public class OneBoxTest extends ComponentTestCase {
@@ -33,11 +33,12 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
-		lookup(MessageQueueMonitor.class);
-
-
 		String topic = "order.new";
-		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, LocalConsumerBootstrap.ID);
+
+		lookup(MessageQueueMonitor.class);
+		Connector connector = lookup(MetaService.class).getConnector(topic);
+
+		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, connector.getType());
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
 		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
@@ -115,8 +116,8 @@ public class OneBoxTest extends ComponentTestCase {
 		}
 
 		@Override
-		public void consume(List<Message<String>> msgs) {
-			for (Message<String> msg : msgs) {
+		public void consume(List<StoredMessage<String>> msgs) {
+			for (StoredMessage<String> msg : msgs) {
 				String body = msg.getBody();
 				System.out.println(m_id + "<<< " + body);
 				if (body.startsWith("NACK-")) {

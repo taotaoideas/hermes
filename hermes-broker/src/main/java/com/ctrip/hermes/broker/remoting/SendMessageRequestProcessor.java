@@ -5,15 +5,14 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
-import com.ctrip.hermes.message.MessagePackage;
+import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
-import com.ctrip.hermes.storage.message.Message;
 
 public class SendMessageRequestProcessor implements CommandProcessor {
 
@@ -21,6 +20,9 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 	@Inject
 	private MessageChannelManager m_channelManager;
+
+	@Inject
+	private MessageCodec m_msgCodec;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -34,20 +36,15 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
 
-		List<Message> msgs = decode(cmd.getBody());
+		List<Message<byte[]>> msgs = decode(cmd.getBody());
 
 		channel.send(msgs);
 	}
 
-	private List<Message> decode(byte[] body) {
-		MessagePackage pkg = JSON.parseObject(body, MessagePackage.class);
-		// TODO
-		Message msg = new Message();
-		msg.setContent(pkg.getMessage());
-		msg.setPartition((String) pkg.getHeader(MessagePackage.PARTITION));
-		msg.setKey((String) pkg.getHeader(MessagePackage.KEY));
+	private List<Message<byte[]>> decode(byte[] body) {
+		Message<byte[]> pMsg = m_msgCodec.decode(body);
 
-		return Arrays.asList(msg);
+		return Arrays.asList(pMsg);
 	}
 
 }

@@ -1,12 +1,12 @@
 package com.ctrip.hermes.example.demo;
 
 import com.ctrip.hermes.consumer.BaseConsumer;
-import com.ctrip.hermes.consumer.Message;
+import com.ctrip.hermes.message.StoredMessage;
 
 public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 
 	@Override
-	public void consume(Message<Order> msg) {
+	public void consume(StoredMessage<Order> msg) {
 		if (((long) msg.getBody().getPrice()) % 3 == System.currentTimeMillis() % 3) {
 			msg.nack();
 		}

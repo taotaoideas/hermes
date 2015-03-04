@@ -2,7 +2,6 @@ package com.ctrip.hermes.localDev.resource;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,12 +14,9 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.plexus.PlexusContainer;
 import org.unidal.lookup.ContainerLoader;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.localDev.pojo.OutputMessage;
-import com.ctrip.hermes.message.MessagePackage;
-import com.ctrip.hermes.storage.message.Message;
-import com.ctrip.hermes.storage.storage.Offset;
+import com.ctrip.hermes.storage.message.Record;
 
 @Path("/queue")
 public class QueueResource {
@@ -29,7 +25,7 @@ public class QueueResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<OutputMessage> getMessages(@QueryParam("topic") String topic) throws Exception {
-        Map<String, List<Message>> topicMap = container.lookup(MessageQueueMonitor.class).status().getTopics();
+        Map<String, List<Record>> topicMap = container.lookup(MessageQueueMonitor.class).status().getTopics();
         if (topicMap.containsKey(topic)) {
              List<OutputMessage> result = buildOutputMessage(topicMap.get(topic));
             return result;
@@ -38,9 +34,9 @@ public class QueueResource {
         }
     }
 
-    private List<OutputMessage> buildOutputMessage(List<Message> messages) {
+    private List<OutputMessage> buildOutputMessage(List<Record> messages) {
         List<OutputMessage> result = new ArrayList<>();
-        for (Message msg : messages) {
+        for (Record msg : messages) {
             result.add(OutputMessage.convert(msg));
         }
         return result;

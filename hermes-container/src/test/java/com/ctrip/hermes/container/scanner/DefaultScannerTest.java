@@ -9,10 +9,10 @@ import java.util.List;
 import org.junit.Test;
 
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.consumer.Message;
 import com.ctrip.hermes.consumer.Subscribe;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.engine.scanner.DefaultScanner;
+import com.ctrip.hermes.message.StoredMessage;
 
 public class DefaultScannerTest {
 
@@ -20,7 +20,7 @@ public class DefaultScannerTest {
 	public static class MockConsumer implements Consumer<Object> {
 
 		@Override
-		public void consume(List<Message<Object>> msgs) {
+		public void consume(List<StoredMessage<Object>> msgs) {
 		}
 
 	}

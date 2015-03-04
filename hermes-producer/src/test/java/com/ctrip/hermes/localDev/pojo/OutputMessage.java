@@ -4,41 +4,53 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
-import com.ctrip.hermes.message.MessagePackage;
-import com.ctrip.hermes.storage.message.Message;
+import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
 public class OutputMessage {
 
-    public String message;
-    public String key;
-    public Offset offset;
-    public Offset ackOffset;
-    public Map<String, String> properties = new HashMap<String, String>();
-    public long timestamp;
+	public String message;
 
-    public OutputMessage(String message, String key, Offset offset, Offset ackOffset, Map<String, String> properties,
-                         long timestamp) {
-        this.message = message;
-        this.key = key;
-        this.offset = offset;
-        this.ackOffset = ackOffset;
-        this.properties = properties;
-        this.timestamp = timestamp;
-    }
+	public String key;
 
-    public static OutputMessage convert(Message msg) {
-        MessagePackage pkg = JSON.parseObject(((Message) msg).getContent(),
-                MessagePackage.class);
-        String body = null, key = null;
-        if (null != pkg) {
-            body = JSON.parseObject(pkg.getMessage(), String.class);
-            key = JSON.parseObject(pkg.getKey(), String.class);
-        }
+	public Offset offset;
 
-        // todo: get timestamp from <Message>msg
+	public Offset ackOffset;
 
-        return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), msg.getProperties(), new Date().getTime());
-    }
+	public Map<String, String> properties = new HashMap<String, String>();
+
+	public long timestamp;
+
+	public OutputMessage(String message, String key, Offset offset, Offset ackOffset, Map<String, String> properties,
+	      long timestamp) {
+		this.message = message;
+		this.key = key;
+		this.offset = offset;
+		this.ackOffset = ackOffset;
+		this.properties = properties;
+		this.timestamp = timestamp;
+	}
+
+	public static OutputMessage convert(Record msg) {
+		String body = null, key = null;
+		body = new String(msg.getContent());
+		key = msg.getKey();
+
+		// todo: get timestamp from <Message>msg
+
+		return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), msg.getProperties(),
+		      new Date().getTime());
+	}
+
+	public static OutputMessage convert(StoredMessage<byte[]> msg) {
+		String body = null, key = null;
+		body = new String(msg.getBody());
+		key = msg.getKey();
+
+		// todo: get timestamp from <Message>msg
+
+		return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), new HashMap<String, String>(),
+		      new Date().getTime());
+	}
 }

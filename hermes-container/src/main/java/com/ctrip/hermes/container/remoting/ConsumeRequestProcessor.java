@@ -5,14 +5,13 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
+import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
 import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandType;
-import com.ctrip.hermes.storage.message.Message;
 
 public class ConsumeRequestProcessor implements CommandProcessor {
 
@@ -20,6 +19,9 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 
 	@Inject
 	private ConsumerBootstrap m_bootstrap;
+	
+	@Inject
+	private StoredMessageCodec m_codec;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -30,10 +32,7 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 	public void process(CommandContext ctx) {
 		Command cmd = ctx.getCommand();
 
-		// TODO parse cmd.getBody() to multiple message bytes
-		List<Message> msgs = JSON.parseObject(cmd.getBody(), new TypeReference<List<Message>>() {
-		}.getType());
-
+		List<StoredMessage<byte[]>> msgs = m_codec.decode(cmd.getBody());
 		m_bootstrap.deliverMessage(cmd.getCorrelationId(), msgs);
 	}
 
