@@ -33,9 +33,6 @@ LocalDev.service("ProducerService", ['$http', '$q', function ($http, $q) {
         },
 
         sendMsg: function (topic, msg) {
-            var date = new Date();
-            msgs.push(new Message(indexCounter++, date.toLocaleString() + " (" + date.getTime() + ")", msg, "success", "OK"));
-
             $http.get("http://localhost:2765/api" + "/producer/send" + "?topic=" + topic + "&msg=" + msg)
         }
     }

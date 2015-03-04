@@ -17,14 +17,14 @@ LocalDev.service("ConsumerService", ['$http', '$q', function ($http, $q) {
         this.index = index;
         this.timestamp = timestamp;
         this.content = content;
-        this.isOk = isOk;
+        this.isOK = isOk;
         this.status = status;
     }
 
     var i = 1;
     return {
         getConsumerStatus: function (topic) {
-            return $http.get("http://localhost:2765/api" + "/consumer/all");
+            return $http.get("http://localhost:2765/api" + "/consumer" );
         },
         handleData: function (data) {
             var result = [];
@@ -46,8 +46,6 @@ LocalDev.service("ConsumerService", ['$http', '$q', function ($http, $q) {
 
                     consumers.push(new Consumer(consumer.name, msgs));
                 }
-                var mockConsumer = new Consumer("s-1", "single-1",
-                    [new Message(1, 1011, "content111", "success", "ok")]);
 
                 result.push(new ConsumerGroup(group.topic, group.groupName, consumers))
             }
