@@ -31,7 +31,11 @@ public class Bootstrap extends ComponentTestCase {
 	}
 
 	private void startBroker() {
-		lookup(NettyServer.class).start();
+		new Thread() {
+			public void run() {
+				lookup(NettyServer.class).start();
+			}
+		}.start();
 	}
 
 }

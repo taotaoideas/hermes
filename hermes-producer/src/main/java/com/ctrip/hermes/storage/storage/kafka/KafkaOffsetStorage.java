@@ -6,7 +6,9 @@ import kafka.consumer.ConsumerConfig;
 import kafka.producer.ProducerConfig;
 
 import com.ctrip.hermes.storage.spi.typed.OffsetStorage;
+import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Offset;
+import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
 
 public class KafkaOffsetStorage extends AbstractKafkaStorage<Offset> implements OffsetStorage {
@@ -21,4 +23,21 @@ public class KafkaOffsetStorage extends AbstractKafkaStorage<Offset> implements 
 
 	}
 
+	@Override
+   public Browser<Offset> createBrowser(long offset) {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
+	
+	@Override
+	public List<Offset> read(Range range) throws StorageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Offset top() throws StorageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
