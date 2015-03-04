@@ -20,12 +20,12 @@ public class TracingMessageValve implements Valve, LogEnabled {
 		Message<Object> msg = (Message<Object>) payload;
 		String topic = msg.getTopic();
 
-		Transaction t = Cat.newTransaction("Message", topic);
+		Transaction t = Cat.newTransaction("Produce", topic);
 		t.addData("key=" + msg.getKey());
 
 		try {
 			ctx.next(payload);
-			t.setStatus("0");
+			t.setStatus(Transaction.SUCCESS);
 		} catch (RuntimeException e) {
 			m_logger.error("Error send message", e);
 			Cat.logError(e);

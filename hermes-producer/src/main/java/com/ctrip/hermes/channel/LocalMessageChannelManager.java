@@ -1,7 +1,6 @@
 package com.ctrip.hermes.channel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,9 @@ import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
+import com.dianping.cat.message.Transaction;
 
 public class LocalMessageChannelManager implements MessageChannelManager, LogEnabled {
 
@@ -34,7 +36,8 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 	}
 
 	@Override
-	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId, final String partition) {
+	public synchronized ConsumerChannel newConsumerChannel(final String topic, final String groupId,
+	      final String partition) {
 		return new ConsumerChannel() {
 
 			private MessageQueue m_q = m_queueManager.findQueue(topic, groupId, partition);
@@ -51,7 +54,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 					List<ConsumerChannelHandler> curHandlers = m_handlers.get(triple);
 
 					if (curHandlers == null) {
-						curHandlers = startQueuePuller(m_q);
+						curHandlers = startQueuePuller(m_q, topic);
 						m_handlers.put(triple, curHandlers);
 					}
 					curHandlers.add(handler);
@@ -65,10 +68,10 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				m_q.ack(recs);
 			}
 		};
-		
+
 	}
-	
-	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q) {
+
+	private List<ConsumerChannelHandler> startQueuePuller(final MessageQueue q, final String topic) {
 		// TODO
 		final List<ConsumerChannelHandler> handlers = Collections
 		      .synchronizedList(new ArrayList<ConsumerChannelHandler>());
@@ -83,9 +86,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 					List<Message> msgs = q.read(100);
 
 					if (CollectionUtil.notEmpty(msgs)) {
-						for (Message msg : msgs) {
-							dispatchMessage(msg);
-						}
+						dispatchMessage(msgs);
 					} else {
 						try {
 							Thread.sleep(100);
@@ -95,7 +96,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				}
 			}
 
-			private void dispatchMessage(Message msg) {
+			private void dispatchMessage(List<Message> msgs) {
 				while (true) {
 					if (handlers.isEmpty()) {
 						// TODO shutdown and cleanup
@@ -107,8 +108,20 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 						int curIdx = m_idx++;
 						ConsumerChannelHandler handler = handlers.get(curIdx % handlers.size());
 						if (handler.isOpen()) {
-							// TODO handle exception
-							handler.handle(Arrays.asList(msg));
+							Transaction t = Cat.newTransaction("Deliver", topic);
+
+							try {
+								appendCatEvent(t, msgs, topic);
+
+								handler.handle(msgs);
+
+								t.setStatus(Transaction.SUCCESS);
+							} catch (Exception e) {
+								// TODO handle exception
+								t.setStatus(e);
+							} finally {
+								t.complete();
+							}
 							break;
 						} else {
 							m_logger.info(String.format("Remove closed consumer handler %s", handler));
@@ -125,7 +138,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 	}
 
 	@Override
-	public ProducerChannel newProducerChannel(String topic) {
+	public ProducerChannel newProducerChannel(final String topic) {
 		final MessageQueue q = m_queueManager.findQueue(topic);
 
 		// TODO
@@ -133,7 +146,19 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 			@Override
 			public void send(List<Message> msgs) {
-				q.write(msgs);
+				Transaction t = Cat.newTransaction("Receive", topic);
+
+				try {
+					appendCatEvent(t, msgs, topic);
+
+					q.write(msgs);
+
+					t.setStatus(Transaction.SUCCESS);
+				} catch (Throwable e) {
+					t.setStatus(e);
+				} finally {
+					t.complete();
+				}
 			}
 
 			@Override
@@ -142,6 +167,12 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 			}
 		};
+	}
+
+	private void appendCatEvent(Transaction t, List<Message> msgs, String topic) {
+		for (Message msg : msgs) {
+			Cat.logEvent("Message", topic, Event.SUCCESS, msg.getKey());
+		}
 	}
 
 	@Override

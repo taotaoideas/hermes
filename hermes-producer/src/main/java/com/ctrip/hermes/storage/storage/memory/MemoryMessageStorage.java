@@ -5,7 +5,7 @@ import java.util.Map;
 import com.ctrip.hermes.storage.message.Message;
 import com.ctrip.hermes.storage.spi.typed.MessageStorage;
 
-public class MemoryMessageStorage extends AbstractMemoryStorage<Message> implements MessageStorage{
+public class MemoryMessageStorage extends AbstractMemoryStorage<Message> implements MessageStorage {
 
 	public MemoryMessageStorage(String id) {
 		super(id);
@@ -20,6 +20,7 @@ public class MemoryMessageStorage extends AbstractMemoryStorage<Message> impleme
 		newMsg.setOffset(msg.getOffset());
 		newMsg.setPriority(msg.getPriority());
 		newMsg.setPartition(msg.getPartition());
+		newMsg.setKey(msg.getKey());
 
 		for (Map.Entry<String, String> entry : newMsg.getProperties().entrySet()) {
 			newMsg.setProperty(entry.getKey(), entry.getValue());

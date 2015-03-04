@@ -2,23 +2,16 @@ package com.ctrip.hermes.consumer;
 
 import com.ctrip.hermes.storage.storage.Offset;
 
-public class Message<T> {
-
-	private T m_body;
+// TODO extends com.ctrip.hermes.message and rename and remove duplicate fields
+public class Message<T> extends com.ctrip.hermes.message.Message<T> {
 
 	private com.ctrip.hermes.storage.message.Message m_storageMsg;
 
 	private boolean m_success = true;
 
-	private String m_key;
-
 	public Message(T body, com.ctrip.hermes.storage.message.Message msg) {
-		m_body = body;
+		setBody(body);
 		m_storageMsg = msg;
-	}
-
-	public T getBody() {
-		return m_body;
 	}
 
 	public Offset getAckOffset() {
@@ -35,14 +28,6 @@ public class Message<T> {
 
 	public boolean isSuccess() {
 		return m_success;
-	}
-
-	public String getKey() {
-		return m_key;
-	}
-
-	public void setKey(String key) {
-		m_key = key;
 	}
 
 }
