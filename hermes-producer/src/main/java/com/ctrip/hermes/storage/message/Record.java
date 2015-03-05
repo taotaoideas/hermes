@@ -98,7 +98,7 @@ public class Record implements Locatable {
 		setProperty(MessageConstants.PROP_BORNTIME, time);
 	}
 
-	public long getBornTime() {
-		return (long) getProperty(MessageConstants.PROP_BORNTIME);
+	public Long getBornTime() {
+		return (Long) getProperty(MessageConstants.PROP_BORNTIME);
 	}
 }

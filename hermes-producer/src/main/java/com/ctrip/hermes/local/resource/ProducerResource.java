@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.ctrip.hermes.local.pojo.Order;
 import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.producer.Producer;
 
@@ -24,12 +25,19 @@ public class ProducerResource {
     public Boolean sendMsg(@QueryParam("topic") String topic,
                         @QueryParam("msg") String msg,
                         @QueryParam("key") String key) {
+
+        Object toSend = msg;
+        if("order.new".equals(topic)) {
+            String[] parts = msg.split("\\s");
+            toSend = new Order(parts[0], parts.length < 2 ? 0 : Double.parseDouble(parts[1]));
+        }
+
         Boolean isSuccess = true;
         if (null == key) {
-            Producer.getInstance().message(topic, msg).send();
+            Producer.getInstance().message(topic, toSend).send();
             history.add(new OutputMessage(msg, key, null,null, null, new Date().getTime()));
         } else {
-            Producer.getInstance().message(topic, msg).withKey(key).send();
+            Producer.getInstance().message(topic, toSend).withKey(key).send();
             history.add(new OutputMessage(msg, key, null,null, null, new Date().getTime()));
         }
         return isSuccess;

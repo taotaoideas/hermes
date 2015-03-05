@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.ctrip.hermes.local.pojo.MockConsumer;
+import com.ctrip.hermes.local.pojo.MockConsumerGroup;
 import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.message.StoredMessage;
 import com.google.common.collect.ArrayListMultimap;
@@ -59,33 +61,5 @@ public class MockConsumers {
         List<MockConsumer> consumers = consumerMap.get(topic + SPLITER + group);
 
         consumers.get(new Random().nextInt(consumers.size())).consumeOneMsg(msg);
-    }
-
-
-
-    public class MockConsumerGroup {
-        public String topic;
-        public String groupName;
-        public List<MockConsumer> consumers;
-
-        public MockConsumerGroup(String topic, String groupName, List<MockConsumer> consumers) {
-            this.topic = topic;
-            this.groupName = groupName;
-            this.consumers = consumers;
-        }
-    }
-
-
-    public class MockConsumer {
-        public String name;
-        public List<OutputMessage> messages = new ArrayList<>();
-
-        public MockConsumer(String name) {
-            this.name = name;
-        }
-
-        public void consumeOneMsg(StoredMessage<byte[]> msg) {
-            messages.add(OutputMessage.convert(msg));
-        }
     }
 }

@@ -29,6 +29,7 @@ LocalDev.controller("ProducerCtrl", function ($scope, $q, MainService, ProducerS
         if (undefined == $scope.tooltip.message) {
 
         } else {
+            MainService.setSelectedTopic($scope.selectedTopic);
             ProducerService.sendMsg($scope.selectedTopic, $scope.tooltip.message);
             $scope.tooltip.message = undefined;
         }
