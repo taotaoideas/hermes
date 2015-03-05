@@ -43,17 +43,26 @@
                 <!--Topic DropDown-->
                 <button type="button" class="btn btn-md btn-default" data-animation="am-flip-x"
                         bs-dropdown="topic_dropdown">
-                    Topic: {{selectedTopic}}<span class="caret"></span>
+                   Topic: {{selectedTopic}}<span class="caret"></span>
                 </button>
             </div>
+
         </div>
-        <div class="col-md-5">
+        <div class="col-md-1 col-md-offset-8">
+            <button type="submit" class="btn btn-sm btn-info " ng-click=send()>Add One Consumer
+            </button>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-6">
             <!--Producer-->
             <div class="producer" ng-controller="ProducerCtrl">
                 <h2>Producer: details...</h2>
 
                 <div class="input-group">
-                    <span class="input-group-addon" id="basic-addon1">Topic:</span>
+                    <span class="input-group-addon" id="basic-addon1"><strong>Topic:</strong></span>
 
                     <input type="text" class="form-control" data-placement="top" data-type="info"
                            data-container="body" placeholder={{selectedTopic}}
@@ -98,7 +107,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-6">
             <!--Queue-->
             <div class="queue" ng-controller="QueueCtrl">
                 <h2>Queue: details...</h2>

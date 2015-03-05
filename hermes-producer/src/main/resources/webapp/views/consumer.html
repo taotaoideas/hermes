@@ -13,7 +13,7 @@
                     <th>Status</th>
                 </tr>
                 </thead>
-                <tbody ng-repeat="msg in consumer.msgs">
+                <tbody ng-repeat="msg in consumer.msgs | orderBy: '-index'">
                 <tr class = {{msg.isOK}}>
                 <td>{{msg.index}}</td>
                     <td>{{msg.timestamp}}</td>
