@@ -1,4 +1,4 @@
-package com.ctrip.hermes.localDev.resource;
+package com.ctrip.hermes.local.resource;
 
 
 import java.util.Set;

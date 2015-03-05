@@ -1,11 +1,11 @@
-package com.ctrip.hermes.localDev;
+package com.ctrip.hermes.local;
 
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.ctrip.hermes.localDev.pojo.OutputMessage;
+import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.message.StoredMessage;
 import com.google.common.collect.ArrayListMultimap;
 

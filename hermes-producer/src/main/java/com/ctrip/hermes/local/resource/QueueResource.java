@@ -1,4 +1,4 @@
-package com.ctrip.hermes.localDev.resource;
+package com.ctrip.hermes.local.resource;
 
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.unidal.lookup.ContainerLoader;
 
 import com.ctrip.hermes.channel.MessageQueueMonitor;
-import com.ctrip.hermes.localDev.pojo.OutputMessage;
+import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.storage.message.Record;
 
 @Path("/queue")

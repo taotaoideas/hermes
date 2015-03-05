@@ -1,4 +1,4 @@
-package com.ctrip.hermes.localDev.pojo;
+package com.ctrip.hermes.local.pojo;
 
 import java.util.Date;
 import java.util.HashMap;

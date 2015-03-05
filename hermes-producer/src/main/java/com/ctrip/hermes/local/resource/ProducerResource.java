@@ -1,4 +1,4 @@
-package com.ctrip.hermes.localDev.resource;
+package com.ctrip.hermes.local.resource;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,7 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.ctrip.hermes.localDev.pojo.OutputMessage;
+import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.producer.Producer;
 
 
