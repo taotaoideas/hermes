@@ -33,8 +33,8 @@ public class KafkaGroup {
 	}
 
 	public StoragePair<Record> createMessagePair() {
-		KafkaMessageStorage main = new KafkaMessageStorage(m_topic, m_partition, m_pc, m_cc);
-		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_" + m_topic + "_" + m_groupId, m_partition, m_pc, m_cc);
+		KafkaMessageStorage main = new KafkaMessageStorage(m_topic, m_pc, m_cc);
+		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_" + m_topic);
 
 		MessagePair pair = new MessagePair(main, offset);
 
@@ -44,8 +44,7 @@ public class KafkaGroup {
 
 	public StoragePair<Resend> createResendPair() {
 		KafkaResendStorage resend = new KafkaResendStorage("resend_" + m_topic + "_" + m_groupId, m_partition, m_pc, m_cc);
-		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_resend_" + m_topic + "_" + m_groupId, m_partition,
-		      m_pc, m_cc);
+		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_resend_" + m_topic);
 		ResendPair pair = new ResendPair(resend, offset, Long.MAX_VALUE);
 		return pair;
 	}

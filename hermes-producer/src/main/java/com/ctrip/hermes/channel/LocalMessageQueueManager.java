@@ -107,6 +107,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			props.put("serializer.class", DefaultEncoder.class.getCanonicalName());
 			props.put("key.serializer.class", StringEncoder.class.getCanonicalName());
 			props.put("group.id", groupId);
+			props.put("consumer.timeout.ms", "100");
 			ProducerConfig pc = new ProducerConfig(props);
 			ConsumerConfig cc = new ConsumerConfig(props);
 
