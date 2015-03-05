@@ -12,14 +12,16 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.unidal.lookup.ContainerLoader;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.channel.MessageQueueMonitor;
+import com.ctrip.hermes.channel.*;
 import com.ctrip.hermes.local.MockConsumers;
 import com.ctrip.hermes.local.pojo.MockConsumer;
 import com.ctrip.hermes.local.pojo.MockConsumerGroup;
 import com.ctrip.hermes.local.pojo.OutputMessage;
+import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.storage.Locatable;
@@ -31,15 +33,35 @@ public class ConsumerResource {
 
 
     @GET
-    @Path("/old")
+    @Path("/add")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<MockConsumerGroup> oldGetDetails(@QueryParam("topic") String topic) {
-        if (null == topic) {
-
-            return MockConsumers.getInstance().getAllGroup();
-        } else {
-            return MockConsumers.getInstance().getGroupByTopic(topic);
+    public Object addOneConsumer(@QueryParam("topic") String topic,
+                                 @QueryParam("group") String group) {
+        try {
+            startConsumerGroup(topic, group);
+        } catch (Exception e) {
+            return e.getMessage();
         }
+        return true;
+    }
+
+    private void startConsumerGroup(final String topic, final String group) throws ComponentLookupException {
+        MessageChannelManager manager = container.lookup(MessageChannelManager.class, LocalMessageChannelManager.ID);
+
+        ConsumerChannel cc = manager.newConsumerChannel(topic, group);
+        cc.start(new ConsumerChannelHandler() {
+            @Override
+            public void handle(List<StoredMessage<byte[]>> msgs) {
+                for (StoredMessage<byte[]> msg : msgs) {
+                    MockConsumers.getInstance().consumeOneMsg(topic, group, msg);
+                }
+            }
+
+            @Override
+            public boolean isOpen() {
+                return true;
+            }
+        });
     }
 
     @GET
