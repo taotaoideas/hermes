@@ -32,14 +32,7 @@ LocalDev
     })
     .controller("DropdownCtrl", function ($scope, $q, $alert, MainService) {
 
-        MainService.getTopicDropDown().success(function (data, status, headers, config) {
-            $scope.topic_dropdown = MainService.handleTopicDropdown(data);
-
-            if (MainService.getSelectedTopic() == undefined
-                && $scope.topic_dropdown.length > 0) {
-               $scope.$setTopic($scope.topic_dropdown[0].text);
-            }
-        });
+        updateDropdown();
 
         $scope.$setTopic = function(topic) {
             MainService.setSelectedTopic(topic);
@@ -47,5 +40,17 @@ LocalDev
 
         $scope.$watch(function() {return MainService.getSelectedTopic()}, function() {
             $scope.selectedTopic = MainService.getSelectedTopic();
-        })
+            updateDropdown();
+        });
+
+        function updateDropdown() {
+            MainService.getTopicDropDown().success(function (data, status, headers, config) {
+                $scope.topic_dropdown = MainService.handleTopicDropdown(data);
+
+                if (MainService.getSelectedTopic() == undefined
+                    && $scope.topic_dropdown.length > 0) {
+                    $scope.$setTopic($scope.topic_dropdown[0].text);
+                }
+            });
+        }
     })

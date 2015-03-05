@@ -39,7 +39,9 @@ LocalDev.service("MainService", ['$http', '$q', function ($http, $q) {
 
         getSelectedTopic : function() {
             return selectedTopic;
-        }
+        },
+
+
 
     };
 }]);
