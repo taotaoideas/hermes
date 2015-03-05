@@ -27,6 +27,7 @@ public class DefaultProducer extends Producer {
 
 		@Override
 		public void send() {
+			m_msg.setBornTime(System.currentTimeMillis());
 			m_pipe.put(m_msg);
 		}
 

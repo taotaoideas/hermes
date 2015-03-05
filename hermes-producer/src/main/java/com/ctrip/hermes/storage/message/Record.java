@@ -13,7 +13,7 @@ public class Record implements Locatable {
 
 	private byte[] m_content;
 
-	private Map<String, String> m_properties = new HashMap<String, String>();
+	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
 	private Offset m_offset;
 
@@ -53,19 +53,19 @@ public class Record implements Locatable {
 		m_content = content;
 	}
 
-	public void setProperty(String key, String value) {
+	public void setProperty(String key, Object value) {
 		m_properties.put(key, value);
 	}
 
-	public String getProperty(String key) {
+	public Object getProperty(String key) {
 		return m_properties.get(key);
 	}
 
-	public Map<String, String> getProperties() {
+	public Map<String, Object> getProperties() {
 		return m_properties;
 	}
 
-	public void setProperties(Map<String, String> properties) {
+	public void setProperties(Map<String, Object> properties) {
 		m_properties = properties;
 	}
 
@@ -74,7 +74,7 @@ public class Record implements Locatable {
 	}
 
 	public int getPriority() {
-		return StringUtil.safeToInt(getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
+		return StringUtil.safeToInt((String)getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
 	}
 
 	public void setPartition(String partition) {
@@ -82,7 +82,7 @@ public class Record implements Locatable {
 	}
 
 	public String getPartition() {
-		return getProperty(MessageConstants.PROP_PARTITION);
+		return (String) getProperty(MessageConstants.PROP_PARTITION);
 	}
 
 	public void setKey(String key) {
@@ -90,6 +90,14 @@ public class Record implements Locatable {
 	}
 
 	public String getKey() {
-		return getProperty(MessageConstants.PROP_KEY);
+		return (String) getProperty(MessageConstants.PROP_KEY);
+	}
+	
+	public void setBornTime(long time) {
+		setProperty(MessageConstants.PROP_BORNTIME, time);
+	}
+	
+	public long getBornTime() {
+		return (long) getProperty(MessageConstants.PROP_BORNTIME);
 	}
 }

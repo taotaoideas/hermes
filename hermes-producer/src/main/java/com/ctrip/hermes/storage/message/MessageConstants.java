@@ -8,4 +8,6 @@ public class MessageConstants {
 
 	public static final String PROP_KEY = "KEY";
 
+	public static final String PROP_BORNTIME = "BORNTIME";
+
 }

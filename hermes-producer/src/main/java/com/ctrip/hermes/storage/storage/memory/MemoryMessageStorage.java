@@ -22,7 +22,7 @@ public class MemoryMessageStorage extends AbstractMemoryStorage<Record> implemen
 		newMsg.setPartition(msg.getPartition());
 		newMsg.setKey(msg.getKey());
 
-		for (Map.Entry<String, String> entry : newMsg.getProperties().entrySet()) {
+		for (Map.Entry<String, Object> entry : newMsg.getProperties().entrySet()) {
 			newMsg.setProperty(entry.getKey(), entry.getValue());
 		}
 
