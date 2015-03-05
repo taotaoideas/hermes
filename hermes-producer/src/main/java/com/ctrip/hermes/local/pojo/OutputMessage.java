@@ -18,11 +18,11 @@ public class OutputMessage {
 
 	public Offset ackOffset;
 
-	public Map<String, String> properties = new HashMap<String, String>();
+	public Map<String, Object> properties = new HashMap<String, Object>();
 
 	public long timestamp;
 
-	public OutputMessage(String message, String key, Offset offset, Offset ackOffset, Map<String, String> properties,
+	public OutputMessage(String message, String key, Offset offset, Offset ackOffset, Map<String, Object> properties,
 	      long timestamp) {
 		this.message = message;
 		this.key = key;
@@ -50,7 +50,7 @@ public class OutputMessage {
 
 		// todo: get timestamp from <Message>msg
 
-		return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), new HashMap<String, String>(),
+		return new OutputMessage(body, key, msg.getOffset(), msg.getAckOffset(), new HashMap<String, Object>(),
 		      new Date().getTime());
 	}
 }

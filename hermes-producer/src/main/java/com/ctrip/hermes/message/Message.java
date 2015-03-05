@@ -11,6 +11,8 @@ public class Message<T> {
 
 	private String m_partition;
 
+	private long m_bornTime;
+
 	public T getBody() {
 		return m_body;
 	}
@@ -49,6 +51,14 @@ public class Message<T> {
 
 	public void setTopic(String topic) {
 		m_topic = topic;
+	}
+
+	public long getBornTime() {
+		return m_bornTime;
+	}
+
+	public void setBornTime(long bornTime) {
+		m_bornTime = bornTime;
 	}
 
 }

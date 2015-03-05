@@ -25,6 +25,7 @@ public class DefaultMessageCodec implements MessageCodec {
 			codec.writeString(msg.getKey());
 			codec.writeString(msg.getPartition());
 			codec.writeBoolean(msg.isPriority());
+			codec.writeLong(msg.getBornTime());
 
 			codec.writeBytes(msgBody);
 		} catch (IOException e) {
@@ -49,6 +50,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		msg.setKey(codec.readString());
 		msg.setPartition(codec.readString());
 		msg.setPriority(codec.readBoolean());
+		msg.setBornTime(codec.readLong());
 		// TODO should use ByteBuffer
 		msg.setBody(codec.readBytes());
 
