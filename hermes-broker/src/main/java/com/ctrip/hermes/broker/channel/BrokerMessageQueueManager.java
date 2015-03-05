@@ -1,4 +1,4 @@
-package com.ctrip.hermes.channel;
+package com.ctrip.hermes.broker.channel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +12,7 @@ import kafka.serializer.StringEncoder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
@@ -26,10 +27,10 @@ import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
 import com.ctrip.hermes.storage.storage.mysql.MysqlGroup;
 
-public class LocalMessageQueueManager implements MessageQueueManager {
-
-	public final static String ID = "local";
+public class BrokerMessageQueueManager implements MessageQueueManager {
 	
+	public final static String ID = "broker";
+
 	@Inject
 	private MetaService m_meta;
 

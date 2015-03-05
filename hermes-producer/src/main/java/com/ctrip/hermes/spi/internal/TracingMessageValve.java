@@ -8,6 +8,7 @@ import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.spi.Valve;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.message.spi.MessageTree;
 
 public class TracingMessageValve implements Valve, LogEnabled {
 	public static final String ID = "tracing";
@@ -20,11 +21,18 @@ public class TracingMessageValve implements Valve, LogEnabled {
 		Message<Object> msg = (Message<Object>) payload;
 		String topic = msg.getTopic();
 
-		Transaction t = Cat.newTransaction(topic, "Produce");
-		t.addData("key=" + msg.getKey());
+		Transaction t = Cat.newTransaction("Produce", topic);
+		t.addData("key", msg.getKey());
 
 		try {
 			ctx.next(payload);
+
+			MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+			String msgId = Cat.createMessageId();
+			Cat.logEvent("RemoteCall", msgId);
+			ctx.put("CatMessageId", msgId);
+			ctx.put("CatParentMessageId", tree.getMessageId());
+			ctx.put("CatRootMessageId", tree.getRootMessageId());
 			t.setStatus(Transaction.SUCCESS);
 		} catch (RuntimeException e) {
 			m_logger.error("Error send message", e);

@@ -1,5 +1,8 @@
 package com.ctrip.hermes.message;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Message<T> {
 	private String m_topic;
 
@@ -12,6 +15,8 @@ public class Message<T> {
 	private String m_partition;
 
 	private long m_bornTime;
+
+	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
 	public T getBody() {
 		return m_body;
@@ -59,6 +64,14 @@ public class Message<T> {
 
 	public void setBornTime(long bornTime) {
 		m_bornTime = bornTime;
+	}
+
+	public Map<String, Object> getProperties() {
+		return m_properties;
+	}
+
+	public void setProperties(Map<String, Object> properties) {
+		m_properties = properties;
 	}
 
 }

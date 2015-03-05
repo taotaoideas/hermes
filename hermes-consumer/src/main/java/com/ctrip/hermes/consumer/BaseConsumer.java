@@ -15,7 +15,8 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 			String topic = msgs.get(0).getTopic();
 
 			for (StoredMessage<T> msg : msgs) {
-				Transaction t = Cat.newTransaction(topic, "Consume");
+				Transaction t = Cat.newTransaction("Consume", topic);
+
 				try {
 					t.addData("topic", topic);
 					t.addData("key", msg.getKey());
@@ -25,6 +26,8 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 
 					consume(msg);
 
+					Cat.logEvent("Consume:1.1.1.1", topic + ":" + getGroupId());
+					Cat.logEvent("Message:" + topic, "Consume:1.1.1.1");
 					t.setStatus(msg.isSuccess() ? Transaction.SUCCESS : "NACK");
 				} catch (RuntimeException e) {
 					t.setStatus(e);

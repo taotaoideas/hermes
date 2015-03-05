@@ -34,11 +34,13 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.message.Pipeline</role>
+					<role-hint>producer</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.Pipeline</role>
+			<role-hint>producer</role-hint>
 			<implementation>com.ctrip.hermes.message.internal.ProducerPipeline</implementation>
 			<requirements>
 				<requirement>
@@ -175,11 +177,13 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+					<role-hint>local</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+			<role-hint>local</role-hint>
 			<implementation>com.ctrip.hermes.channel.LocalMessageQueueManager</implementation>
 			<requirements>
 				<requirement>
@@ -211,6 +215,7 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+					<role-hint>local</role-hint>
 				</requirement>
 			</requirements>
 		</component>

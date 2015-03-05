@@ -17,8 +17,15 @@ public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 
 	private boolean shouldNack(StoredMessage<Order> msg) {
 		long price = (long) msg.getBody().getPrice();
+		boolean nack = price % 3 == System.currentTimeMillis() % 3;
 
-		return price % 3 == System.currentTimeMillis() % 3;
+		String prefix = "ACK";
+		if (nack) {
+			prefix = "NACK";
+		}
+		System.out.println(String.format("%s %s", prefix, msg.getBody()));
+
+		return nack;
 	}
 
 	protected abstract String getGroupId();

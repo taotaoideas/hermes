@@ -1,4 +1,4 @@
-package com.ctrip.hermes.channel;
+package com.ctrip.hermes.broker.channel;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,9 +9,20 @@ import java.util.Map;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.tuple.Pair;
 import org.unidal.tuple.Triple;
 
+import com.ctrip.hermes.channel.ConsumerChannel;
+import com.ctrip.hermes.channel.ConsumerChannelHandler;
+import com.ctrip.hermes.channel.MessageChannelManager;
+import com.ctrip.hermes.channel.MessageQueueManager;
+import com.ctrip.hermes.channel.ProducerChannel;
+import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.PipelineContext;
+import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.internal.DeliverPipeline;
+import com.ctrip.hermes.message.internal.ReceiverPipeline;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
@@ -19,14 +30,19 @@ import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
-import com.dianping.cat.message.spi.MessageTree;
 
-public class LocalMessageChannelManager implements MessageChannelManager, LogEnabled {
+public class BrokerMessageChannelManager implements MessageChannelManager, LogEnabled {
 
-	public static final String ID = "local";
+	public static final String ID = "broker";
 
 	@Inject
 	private MessageQueueManager m_queueManager;
+
+	@Inject
+	private DeliverPipeline m_deliverPipeline;
+
+	@Inject
+	private ReceiverPipeline m_receiverPipeline;
 
 	private Map<Triple<String, String, String>, List<ConsumerChannelHandler>> m_handlers = new HashMap<>();
 
@@ -51,7 +67,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 			@Override
 			public void start(ConsumerChannelHandler handler) {
-				synchronized (LocalMessageChannelManager.this) {
+				synchronized (BrokerMessageChannelManager.this) {
 					Triple<String, String, String> triple = new Triple<>(topic, groupId, partition);
 					List<ConsumerChannelHandler> curHandlers = m_handlers.get(triple);
 
@@ -107,7 +123,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 						}
 					} else {
 						int curIdx = m_idx++;
-						ConsumerChannelHandler handler = handlers.get(curIdx % handlers.size());
+						final ConsumerChannelHandler handler = handlers.get(curIdx % handlers.size());
 						if (handler.isOpen()) {
 							Transaction t = Cat.newTransaction("Deliver", topic);
 
@@ -119,7 +135,15 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 									msgs.add(new StoredMessage(r, topic));
 								}
 
-								handler.handle(msgs);
+								m_deliverPipeline.put(new Pair<>(msgs, new PipelineSink() {
+
+									@Override
+									public void handle(PipelineContext ctx, Object payload) {
+										List<StoredMessage<byte[]>> sinkMsgs = (List<StoredMessage<byte[]>>) payload;
+
+										handler.handle(sinkMsgs);
+									}
+								}));
 
 								t.setStatus(Transaction.SUCCESS);
 							} catch (Exception e) {
@@ -152,28 +176,35 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		return new ProducerChannel() {
 
 			@Override
-			public void send(List<com.ctrip.hermes.message.Message<byte[]>> pMsgs) {
-				Transaction t = Cat.newTransaction("Receive", topic);
+			public void send(final List<Message<byte[]>> msgs) {
+				final Transaction t = Cat.newTransaction("Receive", topic);
 
-//				MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-//				tree.setRootMessageId(rootMessageId);
-//				tree.setMessageId(messageId);
-//				tree.setParentMessageId(parentMessageId);
-				
+				// MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+				// tree.setRootMessageId(rootMessageId);
+				// tree.setMessageId(messageId);
+				// tree.setParentMessageId(parentMessageId);
+
 				try {
+					m_receiverPipeline.put(new Pair<>(msgs, new PipelineSink() {
 
-					List<Record> cMsgs = new ArrayList<Record>();
-					for (com.ctrip.hermes.message.Message<byte[]> pMsg : pMsgs) {
-						cMsgs.add(new Record(pMsg));
-					}
+						@Override
+						public void handle(PipelineContext ctx, Object payload) {
+							List<Message<byte[]>> sinkMsgs = (List<Message<byte[]>>) payload;
 
-					appendCatEvent(t, cMsgs, topic, "ReceiveMessage");
+							final List<Record> records = new ArrayList<Record>();
+							for (Message<byte[]> msg : sinkMsgs) {
+								records.add(new Record(msg));
+							}
 
-					// TODO attach cat rootMessageId, messageId to msg
-					q.write(cMsgs);
+							appendCatEvent(t, records, topic, "ReceiveMessage");
+							// TODO attach cat rootMessageId, messageId to msg
+							q.write(records);
+						}
+					}));
 
 					t.setStatus(Transaction.SUCCESS);
 				} catch (Throwable e) {
+					m_logger.error("", e);
 					t.setStatus(e);
 				} finally {
 					t.complete();

@@ -32,7 +32,7 @@ public class AbstractValveRegistry extends ContainerHolder implements ValveRegis
 	}
 
 	@Override
-	public void registerValve(Valve valve, String name, int order) {
+	public synchronized void registerValve(Valve valve, String name, int order) {
 		m_tuples.add(new Triple<Valve, String, Integer>(valve, name, order));
 
 		ArrayList<Valve> newValves = new ArrayList<>();

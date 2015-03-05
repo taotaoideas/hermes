@@ -74,8 +74,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MetaManager.class));
 
 		all.add(C(Producer.class, DefaultProducer.class) //
-		      .req(Pipeline.class));
-		all.add(C(Pipeline.class, ProducerPipeline.class) //
+		      .req(Pipeline.class, PRODUCER));
+		all.add(C(Pipeline.class, PRODUCER, ProducerPipeline.class) //
 		      .req(ValveRegistry.class, PRODUCER) //
 		      .req(ProducerSinkManager.class));
 
@@ -114,8 +114,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// channel
 		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.ID, LocalMessageChannelManager.class) //
-		      .req(MessageQueueManager.class));
-		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.class) //
+		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
+		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.ID, LocalMessageQueueManager.class) //
 		      .req(MetaService.class));
 
 		// command processors
@@ -126,7 +126,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(StoredMessageCodec.class, DefaultStoredMessageCodec.class));
 
 		all.add(C(MessageQueueMonitor.class) //
-		      .req(MessageQueueManager.class));
+		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
 
 		return all;
 	}

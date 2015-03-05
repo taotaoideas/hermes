@@ -18,7 +18,7 @@ public class Bootstrap extends ComponentTestCase {
 	@Test
 	public void start() throws Exception {
 		startBroker();
-		startLocalDevServer();
+//		startLocalDevServer();
 		
 		startConsumers();
 		OrderProducer p = new OrderProducer();

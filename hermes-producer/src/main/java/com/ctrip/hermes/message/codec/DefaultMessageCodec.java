@@ -2,6 +2,7 @@ package com.ctrip.hermes.message.codec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import org.unidal.lookup.annotation.Inject;
 
@@ -26,7 +27,12 @@ public class DefaultMessageCodec implements MessageCodec {
 			codec.writeString(msg.getPartition());
 			codec.writeBoolean(msg.isPriority());
 			codec.writeLong(msg.getBornTime());
-
+			
+//			codec.writeLong(msg.getProperties().size());
+//			for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
+//				
+//         }
+			
 			codec.writeBytes(msgBody);
 		} catch (IOException e) {
 			// ByteArrayOutputStream won't throw IOException
