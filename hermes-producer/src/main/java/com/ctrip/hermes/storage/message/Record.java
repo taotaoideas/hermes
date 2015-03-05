@@ -24,6 +24,7 @@ public class Record implements Locatable {
 		setPartition(msg.getPartition());
 		setPriority(msg.isPriority() ? 0 : 1);
 		setKey(msg.getKey());
+		setBornTime(msg.getBornTime());
 	}
 
 	public Record() {
@@ -74,7 +75,7 @@ public class Record implements Locatable {
 	}
 
 	public int getPriority() {
-		return StringUtil.safeToInt((String)getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
+		return StringUtil.safeToInt((String) getProperty(MessageConstants.PROP_PRIORITY), DEFAULT_PRIORITY);
 	}
 
 	public void setPartition(String partition) {
@@ -92,11 +93,11 @@ public class Record implements Locatable {
 	public String getKey() {
 		return (String) getProperty(MessageConstants.PROP_KEY);
 	}
-	
+
 	public void setBornTime(long time) {
 		setProperty(MessageConstants.PROP_BORNTIME, time);
 	}
-	
+
 	public Long getBornTime() {
 		return (Long) getProperty(MessageConstants.PROP_BORNTIME);
 	}
