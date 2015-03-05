@@ -15,30 +15,27 @@ import com.ctrip.hermes.local.LocalDevServer;
 
 public class Bootstrap extends ComponentTestCase {
 
-	@BeforeClass
-	public static void beforeClass() {
-		System.setProperty("devMode", "true");
-	}
-
 	@Test
 	public void start() throws Exception {
-
 		startBroker();
 		startLocalDevServer();
+		
+		startConsumers();
+		OrderProducer p = new OrderProducer();
 
-		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
+		while (true) {
+			p.send();
+			System.in.read();
+		}
+	}
+
+	private void startConsumers() {
 		List<Subscriber> subs = lookup(Scanner.class).scan();
+		
+		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
 		for (Subscriber s : subs) {
 			System.out.println("Found consumer class " + s.getConsumer().getClass());
 			cb.startConsumer(s);
-		}
-
-		OrderProducer p = new OrderProducer();
-		p.send();
-
-		while (true) {
-			System.in.read();
-			p.send();
 		}
 	}
 
@@ -54,4 +51,8 @@ public class Bootstrap extends ComponentTestCase {
 		}.start();
 	}
 
+	@BeforeClass
+	public static void beforeClass() {
+		System.setProperty("devMode", "true");
+	}
 }

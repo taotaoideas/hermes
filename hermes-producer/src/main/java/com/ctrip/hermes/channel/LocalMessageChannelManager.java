@@ -64,8 +64,6 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 			@Override
 			public void ack(List<OffsetRecord> recs) {
-				m_logger.info("ACK..." + recs);
-
 				m_q.ack(recs);
 			}
 		};
@@ -110,10 +108,10 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 						int curIdx = m_idx++;
 						ConsumerChannelHandler handler = handlers.get(curIdx % handlers.size());
 						if (handler.isOpen()) {
-							Transaction t = Cat.newTransaction("Deliver", topic);
+							Transaction t = Cat.newTransaction(topic, "Deliver");
 
 							try {
-								appendCatEvent(t, records, topic);
+								appendCatEvent(t, records, topic, "DeliverMessage");
 
 								List<StoredMessage<byte[]>> msgs = new ArrayList<>(records.size());
 								for (Record r : records) {
@@ -154,7 +152,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 
 			@Override
 			public void send(List<com.ctrip.hermes.message.Message<byte[]>> pMsgs) {
-				Transaction t = Cat.newTransaction("Receive", topic);
+				Transaction t = Cat.newTransaction(topic, "Receive");
 
 				try {
 
@@ -163,7 +161,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 						cMsgs.add(new Record(pMsg));
 					}
 
-					appendCatEvent(t, cMsgs, topic);
+					appendCatEvent(t, cMsgs, topic, "ReceiveMessage");
 
 					q.write(cMsgs);
 
@@ -183,9 +181,9 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		};
 	}
 
-	private void appendCatEvent(Transaction t, List<Record> msgs, String topic) {
+	private void appendCatEvent(Transaction t, List<Record> msgs, String topic, String prefix) {
 		for (Record msg : msgs) {
-			Cat.logEvent("Message", topic, Event.SUCCESS, msg.getKey());
+			Cat.logEvent(topic, prefix, Event.SUCCESS, msg.getKey());
 		}
 	}
 

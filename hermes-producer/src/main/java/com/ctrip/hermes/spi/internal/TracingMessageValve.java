@@ -20,7 +20,7 @@ public class TracingMessageValve implements Valve, LogEnabled {
 		Message<Object> msg = (Message<Object>) payload;
 		String topic = msg.getTopic();
 
-		Transaction t = Cat.newTransaction("Produce", topic);
+		Transaction t = Cat.newTransaction(topic, "Produce");
 		t.addData("key=" + msg.getKey());
 
 		try {

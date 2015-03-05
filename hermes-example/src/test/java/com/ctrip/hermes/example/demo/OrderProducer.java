@@ -10,9 +10,16 @@ public class OrderProducer {
 	private Random rnd = new Random(System.currentTimeMillis());
 
 	public void send() {
-		String id = UUID.randomUUID().toString().substring(0, 6);
-		Order order = new Order(id, rnd.nextInt(10000));
-		Producer.getInstance().message("order.new", order).withKey(id).withPartition(id).send();
+		Order order = makeOrder();
+		
+		Producer.getInstance() //
+		      .message("order.new", order) //
+		      .withKey(order.getId()) //
+		      .send();
 	}
 
+	private Order makeOrder() {
+		String id = UUID.randomUUID().toString().substring(0, 6);
+		return new Order(id, rnd.nextInt(10000));
+	}
 }

@@ -15,7 +15,7 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 			String topic = msgs.get(0).getTopic();
 
 			for (StoredMessage<T> msg : msgs) {
-				Transaction t = Cat.newTransaction("Consume", topic);
+				Transaction t = Cat.newTransaction(topic, "Consume");
 				try {
 					t.addData("topic", topic);
 					t.addData("key", msg.getKey());

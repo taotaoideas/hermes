@@ -7,10 +7,18 @@ public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 
 	@Override
 	public void consume(StoredMessage<Order> msg) {
-		if (((long) msg.getBody().getPrice()) % 3 == System.currentTimeMillis() % 3) {
+		System.out.println(String.format("Consumer %s of %s receive %s", //
+		      getId(), getGroupId(), msg.getBody()));
+
+		if (shouldNack(msg)) {
 			msg.nack();
 		}
-		System.out.println(String.format("Consumer %s of %s receive %s", getId(), getGroupId(), msg.getBody()));
+	}
+
+	private boolean shouldNack(StoredMessage<Order> msg) {
+		long price = (long) msg.getBody().getPrice();
+
+		return price % 3 == System.currentTimeMillis() % 3;
 	}
 
 	protected abstract String getGroupId();
