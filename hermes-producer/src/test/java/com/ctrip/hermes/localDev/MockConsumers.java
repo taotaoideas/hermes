@@ -43,11 +43,25 @@ public class MockConsumers {
         return groups;
     }
 
-    public void consumeOneMsg(String topic, String group, StoredMessage<byte[]> msg) {
+    public List<MockConsumerGroup> getGroupByTopic(String topic) {
+        List<MockConsumerGroup> groups = new ArrayList<>();
+        for (String key : consumerMap.keySet()) {
+            String[] topicAndGroup = key.split(SPLITER);
+            if (topic.equals(topicAndGroup[0])) {
+                groups.add(new MockConsumerGroup(topicAndGroup[0], topicAndGroup[1],
+                        consumerMap.get(key)));
+            }
+        }
+        return groups;
+    }
+
+    public void consumeOneMsg(String topic, String group, StoredMessage<byte[]>  msg) {
         List<MockConsumer> consumers = consumerMap.get(topic + SPLITER + group);
 
         consumers.get(new Random().nextInt(consumers.size())).consumeOneMsg(msg);
     }
+
+
 
     public class MockConsumerGroup {
         public String topic;

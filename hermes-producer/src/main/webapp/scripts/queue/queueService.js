@@ -9,7 +9,6 @@ LocalDev.service("QueueService", ['$http', '$q', function ($http, $q) {
         this.status = status;
     }
 
-
     return {
         getQueueStatus: function (topic) {
             return $http.get("http://localhost:2765/api" + "/queue"+"?topic="+topic);
@@ -23,9 +22,5 @@ LocalDev.service("QueueService", ['$http', '$q', function ($http, $q) {
             }
             return result;
         },
-
-        getQueueInfo: function () {
-            return "queue info"
-        }
     }
 }])

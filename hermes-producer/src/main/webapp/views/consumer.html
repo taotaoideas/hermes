@@ -14,8 +14,8 @@
                 </tr>
                 </thead>
                 <tbody ng-repeat="msg in consumer.msgs">
-                <tr>
-                    <td>{{msg.index}}</td>
+                <tr class = {{msg.isOK}}>
+                <td>{{msg.index}}</td>
                     <td>{{msg.timestamp}}</td>
                     <td>{{msg.content}}</td>
                     <td><span class="label">{{msg.status}}</span></td>

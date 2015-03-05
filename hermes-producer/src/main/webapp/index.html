@@ -43,22 +43,36 @@
                 <!--Topic DropDown-->
                 <button type="button" class="btn btn-md btn-default" data-animation="am-flip-x"
                         bs-dropdown="topic_dropdown">
-                    Current Topic: <span class="caret"></span>
+                    Topic: {{selectedTopic}}<span class="caret"></span>
                 </button>
             </div>
         </div>
-        <div class="col-lg-5">
+        <div class="col-md-5">
             <!--Producer-->
             <div class="producer" ng-controller="ProducerCtrl">
                 <h2>Producer: details...</h2>
-                <label>Topic: {Selected Topic}(editable)</label>
-                <label>AppId: {Selected AppId}(editable)</label>
 
-                <input type="text" class="form-control" data-placement="right" data-type="info"
-                       data-container="body" placeholder="Send a Message..."
-                       data-trigger="focus" bs-tooltip="tooltip" ng-model="tooltip.message"
-                       ng-keypress= sendByEnter()>
-                <button type="submit" class="btn btn-xs btn-primary btn-search" ng-click=send() >Send!</button>
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">Topic:</span>
+
+                    <input type="text" class="form-control" data-placement="top" data-type="info"
+                           data-container="body" placeholder={{selectedTopic}}
+                           data-trigger="manual" ng-model="selectedTopic"
+                           ng-keypress=sendByEnter() style=" display: inline-block; width: 40%;">
+                </div>
+
+                <div class="input-group">
+                    <input type="text" class="form-control" data-placement="top" data-type="info"
+                           data-container="body" placeholder="Send a Message..."
+                           data-trigger="manual" bs-tooltip="tooltip" ng-model="tooltip.message"
+                           data-animation="am-flip-x"
+                           ng-keypress=sendByEnter()>
+                     <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary " ng-click=send()>Send!
+                    </button>
+                         </span>
+
+                </div>
                 <div class="producer-msg-hisorty-table">
 
 
@@ -73,7 +87,7 @@
                         </tr>
                         </thead>
                         <tbody ng-repeat="msg in sent_msgs | limitTo:50 | orderBy: '-index'">
-                        <tr>
+                        <tr class={{msg.isOK}}>
                             <td>{{msg.index}}</td>
                             <td>{{msg.timestamp}}</td>
                             <td>{{msg.content}}</td>
@@ -84,7 +98,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-5">
+        <div class="col-md-5">
             <!--Queue-->
             <div class="queue" ng-controller="QueueCtrl">
                 <h2>Queue: details...</h2>
@@ -101,7 +115,7 @@
                         </tr>
                         </thead>
                         <tbody ng-repeat="msg in msgs | limitTo:50 | orderBy: '-index'">
-                        <tr>
+                        <tr class={{msg.isOK}}>
                             <td>{{msg.index}}</td>
                             <td>{{msg.timestamp}}</td>
                             <td>{{msg.content}}</td>
@@ -118,9 +132,8 @@
     <div ng-controller="ConsumerTabCtrl">
 
 
-
         <div bs-active-pane="tabs.activeTab" bs-tabs>
-            <div ng-repeat="tab in tabs " title="{{ tab.groupName }}" bs-pane>
+            <div ng-repeat="tab in tabs " title="{{ tab.groupName }}" bs-pane ng-if="checkTopic(tab)">
                 <div class="consumer-group" ng-repeat="consumer in tab.consumers">
                     <div consumer info="consumer"></div>
                 </div>

@@ -14,7 +14,6 @@ import com.ctrip.hermes.channel.ConsumerChannelHandler;
 import com.ctrip.hermes.channel.LocalMessageChannelManager;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.message.StoredMessage;
-import com.ctrip.hermes.storage.message.Record;
 
 
 public class LocalDevServer extends JettyServer {
@@ -67,10 +66,16 @@ public class LocalDevServer extends JettyServer {
         startConsumerGroup("order.new", "Group No.2", "My Consumer Name 5");
         startConsumerGroup("order.new", "Group No.3", "My Consumer Name 6");
 
+        startConsumerGroup("local.order.new", "Group No.3", "My Consumer Name 6");
+        startConsumerGroup("local.order.new", "Group No.3", "My Consumer Name 6");
+
+        startConsumerGroup("test.topic", "Group No.3", "My Consumer Name 6");
+
         waitForAnyKey();
     }
 
     private void startConsumerGroup(final String topic, final String group, String consumerName) {
+
         MockConsumers.getInstance().putOneConsumer(topic, group, consumerName);
 
         MessageChannelManager cm = lookup(MessageChannelManager.class, LocalMessageChannelManager.ID);

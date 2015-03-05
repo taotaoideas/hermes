@@ -1,32 +1,40 @@
 "use strict";
-LocalDev.controller("ProducerCtrl", function ($scope, $q, ProducerService) {
-
-    $scope.topic = "order.new";
+LocalDev.controller("ProducerCtrl", function ($scope, $q, MainService, ProducerService) {
 
     $scope.name = ProducerService.getProducerInfo();
 
 
     setInterval(function () {
-        ProducerService.getProducerMessageHistory($scope.topic).success(function(data, status, headers, config){
+        ProducerService.getProducerMessageHistory($scope.selectedTopic).success(function(data, status, headers, config){
             $scope.sent_msgs = ProducerService.handleDate(data);
         })
     }, 1000)
 
     $scope.tooltip = {
-        "title": "Tooltip: not null and invalid syntax validation!",
+        //"title": "Tooltip: not null and invalid syntax validation!",
         message: undefined
     };
 
+    $scope.alert = {
+        "title": "Invalid Input!",
+        "content": "Must input content!",
+        "type": "info"
+    };
+
     $scope.sendByEnter = function () {
-        if (event.keyCode == 13) $scope.send();
+        if (event.keyCode == 13) $scope.send();   // press <Enter> to send the message.
     }
 
     $scope.send = function () {
         if (undefined == $scope.tooltip.message) {
-            alert("Must input Message(Todo: better alert)");
+
         } else {
-            ProducerService.sendMsg("order.new", $scope.tooltip.message);
+            ProducerService.sendMsg($scope.selectedTopic, $scope.tooltip.message);
             $scope.tooltip.message = undefined;
         }
     }
+
+    $scope.$watch(function() {return MainService.getSelectedTopic()}, function() {
+        $scope.selectedTopic = MainService.getSelectedTopic();
+    })
 })

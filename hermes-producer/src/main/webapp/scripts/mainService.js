@@ -1,6 +1,8 @@
 "use strict";
 LocalDev.service("MainService", ['$http', '$q', function ($http, $q) {
     var SERVICE_URL = "<server_url>/rest/slides";
+
+    var selectedTopic = undefined;
     return {
         get: function () {
             return this.$http.get(this.LOAD_SLIDES_URL).error(this.errorCallback.bind(this));
@@ -24,11 +26,19 @@ LocalDev.service("MainService", ['$http', '$q', function ($http, $q) {
                 var topic = data[i];
                 var dropdown = {
                     "text": topic,
-                    "click": null
+                    "click": "$setTopic(\"" + topic+ "\")"
                 }
                 dropdowns.push(dropdown)
             }
             return dropdowns;
+        },
+
+        setSelectedTopic: function(topic) {
+           selectedTopic = topic;
+        },
+
+        getSelectedTopic : function() {
+            return selectedTopic;
         }
 
     };
