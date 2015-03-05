@@ -54,3 +54,14 @@ LocalDev
             });
         }
     })
+    .controller("PopupCtrl", function ($scope, $q, $alert, MainService) {
+        $scope.create = function(topic, group) {
+            console.log("topic:" +topic + "; group: "+group);
+
+            if (undefined != topic && undefined!=group) {
+                MainService.addConsumer(topic, group);
+            } else {
+                alert("Must Input \"Topic\" and \"Group\"");
+            }
+        }
+    });

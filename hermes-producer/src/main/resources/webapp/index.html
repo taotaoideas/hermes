@@ -48,8 +48,10 @@
             </div>
 
         </div>
-        <div class="col-md-1 col-md-offset-8">
-            <button type="button" class="btn btn-sm btn-info " data-template="views/addConsumer.html"
+        <div class="col-md-1 col-md-offset-8" >
+            <button type="button" class="btn btn-sm btn-info " data-placement="bottom"
+                    title="Configure Consumer" data-content=" some needed content"
+                    data-template="views/addConsumer.html"
                     data-animation="am-flip-x" data-auto-close="1" bs-popover>Add Consumer Group
             </button>
         </div>
@@ -60,8 +62,7 @@
         <div class="col-md-6">
             <!--Producer-->
             <div class="producer" ng-controller="ProducerCtrl">
-                <h2>Producer: details...</h2>
-
+                <h3>Producer: details...</h3>
                 <div class="input-group">
                     <span class="input-group-addon" id="basic-addon1"><strong>Topic:</strong></span>
 
@@ -86,7 +87,7 @@
                 <div class="producer-msg-hisorty-table">
 
 
-                    <h3>Message Send History</h3>
+                    <h4>Message Send History</h4>
                     <table class="table table-striped" ng-cloak>
                         <thead>
                         <tr>
@@ -111,10 +112,10 @@
         <div class="col-md-6">
             <!--Queue-->
             <div class="queue" ng-controller="QueueCtrl">
-                <h2>Queue: details...</h2>
+                <h3>Queue: details...</h3>
 
                 <div class="queue-msg-table">
-                    <h3>Message in the Queue</h3>
+                    <h4>Message in the Queue</h4>
                     <table class="table table-striped" ng-cloak>
                         <thead>
                         <tr>

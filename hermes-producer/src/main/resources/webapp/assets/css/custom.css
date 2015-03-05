@@ -1,7 +1,7 @@
 .producer {
-    height: 600px;
-    padding: 30px 15px;
-    margin-bottom: 30px;
+    height: 400px;
+    padding: 5px 15px;
+    margin-bottom: 5px;
     color: inherit;
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
@@ -9,9 +9,9 @@
 }
 
 .queue {
-    height: 600px;
-    padding: 30px 15px;
-    margin-bottom: 30px;
+    height: 400px;
+    padding: 5px 15px;
+    margin-bottom: 5px;
     color: inherit;
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
