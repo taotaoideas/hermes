@@ -1,4 +1,4 @@
-package com.ctrip.hermes.localDev;
+package com.ctrip.hermes.local;
 
 import java.io.IOException;
 

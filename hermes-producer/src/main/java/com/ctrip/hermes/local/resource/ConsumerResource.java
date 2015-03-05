@@ -1,4 +1,4 @@
-package com.ctrip.hermes.localDev.resource;
+package com.ctrip.hermes.local.resource;
 
 
 import java.util.List;
@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import org.codehaus.plexus.PlexusContainer;
 import org.unidal.lookup.ContainerLoader;
 
-import com.ctrip.hermes.localDev.MockConsumers;
+import com.ctrip.hermes.local.MockConsumers;
 
 @Path("/consumer")
 public class ConsumerResource {
