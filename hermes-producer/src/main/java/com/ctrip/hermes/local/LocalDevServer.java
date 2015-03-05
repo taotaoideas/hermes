@@ -27,44 +27,5 @@ public class LocalDevServer {
 
 	}
 
-	public static void main(String[] args) throws Exception {
-		LocalDevServer.getInstance().start();
-	}
 
-	public void startWebapp() throws Exception {
-		// open the page in the default browser
-		// display("/index.html");
-
-		// startConsumerGroup("order.new", "Group No.1", "My Consumer Name 1");
-		// startConsumerGroup("order.new", "Group No.1", "My Consumer Name 2");
-		// startConsumerGroup("order.new", "Group No.2", "My Consumer Name 3");
-		// startConsumerGroup("order.new", "Group No.2", "My Consumer Name 4");
-		// startConsumerGroup("order.new", "Group No.2", "My Consumer Name 5");
-		// startConsumerGroup("order.new", "Group No.3", "My Consumer Name 6");
-		//
-		// startConsumerGroup("local.order.new", "Group No.3", "My Consumer Name 6");
-		// startConsumerGroup("local.order.new", "Group No.3", "My Consumer Name 6");
-		//
-		// startConsumerGroup("test.topic", "Group No.3", "My Consumer Name 6");
-	}
-
-	// private void startConsumerGroup(final String topic, final String group, String consumerName) {
-	//
-	// MockConsumers.getInstance().putOneConsumer(topic, group, consumerName);
-	//
-	// ConsumerChannel cc = m_channelManager.newConsumerChannel(topic, group);
-	// cc.start(new ConsumerChannelHandler() {
-	// @Override
-	// public void handle(List<StoredMessage<byte[]>> msgs) {
-	// for (StoredMessage<byte[]> msg : msgs) {
-	// MockConsumers.getInstance().consumeOneMsg(topic, group, msg);
-	// }
-	// }
-	//
-	// @Override
-	// public boolean isOpen() {
-	// return true;
-	// }
-	// });
-	// }
 }
