@@ -42,8 +42,8 @@ public class MysqlResendStorage implements ResendStorage {
 		PreparedStatement stmt = m_conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		for (Resend resend : resends) {
 			Range r = resend.getRange();
-			stmt.setLong(1, r.startOffset().getOffset());
-			stmt.setLong(2, r.endOffset().getOffset());
+			stmt.setLong(1, r.getStartOffset().getOffset());
+			stmt.setLong(2, r.getEndOffset().getOffset());
 			stmt.setString(3, r.getId());
 
 			stmt.addBatch();

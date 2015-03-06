@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import kafka.consumer.ConsumerConfig;
-import kafka.producer.ProducerConfig;
-import kafka.serializer.DefaultEncoder;
-import kafka.serializer.StringEncoder;
-
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
@@ -52,7 +47,7 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 		if (Storage.MEMORY.equals(storage.getType())) {
 			return findMemoryQueue(topic, groupId);
 		} else if (Storage.KAFKA.equals(storage.getType())) {
-			return findKafkaQueue(topic, groupId, partition);
+			return findKafkaQueue(topic, groupId);
 		} else if (Storage.MYSQL.equals(storage.getType())) {
 			return findMySQLQueue(topic, groupId);
 		} else {
@@ -93,25 +88,26 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 	}
 
-	private synchronized MessageQueue findKafkaQueue(String topic, String groupId, String partition) {
+	private synchronized MessageQueue findKafkaQueue(String topic, String groupId) {
 		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
 
 		MessageQueue q = m_queues.get(pair);
 
 		if (q == null) {
-			Properties props = new Properties();
+			Properties producerProp = new Properties();
+			Properties consumerProp = new Properties();
 			Storage storage = m_meta.getStorage(topic);
 			for (Property prop : storage.getProperties()) {
-				props.put(prop.getName(), prop.getValue());
+				producerProp.put(prop.getName(), prop.getValue());
+				consumerProp.put(prop.getName(), prop.getValue());
 			}
-			props.put("serializer.class", DefaultEncoder.class.getCanonicalName());
-			props.put("key.serializer.class", StringEncoder.class.getCanonicalName());
-			props.put("group.id", groupId);
-			props.put("consumer.timeout.ms", "100");
-			ProducerConfig pc = new ProducerConfig(props);
-			ConsumerConfig cc = new ConsumerConfig(props);
+			producerProp.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+			producerProp.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+			producerProp.put("client.id", topic + "_" + groupId);
+			consumerProp.put("group.id", groupId);
+			consumerProp.put("consumer.timeout.ms", "100");
 
-			KafkaGroup kg = new KafkaGroup(topic, groupId, partition, pc, cc);
+			KafkaGroup kg = new KafkaGroup(topic, producerProp, consumerProp);
 
 			StoragePair<Record> main = kg.createMessagePair();
 			StoragePair<Resend> resend = kg.createResendPair();

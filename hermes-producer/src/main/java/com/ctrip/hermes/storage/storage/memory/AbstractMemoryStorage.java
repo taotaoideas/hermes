@@ -101,7 +101,7 @@ public abstract class AbstractMemoryStorage<T> implements Storage<T> {
 	public synchronized List<T> read(Range range) {
 		List<T> result = new ArrayList<T>();
 
-		for (long i = range.startOffset().getOffset(); i <= range.endOffset().getOffset(); i++) {
+		for (long i = range.getStartOffset().getOffset(); i <= range.getEndOffset().getOffset(); i++) {
 			T c = clone(m_contents.get((int) i));
 			attachOffset(c, (int) i);
 

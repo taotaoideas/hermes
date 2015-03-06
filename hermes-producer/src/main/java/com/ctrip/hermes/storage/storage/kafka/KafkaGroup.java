@@ -1,9 +1,15 @@
 package com.ctrip.hermes.storage.storage.kafka;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
-import kafka.consumer.ConsumerConfig;
-import kafka.producer.ProducerConfig;
+import kafka.javaapi.PartitionMetadata;
+import kafka.javaapi.TopicMetadata;
+import kafka.javaapi.TopicMetadataResponse;
+
+import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
@@ -16,36 +22,44 @@ public class KafkaGroup {
 
 	private String m_topic;
 
-	private String m_groupId;
+	private Properties m_pc;
 
-	private String m_partition;
+	private Properties m_cc;
 
-	private ProducerConfig m_pc;
-
-	private ConsumerConfig m_cc;
-
-	public KafkaGroup(String topic, String groupId, String partition, ProducerConfig pc, ConsumerConfig cc) {
+	public KafkaGroup(String topic, Properties pc, Properties cc) {
 		m_topic = topic;
-		m_groupId = groupId;
-		m_partition = partition;
 		m_pc = pc;
 		m_cc = cc;
 	}
 
 	public StoragePair<Record> createMessagePair() {
 		KafkaMessageStorage main = new KafkaMessageStorage(m_topic, m_pc, m_cc);
-		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_" + m_topic);
 
-		MessagePair pair = new MessagePair(main, offset);
+		MessagePair pair = new MessagePair(main, null);
 
-		return new ClusteredMessagePair(Arrays.asList(pair));
+		List<Pair<String, Integer>> brokers = new ArrayList<>();
+		String[] brokerList = null;
+		if (m_cc.containsKey("metadata.broker.list"))
+			brokerList = m_cc.getProperty("metadata.broker.list").split(",");
+		else if (m_cc.containsKey("bootstrap.servers"))
+			brokerList = m_cc.getProperty("bootstrap.servers").split(",");
+		for (String broker : brokerList) {
+			brokers.add(new Pair<>(broker.split(":")[0], Integer.parseInt(broker.split(":")[1])));
+		}
 
+		ClusteredMessagePair cluster = new ClusteredMessagePair(Arrays.asList(pair));
+		TopicMetadataResponse topicMetadataRes = SimpleConsumerUtil.getTopicMetadata(brokers.get(0).getKey(), brokers
+		      .get(0).getValue(), m_topic);
+		TopicMetadata topicMetadata = topicMetadataRes.topicsMetadata().get(0);
+		for (PartitionMetadata partitionMetadata : topicMetadata.partitionsMetadata()) {
+			cluster.addPair(String.valueOf(partitionMetadata.partitionId()), pair);
+		}
+		return cluster;
 	}
 
 	public StoragePair<Resend> createResendPair() {
-		KafkaResendStorage resend = new KafkaResendStorage("resend_" + m_topic + "_" + m_groupId, m_partition, m_pc, m_cc);
-		KafkaOffsetStorage offset = new KafkaOffsetStorage("offset_resend_" + m_topic);
-		ResendPair pair = new ResendPair(resend, offset, Long.MAX_VALUE);
+		KafkaResendStorage resend = new KafkaResendStorage("resend_" + m_topic, m_pc, m_cc);
+		ResendPair pair = new ResendPair(resend, null, Long.MAX_VALUE);
 		return pair;
 	}
 

@@ -31,6 +31,10 @@ public abstract class ClusteredPair<T extends Locatable> implements StoragePair<
 		}
 	}
 
+	public void addPair(String id, StoragePair<T> p) {
+		m_id2Pair.put(id, p);
+	}
+	
 	@Override
 	public List<T> readMain(int batchSize) throws StorageException {
 		List<T> result = new ArrayList<>();

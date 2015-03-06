@@ -2,12 +2,18 @@ package com.ctrip.hermes.storage.storage;
 
 public interface Range extends Locatable {
 
-    String getId();
+	void setId(String id);
 
-    Offset startOffset();
+	String getId();
 
-    Offset endOffset();
+	void setStartOffset(Offset offset);
+	
+	Offset getStartOffset();
 
-    boolean contains(Offset o);
+	void setEndOffset(Offset offset);
+	
+	Offset getEndOffset();
+
+	boolean contains(Offset o);
 
 }

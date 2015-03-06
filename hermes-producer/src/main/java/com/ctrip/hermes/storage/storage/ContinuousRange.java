@@ -29,6 +29,10 @@ public class ContinuousRange implements Range {
         this(CollectionUtil.first(offsets), CollectionUtil.last(offsets));
     }
 
+    public void setId(String id) {
+   	 m_id = id;
+    }
+    
     @Override
     public String getId() {
         return m_id;
@@ -45,12 +49,12 @@ public class ContinuousRange implements Range {
     }
 
     @Override
-    public Offset startOffset() {
+    public Offset getStartOffset() {
         return m_start;
     }
 
     @Override
-    public Offset endOffset() {
+    public Offset getEndOffset() {
         return m_end;
     }
 
@@ -66,5 +70,17 @@ public class ContinuousRange implements Range {
     public String toString() {
         return "ContinuousRange [m_id=" + m_id + ", m_start=" + m_start + ", m_end=" + m_end + "]";
     }
+
+	@Override
+   public void setStartOffset(Offset offset) {
+		m_start = offset;
+   }
+
+	@Override
+   public void setEndOffset(Offset offset) {
+		m_end = offset;
+   }
+    
+    
 
 }

@@ -109,7 +109,7 @@ public class MysqlMessageStorage implements MessageStorage {
 
 	public List<Record> read(Range range) throws StorageException {
 		String sqlTpl = "select id,c from msg where id  >= ? and id <= ?";
-		String sql = String.format(sqlTpl, range.startOffset().getOffset(), range.endOffset().getOffset());
+		String sql = String.format(sqlTpl, range.getStartOffset().getOffset(), range.getEndOffset().getOffset());
 
 		try {
 			ResultSet rs = m_conn.createStatement().executeQuery(sql);

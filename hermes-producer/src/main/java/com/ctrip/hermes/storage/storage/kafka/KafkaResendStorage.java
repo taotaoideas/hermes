@@ -1,24 +1,22 @@
 package com.ctrip.hermes.storage.storage.kafka;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.unidal.tuple.Pair;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import kafka.api.FetchRequest;
-import kafka.api.FetchRequestBuilder;
-import kafka.common.ErrorMapping;
+import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
-import kafka.javaapi.FetchResponse;
-import kafka.javaapi.PartitionMetadata;
-import kafka.javaapi.TopicMetadata;
-import kafka.javaapi.consumer.SimpleConsumer;
-import kafka.javaapi.message.ByteBufferMessageSet;
-import kafka.javaapi.producer.Producer;
-import kafka.message.MessageAndOffset;
-import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
+import kafka.consumer.KafkaStream;
+import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.message.MessageAndMetadata;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.storage.message.Resend;
@@ -26,63 +24,34 @@ import com.ctrip.hermes.storage.spi.typed.ResendStorage;
 import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
+import com.google.common.collect.ImmutableMap;
 
 public class KafkaResendStorage implements ResendStorage {
 
-	protected String m_topic;
+	private String m_topic;
 
-	protected Producer<String, byte[]> m_producer;
+	private KafkaProducer<String, byte[]> m_producer;
 
-	protected String m_partition;
+	private ConsumerConnector m_consumer;
 
-	protected int m_partition_id;
+	private int m_consumer_threads = 1;
 
-	protected SimpleConsumer m_consumer;
+	private ExecutorService m_executor;
 
-	protected int bufferSize = 10000;
+	private Map<String, List<KafkaStream<byte[], byte[]>>> m_topicMessageStreams;
 
-	protected List<Pair<String, Integer>> brokers = new ArrayList<>();
-
-	public KafkaResendStorage(String id, String partition, ProducerConfig pc, ConsumerConfig cc) {
+	public KafkaResendStorage(String id, Properties pc, Properties cc) {
 		m_topic = id;
-		m_partition = partition;
-		m_producer = new Producer<>(pc);
-		String[] brokerList = cc.props().getString("metadata.broker.list").split(",");
-		for (String broker : brokerList) {
-			brokers.add(new Pair<>(broker.split(":")[0], Integer.parseInt(broker.split(":")[1])));
-		}
-
-		TopicMetadata topicMetadata = SimpleConsumerUtil
-		      .getTopicMetadata(brokers.get(0).getKey(), brokers.get(0).getValue(), m_topic).topicsMetadata().get(0);
-		if (topicMetadata.topic() == null) {
-			System.out.println("Can't find topic. Exiting");
-			return;
-		}
-		if (topicMetadata.partitionsMetadata().size() == 0) {
-			System.out.println("Can't find partition for topic. Exiting");
-			return;
-		}
-
-		m_partition_id = partition.hashCode() % topicMetadata.partitionsMetadata().size();
-		PartitionMetadata metadata = SimpleConsumerUtil.findLeader(brokers, m_topic, m_partition_id);
-		if (metadata == null) {
-			System.out.println("Can't find metadata for Topic and Partition. Exiting");
-			return;
-		}
-		if (metadata.leader() == null) {
-			System.out.println("Can't find Leader for Topic and Partition. Exiting");
-			return;
-		}
-		String leadBroker = metadata.leader().host();
-		String clientName = "Client_" + m_topic + "_" + m_partition_id;
-
-		m_consumer = new SimpleConsumer(leadBroker, metadata.leader().port(), bufferSize, 64 * 1024, clientName);
+		m_producer = new KafkaProducer<>(pc);
+		m_consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(cc));
+		m_topicMessageStreams = m_consumer.createMessageStreams(ImmutableMap.of(m_topic, m_consumer_threads));
+		m_executor = Executors.newFixedThreadPool(m_consumer_threads);
 	}
 
 	@Override
 	public void append(List<Resend> payloads) throws StorageException {
 		for (Resend payload : payloads) {
-			KeyedMessage<String, byte[]> kafkaMsg = new KeyedMessage<>(m_topic, JSON.toJSONBytes(payload));
+			ProducerRecord<String, byte[]> kafkaMsg = new ProducerRecord<>(m_topic, JSON.toJSONBytes(payload));
 			m_producer.send(kafkaMsg);
 		}
 	}
@@ -90,14 +59,7 @@ public class KafkaResendStorage implements ResendStorage {
 	@Override
 	public Browser<Resend> createBrowser(long offset) {
 		long nextReadIdx = 0;
-
-		if (offset > 0) {
-			nextReadIdx = offset;
-		} else {
-			nextReadIdx = SimpleConsumerUtil.getLastOffset(m_consumer, m_topic, m_partition_id,
-			      kafka.api.OffsetRequest.EarliestTime(), m_consumer.clientId());
-		}
-
+		// Ignore offset, read from beginning
 		return new KafkaResendBrowser(nextReadIdx);
 	}
 
@@ -110,55 +72,35 @@ public class KafkaResendStorage implements ResendStorage {
 		}
 
 		@Override
-		public synchronized List<Resend> read(int batchSize) {
-			List<Resend> result = new ArrayList<>();
-			int remain = batchSize;
-			int numErrors = 0;
-			while (remain > 0) {
-				FetchRequest req = new FetchRequestBuilder().clientId(m_consumer.clientId())
-				      .addFetch(m_topic, m_partition_id, m_nextReadIdx, bufferSize).build();
-				FetchResponse fetchResponse = m_consumer.fetch(req);
-				if (fetchResponse.hasError()) {
-					numErrors++;
-					short code = fetchResponse.errorCode(m_topic, m_partition_id);
-					System.out.println("Error fetching data Reason: " + code);
-					if (numErrors > 5)
-						break;
-					if (code == ErrorMapping.OffsetOutOfRangeCode()) {
-						m_nextReadIdx = SimpleConsumerUtil.getLastOffset(m_consumer, m_topic, m_partition_id,
-						      kafka.api.OffsetRequest.LatestTime(), m_consumer.clientId());
-						continue;
+		public synchronized List<Resend> read(final int batchSize) {
+			final List<Resend> result = new CopyOnWriteArrayList<>();
+			List<KafkaStream<byte[], byte[]>> streams = m_topicMessageStreams.get(m_topic);
+			final CountDownLatch latch = new CountDownLatch(m_consumer_threads);
+			for (final KafkaStream<byte[], byte[]> stream : streams) {
+				m_executor.submit(new Runnable() {
+					public void run() {
+						try {
+							for (MessageAndMetadata<byte[], byte[]> msgAndMetadata : stream) {
+								if (result.size() == batchSize) {
+									break;
+								}
+								Resend resend = JSON.parseObject(msgAndMetadata.message(), Resend.class);
+								m_nextReadIdx = msgAndMetadata.offset();
+								result.add(resend);
+								if (result.size() == batchSize) {
+									break;
+								}
+							}
+						} finally {
+							latch.countDown();
+						}
 					}
-					m_consumer.close();
-					PartitionMetadata metadata = SimpleConsumerUtil.findLeader(brokers, m_topic, m_partition_id);
-					String leadBroker = metadata.leader().host();
-					String clientName = "Client_" + m_topic + "_" + m_partition_id;
-
-					m_consumer = new SimpleConsumer(leadBroker, metadata.leader().port(), bufferSize, 64 * 1024, clientName);
-					continue;
-				}
-				numErrors = 0;
-
-				ByteBufferMessageSet messageSet = fetchResponse.messageSet(m_topic, m_partition_id);
-				if (messageSet.sizeInBytes() == 0) {
-					break;
-				}
-				for (MessageAndOffset messageAndOffset : messageSet) {
-					long currentOffset = messageAndOffset.offset();
-					if (currentOffset < m_nextReadIdx) {
-						System.out.println("Found an old offset: " + currentOffset + " Expecting: " + m_nextReadIdx);
-						continue;
-					}
-					m_nextReadIdx = messageAndOffset.nextOffset();
-					ByteBuffer payload = messageAndOffset.message().payload();
-
-					byte[] bytes = new byte[payload.limit()];
-					payload.get(bytes);
-					// System.out.println(String.valueOf(messageAndOffset.offset()) + ": " + new String(bytes));
-					Resend resend = JSON.parseObject(bytes, Resend.class);
-					result.add(resend);
-					remain--;
-				}
+				});
+			}
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 			return result;
 		}
@@ -188,7 +130,7 @@ public class KafkaResendStorage implements ResendStorage {
 	}
 
 	@Override
-   public String getId() {
+	public String getId() {
 		return m_topic;
 	}
 }
