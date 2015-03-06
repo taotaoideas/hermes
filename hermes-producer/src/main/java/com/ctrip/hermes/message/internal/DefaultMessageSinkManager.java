@@ -3,14 +3,16 @@ package com.ctrip.hermes.message.internal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Future;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.message.ProducerSinkManager;
+import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerSinkManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Connector;
 
@@ -19,11 +21,11 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 	@Inject
 	private MetaService m_meta;
 
-	private Map<String, PipelineSink> m_sinks = new HashMap<>();
+	private Map<String, PipelineSink<Future<SendResult>>> m_sinks = new HashMap<>();
 
 	@Override
-	public PipelineSink getSink(String topic) {
-		PipelineSink sink = null;
+	public PipelineSink<Future<SendResult>> getSink(String topic) {
+		PipelineSink<Future<SendResult>> sink = null;
 
 		Connector connector = m_meta.getConnector(topic);
 		switch (connector.getType()) {
@@ -45,6 +47,7 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 		return sink;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void initialize() throws InitializationException {
 		Map<String, PipelineSink> sinks = lookupMap(PipelineSink.class);

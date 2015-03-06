@@ -8,9 +8,9 @@ import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.spi.Valve;
 
-public class DefaultPipelineContext implements PipelineContext {
+public class DefaultPipelineContext<T> implements PipelineContext<T> {
 
-	private PipelineSink m_sink;
+	private PipelineSink<T> m_sink;
 
 	private int m_index;
 
@@ -20,13 +20,13 @@ public class DefaultPipelineContext implements PipelineContext {
 
 	private Map<String, Object> m_attrs = new HashMap<String, Object>();
 
-	public DefaultPipelineContext(List<Valve> valves, PipelineSink sink) {
+	public DefaultPipelineContext(List<Valve> valves, PipelineSink<T> sink) {
 		m_valves = valves;
 		m_sink = sink;
 	}
 
 	@Override
-	public void next(Object payload) {
+	public T next(Object payload) {
 		if (m_index == 0) {
 			m_source = payload;
 		}
@@ -36,15 +36,17 @@ public class DefaultPipelineContext implements PipelineContext {
 
 			m_index++;
 			valve.handle(this, payload);
+			// TODO
+			return null;
 		} else {
-			m_sink.handle(this, payload);
+			return m_sink.handle(this, payload);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T getSource() {
-		return (T) m_source;
+	public <O> O getSource() {
+		return (O) m_source;
 	}
 
 	@Override
@@ -54,8 +56,8 @@ public class DefaultPipelineContext implements PipelineContext {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T get(String name) {
-		return (T) m_attrs.get(name);
+	public <O> O get(String name) {
+		return (O) m_attrs.get(name);
 	}
 
 }

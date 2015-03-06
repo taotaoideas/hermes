@@ -8,7 +8,7 @@ public class ConsumerTracingValve implements Valve {
 	public static final String ID = "consumer-tracing";
 
 	@Override
-	public void handle(PipelineContext ctx, Object payload) {
+	public void handle(PipelineContext<?> ctx, Object payload) {
 		ctx.next(payload);
 	}
 

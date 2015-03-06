@@ -17,6 +17,7 @@ import com.ctrip.hermes.channel.ConsumerChannelHandler;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.channel.ProducerChannel;
+import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
@@ -136,13 +137,15 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 									msgs.add(new StoredMessage(r, topic));
 								}
 
-								m_deliverPipeline.put(new Pair<>(msgs, new PipelineSink() {
+								m_deliverPipeline.put(new Pair<>(msgs, new PipelineSink<Void>() {
 
 									@Override
-									public void handle(PipelineContext ctx, Object payload) {
+									public Void handle(PipelineContext ctx, Object payload) {
 										List<StoredMessage<byte[]>> sinkMsgs = (List<StoredMessage<byte[]>>) payload;
 
 										handler.handle(sinkMsgs);
+
+										return null;
 									}
 								}));
 
@@ -177,20 +180,20 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 		return new ProducerChannel() {
 
 			@Override
-			public void send(final List<Message<byte[]>> msgs) {
+			public List<SendResult> send(final List<Message<byte[]>> msgs) {
 				final Transaction t = Cat.newTransaction("Receive", topic);
+				List<SendResult> result = new ArrayList<SendResult>(msgs.size());
 
-				 MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-//				 tree.setRootMessageId(rootMessageId);
-//				 tree.setMessageId(messageId);
-//				 tree.setParentMessageId(parentMessageId);
+				// tree.setRootMessageId(rootMessageId);
+				// tree.setMessageId(messageId);
+				// tree.setParentMessageId(parentMessageId);
 
 				try {
-					m_receiverPipeline.put(new Pair<>(msgs, new PipelineSink() {
+					m_receiverPipeline.put(new Pair<>(msgs, new PipelineSink<Void>() {
 
 						@SuppressWarnings("unchecked")
-                  @Override
-						public void handle(PipelineContext ctx, Object payload) {
+						@Override
+						public Void handle(PipelineContext<Void> ctx, Object payload) {
 							List<Message<byte[]>> sinkMsgs = (List<Message<byte[]>>) payload;
 
 							final List<Record> records = new ArrayList<Record>();
@@ -201,6 +204,8 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 							appendCatEvent(t, records, topic, "ReceiveMessage");
 							// TODO attach cat rootMessageId, messageId to msg
 							q.write(records);
+
+							return null;
 						}
 					}));
 
@@ -209,8 +214,16 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 					m_logger.error("", e);
 					t.setStatus(e);
 				} finally {
+					MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+					for (int i = 0; i < msgs.size(); i++) {
+						SendResult r = new SendResult();
+						r.setCatMessageId(tree.getMessageId());
+						result.add(r);
+					}
 					t.complete();
 				}
+
+				return result;
 			}
 
 			@Override

@@ -9,19 +9,21 @@ import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.ValveRegistry;
 
-public class ReceiverPipeline implements Pipeline {
+public class ReceiverPipeline implements Pipeline<Void> {
 
 	@Inject
 	private ValveRegistry m_valveRegistry;
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void put(Object payload) {
-		Pair<Message<byte[]>, PipelineSink> pair = (Pair<Message<byte[]>, PipelineSink>) payload;
+	public Void put(Object payload) {
+		Pair<Message<byte[]>, PipelineSink<Void>> pair = (Pair<Message<byte[]>, PipelineSink<Void>>) payload;
 
-		PipelineContext ctx = new DefaultPipelineContext(m_valveRegistry.getValveList(), pair.getValue());
+		PipelineContext<Void> ctx = new DefaultPipelineContext<>(m_valveRegistry.getValveList(), pair.getValue());
 
 		ctx.next(pair.getKey());
+
+		return null;
 	}
 
 }

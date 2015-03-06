@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
+import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.remoting.Command;
@@ -36,10 +38,13 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 		String topic = cmd.getHeader("topic");
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
-
 		List<Message<byte[]>> msgs = decode(cmd.getBody());
+		List<SendResult> results = channel.send(msgs);
 
-		channel.send(msgs);
+		ctx.write(new Command(CommandType.SendMessageResponse) //
+		      .setBody(JSON.toJSONBytes(results)) //
+		      .setCorrelationId(cmd.getCorrelationId()));
+
 	}
 
 	private List<Message<byte[]>> decode(byte[] body) {

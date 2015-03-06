@@ -22,7 +22,7 @@ public class DecodeMessageValve implements Valve {
 	private StoredMessageCodec m_codec;
 
 	@Override
-	public void handle(PipelineContext ctx, Object payload) {
+	public void handle(PipelineContext<?> ctx, Object payload) {
 		MessageContext msgCtx = (MessageContext) payload;
 		String topic = msgCtx.getTopic();
 		Codec codec = m_codecManager.getCodec(topic);

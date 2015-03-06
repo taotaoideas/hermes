@@ -8,7 +8,7 @@ public class DeliverTracingValve implements Valve {
 	public static final String ID = "deliver-tracing";
 
 	@Override
-	public void handle(PipelineContext ctx, Object payload) {
+	public void handle(PipelineContext<?> ctx, Object payload) {
 
 	}
 

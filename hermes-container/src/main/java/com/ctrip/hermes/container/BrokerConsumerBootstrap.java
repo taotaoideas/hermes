@@ -39,7 +39,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 	private ValveRegistry m_valveRegistry;
 
 	@Inject
-	private Pipeline m_pipeline;
+	private Pipeline<Void> m_pipeline;
 
 	@Inject
 	private ClientManager m_clientManager;
@@ -68,12 +68,12 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 		future.awaitUninterruptibly();
 	}
 
-	private PipelineSink newConsumerSink(final Subscriber s, final LinkedBlockingQueue<OffsetRecord> ackQueue) {
-		return new PipelineSink() {
+	private PipelineSink<Void> newConsumerSink(final Subscriber s, final LinkedBlockingQueue<OffsetRecord> ackQueue) {
+		return new PipelineSink<Void>() {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			public void handle(PipelineContext ctx, Object payload) {
+			public Void handle(PipelineContext ctx, Object payload) {
 				List<StoredMessage> msgs = (List<StoredMessage>) payload;
 				// TODO
 				try {
@@ -90,6 +90,8 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 						ackQueue.offer(offsetRecord);
 					}
 				}
+
+				return null;
 			}
 		};
 	}
@@ -98,7 +100,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 	public void deliverMessage(int correlationId, List<StoredMessage<byte[]>> msgs) {
 		// TODO make it async
 		SinkContext sinkCtx = m_consumerSinks.get(correlationId);
-		PipelineSink sink = sinkCtx.getSink();
+		PipelineSink<Void> sink = sinkCtx.getSink();
 		Subscriber s = sinkCtx.getSubscriber();
 
 		if (sink != null) {
@@ -142,9 +144,9 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 
 		private Subscriber m_subscriber;
 
-		private PipelineSink m_sink;
+		private PipelineSink<Void> m_sink;
 
-		public SinkContext(Subscriber subscriber, PipelineSink sink) {
+		public SinkContext(Subscriber subscriber, PipelineSink<Void> sink) {
 			m_subscriber = subscriber;
 			m_sink = sink;
 		}
@@ -153,7 +155,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 			return m_subscriber;
 		}
 
-		public PipelineSink getSink() {
+		public PipelineSink<Void> getSink() {
 			return m_sink;
 		}
 

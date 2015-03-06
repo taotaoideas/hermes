@@ -11,6 +11,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Triple;
 
+import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Record;
@@ -152,32 +153,42 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		return new ProducerChannel() {
 
 			@Override
-			public void send(List<com.ctrip.hermes.message.Message<byte[]>> pMsgs) {
+			public List<SendResult> send(List<Message<byte[]>> msgs) {
+				List<SendResult> result = new ArrayList<SendResult>(msgs.size());
 				Transaction t = Cat.newTransaction("Receive", topic);
 
-//				MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-//				tree.setRootMessageId(rootMessageId);
-//				tree.setMessageId(messageId);
-//				tree.setParentMessageId(parentMessageId);
-				
+				// MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+				// tree.setRootMessageId(rootMessageId);
+				// tree.setMessageId(messageId);
+				// tree.setParentMessageId(parentMessageId);
+
 				try {
 
-					List<Record> cMsgs = new ArrayList<Record>();
-					for (com.ctrip.hermes.message.Message<byte[]> pMsg : pMsgs) {
-						cMsgs.add(new Record(pMsg));
+					List<Record> records = new ArrayList<Record>();
+					for (com.ctrip.hermes.message.Message<byte[]> pMsg : msgs) {
+						records.add(new Record(pMsg));
 					}
 
-					appendCatEvent(t, cMsgs, topic, "ReceiveMessage");
+					appendCatEvent(t, records, topic, "ReceiveMessage");
 
 					// TODO attach cat rootMessageId, messageId to msg
-					q.write(cMsgs);
+					q.write(records);
 
 					t.setStatus(Transaction.SUCCESS);
 				} catch (Throwable e) {
 					t.setStatus(e);
 				} finally {
+					MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+					for (int i = 0; i < msgs.size(); i++) {
+						SendResult r = new SendResult();
+						r.setCatMessageId(tree.getMessageId());
+						result.add(r);
+					}
+
 					t.complete();
 				}
+
+				return result;
 			}
 
 			@Override

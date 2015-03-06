@@ -8,7 +8,8 @@ public enum CommandType {
 	// TODO partition ids
 	HandshakeRequest(1), HandshakeResponse(2), //
 	SendMessageRequest(3), StartConsumerRequest(4), //
-	ConsumeRequest(5), AckRequest(6);
+	ConsumeRequest(5), AckRequest(6), //
+	SendMessageResponse(7);
 
 	private static Map<Integer, CommandType> m_types = new HashMap<Integer, CommandType>();
 

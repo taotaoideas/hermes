@@ -43,12 +43,12 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 
 			@Override
 			public void handle(List<StoredMessage<byte[]>> smsgs) {
-				Pair<PipelineSink, Object> pair = new Pair<>();
-				pair.setKey(new PipelineSink() {
+				Pair<PipelineSink<Void>, Object> pair = new Pair<>();
+				pair.setKey(new PipelineSink<Void>() {
 
 					@SuppressWarnings({ "rawtypes", "unchecked" })
 					@Override
-					public void handle(PipelineContext ctx, Object payload) {
+					public Void handle(PipelineContext ctx, Object payload) {
 						List<StoredMessage> msgs = (List<StoredMessage>) payload;
 						// TODO
 						try {
@@ -64,6 +64,8 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 								cc.ack(Arrays.asList(offsetRecord));
 							}
 						}
+
+						return null;
 					}
 				});
 				pair.setValue(new MessageContext(topic, smsgs, s.getMessageClass()));
