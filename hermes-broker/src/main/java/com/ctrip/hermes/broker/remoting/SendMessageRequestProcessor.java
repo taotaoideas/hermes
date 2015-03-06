@@ -1,5 +1,6 @@
 package com.ctrip.hermes.broker.remoting;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,7 +43,8 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 	}
 
 	private List<Message<byte[]>> decode(byte[] body) {
-		Message<byte[]> pMsg = m_msgCodec.decode(body);
+		// TODO use netty bytebuffer
+		Message<byte[]> pMsg = m_msgCodec.decode(ByteBuffer.wrap(body));
 
 		return Arrays.asList(pMsg);
 	}

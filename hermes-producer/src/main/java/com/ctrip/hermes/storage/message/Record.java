@@ -25,6 +25,10 @@ public class Record implements Locatable {
 		setPriority(msg.isPriority() ? 0 : 1);
 		setKey(msg.getKey());
 		setBornTime(msg.getBornTime());
+
+		for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
+			setProperty(entry.getKey(), entry.getValue());
+		}
 	}
 
 	public Record() {

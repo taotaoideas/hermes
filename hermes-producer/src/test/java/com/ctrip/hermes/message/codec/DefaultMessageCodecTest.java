@@ -2,6 +2,7 @@ package com.ctrip.hermes.message.codec;
 
 import static org.junit.Assert.assertEquals;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -22,15 +23,19 @@ public class DefaultMessageCodecTest extends ComponentTestCase {
 		writeMsg.setPartition(UUID.randomUUID().toString());
 		writeMsg.setTopic(UUID.randomUUID().toString());
 		writeMsg.setPriority(true);
+		writeMsg.addProperty(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+		writeMsg.addProperty(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
-		byte[] bytes = msgCodec.encode(writeMsg);
-
-		Message<byte[]> readMsg = msgCodec.decode(bytes);
+		ByteBuffer buf = msgCodec.encode(writeMsg);
+		buf.flip();
+		
+		Message<byte[]> readMsg = msgCodec.decode(buf);
 
 		assertEquals(writeMsg.getKey(), readMsg.getKey());
 		assertEquals(writeMsg.getPartition(), readMsg.getPartition());
 		assertEquals(writeMsg.getTopic(), readMsg.getTopic());
 		assertEquals(writeMsg.isPriority(), readMsg.isPriority());
+		assertEquals(writeMsg.getProperties(), readMsg.getProperties());
 
 		Codec codec = lookup(CodecManager.class).getCodec(writeMsg.getTopic());
 		Pojo readPojo = codec.decode(readMsg.getBody(), Pojo.class);

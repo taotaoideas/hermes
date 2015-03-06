@@ -1,9 +1,9 @@
 package com.ctrip.hermes.message.codec;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.storage.Offset;
@@ -11,27 +11,43 @@ import com.ctrip.hermes.storage.storage.Offset;
 public class DefaultStoredMessageCodec implements StoredMessageCodec {
 
 	@Override
-	public byte[] encode(List<StoredMessage<byte[]>> msgs) {
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		HermesCodec codec = new HermesCodec(bout);
+	public ByteBuffer encode(List<StoredMessage<byte[]>> msgs) {
+		ByteBuffer buf = ByteBuffer.allocateDirect(sizeOf(msgs));
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		codec.writeInt(msgs.size());
 
-		try {
-			for (StoredMessage<byte[]> msg : msgs) {
-				writeMsg(codec, msg);
-			}
-		} catch (IOException e) {
-			// ByteArrayOutputStream won't throw IOException
-			throw new RuntimeException("Unexpected exception when write to ByteArrayOutputStream", e);
+		for (StoredMessage<byte[]> msg : msgs) {
+			writeMsg(codec, msg);
 		}
 
-		return bout.toByteArray();
+		return buf;
+	}
+
+	private void writeMsg(HermesPrimitiveCodec codec, StoredMessage<byte[]> msg) {
+		// TODO remove duplicate code with MessageCodec
+		codec.writeString(msg.getTopic());
+		codec.writeString(msg.getKey());
+		codec.writeString(msg.getPartition());
+		codec.writeBoolean(msg.isPriority());
+		codec.writeLong(msg.getBornTime());
+
+		codec.writeInt(msg.getProperties().size());
+		for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
+			codec.writeString(entry.getKey());
+			codec.writeObject(entry.getValue());
+		}
+
+		codec.writeBytes(msg.getBody());
+
+		writeOffset(codec, msg.getAckOffset());
+		writeOffset(codec, msg.getOffset());
+		codec.writeBoolean(msg.isSuccess());
 	}
 
 	@Override
-	public List<StoredMessage<byte[]>> decode(byte[] bytes) {
-		HermesCodec codec = new HermesCodec(bytes);
+	public List<StoredMessage<byte[]>> decode(ByteBuffer buf) {
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		int listSize = codec.readInt();
 		List<StoredMessage<byte[]>> result = new ArrayList<StoredMessage<byte[]>>(listSize);
@@ -43,29 +59,32 @@ public class DefaultStoredMessageCodec implements StoredMessageCodec {
 		return result;
 	}
 
-	private void writeMsg(HermesCodec codec, StoredMessage<byte[]> msg) throws IOException {
-		codec.writeBytes(msg.getBody());
-		writeOffset(codec, msg.getAckOffset());
-		codec.writeString(msg.getKey());
-		writeOffset(codec, msg.getOffset());
-		codec.writeString(msg.getPartition());
-		codec.writeString(msg.getTopic());
-	}
-
-	private StoredMessage<byte[]> readMsg(HermesCodec codec) {
+	private StoredMessage<byte[]> readMsg(HermesPrimitiveCodec codec) {
 		StoredMessage<byte[]> msg = new StoredMessage<byte[]>();
 
-		msg.setBody(codec.readBytes());
-		msg.setAckOffset(readOffset(codec));
-		msg.setKey(codec.readString());
-		msg.setOffset(readOffset(codec));
-		msg.setPartition(codec.readString());
 		msg.setTopic(codec.readString());
+		msg.setKey(codec.readString());
+		msg.setPartition(codec.readString());
+		msg.setPriority(codec.readBoolean());
+		msg.setBornTime(codec.readLong());
+
+		int propertiesSize = codec.readInt();
+		for (int i = 0; i < propertiesSize; i++) {
+			String name = codec.readString();
+			Object value = codec.readObject();
+			msg.addProperty(name, value);
+		}
+
+		msg.setBody(codec.readBytes());
+
+		msg.setAckOffset(readOffset(codec));
+		msg.setOffset(readOffset(codec));
+		msg.setSuccess(codec.readBoolean());
 
 		return msg;
 	}
 
-	private void writeOffset(HermesCodec codec, Offset offset) throws IOException {
+	private void writeOffset(HermesPrimitiveCodec codec, Offset offset) {
 		if (offset == null) {
 			codec.writeNull();
 		} else {
@@ -74,14 +93,24 @@ public class DefaultStoredMessageCodec implements StoredMessageCodec {
 		}
 	}
 
-	private Offset readOffset(HermesCodec codec) {
+	private Offset readOffset(HermesPrimitiveCodec codec) {
 		Offset offset = null;
-		
+
 		if (!codec.nextNull()) {
 			offset = new Offset(codec.readString(), codec.readLong());
 		}
 
 		return offset;
+	}
+
+	private int sizeOf(List<StoredMessage<byte[]>> msgs) {
+		// TODO estemate msg size
+		int size = 0;
+		for (StoredMessage<byte[]> msg : msgs) {
+			size += msg.getBody().length;
+		}
+
+		return size + 1024 * 4;
 	}
 
 }

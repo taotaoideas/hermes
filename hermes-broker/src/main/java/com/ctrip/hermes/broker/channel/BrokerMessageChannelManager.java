@@ -30,6 +30,7 @@ import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.message.spi.MessageTree;
 
 public class BrokerMessageChannelManager implements MessageChannelManager, LogEnabled {
 
@@ -179,15 +180,16 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 			public void send(final List<Message<byte[]>> msgs) {
 				final Transaction t = Cat.newTransaction("Receive", topic);
 
-				// MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-				// tree.setRootMessageId(rootMessageId);
-				// tree.setMessageId(messageId);
-				// tree.setParentMessageId(parentMessageId);
+				 MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+//				 tree.setRootMessageId(rootMessageId);
+//				 tree.setMessageId(messageId);
+//				 tree.setParentMessageId(parentMessageId);
 
 				try {
 					m_receiverPipeline.put(new Pair<>(msgs, new PipelineSink() {
 
-						@Override
+						@SuppressWarnings("unchecked")
+                  @Override
 						public void handle(PipelineContext ctx, Object payload) {
 							List<Message<byte[]>> sinkMsgs = (List<Message<byte[]>>) payload;
 

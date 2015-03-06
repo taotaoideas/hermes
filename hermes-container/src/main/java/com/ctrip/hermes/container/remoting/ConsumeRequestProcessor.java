@@ -1,5 +1,6 @@
 package com.ctrip.hermes.container.remoting;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +33,8 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 	public void process(CommandContext ctx) {
 		Command cmd = ctx.getCommand();
 
-		List<StoredMessage<byte[]>> msgs = m_codec.decode(cmd.getBody());
+		// TODO use bytebuffer
+		List<StoredMessage<byte[]>> msgs = m_codec.decode(ByteBuffer.wrap(cmd.getBody()));
 		m_bootstrap.deliverMessage(cmd.getCorrelationId(), msgs);
 	}
 

@@ -2,6 +2,7 @@ package com.ctrip.hermes.broker.remoting;
 
 import io.netty.channel.Channel;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +27,7 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 
 	@Inject
 	private MessageChannelManager m_channelManager;
-	
+
 	@Inject
 	private StoredMessageCodec m_codec;
 
@@ -76,7 +77,13 @@ public class StartConsumerRequestProcessor implements CommandProcessor {
 	}
 
 	private byte[] encode(List<StoredMessage<byte[]>> msgs) {
-		return m_codec.encode(msgs);
+		ByteBuffer buf = m_codec.encode(msgs);
+		buf.flip();
+		byte[] bytes = new byte[buf.limit()];
+		// TODO use bytebuffer
+		buf.get(bytes);
+
+		return bytes;
 	}
 
 }

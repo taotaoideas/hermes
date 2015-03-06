@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,8 @@ public class DefaultStoredMessageCodecTest extends ComponentTestCase {
 		msg1.setPriority(true);
 		msg1.setSuccess(true);
 		msg1.setTopic(UUID.randomUUID().toString());
+		msg1.addProperty(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+		msg1.addProperty(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 		writeMsgs.add(msg1);
 
 		StoredMessage<byte[]> msg2 = new StoredMessage<byte[]>();
@@ -37,9 +40,10 @@ public class DefaultStoredMessageCodecTest extends ComponentTestCase {
 		msg2.setAckOffset(new Offset(UUID.randomUUID().toString(), 2));
 		writeMsgs.add(msg2);
 
-		byte[] bytes = codec.encode(writeMsgs);
+		ByteBuffer buf = codec.encode(writeMsgs);
 
-		List<StoredMessage<byte[]>> readMsgs = codec.decode(bytes);
+		buf.flip();
+		List<StoredMessage<byte[]>> readMsgs = codec.decode(buf);
 
 		assertTrue(writeMsgs.size() > 0);
 		assertEquals(writeMsgs.size(), readMsgs.size());
@@ -52,7 +56,10 @@ public class DefaultStoredMessageCodecTest extends ComponentTestCase {
 			assertEquals(wm.getKey(), rm.getKey());
 			assertEquals(wm.getOffset(), rm.getOffset());
 			assertEquals(wm.getPartition(), rm.getPartition());
+			assertEquals(wm.isPriority(), rm.isPriority());
+			assertEquals(wm.isSuccess(), rm.isSuccess());
 			assertEquals(wm.getTopic(), rm.getTopic());
+			assertEquals(wm.getProperties(), rm.getProperties());
 		}
 
 	}

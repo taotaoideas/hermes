@@ -1,5 +1,7 @@
 package com.ctrip.hermes.message;
 
+import java.util.Map;
+
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
@@ -28,12 +30,17 @@ public class StoredMessage<T> extends Message<Object> {
 		setPartition(r.getPartition());
 		setTopic(topic);
 
+		for (Map.Entry<String, Object> entry : r.getProperties().entrySet()) {
+			// TODO remove key, partition, topic
+			addProperty(entry.getKey(), entry.getValue());
+		}
+
 		m_offset = r.getOffset();
 		m_ackOffset = r.getAckOffset();
 	}
 
 	@SuppressWarnings("unchecked")
-   @Override
+	@Override
 	public T getBody() {
 		return (T) super.getBody();
 	}

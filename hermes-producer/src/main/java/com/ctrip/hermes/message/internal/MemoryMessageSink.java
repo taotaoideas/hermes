@@ -1,5 +1,6 @@
 package com.ctrip.hermes.message.internal;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import org.unidal.lookup.annotation.Inject;
@@ -27,7 +28,7 @@ public class MemoryMessageSink implements PipelineSink {
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
 
-		channel.send(Arrays.asList(m_msgCodec.decode(encodedMsg)));
+		channel.send(Arrays.asList(m_msgCodec.decode(ByteBuffer.wrap(encodedMsg))));
 	}
 
 }

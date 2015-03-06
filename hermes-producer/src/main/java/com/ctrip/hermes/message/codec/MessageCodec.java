@@ -1,12 +1,13 @@
 package com.ctrip.hermes.message.codec;
 
+import java.nio.ByteBuffer;
+
 import com.ctrip.hermes.message.Message;
 
 public interface MessageCodec {
 
-	public byte[] encode(Message<?> msg);
+	public ByteBuffer encode(Message<?> msg);
 
-	// TODO should return Message<ByteBuffer>
-	public Message<byte[]> decode(byte[] bytes);
+	public Message<byte[]> decode(ByteBuffer buf);
 
 }
