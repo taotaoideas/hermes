@@ -55,8 +55,9 @@ LocalDev
         }
     })
     .controller("PopupCtrl", function ($scope, $q, $alert, MainService) {
+        $scope.topic = MainService.getSelectedTopic();
+
         $scope.create = function(topic, group) {
-            console.log("topic:" +topic + "; group: "+group);
 
             if (undefined != topic && undefined!=group) {
                 MainService.addConsumer(topic, group);

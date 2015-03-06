@@ -13,11 +13,12 @@ import javax.ws.rs.core.MediaType;
 import com.ctrip.hermes.local.pojo.Order;
 import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.producer.Producer;
+import com.google.common.collect.ArrayListMultimap;
 
 
 @Path("/producer")
 public class ProducerResource {
-    static List<OutputMessage> history = new ArrayList<>();
+    static ArrayListMultimap<String/* topic */, OutputMessage> history = ArrayListMultimap.create();
 
     @GET
     @Path("/send")
@@ -35,10 +36,10 @@ public class ProducerResource {
         Boolean isSuccess = true;
         if (null == key) {
             Producer.getInstance().message(topic, toSend).send();
-            history.add(new OutputMessage(msg, key, null,null, null, new Date().getTime()));
+            history.put(topic, new OutputMessage(msg, key, null, null, null, new Date().getTime()));
         } else {
             Producer.getInstance().message(topic, toSend).withKey(key).send();
-            history.add(new OutputMessage(msg, key, null,null, null, new Date().getTime()));
+            history.put(topic, new OutputMessage(msg, key, null, null, null, new Date().getTime()));
         }
         return isSuccess;
     }
@@ -47,6 +48,6 @@ public class ProducerResource {
     @Path("/history")
     @Produces(MediaType.APPLICATION_JSON)
     public List<OutputMessage> sendMsg(@QueryParam("topic") String topic) {
-        return history;
+        return history.get(topic);
     }
 }
