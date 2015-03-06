@@ -18,9 +18,10 @@ LocalDev.service("QueueService", ['$http', '$q', function ($http, $q) {
             var result = []
             var topicInfo = data;
             for (var i = 0; i < topicInfo.length; i++) {
-                result.push(new Status(i + 1, 0, topicInfo[i].message, "success", "OK"));
+                var timestamp = new Date(topicInfo[i].timestamp);
+                result.push(new Status(i + 1, timestamp.toLocaleString(), topicInfo[i].message, "success", "OK"));
             }
             return result;
-        },
+        }
     }
 }])

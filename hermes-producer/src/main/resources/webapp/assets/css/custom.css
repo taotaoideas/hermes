@@ -1,3 +1,8 @@
+.title-2 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
 .producer {
     height: 400px;
     padding: 5px 15px;
@@ -19,12 +24,13 @@
 }
 
 .producer-msg-hisorty-table {
-    height: 400px !important;
+    height: 280px !important;
+    /*border: 1px solid #c5c5c5;*/
     overflow: auto;
 }
 
 .queue-msg-table {
-    height: 400px !important;
+    height: 340px !important;
     overflow: auto;
 }
 
@@ -35,8 +41,8 @@
 .consumer {
     height: 100%;
     /*width: 500px;*/
-    padding: 30px 15px;
-    margin-bottom: 30px;
+    padding: 5px 15px;
+    margin-bottom: 5px;
     color: inherit;
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;

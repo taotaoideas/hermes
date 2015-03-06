@@ -26,7 +26,7 @@ LocalDev.service("ProducerService", ['$http', '$q', function ($http, $q) {
             for (var i = 0; i < data.length; i++) {
                 var msg = data[i];
                 var date = new Date(msg.timestamp);
-                msgs.push(new Message(i, date.toLocaleString() /*+ " (" + date.getTime() + ")"*/,
+                msgs.push(new Message(i+1, date.toLocaleString() /*+ " (" + date.getTime() + ")"*/,
                     msg.message, "success", "OK"));
             }
             return msgs;

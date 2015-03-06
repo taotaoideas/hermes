@@ -21,6 +21,26 @@ LocalDev.service("ConsumerService", ['$http', '$q', function ($http, $q) {
         this.status = status;
     }
 
+    function buildConsumerGroup(group) {
+        var consumers = []
+        for (var j = 0; j < group.consumers.length; j++) {
+            var consumer = group.consumers[j];
+
+            var msgs = []
+            if (consumer.messages.length > 0) {
+                for (var k = 0; k < consumer.messages.length; k++) {
+                    var msg = consumer.messages[k];
+                    var offset = msg.offset.offset;
+                    var timestamp = new Date(msg.timestamp);
+                    msgs.push(new Message(offset, timestamp.toLocaleString(), msg.message, "success", "OK"))
+                }
+            }
+
+            consumers.push(new Consumer(consumer.name, msgs));
+        }
+        return new ConsumerGroup(group.topic, group.groupName, consumers);
+    }
+
     var i = 1;
     return {
         getConsumerStatus: function (topic) {
@@ -30,24 +50,7 @@ LocalDev.service("ConsumerService", ['$http', '$q', function ($http, $q) {
             var result = [];
 
             for (var i = 0; i < data.length; i++) {
-                var group = data[i];
-
-                var consumers = []
-                for (var j = 0; j < group.consumers.length; j++) {
-                    var consumer = group.consumers[j];
-
-                    var msgs = []
-                    if (consumer.messages.length > 0) {
-                        for (var k = 0; k < consumer.messages.length; k++) {
-                            var msg = consumer.messages[k];
-                            msgs.push(new Message(k, 0, msg.message, "success", "ok"))
-                        }
-                    }
-
-                    consumers.push(new Consumer(consumer.name, msgs));
-                }
-
-                result.push(new ConsumerGroup(group.topic, group.groupName, consumers))
+                result.push(buildConsumerGroup(data[i]));
             }
             return result;
         }

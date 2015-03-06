@@ -10,37 +10,46 @@ LocalDev
             templateUrl: 'views/consumer.html'
         }
     })
-    .controller("ConsumerTabCtrl", function ($scope, $q, ConsumerService, MainService) {
+    .controller("ConsumerTabCtrl", function ($scope, $q, $window, ConsumerService, MainService) {
         $scope.tabs = [];
 
-        setInterval(function() {
+        setInterval(function () {
             $scope.topic = MainService.getSelectedTopic();
-            //console.log($scope.topic)
             updateTabs($scope.tabs);
         }, 1000)
 
         function updateTabs(tabs) {
             if (tabs.length == 0) {
-                ConsumerService.getConsumerStatus($scope.topic).success(function(data, status, headers, config){
-                    $scope.tabs=ConsumerService.handleData(data);
+                ConsumerService.getConsumerStatus($scope.topic).success(function (data, status, headers, config) {
+                    $scope.tabs = ConsumerService.handleData(data);
                     $scope.tabs.activeTab = 0;
                 });
             } else {
-                ConsumerService.getConsumerStatus($scope.topic).success(function(data, status, headers, config){
-                    if ($scope.tabs.activeTab == -1 ||$scope.tabs.activeTab > data.length) {
-                        $scope.tabs.activeTab = 0
-                    }
-                    var d = ConsumerService.handleData(data)[$scope.tabs.activeTab];
+                ConsumerService.getConsumerStatus($scope.topic).success(function (data, status, headers, config) {
+                    var dataResult = ConsumerService.handleData(data);
 
-                    $scope.tabs[$scope.tabs.activeTab].groupName = d.groupName;
-                    $scope.tabs[$scope.tabs.activeTab].consumers = d.consumers;
-                    $scope.tabs[$scope.tabs.activeTab].send = d.send;
-                    $scope.tabs[$scope.tabs.activeTab].resend = d.resend;
+                    for (var i = 0; i < $scope.tabs.length; i++) {
+                        $scope.tabs[i].groupName = dataResult[i].groupName;
+
+                        $scope.tabs[i].consumers = dataResult[i].consumers;
+                    }
+
+                    for (var i = $scope.tabs.length; i < dataResult.length; i++) {
+                        $scope.tabs.push(dataResult[i]);
+                    }
                 });
             }
         }
-        $scope.checkTopic =function (tab) {
+
+        $scope.isShowTab = function (tab) {
             return tab.topic == $scope.topic;
+        };
+
+        $scope.scroll = function () {
+            //alert("scroll");
+            //setTimeout(function () {
+            //    $window.scrollBy(100, document.body.scrollHeight - 500);
+            //}, 300);
         }
     })
     .controller("ConsumerCtrl", function ($scope) {
