@@ -2,9 +2,9 @@ package com.ctrip.hermes.spi.internal;
 
 import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.PipelineContext;
+import com.ctrip.hermes.remoting.CatConstants;
 import com.ctrip.hermes.spi.Valve;
 import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;

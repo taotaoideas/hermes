@@ -3,9 +3,11 @@ package com.ctrip.hermes.consumer;
 import java.util.List;
 
 import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.remoting.CatConstants;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
+import com.dianping.cat.configuration.NetworkInterfaceManager;
+import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 
@@ -36,6 +38,8 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 
 					consume(msg);
 
+					String type = "Consumer:" + NetworkInterfaceManager.INSTANCE.getLocalHostAddress() + ":" + getGroupId();
+					Cat.logEvent(type, msg.getTopic(), Event.SUCCESS, "key=" + msg.getKey());
 					Cat.logMetricForCount(msg.getTopic());
 					t.setStatus(msg.isSuccess() ? Transaction.SUCCESS : "FAILED-WILL-RETRY");
 				} catch (RuntimeException | Error e) {

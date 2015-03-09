@@ -2,10 +2,12 @@ package com.ctrip.hermes.remoting;
 
 public interface CatConstants {
 
-	public final static String MSG_ID = "CatMessageId";
+	public static final String ROOT_MESSAGE_ID = "RootMessageId";
 
-	public final static String PARENT_MSG_ID = "CatParentMessageId";
+	public static final String CURRENT_MESSAGE_ID = "CurrentMessageId";
 
-	public final static String ROOT_MSG_ID = "CatRootMessageId";
+	public static final String SERVER_MESSAGE_ID = "ServerMessageId";
+
+	public static final String TYPE_REMOTE_CALL = "RemoteCall";
 
 }
