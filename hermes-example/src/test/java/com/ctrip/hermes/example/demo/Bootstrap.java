@@ -19,6 +19,8 @@ public class Bootstrap extends ComponentTestCase {
 
 	@Test
 	public void start() throws Exception {
+		System.setProperty("devMode", "true");
+		
 		startBroker();
 		startLocalDevServer();
 
