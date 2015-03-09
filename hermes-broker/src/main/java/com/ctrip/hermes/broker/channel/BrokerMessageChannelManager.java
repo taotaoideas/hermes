@@ -29,6 +29,7 @@ import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
@@ -127,14 +128,32 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 						int curIdx = m_idx++;
 						final ConsumerChannelHandler handler = handlers.get(curIdx % handlers.size());
 						if (handler.isOpen()) {
-							Transaction t = Cat.newTransaction("Deliver", topic);
 
 							try {
-								appendCatEvent(t, records, topic, "DeliverMessage");
-
 								List<StoredMessage<byte[]>> msgs = new ArrayList<>(records.size());
 								for (Record r : records) {
+									Transaction t = Cat.newTransaction("Message.Delivered", topic);
+									MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+									String childMsgId = Cat.createMessageId();
+
+									String rootMsgId = r.getProperty(CatConstants.ROOT_MESSAGE_ID);
+									String parentMsgId = r.getProperty(CatConstants.CURRENT_MESSAGE_ID);
+									String msgId = r.getProperty(CatConstants.SERVER_MESSAGE_ID);
+
+									tree.setMessageId(msgId);
+									tree.setParentMessageId(parentMsgId);
+									tree.setRootMessageId(rootMsgId);
+
+									Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
+									System.out.println(String.format("Deliver: %s %s %s", childMsgId, msgId, rootMsgId));
+
+									r.setProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
+									r.setProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
+									r.setProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
+
 									msgs.add(new StoredMessage(r, topic));
+									t.setStatus(Transaction.SUCCESS);
+									t.complete();
 								}
 
 								m_deliverPipeline.put(new Pair<>(msgs, new PipelineSink<Void>() {
@@ -149,13 +168,10 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 									}
 								}));
 
-								t.setStatus(Transaction.SUCCESS);
 							} catch (Exception e) {
 								// TODO handle exception
 								m_logger.error("", e);
-								t.setStatus(e);
 							} finally {
-								t.complete();
 							}
 							break;
 						} else {
@@ -181,12 +197,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 
 			@Override
 			public List<SendResult> send(final List<Message<byte[]>> msgs) {
-				final Transaction t = Cat.newTransaction("Receive", topic);
 				List<SendResult> result = new ArrayList<SendResult>(msgs.size());
-
-				// tree.setRootMessageId(rootMessageId);
-				// tree.setMessageId(messageId);
-				// tree.setParentMessageId(parentMessageId);
 
 				try {
 					m_receiverPipeline.put(new Pair<>(msgs, new PipelineSink<Void>() {
@@ -197,30 +208,45 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 							List<Message<byte[]>> sinkMsgs = (List<Message<byte[]>>) payload;
 
 							final List<Record> records = new ArrayList<Record>();
+
 							for (Message<byte[]> msg : sinkMsgs) {
+								Transaction t = Cat.newTransaction("Message.Received", topic);
+								MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+
+								String childMsgId = Cat.createMessageId();
+								String msgId = msg.getProperty(CatConstants.SERVER_MESSAGE_ID);
+								String parentMsgId = msg.getProperty(CatConstants.CURRENT_MESSAGE_ID);
+								String rootMsgId = msg.getProperty(CatConstants.ROOT_MESSAGE_ID);
+
+								tree.setMessageId(msgId);
+								tree.setParentMessageId(parentMsgId);
+								tree.setRootMessageId(rootMsgId);
+
+								Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
+
+								msg.addProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
+								msg.addProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
+
 								records.add(new Record(msg));
+
+								t.setStatus(Transaction.SUCCESS);
+								t.complete();
 							}
-
-							appendCatEvent(t, records, topic, "ReceiveMessage");
-							// TODO attach cat rootMessageId, messageId to msg
 							q.write(records);
-
 							return null;
 						}
 					}));
 
-					t.setStatus(Transaction.SUCCESS);
 				} catch (Throwable e) {
 					m_logger.error("", e);
-					t.setStatus(e);
 				} finally {
-					MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-					for (int i = 0; i < msgs.size(); i++) {
+					for (Message<byte[]> msg : msgs) {
 						SendResult r = new SendResult();
-						r.setCatMessageId(tree.getMessageId());
+						String msgId = (String) msg.getProperty(CatConstants.CURRENT_MESSAGE_ID);
+						r.setCatMessageId(msgId);
+						Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, msgId);
 						result.add(r);
 					}
-					t.complete();
 				}
 
 				return result;
@@ -232,12 +258,6 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 
 			}
 		};
-	}
-
-	private void appendCatEvent(Transaction t, List<Record> msgs, String topic, String prefix) {
-		for (Record msg : msgs) {
-			Cat.logEvent(topic, prefix, Event.SUCCESS, msg.getKey());
-		}
 	}
 
 	@Override

@@ -10,14 +10,19 @@ import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandType;
+import com.ctrip.hermes.remoting.future.FutureManager;
 import com.ctrip.hermes.remoting.netty.ClientManager;
 import com.ctrip.hermes.remoting.netty.NettyClientHandler;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class BrokerMessageSink implements PipelineSink<Future<SendResult>> {
 	public static final String ID = "broker";
 
 	@Inject
 	private ClientManager m_channelManager;
+
+	@Inject
+	private FutureManager m_futureManager;
 
 	@Override
 	public Future<SendResult> handle(PipelineContext<Future<SendResult>> ctx, Object input) {
@@ -34,8 +39,10 @@ public class BrokerMessageSink implements PipelineSink<Future<SendResult>> {
 		      .setBody(msgBytes) //
 		      .addHeader("topic", topic);
 
+		final SettableFuture<SendResult> future = m_futureManager.newFuture(cmd.getCorrelationId());
+
 		client.writeCommand(cmd);
-		
-		return null;
+
+		return future;
 	}
 }

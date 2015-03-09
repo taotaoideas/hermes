@@ -44,6 +44,9 @@ import com.ctrip.hermes.remoting.CommandProcessor;
 import com.ctrip.hermes.remoting.CommandProcessorManager;
 import com.ctrip.hermes.remoting.CommandRegistry;
 import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
+import com.ctrip.hermes.remoting.SendMessageResponseProcessor;
+import com.ctrip.hermes.remoting.future.DefaultFutureManager;
+import com.ctrip.hermes.remoting.future.FutureManager;
 import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
 import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
 import com.ctrip.hermes.remoting.netty.ClientManager;
@@ -83,12 +86,14 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(Codec.class, JsonCodec.ID, JsonCodec.class));
 		all.add(C(CodecManager.class, DefaultCodecManager.class));
 
+		all.add(C(FutureManager.class, DefaultFutureManager.class));
+
 		// sinks
 		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
 		      .req(MessageChannelManager.class, LocalMessageChannelManager.ID) //
 		      .req(MessageCodec.class));
 		all.add(C(PipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
-		      .req(ClientManager.class));
+		      .req(ClientManager.class, FutureManager.class));
 		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 
@@ -120,6 +125,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
+		all.add(C(CommandProcessor.class, SendMessageResponseProcessor.ID, SendMessageResponseProcessor.class) //
+				.req(FutureManager.class));
 
 		all.add(C(MessageCodec.class, DefaultMessageCodec.class) //
 		      .req(CodecManager.class));

@@ -29,6 +29,8 @@ public class ProducerPipeline implements Pipeline<Future<SendResult>> {
 		PipelineContext<Future<SendResult>> ctx = new DefaultPipelineContext<>(m_registry.getValveList(), sink);
 		ctx.put("topic", topic);
 
-		return ctx.next(msg);
+		ctx.next(msg);
+
+		return ctx.getResult();
 	}
 }

@@ -5,7 +5,9 @@ import java.util.List;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.message.spi.MessageTree;
 
 public abstract class BaseConsumer<T> implements Consumer<T> {
 
@@ -15,7 +17,15 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 			String topic = msgs.get(0).getTopic();
 
 			for (StoredMessage<T> msg : msgs) {
-				Transaction t = Cat.newTransaction("Consume", topic);
+				Transaction t = Cat.newTransaction("Message.Consumed", topic);
+				MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
+				String rootMsgId = msg.getProperty(CatConstants.ROOT_MESSAGE_ID);
+				String parentMsgId = msg.getProperty(CatConstants.CURRENT_MESSAGE_ID);
+				String msgId = msg.getProperty(CatConstants.SERVER_MESSAGE_ID);
+				tree.setRootMessageId(rootMsgId);
+				tree.setParentMessageId(parentMsgId);
+				tree.setMessageId(msgId);
+				System.out.println(String.format("Consumer: %s %s %s", msgId, parentMsgId, rootMsgId));
 
 				try {
 					t.addData("topic", topic);
@@ -26,10 +36,10 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 
 					consume(msg);
 
-					Cat.logEvent("Consume:1.1.1.1", topic + ":" + getGroupId());
-					Cat.logEvent("Message:" + topic, "Consume:1.1.1.1");
-					t.setStatus(msg.isSuccess() ? Transaction.SUCCESS : "NACK");
-				} catch (RuntimeException e) {
+					Cat.logMetricForCount(msg.getTopic());
+					t.setStatus(msg.isSuccess() ? Transaction.SUCCESS : "FAILED-WILL-RETRY");
+				} catch (RuntimeException | Error e) {
+					Cat.logError(e);
 					t.setStatus(e);
 				} finally {
 					t.complete();

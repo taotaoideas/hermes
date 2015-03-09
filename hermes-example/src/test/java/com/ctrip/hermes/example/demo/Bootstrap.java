@@ -1,12 +1,14 @@
 package com.ctrip.hermes.example.demo;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
+import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.container.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
@@ -19,19 +21,20 @@ public class Bootstrap extends ComponentTestCase {
 	public void start() throws Exception {
 		startBroker();
 		startLocalDevServer();
-		
+
 		startConsumers();
 		OrderProducer p = new OrderProducer();
 
 		while (true) {
-			p.send();
+			Future<SendResult> f = p.send();
+			System.out.println(f.get().getCatMessageId());
 			System.in.read();
 		}
 	}
 
 	private void startConsumers() {
 		List<Subscriber> subs = lookup(Scanner.class).scan();
-		
+
 		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
 		for (Subscriber s : subs) {
 			System.out.println("Found consumer class " + s.getConsumer().getClass());

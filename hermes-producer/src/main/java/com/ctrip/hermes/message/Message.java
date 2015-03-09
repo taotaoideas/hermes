@@ -77,5 +77,9 @@ public class Message<T> {
 	public void addProperty(String name, Object value) {
 		m_properties.put(name, value);
 	}
+	
+	public <T> T getProperty(String name) {
+		return (T) m_properties.get(name);
+	}
 
 }

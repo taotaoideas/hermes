@@ -16,7 +16,7 @@ public class EncodeMessageValve implements Valve {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void handle(PipelineContext ctx, Object payload) {
+	public void handle(PipelineContext<?> ctx, Object payload) {
 		Message<Object> msg = (Message<Object>) payload;
 
 		ctx.next(m_msgCodec.encode(msg));

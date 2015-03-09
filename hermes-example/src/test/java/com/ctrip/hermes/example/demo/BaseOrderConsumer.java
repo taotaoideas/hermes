@@ -2,6 +2,8 @@ package com.ctrip.hermes.example.demo;
 
 import com.ctrip.hermes.consumer.BaseConsumer;
 import com.ctrip.hermes.message.StoredMessage;
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Event;
 
 public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 
@@ -10,8 +12,14 @@ public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 		System.out.println(String.format("Consumer %s of %s receive %s", //
 		      getId(), getGroupId(), msg.getBody()));
 
+		Cat.logEvent("OrderProcessed", msg.getTopic(), Event.SUCCESS, "key=" + msg.getKey());
+
 		if (shouldNack(msg)) {
 			msg.nack();
+		}
+
+		if (msg.getBody().getPrice() % 4 == 0) {
+			throw new RuntimeException("internal error");
 		}
 	}
 

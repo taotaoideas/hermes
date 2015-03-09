@@ -1,7 +1,11 @@
 package com.ctrip.hermes.producer;
 
+import java.util.concurrent.Future;
+
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.unidal.lookup.ContainerLoader;
+
+import com.ctrip.hermes.channel.SendResult;
 
 public abstract class Producer {
 	public abstract Holder message(String topic, Object body);
@@ -17,7 +21,7 @@ public abstract class Producer {
 	public interface Holder {
 		public Holder withKey(String key);
 
-		public void send();
+		public Future<SendResult> send();
 
 		public Holder withPriority();
 		

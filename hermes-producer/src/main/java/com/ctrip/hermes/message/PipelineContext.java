@@ -4,10 +4,12 @@ public interface PipelineContext<O> {
 
 	public <T> T getSource();
 
-	public O next(Object payload);
+	public void next(Object payload);
 
-	public void put(String name, String value);
+	public void put(String name, Object value);
 
 	public <T> T get(String name);
+	
+	public O getResult();
 
 }

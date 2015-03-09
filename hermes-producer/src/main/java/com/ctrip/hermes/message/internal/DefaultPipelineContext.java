@@ -20,13 +20,15 @@ public class DefaultPipelineContext<T> implements PipelineContext<T> {
 
 	private Map<String, Object> m_attrs = new HashMap<String, Object>();
 
+	private T m_result;
+
 	public DefaultPipelineContext(List<Valve> valves, PipelineSink<T> sink) {
 		m_valves = valves;
 		m_sink = sink;
 	}
 
 	@Override
-	public T next(Object payload) {
+	public void next(Object payload) {
 		if (m_index == 0) {
 			m_source = payload;
 		}
@@ -36,10 +38,8 @@ public class DefaultPipelineContext<T> implements PipelineContext<T> {
 
 			m_index++;
 			valve.handle(this, payload);
-			// TODO
-			return null;
 		} else {
-			return m_sink.handle(this, payload);
+			m_result = m_sink.handle(this, payload);
 		}
 	}
 
@@ -50,7 +50,7 @@ public class DefaultPipelineContext<T> implements PipelineContext<T> {
 	}
 
 	@Override
-	public void put(String name, String value) {
+	public void put(String name, Object value) {
 		m_attrs.put(name, value);
 	}
 
@@ -58,6 +58,11 @@ public class DefaultPipelineContext<T> implements PipelineContext<T> {
 	@Override
 	public <O> O get(String name) {
 		return (O) m_attrs.get(name);
+	}
+
+	@Override
+	public T getResult() {
+		return m_result;
 	}
 
 }

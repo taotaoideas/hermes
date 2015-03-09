@@ -1,14 +1,17 @@
 package com.ctrip.hermes.producer.internal;
 
+import java.util.concurrent.Future;
+
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.producer.Producer;
 
 public class DefaultProducer extends Producer {
 	@Inject
-	private Pipeline m_pipe;
+	private Pipeline<Future<SendResult>> m_pipe;
 
 	@Override
 	public DefaultHolder message(String topic, Object body) {
@@ -26,9 +29,9 @@ public class DefaultProducer extends Producer {
 		}
 
 		@Override
-		public void send() {
+		public Future<SendResult> send() {
 			m_msg.setBornTime(System.currentTimeMillis());
-			m_pipe.put(m_msg);
+			return m_pipe.put(m_msg);
 		}
 
 		@Override
