@@ -24,8 +24,5 @@ public class LocalDevServer {
 		server.setHandler(ctx);
 
 		server.start();
-
 	}
-
-
 }

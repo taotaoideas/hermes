@@ -60,6 +60,8 @@ public class MockConsumers {
     public void consumeOneMsg(String topic, String group, StoredMessage<byte[]>  msg) {
         List<MockConsumer> consumers = consumerMap.get(topic + SPLITER + group);
 
-        consumers.get(new Random().nextInt(consumers.size())).consumeOneMsg(msg);
+        if (consumers.size() > 0 ) {
+            consumers.get(new Random().nextInt(consumers.size())).consumeOneMsg(msg);
+        }
     }
 }

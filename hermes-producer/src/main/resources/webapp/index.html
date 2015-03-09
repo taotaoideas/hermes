@@ -13,7 +13,7 @@
 <body>
 
 <!--Nav Bar-->
-<nav class="navbar navbar-inverse ">
+<nav class="navbar navbar-inverse " style="margin-bottom: 5px">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
@@ -48,8 +48,10 @@
             </div>
 
         </div>
-        <div class="col-md-1 col-md-offset-8">
-            <button type="button" class="btn btn-sm btn-info " data-template="views/addConsumer.html"
+        <div class="col-md-1 col-md-offset-8" >
+            <button type="button" class="btn btn-sm btn-info " data-placement="bottom"
+                    title="Configure Consumer" data-content=" some needed content"
+                    data-template="views/addConsumer.html"
                     data-animation="am-flip-x" data-auto-close="1" bs-popover>Add Consumer Group
             </button>
         </div>
@@ -60,8 +62,7 @@
         <div class="col-md-6">
             <!--Producer-->
             <div class="producer" ng-controller="ProducerCtrl">
-                <h2>Producer: details...</h2>
-
+                <h3 class="title-2">Producer</h3>
                 <div class="input-group">
                     <span class="input-group-addon" id="basic-addon1"><strong>Topic:</strong></span>
 
@@ -86,11 +87,11 @@
                 <div class="producer-msg-hisorty-table">
 
 
-                    <h3>Message Send History</h3>
+                    <h4>Message Send History</h4>
                     <table class="table table-striped" ng-cloak>
                         <thead>
                         <tr>
-                            <th>Index</th>
+                            <th>Offset</th>
                             <th>Timestamp</th>
                             <th>Content</th>
                             <th>Status</th>
@@ -111,14 +112,14 @@
         <div class="col-md-6">
             <!--Queue-->
             <div class="queue" ng-controller="QueueCtrl">
-                <h2>Queue: details...</h2>
+                <h3 class="title-2">Queue</h3>
 
                 <div class="queue-msg-table">
-                    <h3>Message in the Queue</h3>
+                    <h4>Message in the Queue</h4>
                     <table class="table table-striped" ng-cloak>
                         <thead>
                         <tr>
-                            <th>Index</th>
+                            <th>Offset</th>
                             <th>Timestamp</th>
                             <th>Content</th>
                             <th>Status</th>
@@ -139,11 +140,11 @@
     </div>
 
     <!--Consumer Groups-->
-    <div ng-controller="ConsumerTabCtrl">
+    <div ng-controller="ConsumerTabCtrl" style="height: 300px !important;">
 
 
-        <div bs-active-pane="tabs.activeTab" bs-tabs>
-            <div ng-repeat="tab in tabs " title="{{ tab.groupName }}" bs-pane ng-if="checkTopic(tab)">
+        <div bs-active-pane="tabs.activeTab" bs-tabs ng-click="scroll()">
+            <div ng-repeat="tab in tabs " title="{{ tab.groupName }}" bs-pane ng-if="isShowTab(tab)" >
                 <div class="consumer-group" ng-repeat="consumer in tab.consumers">
                     <div consumer info="consumer"></div>
                 </div>
