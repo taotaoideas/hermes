@@ -28,7 +28,7 @@ public class MessageQueueMonitor implements Initializable {
 	private MessageQueueManager m_queueManager;
 
 	public MessageQueueStatus status() throws Exception {
-		LocalMessageQueueManager m = (LocalMessageQueueManager) m_queueManager;
+		MessageQueueManager m = m_queueManager;
 		Map<Pair<String, String>, MessageQueue> queues = m.getQueues();
 
 		MessageQueueStatus result = new MessageQueueStatus();
