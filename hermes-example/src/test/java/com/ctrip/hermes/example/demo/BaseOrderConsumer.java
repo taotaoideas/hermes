@@ -9,31 +9,19 @@ public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 
 	@Override
 	public void consume(StoredMessage<Order> msg) {
-		System.out.println(String.format("Consumer %s of %s receive %s", //
-		      getId(), getGroupId(), msg.getBody()));
+		System.out.println(String.format("Consumer %s of %s <<<<<<<<<< %s", getId(), getGroupId(), msg.getBody()));
 
 		Cat.logEvent("OrderProcessed", msg.getTopic(), Event.SUCCESS, "key=" + msg.getKey());
 
-		if (shouldNack(msg)) {
+		double price = msg.getBody().getPrice();
+		if (price % 3 == System.currentTimeMillis() % 3) {
+			System.out.println(String.format("\tNACK %s", msg.getKey()));
 			msg.nack();
 		}
 
-		if (msg.getBody().getPrice() % 4 == 0) {
-			throw new RuntimeException("internal error");
+		if (price % 4 == 0) {
+			throw new RuntimeException("internal error for error");
 		}
-	}
-
-	private boolean shouldNack(StoredMessage<Order> msg) {
-		long price = (long) msg.getBody().getPrice();
-		boolean nack = price % 3 == System.currentTimeMillis() % 3;
-
-		String prefix = "ACK";
-		if (nack) {
-			prefix = "NACK";
-		}
-		System.out.println(String.format("%s %s", prefix, msg.getBody()));
-
-		return nack;
 	}
 
 	protected abstract String getGroupId();

@@ -30,6 +30,7 @@ import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
+import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
@@ -117,6 +118,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			private void dispatchMessage(List<Record> records) {
+				String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 				while (true) {
 					if (handlers.isEmpty()) {
 						// TODO shutdown and cleanup
@@ -145,7 +147,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 									tree.setRootMessageId(rootMsgId);
 
 									Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
-									System.out.println(String.format("Deliver: %s %s %s", childMsgId, msgId, rootMsgId));
+									Cat.logEvent("Message:" + topic, "BrokerDelivered:" + ip, Event.SUCCESS, "key=" + r.getKey());
 
 									r.setProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
 									r.setProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
@@ -208,7 +210,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 							List<Message<byte[]>> sinkMsgs = (List<Message<byte[]>>) payload;
 
 							final List<Record> records = new ArrayList<Record>();
-
+							String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 							for (Message<byte[]> msg : sinkMsgs) {
 								Transaction t = Cat.newTransaction("Message.Received", topic);
 								MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
@@ -223,6 +225,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 								tree.setRootMessageId(rootMsgId);
 
 								Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
+								Cat.logEvent("Message:" + topic, "BrokerReceived:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 
 								msg.addProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
 								msg.addProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);

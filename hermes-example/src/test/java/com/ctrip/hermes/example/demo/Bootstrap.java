@@ -1,18 +1,18 @@
 package com.ctrip.hermes.example.demo;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
-import com.ctrip.hermes.channel.SendResult;
+import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.consumer.Subscribe;
 import com.ctrip.hermes.container.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.scanner.Scanner;
 import com.ctrip.hermes.local.LocalDevServer;
 
 public class Bootstrap extends ComponentTestCase {
@@ -24,22 +24,39 @@ public class Bootstrap extends ComponentTestCase {
 
 		startConsumers();
 		OrderProducer p = new OrderProducer();
+		p.send("order.new");
+		p.send("order.update");
 
 		while (true) {
-			Future<SendResult> f = p.send();
-			System.out.println(f.get().getCatMessageId());
 			System.in.read();
+			p.send("order.new");
 		}
 	}
 
 	private void startConsumers() {
-		List<Subscriber> subs = lookup(Scanner.class).scan();
+		// List<Subscriber> subs = lookup(Scanner.class).scan();
+		List<Subscriber> subs = findSubscribers();
 
 		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
 		for (Subscriber s : subs) {
 			System.out.println("Found consumer class " + s.getConsumer().getClass());
 			cb.startConsumer(s);
 		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	private List<Subscriber> findSubscribers() {
+		List<Subscriber> result = new ArrayList<Subscriber>();
+		List<Consumer> cs = lookupList(Consumer.class);
+		for (Consumer c : cs) {
+			Subscribe anno = c.getClass().getAnnotation(Subscribe.class);
+			try {
+				result.add(new Subscriber(anno.topicPattern(), anno.groupId(), c, anno.messageClass()));
+			} catch (Exception e) {
+
+			}
+		}
+		return result;
 	}
 
 	private void startLocalDevServer() throws Exception {
@@ -56,6 +73,6 @@ public class Bootstrap extends ComponentTestCase {
 
 	@BeforeClass
 	public static void beforeClass() {
-		System.setProperty("devMode", "true");
+		System.setProperty("devMode", "false");
 	}
 }

@@ -10,6 +10,7 @@
 	<connector type='broker'>
 		<storage type='memory'>
 			<topic name="order.new" />
+			<topic name="order.update" />
 		</storage>
 		<storage type='kafka'>
 			<property name='zookeeper.connect'

@@ -11,17 +11,18 @@ public class OrderProducer {
 
 	private Random rnd = new Random(System.currentTimeMillis());
 
-	public Future<SendResult> send() {
-		Order order = makeOrder();
-		
+	public Future<SendResult> send(String topic) {
+		Order order = makeOrder(topic);
+		System.out.println(String.format("%s >>>>>>>>>> %s", order, topic));
+
 		return Producer.getInstance() //
-		      .message("order.new", order) //
+		      .message(topic, order) //
 		      .withKey(order.getId()) //
 		      .send();
 	}
 
-	private Order makeOrder() {
+	private Order makeOrder(String topic) {
 		String id = UUID.randomUUID().toString().substring(0, 6);
-		return new Order(id, rnd.nextInt(10000));
+		return new Order(topic + "." + id, rnd.nextInt(100));
 	}
 }

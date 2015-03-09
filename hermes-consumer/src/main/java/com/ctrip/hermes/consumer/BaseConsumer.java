@@ -27,7 +27,6 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 				tree.setRootMessageId(rootMsgId);
 				tree.setParentMessageId(parentMsgId);
 				tree.setMessageId(msgId);
-				System.out.println(String.format("Consumer: %s %s %s", msgId, parentMsgId, rootMsgId));
 
 				try {
 					t.addData("topic", topic);
@@ -38,8 +37,9 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 
 					consume(msg);
 
-					String type = "Consumer:" + NetworkInterfaceManager.INSTANCE.getLocalHostAddress() + ":" + getGroupId();
-					Cat.logEvent(type, msg.getTopic(), Event.SUCCESS, "key=" + msg.getKey());
+					String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+					Cat.logEvent("Consumer:" + ip, msg.getTopic() + ":" + getGroupId(), Event.SUCCESS, "key=" + msg.getKey());
+					Cat.logEvent("Message:" + topic, "Consumed:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 					Cat.logMetricForCount(msg.getTopic());
 					t.setStatus(msg.isSuccess() ? Transaction.SUCCESS : "FAILED-WILL-RETRY");
 				} catch (RuntimeException | Error e) {

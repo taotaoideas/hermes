@@ -5,6 +5,7 @@ import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.remoting.CatConstants;
 import com.ctrip.hermes.spi.Valve;
 import com.dianping.cat.Cat;
+import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
@@ -33,7 +34,8 @@ public class TracingMessageValve implements Valve {
 			msg.addProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
 			Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
 
-			System.out.println(String.format("Producer: %s %s %s", childMsgId, msgId, rootMsgId));
+			String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+			Cat.logEvent("Message:" + topic, "Produced:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 
 			ctx.next(payload);
 

@@ -3,7 +3,7 @@ package com.ctrip.hermes.example.demo;
 import com.ctrip.hermes.consumer.Subscribe;
 
 @Subscribe(topicPattern = "order.new", groupId = "group1", messageClass = Order.class)
-public class OrderConsumer1 extends BaseOrderConsumer {
+public class OrderNewConsumer1 extends BaseOrderConsumer {
 
 	@Override
 	protected String getGroupId() {
@@ -12,7 +12,7 @@ public class OrderConsumer1 extends BaseOrderConsumer {
 
 	@Override
 	protected String getId() {
-		return "1-A";
+		return "order.new.1";
 	}
 
 }
