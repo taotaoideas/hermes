@@ -19,7 +19,7 @@ import com.ctrip.hermes.producer.Producer;
 public class TestKafka extends ComponentTestCase {
 	@Test
 	public void test() throws Exception {
-		String topic = "order.kafka";
+		String topic = "order2.kafka";
 		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
 
 		Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {

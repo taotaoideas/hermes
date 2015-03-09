@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<meta dev-mode='false'>
+<meta dev-mode='true'>
 	<connector type='local'>
 		<storage type='memory' default='true'>
 			<topic name='local.order.new' />
@@ -9,16 +9,18 @@
 	</connector>
 	<connector type='broker'>
 		<storage type='memory'>
-			<topic name="order.new" />
+			<topic name="xx.order.new" />
 		</storage>
 		<storage type='kafka'>
 			<property name='zookeeper.connect'
 				value='fx-message04:2181,fx-message05:2181,fx-message06:2181' />
-			<property name='metadata.broker.list'
+			<property name='bootstrap.servers'
 				value='fx-message01:9092,fx-message02:9092,fx-message03:9092' />
 			<property name='request.required.acks' value='1' />
 			<property name='offsets.storage' value='kafka' />
 			<topic name='order.kafka' />
+			<topic name='order2.kafka' />
+			<topic name='order.new' />
 		</storage>
 	</connector>
 </meta>

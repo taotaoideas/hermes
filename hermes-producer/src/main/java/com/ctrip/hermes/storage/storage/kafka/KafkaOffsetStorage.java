@@ -2,42 +2,42 @@ package com.ctrip.hermes.storage.storage.kafka;
 
 import java.util.List;
 
-import kafka.consumer.ConsumerConfig;
-import kafka.producer.ProducerConfig;
-
 import com.ctrip.hermes.storage.spi.typed.OffsetStorage;
 import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
 
-public class KafkaOffsetStorage extends AbstractKafkaStorage<Offset> implements OffsetStorage {
+public class KafkaOffsetStorage implements OffsetStorage {
 
-	public KafkaOffsetStorage(String id, String partition, ProducerConfig pc, ConsumerConfig cc) {
-		super(id, partition, pc, cc);
+	private String m_topic;
+	
+	public KafkaOffsetStorage(String id) {
+		m_topic = id;
 	}
 
 	@Override
 	public void append(List<Offset> payloads) throws StorageException {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-   public Browser<Offset> createBrowser(long offset) {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
-	
+	public Browser<Offset> createBrowser(long offset) {
+		return null;
+	}
+
 	@Override
 	public List<Offset> read(Range range) throws StorageException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Offset top() throws StorageException {
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+   public String getId() {
+		return m_topic;
 	}
 }

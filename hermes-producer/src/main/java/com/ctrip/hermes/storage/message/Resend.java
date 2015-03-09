@@ -16,6 +16,10 @@ public class Resend implements Locatable {
 
 	private Offset m_offset;
 
+	public Resend() {
+
+	}
+
 	public Resend(Range range, long due) {
 		m_range = range;
 		m_due = due;

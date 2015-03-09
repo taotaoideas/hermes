@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import kafka.consumer.ConsumerConfig;
-import kafka.producer.ProducerConfig;
-import kafka.serializer.DefaultEncoder;
-import kafka.serializer.StringEncoder;
-
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
@@ -100,18 +95,21 @@ public class BrokerMessageQueueManager implements MessageQueueManager {
 		MessageQueue q = m_queues.get(pair);
 
 		if (q == null) {
-			Properties props = new Properties();
+			Properties producerProp = new Properties();
+			Properties consumerProp = new Properties();
 			Storage storage = m_meta.getStorage(topic);
 			for (Property prop : storage.getProperties()) {
-				props.put(prop.getName(), prop.getValue());
+				producerProp.put(prop.getName(), prop.getValue());
+				consumerProp.put(prop.getName(), prop.getValue());
 			}
-			props.put("serializer.class", DefaultEncoder.class.getCanonicalName());
-			props.put("key.serializer.class", StringEncoder.class.getCanonicalName());
-			props.put("group.id", groupId);
-			ProducerConfig pc = new ProducerConfig(props);
-			ConsumerConfig cc = new ConsumerConfig(props);
-
-			KafkaGroup kg = new KafkaGroup(topic, groupId, partition, pc, cc);
+			producerProp.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+			producerProp.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+			producerProp.put("client.id", topic);
+			if (!"invalid".equals(groupId)) {
+				consumerProp.put("group.id", groupId);
+				consumerProp.put("consumer.timeout.ms", "100");
+			}
+			KafkaGroup kg = new KafkaGroup(topic, producerProp, consumerProp);
 
 			StoragePair<Record> main = kg.createMessagePair();
 			StoragePair<Resend> resend = kg.createResendPair();
