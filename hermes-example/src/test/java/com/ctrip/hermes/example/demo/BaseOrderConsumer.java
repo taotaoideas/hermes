@@ -20,7 +20,7 @@ public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 		}
 
 		if (price % 4 == 0) {
-			throw new RuntimeException("internal error for error");
+			throw new RuntimeException("internal error for demo");
 		}
 	}
 

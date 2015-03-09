@@ -29,13 +29,14 @@ public class TracingMessageValve implements Valve {
 			String msgId = tree.getMessageId();
 			rootMsgId = rootMsgId == null ? msgId : rootMsgId;
 
+			String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+			Cat.logEvent("Message:" + topic, "Produced:" + ip, Event.SUCCESS, "key=" + msg.getKey());
+			Cat.logEvent("Producer:" + ip, topic, Event.SUCCESS, "key=" + msg.getKey());
+
 			msg.addProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
 			msg.addProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
 			msg.addProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
 			Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
-
-			String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-			Cat.logEvent("Message:" + topic, "Produced:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 
 			ctx.next(payload);
 

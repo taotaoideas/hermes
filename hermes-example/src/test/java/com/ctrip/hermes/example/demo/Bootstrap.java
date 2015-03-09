@@ -23,6 +23,7 @@ public class Bootstrap extends ComponentTestCase {
 		startLocalDevServer();
 
 		startConsumers();
+		
 		OrderProducer p = new OrderProducer();
 		p.send("order.new");
 		p.send("order.update");
@@ -34,7 +35,6 @@ public class Bootstrap extends ComponentTestCase {
 	}
 
 	private void startConsumers() {
-		// List<Subscriber> subs = lookup(Scanner.class).scan();
 		List<Subscriber> subs = findSubscribers();
 
 		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
