@@ -41,7 +41,8 @@ LocalDev.service("MainService", ['$http', '$q', function ($http, $q) {
             return selectedTopic;
         },
 
-
-
+        addConsumer : function(topic, group) {
+            $http.get("http://localhost:2765/api" + "/consumer/add"+ "?topic=" + topic + "&group=" + group);
+        }
     };
 }]);
