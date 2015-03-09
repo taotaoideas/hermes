@@ -232,7 +232,7 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
-					<role-hint>local</role-hint>
+					<role-hint>broker</role-hint>
 				</requirement>
 			</requirements>
 		</component>

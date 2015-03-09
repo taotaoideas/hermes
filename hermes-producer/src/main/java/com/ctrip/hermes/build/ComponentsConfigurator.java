@@ -133,7 +133,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(StoredMessageCodec.class, DefaultStoredMessageCodec.class));
 
 		all.add(C(MessageQueueMonitor.class) //
-		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
+		      .req(MessageQueueManager.class, "broker"));
 
 		return all;
 	}

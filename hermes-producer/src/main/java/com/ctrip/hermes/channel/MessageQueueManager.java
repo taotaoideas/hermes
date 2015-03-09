@@ -1,5 +1,9 @@
 package com.ctrip.hermes.channel;
 
+import java.util.Map;
+
+import org.unidal.tuple.Pair;
+
 import com.ctrip.hermes.storage.MessageQueue;
 
 public interface MessageQueueManager {
@@ -20,5 +24,7 @@ public interface MessageQueueManager {
 	 * @return
 	 */
 	public MessageQueue findQueue(String topic);
+
+	public Map<Pair<String, String>, MessageQueue> getQueues();
 
 }
