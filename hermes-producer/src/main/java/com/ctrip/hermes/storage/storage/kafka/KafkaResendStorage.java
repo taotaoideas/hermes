@@ -42,6 +42,11 @@ public class KafkaResendStorage implements ResendStorage {
 
 	public KafkaResendStorage(String id, Properties pc, Properties cc) {
 		m_topic = id;
+		
+		if(!cc.containsKey("group.id")){
+			return ;
+		}
+		
 		m_producer = new KafkaProducer<>(pc);
 		m_consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(cc));
 		m_topicMessageStreams = m_consumer.createMessageStreams(ImmutableMap.of(m_topic, m_consumer_threads));

@@ -103,10 +103,11 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			}
 			producerProp.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
 			producerProp.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-			producerProp.put("client.id", topic + "_" + groupId);
-			consumerProp.put("group.id", groupId);
-			consumerProp.put("consumer.timeout.ms", "100");
-
+			producerProp.put("client.id", topic);
+			if (!"invalid".equals(groupId)) {
+				consumerProp.put("group.id", groupId);
+				consumerProp.put("consumer.timeout.ms", "100");
+			}
 			KafkaGroup kg = new KafkaGroup(topic, producerProp, consumerProp);
 
 			StoragePair<Record> main = kg.createMessagePair();

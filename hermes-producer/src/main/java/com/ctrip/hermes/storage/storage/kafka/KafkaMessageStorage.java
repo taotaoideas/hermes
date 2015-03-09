@@ -66,8 +66,14 @@ public class KafkaMessageStorage implements MessageStorage {
 
 	public KafkaMessageStorage(String topic, Properties pc, Properties cc) {
 		m_topic = topic;
-		m_producer = new KafkaProducer<>(pc);
-		m_send_callback = new KafkaSendMessageCallback();
+
+		if (!cc.containsKey("group.id")) {
+			// Producer only
+			m_producer = new KafkaProducer<>(pc);
+			m_send_callback = new KafkaSendMessageCallback();
+			return;
+		}
+
 		m_consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(cc));
 		m_topicMessageStreams = m_consumer.createMessageStreams(ImmutableMap.of(m_topic, m_consumer_threads));
 		m_executor = Executors.newFixedThreadPool(m_consumer_threads);

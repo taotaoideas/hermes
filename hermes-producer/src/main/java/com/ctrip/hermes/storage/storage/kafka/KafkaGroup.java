@@ -37,22 +37,25 @@ public class KafkaGroup {
 
 		MessagePair pair = new MessagePair(main, null);
 
-		List<Pair<String, Integer>> brokers = new ArrayList<>();
-		String[] brokerList = null;
-		if (m_cc.containsKey("metadata.broker.list"))
-			brokerList = m_cc.getProperty("metadata.broker.list").split(",");
-		else if (m_cc.containsKey("bootstrap.servers"))
-			brokerList = m_cc.getProperty("bootstrap.servers").split(",");
-		for (String broker : brokerList) {
-			brokers.add(new Pair<>(broker.split(":")[0], Integer.parseInt(broker.split(":")[1])));
-		}
-
 		ClusteredMessagePair cluster = new ClusteredMessagePair(Arrays.asList(pair));
-		TopicMetadataResponse topicMetadataRes = SimpleConsumerUtil.getTopicMetadata(brokers.get(0).getKey(), brokers
-		      .get(0).getValue(), m_topic);
-		TopicMetadata topicMetadata = topicMetadataRes.topicsMetadata().get(0);
-		for (PartitionMetadata partitionMetadata : topicMetadata.partitionsMetadata()) {
-			cluster.addPair(String.valueOf(partitionMetadata.partitionId()), pair);
+
+		if (m_cc.containsKey("group.id")) {
+			List<Pair<String, Integer>> brokers = new ArrayList<>();
+			String[] brokerList = null;
+			if (m_cc.containsKey("metadata.broker.list"))
+				brokerList = m_cc.getProperty("metadata.broker.list").split(",");
+			else if (m_cc.containsKey("bootstrap.servers"))
+				brokerList = m_cc.getProperty("bootstrap.servers").split(",");
+			for (String broker : brokerList) {
+				brokers.add(new Pair<>(broker.split(":")[0], Integer.parseInt(broker.split(":")[1])));
+			}
+
+			TopicMetadataResponse topicMetadataRes = SimpleConsumerUtil.getTopicMetadata(brokers.get(0).getKey(), brokers
+			      .get(0).getValue(), m_topic);
+			TopicMetadata topicMetadata = topicMetadataRes.topicsMetadata().get(0);
+			for (PartitionMetadata partitionMetadata : topicMetadata.partitionsMetadata()) {
+				cluster.addPair(String.valueOf(partitionMetadata.partitionId()), pair);
+			}
 		}
 		return cluster;
 	}
