@@ -121,8 +121,8 @@ public class StorageMessageQueue implements MessageQueue {
 
 	}
 
-	private void connectPairs(StoragePair<Record> mainPair, final StoragePair<Resend> resendPair) {
-		mainPair.addRangeStatusListener(new RangeStatusListener() {
+	private void connectPairs(final StoragePair<Record> msgPair, final StoragePair<Resend> resendPair) {
+		msgPair.addRangeStatusListener(new RangeStatusListener() {
 
 			@Override
 			public void onRangeSuccess(RangeEvent event) throws StorageException {

@@ -38,16 +38,17 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
 
 		long startingOffset = Offset.OLDEST;
 
-		Offset lastOffset = m_offset.top();
-		if (lastOffset != null) {
-			startingOffset = lastOffset.getOffset() + 1;
-		} else {
-			T mainTop = m_main.top();
-			if (mainTop != null) {
-				startingOffset = mainTop.getOffset().getOffset() + 1;
+		if (m_offset != null) {
+			Offset lastOffset = m_offset.top();
+			if (lastOffset != null) {
+				startingOffset = lastOffset.getOffset() + 1;
+			} else {
+				T mainTop = m_main.top();
+				if (mainTop != null) {
+					startingOffset = mainTop.getOffset().getOffset() + 1;
+				}
 			}
 		}
-
 		m_mainBrowser = main.createBrowser(startingOffset);
 	}
 
@@ -80,7 +81,11 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
 
 	@Override
 	public List<String> getStorageIds() {
-		return Arrays.asList(m_main.getId(), m_offset.getId());
+		if (m_offset == null) {
+			return Arrays.asList(m_main.getId());
+		} else {
+			return Arrays.asList(m_main.getId(), m_offset.getId());
+		}
 	}
 
 	@Override
@@ -95,12 +100,16 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
 
 	@Override
 	public void onRangeSuccess(RangeEvent event) throws StorageException {
-		m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
+		if (m_offset != null) {
+			m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
+		}
 	}
 
 	@Override
 	public void onRangeFail(RangeEvent event) throws StorageException {
-		m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
+		if (m_offset != null) {
+			m_offset.append(Arrays.asList(event.getRecord().getToUpdate()));
+		}
 	}
 
 	@Override
