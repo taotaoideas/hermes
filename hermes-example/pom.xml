@@ -8,9 +8,7 @@
         <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>hermes-example</artifactId>
-
     <dependencies>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
