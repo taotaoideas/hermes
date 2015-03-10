@@ -3,7 +3,9 @@ package com.ctrip.hermes.range.monitor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
@@ -17,6 +19,7 @@ import com.ctrip.hermes.storage.range.OldOffsetBitmap;
 import com.ctrip.hermes.storage.storage.Offset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class OffsetBitmapTest extends ComponentTestCase {
 
@@ -24,8 +27,6 @@ public class OffsetBitmapTest extends ComponentTestCase {
     final int max = 1 * 10000;
     final AtomicInteger sendCount = new AtomicInteger(0);
     final AtomicInteger ackCount = new AtomicInteger(0);
-
-    OldOffsetBitmap oldBitmap = new OldOffsetBitmap();
 
 
     @Before
@@ -39,14 +40,16 @@ public class OffsetBitmapTest extends ComponentTestCase {
      */
     @Test
     public void testNewBitmapPerformance() throws InterruptedException {
-        final NewOffsetBitmap newBitmap = new NewOffsetBitmap();
+        LinkedBlockingQueue<List<Long>> successQueue = new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<List<Long>> failQueue = new LinkedBlockingQueue<>();
+        final NewOffsetBitmap newBitmap = new NewOffsetBitmap(successQueue, failQueue);
         for (int i = 0; i < 5; i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (sendCount.get() < max) {
-                        List<Offset> list = new ArrayList<>();
-                        list.add(new Offset(ID, sendCount.incrementAndGet()));
+                        List<Long> list = new ArrayList<>();
+                        list.add((long)(sendCount.incrementAndGet()));
                         newBitmap.putOffset(list, new Date().getTime());
                     }
                 }
@@ -59,8 +62,8 @@ public class OffsetBitmapTest extends ComponentTestCase {
                 @Override
                 public void run() {
                     while (ackCount.get() < max) {
-                        List<Offset> list = new ArrayList<>();
-                        list.add(new Offset(ID, ackCount.incrementAndGet()));
+                        List<Long> list = new ArrayList<>();
+                        list.add((long)(ackCount.incrementAndGet()));
                         newBitmap.ackOffset(list, Ack.SUCCESS);
                     }
                 }
@@ -68,96 +71,98 @@ public class OffsetBitmapTest extends ComponentTestCase {
         }
 
         Thread.sleep(3100);
-        List<OffsetRecord> success = newBitmap.getAndRemoveSuccess();
-        List<OffsetRecord> fail = newBitmap.getAndRemoveFail();
-        List<OffsetRecord> timeout = newBitmap.getTimeoutAndRemove();
+        List<Long> timeout = newBitmap.getTimeoutAndRemove();
 
         newBitmap.outputDebugInfo();
-        outputResult(success, fail, timeout);
-        assertEquals(calculateCount(success, fail, timeout), max);
+        assertEquals(calculateCount(successQueue, failQueue)+timeout.size(), max);
     }
 
     @Test
     public void testPutAndSuccessAck() throws InterruptedException {
         int size = 10;
-        NewOffsetBitmap bitmap = new NewOffsetBitmap();
+        LinkedBlockingQueue<List<Long>> successQueue = new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<List<Long>> failQueue = new LinkedBlockingQueue<>();
+        NewOffsetBitmap bitmap = new NewOffsetBitmap(successQueue, failQueue);
         put(bitmap, size);
         ack(bitmap, 0, size, Ack.SUCCESS);
 
         Thread.sleep(50);
 
-        assertEquals(calculateCount(bitmap.getAndRemoveSuccess()), size);
-        assertEquals(calculateCount(bitmap.getAndRemoveFail()), 0);
-        assertEquals(calculateCount(bitmap.getTimeoutAndRemove()), 0);
+        assertEquals(calculateCount(successQueue), size);
+        assertEquals(failQueue.size(), 0);
+        assertEquals(bitmap.getTimeoutAndRemove().size(), 0);
     }
 
     @Test
     public void testPutAndFailAck() throws InterruptedException {
         int size = 10;
-        NewOffsetBitmap bitmap = new NewOffsetBitmap();
+        LinkedBlockingQueue<List<Long>> successQueue = new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<List<Long>> failQueue = new LinkedBlockingQueue<>();
+        NewOffsetBitmap bitmap = new NewOffsetBitmap(successQueue, failQueue);
         put(bitmap, size);
         ack(bitmap, 0, size, Ack.FAIL);
 
         Thread.sleep(50);
 
-        assertEquals(calculateCount(bitmap.getAndRemoveSuccess()), 0);
-        assertEquals(calculateCount(bitmap.getAndRemoveFail()), size);
-        assertEquals(calculateCount(bitmap.getTimeoutAndRemove()), 0);
-
+        assertEquals(calculateCount(successQueue), 0);
+        assertEquals(calculateCount(failQueue), size);
+        assertEquals(bitmap.getTimeoutAndRemove().size(), 0);
     }
 
     @Test
     public void testPutAndAllTimeout() throws InterruptedException, IOException {
         int size = 10;
-        NewOffsetBitmap bitmap = new NewOffsetBitmap();
+        LinkedBlockingQueue<List<Long>> successQueue = new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<List<Long>> failQueue = new LinkedBlockingQueue<>();
+        NewOffsetBitmap bitmap = new NewOffsetBitmap(successQueue, failQueue);
         put(bitmap, size);
 
         Thread.sleep(3200);  // longer than timeout time -- 3000
 
-        assertEquals(calculateCount(bitmap.getAndRemoveSuccess()), 0);
-        assertEquals(calculateCount(bitmap.getAndRemoveFail()), 0);
-        assertEquals(calculateCount(bitmap.getTimeoutAndRemove()), size);
+        assertEquals(calculateCount(successQueue), 0);
+        assertEquals(calculateCount(failQueue), 0);
+        assertEquals(bitmap.getTimeoutAndRemove().size(), size);
     }
 
 
     private void put(NewOffsetBitmap bitmap, int size) {
-        List<Offset> list = new ArrayList<>(size);
+        List<Long> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            list.add(new Offset(ID, i));
+            list.add((long)i);
         }
         bitmap.putOffset(list, new Date().getTime());
     }
 
     private void ack(NewOffsetBitmap bitmap, int start, int end, Ack ack) {
-        List<Offset> list = new ArrayList<>();
+        List<Long> list = new ArrayList<>();
         for (int i = start; i < end; i++) {
-            list.add(new Offset(ID, i));
+            list.add((long)i);
         }
         bitmap.ackOffset(list, ack);
     }
 
-    private void outputResult(List<OffsetRecord> success, List<OffsetRecord> fail, List<OffsetRecord> timeout) {
+    private void outputResult(LinkedBlockingQueue<List<Long>> success, LinkedBlockingQueue<List<Long>> fail,
+                              List<Long> timeout) {
         System.out.println(String.format("Success: %d, Fail: %d, Timeout: %d. Total: %d",
-                calculateCount(success), calculateCount(fail), calculateCount(timeout),
-                calculateCount(success, fail, timeout)));
+                calculateCount(success), calculateCount(fail), timeout.size(),
+                calculateCount(success, fail) + timeout.size()));
     }
 
-    private int calculateCount(List<OffsetRecord> list) {
-        return calculateCount(list, 0);
+    private int calculateCount(LinkedBlockingQueue<List<Long>> queue) {
+        return calculateCount(queue, 0);
     }
 
-    private int calculateCount(List<OffsetRecord> list, int sum) {
+    private int calculateCount(LinkedBlockingQueue<List<Long>> list, int sum) {
         return sumSize(list, sum);
     }
 
-    private int sumSize(List<OffsetRecord> list, int sum) {
-        for (OffsetRecord offsetRecord : list) {
-            sum += offsetRecord.getToBeDone().size();
+    private int calculateCount(LinkedBlockingQueue<List<Long>> q1, LinkedBlockingQueue<List<Long>> q2) {
+        return calculateCount(q1, calculateCount(q2));
+    }
+    private int sumSize(LinkedBlockingQueue<List<Long>> list, int sum) {
+        for (List<Long> aList : list) {
+            sum += aList.size();
         }
         return sum;
-    }
-
-    private int calculateCount(List<OffsetRecord> a, List<OffsetRecord> b, List<OffsetRecord> c) {
-        return calculateCount(a, calculateCount(b, calculateCount(c)));
     }
 }
