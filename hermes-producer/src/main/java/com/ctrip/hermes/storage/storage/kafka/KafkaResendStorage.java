@@ -1,22 +1,22 @@
 package com.ctrip.hermes.storage.storage.kafka;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
+import kafka.consumer.ConsumerIterator;
+import kafka.consumer.ConsumerTimeoutException;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.storage.message.Resend;
@@ -24,33 +24,36 @@ import com.ctrip.hermes.storage.spi.typed.ResendStorage;
 import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
-import com.google.common.collect.ImmutableMap;
 
 public class KafkaResendStorage implements ResendStorage {
+
+	private static final Logger m_logger = Logger.getLogger(KafkaResendStorage.class);
 
 	private String m_topic;
 
 	private KafkaProducer<String, byte[]> m_producer;
 
+	private Resend m_last_resend;
+
 	private ConsumerConnector m_consumer;
 
-	private int m_consumer_threads = 1;
+	private static final int CONSUMER_THREADS = 1;
 
-	private ExecutorService m_executor;
-
-	private Map<String, List<KafkaStream<byte[], byte[]>>> m_topicMessageStreams;
+	private KafkaStream<byte[], byte[]> m_topicMessageStream;
 
 	public KafkaResendStorage(String id, Properties pc, Properties cc) {
 		m_topic = id;
-		
-		if(!cc.containsKey("group.id")){
-			return ;
+
+		if (!cc.containsKey("group.id")) {
+			return;
 		}
-		
+
 		m_producer = new KafkaProducer<>(pc);
 		m_consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(cc));
-		m_topicMessageStreams = m_consumer.createMessageStreams(ImmutableMap.of(m_topic, m_consumer_threads));
-		m_executor = Executors.newFixedThreadPool(m_consumer_threads);
+		Map<String, Integer> topicCount = new HashMap<>();
+		topicCount.put(m_topic, CONSUMER_THREADS);
+		Map<String, List<KafkaStream<byte[], byte[]>>> topicMessageStreams = m_consumer.createMessageStreams(topicCount);
+		m_topicMessageStream = topicMessageStreams.get(m_topic).get(0);
 	}
 
 	@Override
@@ -65,47 +68,38 @@ public class KafkaResendStorage implements ResendStorage {
 	public Browser<Resend> createBrowser(long offset) {
 		long nextReadIdx = 0;
 		// Ignore offset, read from beginning
-		return new KafkaResendBrowser(nextReadIdx);
+		return new KafkaResendBrowser(m_topicMessageStream);
 	}
 
 	class KafkaResendBrowser implements Browser<Resend> {
 
 		private long m_nextReadIdx;
 
-		public KafkaResendBrowser(long nextReadIdx) {
-			m_nextReadIdx = nextReadIdx;
+		private ConsumerIterator<byte[], byte[]> topicStreamIterator;
+
+		public KafkaResendBrowser(KafkaStream<byte[], byte[]> topicMessageStream) {
+			if (topicMessageStream != null)
+				topicStreamIterator = topicMessageStream.iterator();
 		}
 
 		@Override
 		public synchronized List<Resend> read(final int batchSize) {
-			final List<Resend> result = new CopyOnWriteArrayList<>();
-			List<KafkaStream<byte[], byte[]>> streams = m_topicMessageStreams.get(m_topic);
-			final CountDownLatch latch = new CountDownLatch(m_consumer_threads);
-			for (final KafkaStream<byte[], byte[]> stream : streams) {
-				m_executor.submit(new Runnable() {
-					public void run() {
-						try {
-							for (MessageAndMetadata<byte[], byte[]> msgAndMetadata : stream) {
-								if (result.size() == batchSize) {
-									break;
-								}
-								Resend resend = JSON.parseObject(msgAndMetadata.message(), Resend.class);
-								m_nextReadIdx = msgAndMetadata.offset();
-								result.add(resend);
-								if (result.size() == batchSize) {
-									break;
-								}
-							}
-						} finally {
-							latch.countDown();
-						}
-					}
-				});
-			}
+			List<Resend> result = new ArrayList<>();
 			try {
-				latch.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				if (topicStreamIterator == null || topicStreamIterator.isEmpty())
+					return result;
+				while (topicStreamIterator.hasNext()) {
+					MessageAndMetadata<byte[], byte[]> msgAndMetadata = topicStreamIterator.next();
+					Resend resend = JSON.parseObject(msgAndMetadata.message(), Resend.class);
+					m_nextReadIdx = msgAndMetadata.offset();
+					m_last_resend = resend;
+					result.add(resend);
+					if (result.size() == batchSize) {
+						break;
+					}
+				}
+			} catch (ConsumerTimeoutException e) {
+				return result;
 			}
 			return result;
 		}
@@ -130,12 +124,12 @@ public class KafkaResendStorage implements ResendStorage {
 
 	@Override
 	public Resend top() throws StorageException {
-		// TODO Auto-generated method stub
-		return null;
+		return m_last_resend;
 	}
 
 	@Override
 	public String getId() {
 		return m_topic;
 	}
+
 }
