@@ -89,7 +89,7 @@ public class OffsetBitmapTest extends ComponentTestCase {
         Thread.sleep(50);
 
         assertEquals(calculateCount(successQueue), size);
-        assertEquals(failQueue.size(), 0);
+        assertEquals(calculateCount(failQueue), 0);
         assertEquals(bitmap.getTimeoutAndRemove().size(), 0);
     }
 
@@ -120,7 +120,7 @@ public class OffsetBitmapTest extends ComponentTestCase {
         Thread.sleep(3200);  // longer than timeout time -- 3000
 
         assertEquals(calculateCount(successQueue), 0);
-        assertEquals(calculateCount(failQueue), 0);
+        assertEquals(calculateCount(failQueue), size);
         assertEquals(bitmap.getTimeoutAndRemove().size(), size);
     }
 
