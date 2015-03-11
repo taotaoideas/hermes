@@ -1,73 +1,67 @@
 package com.ctrip.hermes.storage.range;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.ctrip.hermes.storage.storage.StorageException;
 
 public class DefaultRangeMonitor implements RangeMonitor {
 
-    private List<RangeStatusListener> m_listeners = new ArrayList<RangeStatusListener>();
+    private List<RangeStatusListener> m_listeners = new ArrayList<>();
 
-    NewOffsetBitmap bitmap = new NewOffsetBitmap();
+    LinkedBlockingQueue<List<Long>> successQueue = new LinkedBlockingQueue<>();
+    LinkedBlockingQueue<List<Long>> failQueue = new LinkedBlockingQueue<>();
+    NewOffsetBitmap bitmap = new NewOffsetBitmap(successQueue, failQueue);
+
+    BitmapTranslator translator = new BitmapTranslator();
 
     public DefaultRangeMonitor() {
-        Timer time = new Timer();
-        time.schedule(new TimerTask() {
+        runPullingThread();
+    }
+
+    private void runPullingThread() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                notifyListener();
+                for (; ; ) {
+                    try {
+                        List<Long> success = successQueue.take();
+                        List<Long> fail = failQueue.take();
+
+                        List<RangeEvent> successList = translator.buildContinuousRange(success);
+                        List<RangeEvent> failList = translator.buildContinuousRange(fail);
+
+                        if (successList.size() > 0 || failList.size() > 0) {
+                            for (RangeStatusListener listener : m_listeners) {
+                                for (RangeEvent event : successList) {
+                                    listener.onRangeSuccess(event);
+                                }
+                                for (RangeEvent event : failList) {
+                                    listener.onRangeFail(event);
+                                }
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }, 1000, 1000);
+        }).start();
     }
 
     @Override
     public void startNewRange(OffsetRecord record) {
-        bitmap.putOffset(record.getToBeDone(), new Date().getTime());
+        translator.putOffset(bitmap, record);
     }
 
-	@Override
-	public void offsetDone(OffsetRecord record) throws StorageException {
-		bitmap.ackOffset(record.getToBeDone(), record.getAck());
-	}
+    @Override
+    public void offsetDone(OffsetRecord record) throws StorageException {
+        translator.ackOffset(bitmap, record);
+    }
 
     @Override
     public void addListener(RangeStatusListener listener) {
         m_listeners.add(listener);
-    }
-
-    private void notifyListener() {
-        // 1. get success RangeEvent
-        List<OffsetRecord> success = bitmap.getAndRemoveSuccess();
-        List<RangeEvent> successList = buildContinuousRange(success);
-
-        // 2. get Fail RangeEvent
-        List<OffsetRecord> fail = bitmap.getAndRemoveFail();
-        List<RangeEvent> failList = buildContinuousRange(fail);
-
-        // 3. get Timeout RangeEvent
-        List<OffsetRecord> timeout = bitmap.getTimeoutAndRemove();
-//        List<RangeEvent> timeoutList = buildContinuousRange(timeout);
-
-        // 4. notify listeners.
-        for (RangeStatusListener listener : m_listeners) {
-            for (RangeEvent event : successList) {
-                listener.onRangeSuccess(event);
-            }
-            for (RangeEvent event : failList) {
-                listener.onRangeFail(event);
-            }
-        }
-    }
-
-    private List<RangeEvent> buildContinuousRange(List<OffsetRecord> recordList) {
-        List<RangeEvent> eventList = new ArrayList<>();
-        for (OffsetRecord offsetRecord : recordList) {
-            eventList.add(new RangeEvent(offsetRecord));
-        }
-        return eventList;
     }
 }

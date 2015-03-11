@@ -23,7 +23,7 @@ public class ProduceAndConsume extends ComponentTestCase {
     static AtomicInteger receiveCount = new AtomicInteger(0);
 
     static AtomicInteger totalSend = new AtomicInteger(0);
-    static AtomicInteger totalRecieve = new AtomicInteger(0);
+    static AtomicInteger totalReceive = new AtomicInteger(0);
 
 
     final static long timeInterval = 3000;
@@ -33,11 +33,11 @@ public class ProduceAndConsume extends ComponentTestCase {
         int secondInTimeInterval = (int) timeInterval / 1000;
 
         totalSend.addAndGet(sendCount.get());
-        totalRecieve.addAndGet(receiveCount.get());
+        totalReceive.addAndGet(receiveCount.get());
         System.out.println(String.format("Throughput:Send:%8d items, Receive: %8d items in %d second. " +
                         "Total Send: %8d, Total Receive: %8d, Delta: %8d.",
                 sendCount.get(), receiveCount.get(), secondInTimeInterval,
-                totalSend.get(), totalRecieve.get(), Math.abs(totalSend.get() - totalRecieve.get())));
+                totalSend.get(), totalReceive.get(), Math.abs(totalSend.get() - totalReceive.get())));
 
         sendCount.set(0);
         receiveCount.set(0);
