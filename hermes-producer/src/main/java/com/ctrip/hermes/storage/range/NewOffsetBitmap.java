@@ -8,13 +8,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
@@ -28,12 +28,12 @@ public class NewOffsetBitmap {
 
 
     ExecutorService service = Executors.newSingleThreadExecutor();
-    LinkedBlockingQueue<List<Long>> successQueue;
-    LinkedBlockingQueue<List<Long>> failQueue;
+    LinkedBlockingQueue<Triple<List<Long>, String, Offset>> allQueue;
+    LinkedBlockingQueue<Triple<List<Long>, String, Offset>> failQueue;
 
-    public NewOffsetBitmap(LinkedBlockingQueue<List<Long>> successQueue,
-                           LinkedBlockingQueue<List<Long>> failQueue) {
-        this.successQueue = successQueue;
+    public NewOffsetBitmap(LinkedBlockingQueue<Triple<List<Long>, String, Offset>> allQueue,
+                           LinkedBlockingQueue<Triple<List<Long>, String, Offset>> failQueue) {
+        this.allQueue = allQueue;
         this.failQueue = failQueue;
 
         // clean timer
@@ -58,22 +58,19 @@ public class NewOffsetBitmap {
 
     // maxSize is OK? If send too fast and ack too slow, this capacity will clean "old" data by LRU.
     // use Offset as key, to avoid the overlap on Long(timestamp)
-    Cache<Offset, Long> remainSuccessOffsetCache = CacheBuilder.newBuilder()
-            .maximumSize(20 * 1000).expireAfterWrite(10, TimeUnit.MINUTES).build();
-    Cache<Offset, Long> remainFailOffsetCache = CacheBuilder.newBuilder()
-            .maximumSize(20 * 1000).expireAfterWrite(10, TimeUnit.MINUTES).build();
     Cache<Long /*offset*/, Long /*timestamp*/> remainTimeoutOffsetCache = CacheBuilder.newBuilder()
             .maximumSize(20 * 1000).expireAfterWrite(10, TimeUnit.MINUTES).build();
 
     long putTimer = 0, ackTimer = 0, cleanTimer = 0;
     int putCount = 0, ackCount = 0, cleanCount = 0;
 
-    private Runnable putOffsetRunnable(final List<Long> offsetList, final long timestamp) {
+    private Runnable putOffsetRunnable(final Iterator<Long> offsetList, final String id,
+                                       final Offset toUpdate, final long timestamp) {
         return new Runnable() {
             @Override
             public void run() {
                 long startTime = new Date().getTime();
-                batchTimestampMap.put(timestamp, new Batch(offsetList.iterator(), timestamp));
+                batchTimestampMap.put(timestamp, new Batch(offsetList, id, toUpdate, timestamp));
 
                 putTimer += new Date().getTime() - startTime;
                 putCount++;
@@ -81,20 +78,24 @@ public class NewOffsetBitmap {
         };
     }
 
-    private Runnable ackOffsetRunnable(final List<Long> offsetList, final Ack ack) {
+    private Runnable ackOffsetRunnable(final Iterator<Long> offsetList, final Ack ack) {
         return new Runnable() {
             @Override
             public void run() {
                 long startTime = new Date().getTime();
-                for (Long offset : offsetList) {
+
+                while(offsetList.hasNext()) {
+                    Long offset = offsetList.next();
                     Batch batch = findBatch(batchTimestampMap, offset);
                     if (null != batch) {
                         batch.ackOffset(offset, ack);
                         // put into queue, if all batch is done (weather success or fail)
                         if (batch.isAllDone()) {
                             try {
-                                successQueue.put(batch.popSuccessOffsets());
-                                failQueue.put(batch.popFailOffsets());
+                                allQueue.put(Triple.from(batch.popAll(), batch.getId(), batch.getToUpdate()));
+                                batch.setBeenTaken(true);
+
+                                failQueue.put(Triple.from(batch.popFailOffsets(), batch.getId(), batch.getToUpdate()));
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -125,16 +126,16 @@ public class NewOffsetBitmap {
                 putTimer, putCount, ackTimer, ackCount, cleanTimer, cleanCount));
     }
 
-    public void putOffset(List<Long> offsetList, long timestamp) {
+    public void putOffset(Iterator<Long> offsetList, String id, Offset toUpdate, long timestamp) {
         try {
             putCleanTask();
-            service.submit(putOffsetRunnable(offsetList, timestamp));
+            service.submit(putOffsetRunnable(offsetList, id, toUpdate, timestamp));
         } catch (InterruptedException e) {
             log.info("NewOffsetBitmap: putOffset() is Interrupted!");
         }
     }
 
-    public void ackOffset(List<Long> offsetList, Ack ack) {
+    public void ackOffset(Iterator<Long> offsetList, Ack ack) {
         try {
             putCleanTask();
             service.submit(ackOffsetRunnable(offsetList, ack));
@@ -166,47 +167,6 @@ public class NewOffsetBitmap {
         return null;
     }
 
-    /*public List<OffsetRecord> getAndRemoveSuccess() {
-        List<Offset> successOffsetList = new ArrayList<>();
-        Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
-        while (iterator.hasNext()) {
-            Batch batch = iterator.next().getValue();
-            if (batch != null && batch.isAllDone()) {
-                successOffsetList.addAll(batch.popSuccessOffsets());
-                // remove success
-                if (batch.canBeRemoved()) {
-                    iterator.remove();
-                }
-            }
-        }
-
-        successOffsetList.addAll(remainSuccessOffsetCache.asMap().keySet());
-        remainSuccessOffsetCache.cleanUp();
-
-        return buildContinuous(successOffsetList);
-    }
-
-    public List<OffsetRecord> getAndRemoveFail() {
-        List<Offset> failOffsetList = new ArrayList<>();
-        Iterator<Map.Entry<Long, Batch>> iterator = batchTimestampMap.entries().iterator();
-        while (iterator.hasNext()) {
-            Batch batch = iterator.next().getValue();
-            if (batch.isAllDone()) {
-                failOffsetList.addAll(batch.popFailOffsets());
-                // remove success
-                if (batch.canBeRemoved()) {
-                    iterator.remove();
-                }
-            }
-        }
-
-        failOffsetList.addAll(remainFailOffsetCache.asMap().keySet());
-        remainFailOffsetCache.invalidateAll();
-
-        return buildContinuous(failOffsetList);
-    }*/
-
-
     public List<Long> getTimeoutAndRemove() {
         try {
             putCleanTask();
@@ -216,15 +176,6 @@ public class NewOffsetBitmap {
 
         List<Long> remainTimeoutOffsetList = new ArrayList<>(remainTimeoutOffsetCache.asMap().keySet());
         return remainTimeoutOffsetList;
-    }
-
-    private List<OffsetRecord> buildContinuous(List<Offset> offsets) {
-        // now: only one OffsetRecord;
-        if (offsets.size() > 0) {
-            return Arrays.asList(new OffsetRecord(offsets, offsets.get(0)));
-        } else {
-            return Lists.newArrayList();
-        }
     }
 
     /**
@@ -251,13 +202,21 @@ public class NewOffsetBitmap {
                 if (nowTime - timestamp > TIMEOUT_THRESHOLD) {
                     Batch batch = entry.getValue();
 
-                    successQueue.put(batch.popSuccessOffsets());
-                    failQueue.put(batch.popFailOffsets());
+                    if (!batch.isBeenTaken()) {  // means it haven't put into allQueue yet
+                        allQueue.put(Triple.from(batch.popAll(), batch.getId(), batch.getToUpdate()));
 
-//                        remainTimeoutOffsetCache.putAll(buildOffsetMap(batch.popTimeoutOffsets(), entry.getKey()));
-                    List<Long> list = batch.popTimeoutOffsets();
-                    remainTimeoutOffsetCache.putAll(buildOffsetMap(list, entry.getKey()));
+                        List<Long> failList = batch.popFailOffsets();
+                        if (failList.size() > 0) {
+                            failQueue.put(Triple.from(failList, batch.getId(), batch.getToUpdate()));
+                        }
 
+                        // Here, regard Timeout as Fail:
+                        failQueue.put(Triple.from(batch.popTimeoutOffsets(), batch.getId(), batch.getToUpdate()));
+
+                        List<Long> list = batch.popTimeoutOffsets();
+                        remainTimeoutOffsetCache.putAll(buildOffsetMap(list, entry.getKey()));
+
+                    }
                     iterator.remove();
                 }
             }
@@ -285,8 +244,30 @@ public class NewOffsetBitmap {
         EWAHCompressedBitmap failMap = EWAHCompressedBitmap.bitmapOf();
         long timestamp;
 
-        public Batch(Iterator<Long> offsetList, long timestamp) {
+        public boolean isBeenTaken() {
+            return isBeenTaken;
+        }
+
+        public void setBeenTaken(boolean isBeenTaken) {
+            this.isBeenTaken = isBeenTaken;
+        }
+
+        boolean isBeenTaken = false;
+        public String getId() {
+            return id;
+        }
+
+        public Offset getToUpdate() {
+            return toUpdate;
+        }
+
+        String id;
+        Offset toUpdate;
+
+        public Batch(Iterator<Long> offsetList, String id, Offset toUpdate, long timestamp) {
             this.timestamp = timestamp;
+            this.id = id;
+            this.toUpdate = toUpdate;
             while (offsetList.hasNext()) {
                 sendMap.set(offsetList.next().intValue());
             }
@@ -303,6 +284,19 @@ public class NewOffsetBitmap {
                     failMap.set(offset.intValue());
                     break;
             }
+        }
+
+        /**
+         * pop all offsets including success, fail, and timeout.
+         */
+        public List<Long> popAll() {
+            List<Long> result = new ArrayList<>();
+            EWAHCompressedBitmap allMap = sendMap.or(successMap.or(failMap));
+            for (Integer index : allMap.toList()) {
+                result.add((long) index);
+            }
+
+            return result;
         }
 
         public List<Long> popSuccessOffsets() {
@@ -326,7 +320,7 @@ public class NewOffsetBitmap {
         }
 
         public List<Long> popTimeoutOffsets() {
-            // sendMap and ((not) ( successMap or failMap)) = remaining = timeoutMap
+            // sendMap and ((not) ( successMap or failMap)) = remaining == timeoutMap
             EWAHCompressedBitmap timeoutMap = sendMap.andNot(successMap.or(failMap));
             List<Long> result = new ArrayList<>();
 
@@ -337,19 +331,8 @@ public class NewOffsetBitmap {
             return result;
         }
 
-        public boolean canBeRemoved() {
-            // 根据isAllDone()之后，且success 和fail的都取完了，则可以从  batchTimestampMap中remove掉了。
-            boolean canBeRemoved = false;
-            if (isAllDone()) {
-                if (successMap.isEmpty() && failMap.isEmpty()) {
-                    canBeRemoved = true;
-                }
-            }
-            return canBeRemoved;
-        }
-
         public boolean contains(long offset) {
-            // 直接从sendMap取，而不是从offsetMap。可以避免发了一个，后续又重发导致offsetMap里面会有重复的情况，
+            // 直接从sendMap取，可以避免发了一个，后续又重发导致offsetMap里面会有重复的情况，
             // 因为sendMap ack会清空，只有后一个Batch的sendMap有该值。
             return sendMap.get((int) offset);
         }
@@ -360,5 +343,12 @@ public class NewOffsetBitmap {
         public boolean isAllDone() {
             return sendMap.isEmpty();
         }
+    }
+
+    public static void main(String[] args) {
+        EWAHCompressedBitmap a = EWAHCompressedBitmap.bitmapOf(1,2);
+        EWAHCompressedBitmap b = EWAHCompressedBitmap.bitmapOf(2, 3);
+        EWAHCompressedBitmap c = EWAHCompressedBitmap.bitmapOf(4);
+        System.out.println(a.or(b.or(c)));
     }
 }
