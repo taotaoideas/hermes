@@ -92,10 +92,15 @@ public class NewOffsetBitmap {
                         // put into queue, if all batch is done (weather success or fail)
                         if (batch.isAllDone()) {
                             try {
-                                allQueue.put(Triple.from(batch.popAll(), batch.getId(), batch.getToUpdate()));
+                                List<Long> all = batch.popAll();
+                                if (all.size() > 0) {
+                                    allQueue.put(Triple.from(all, batch.getId(), batch.getToUpdate()));
+                                }
                                 batch.setBeenTaken(true);
-
-                                failQueue.put(Triple.from(batch.popFailOffsets(), batch.getId(), batch.getToUpdate()));
+                                List<Long> fail = batch.popFailOffsets();
+                                if (fail.size() > 0 ) {
+                                    failQueue.put(Triple.from(fail, batch.getId(), batch.getToUpdate()));
+                                }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -203,15 +208,18 @@ public class NewOffsetBitmap {
                     Batch batch = entry.getValue();
 
                     if (!batch.isBeenTaken()) {  // means it haven't put into allQueue yet
-                        allQueue.put(Triple.from(batch.popAll(), batch.getId(), batch.getToUpdate()));
+                        List<Long> all = batch.popAll();
+                        if (all.size() > 0 ) {
+                            allQueue.put(Triple.from(all, batch.getId(), batch.getToUpdate()));
+                        }
 
                         List<Long> failList = batch.popFailOffsets();
+                        // Here, regard Timeout as Fail:
+                        failList.addAll(batch.popTimeoutOffsets());
+
                         if (failList.size() > 0) {
                             failQueue.put(Triple.from(failList, batch.getId(), batch.getToUpdate()));
                         }
-
-                        // Here, regard Timeout as Fail:
-                        failQueue.put(Triple.from(batch.popTimeoutOffsets(), batch.getId(), batch.getToUpdate()));
 
                         List<Long> list = batch.popTimeoutOffsets();
                         remainTimeoutOffsetCache.putAll(buildOffsetMap(list, entry.getKey()));
