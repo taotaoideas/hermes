@@ -1,77 +1,47 @@
 package com.ctrip.hermes.message.codec;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.message.Message;
 
-/**
- *
-  Introduce:
-
-	              Header                         Body(Bytes)
-	 +----+--------------------------------+ +----------------------+
-	 |0x00| Topic(String) Group(String)    | |                      |
-	 |    | Key(String) Partition (String) | |                      |
-	 |    | Properties(Map)                | |                      |
-	 |    | BodyLength(Int) ...            | |                      |
-	 +----+--------------------------------+ +----------------------+
-
-	 Element      Prefix
-	 +--------------------------------------------------------------+
-	 Fixed Width:                          Following Octets
-	 boolean      0x10(false) 0x11(true)   0 OCTET
-	 char         0x20                     2 OCTET
-	 int          0x30                     4 OCTET
-	 long         0x40                     8 OCTET
-	 +--------------------------------------------------------------+
-	 Variable Width:                       Following Data Size
-	 String       0xA2                     2OCTET  2^16 = 64K
-	 +----------------------------------------------+---------------+
-	 Array:       [size][count][Element][...]
-                  0xC1                     followed 1 octet of data count
-                  0xD4                     followed 4 octet of data count
-	 Map:         [size][count][[key Element][value Element]][...]
-	              0xE1                     followed 1 octet of data count
-                  0xF4                     followed 4 octet of data count
- */
 public class DefaultMessageCodec implements MessageCodec {
 
-	@Inject
-	private CodecManager m_codecManager;
+	@Inject private CodecManager m_codecManager;
 
-	@Override
-	public ByteBuffer encode(Message<?> msg) {
+	@Override public ByteBuffer encode(Message<?> msg) {
 		Codec bodyCodec = m_codecManager.getCodec(msg.getTopic());
 		byte[] msgBody = bodyCodec.encode(msg.getBody());
 
 		ByteBuffer buf = ByteBuffer.allocateDirect(sizeOf(msgBody, msg));
-
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
-		codec.writeString(msg.getTopic());
-		codec.writeString(msg.getKey());
-		codec.writeString(msg.getPartition());
-		codec.writeBoolean(msg.isPriority());
-		codec.writeLong(msg.getBornTime());
-
-		codec.writeInt(msg.getProperties().size());
-		for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
-			codec.writeString(entry.getKey());
-			// TODO support non-string property
-			codec.writeString((String) entry.getValue());
-		}
-
-		codec.writeBytes(msgBody);
+		write(msg, msgBody, codec);
 
 		return buf;
 	}
 
-	@Override
-	public Message<byte[]> decode(ByteBuffer buf) {
+	@Override public Message<byte[]> decode(ByteBuffer buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		Message<byte[]> msg = read(codec);
+
+		return msg;
+	}
+
+	private void write(Message<?> msg, byte[] msgBody, HermesPrimitiveCodec codec) {
+		codec.writeObject(msg.getTopic());
+		codec.writeObject(msg.getKey());
+		codec.writeObject(msg.getPartition());
+		codec.writeObject(msg.isPriority());
+		codec.writeObject(msg.getBornTime());
+
+		codec.writeObject(msg.getProperties());
+
+		codec.writeObject(msgBody);
+	}
+
+	private Message<byte[]> read(HermesPrimitiveCodec codec) {
 		Message<byte[]> msg = new Message<>();
 
 		msg.setTopic(codec.readString());
@@ -80,21 +50,20 @@ public class DefaultMessageCodec implements MessageCodec {
 		msg.setPriority(codec.readBoolean());
 		msg.setBornTime(codec.readLong());
 
-		int propertiesSize = codec.readInt();
-		for (int i = 0; i < propertiesSize; i++) {
-			String name = codec.readString();
-			String value = codec.readString();
-			msg.addProperty(name, value);
-		}
+		msg.setProperties(codec.readMap());
 
 		msg.setBody(codec.readBytes());
-
 		return msg;
 	}
 
 	private int sizeOf(byte[] body, Message<?> msg) {
-		// TODO
-		return body.length + 4 * 1000;
+		// todo: calculate right size.
+		return HermesPrimitiveCodec.calLength(msg.getTopic()) +
+				HermesPrimitiveCodec.calLength(msg.getKey()) +
+				HermesPrimitiveCodec.calLength(msg.getPartition()) +
+				HermesPrimitiveCodec.calLength(msg.isPriority()) +
+				HermesPrimitiveCodec.calLength(msg.getBornTime()) +
+				HermesPrimitiveCodec.calLength(msg.getProperties()) +
+				HermesPrimitiveCodec.calLength(body) + 1000;
 	}
-
 }

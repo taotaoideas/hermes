@@ -37,7 +37,7 @@
 			<artifactId>netty-all</artifactId>
 			<version>4.0.25.Final</version>
 		</dependency>
-		<!--bitmap index: https://code.google.com/p/javaewah/ -->
+		<!--bitmap index: https://github.com/lemire/javaewah -->
 		<dependency>
 			<groupId>com.googlecode.javaewah</groupId>
 			<artifactId>JavaEWAH</artifactId>

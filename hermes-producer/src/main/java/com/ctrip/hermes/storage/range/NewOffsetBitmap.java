@@ -18,6 +18,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
+import com.googlecode.javaewah.IntIterator;
 
 /**
  * 每次batch将多个offset存放于各独立的bitmap中。
@@ -92,10 +93,15 @@ public class NewOffsetBitmap {
                         // put into queue, if all batch is done (weather success or fail)
                         if (batch.isAllDone()) {
                             try {
-                                allQueue.put(Triple.from(batch.popAll(), batch.getId(), batch.getToUpdate()));
+                                List<Long> all = batch.popAll();
+                                if (all.size() > 0) {
+                                    allQueue.put(Triple.from(all, batch.getId(), batch.getToUpdate()));
+                                }
                                 batch.setBeenTaken(true);
-
-                                failQueue.put(Triple.from(batch.popFailOffsets(), batch.getId(), batch.getToUpdate()));
+                                List<Long> fail = batch.popFailOffsets();
+                                if (fail.size() > 0 ) {
+                                    failQueue.put(Triple.from(fail, batch.getId(), batch.getToUpdate()));
+                                }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
@@ -203,15 +209,18 @@ public class NewOffsetBitmap {
                     Batch batch = entry.getValue();
 
                     if (!batch.isBeenTaken()) {  // means it haven't put into allQueue yet
-                        allQueue.put(Triple.from(batch.popAll(), batch.getId(), batch.getToUpdate()));
+                        List<Long> all = batch.popAll();
+                        if (all.size() > 0 ) {
+                            allQueue.put(Triple.from(all, batch.getId(), batch.getToUpdate()));
+                        }
 
                         List<Long> failList = batch.popFailOffsets();
+                        // Here, regard Timeout as Fail:
+                        failList.addAll(batch.popTimeoutOffsets());
+
                         if (failList.size() > 0) {
                             failQueue.put(Triple.from(failList, batch.getId(), batch.getToUpdate()));
                         }
-
-                        // Here, regard Timeout as Fail:
-                        failQueue.put(Triple.from(batch.popTimeoutOffsets(), batch.getId(), batch.getToUpdate()));
 
                         List<Long> list = batch.popTimeoutOffsets();
                         remainTimeoutOffsetCache.putAll(buildOffsetMap(list, entry.getKey()));
@@ -346,9 +355,16 @@ public class NewOffsetBitmap {
     }
 
     public static void main(String[] args) {
-        EWAHCompressedBitmap a = EWAHCompressedBitmap.bitmapOf(1,2);
-        EWAHCompressedBitmap b = EWAHCompressedBitmap.bitmapOf(2, 3);
-        EWAHCompressedBitmap c = EWAHCompressedBitmap.bitmapOf(4);
-        System.out.println(a.or(b.or(c)));
+        EWAHCompressedBitmap b = EWAHCompressedBitmap.bitmapOf();
+
+        b.set(1000);
+        b.set(100000);
+
+        IntIterator it = b.reverseIntIterator();
+
+
+        while(it.hasNext())  {
+            System.out.println(it.next());
+        }
     }
 }

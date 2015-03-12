@@ -89,6 +89,12 @@ public class OffsetBitmapTest extends ComponentTestCase {
         assertEquals(calculateCount(allQueue), size);
         assertEquals(calculateCount(failQueue), 0);
         assertEquals(bitmap.getTimeoutAndRemove().size(), 0);
+
+        assertEquals(allQueue.size(), 1);
+        assertEquals(0, failQueue.size());
+        Triple<List<Long>, String, Offset> triple = allQueue.poll();
+        assertEquals(triple.getMiddle(), ID);
+        assertEquals(triple.getLast(), toUpdate);
     }
 
     @Test
@@ -102,9 +108,15 @@ public class OffsetBitmapTest extends ComponentTestCase {
 
         Thread.sleep(50);
 
+        assertEquals(1, allQueue.size());
+        assertEquals(1, failQueue.size());
         assertEquals(calculateCount(allQueue), size);
         assertEquals(calculateCount(failQueue), size);
         assertEquals(bitmap.getTimeoutAndRemove().size(), 0);
+
+        Triple<List<Long>, String, Offset> triple = failQueue.poll();
+        assertEquals(triple.getMiddle(), ID);
+        assertEquals(triple.getLast(), toUpdate);
     }
 
     @Test
@@ -120,9 +132,20 @@ public class OffsetBitmapTest extends ComponentTestCase {
 
         Thread.sleep(50);
 
+        assertEquals(1, allQueue.size());
+        assertEquals(1, failQueue.size());
         assertEquals(calculateCount(allQueue), size);
         assertEquals(calculateCount(failQueue), 7 - 5);
         assertEquals(bitmap.getTimeoutAndRemove().size(), 0);
+
+        Triple<List<Long>, String, Offset> allTriple = allQueue.poll();
+        assertEquals(allTriple.getMiddle(), ID);
+        assertEquals(allTriple.getLast(), toUpdate);
+
+        Triple<List<Long>, String, Offset> failTriple = failQueue.poll();
+        assertEquals(failTriple.getMiddle(), ID);
+        assertEquals(failTriple.getLast(), toUpdate);
+
     }
 
     @Test
@@ -135,6 +158,8 @@ public class OffsetBitmapTest extends ComponentTestCase {
 
         Thread.sleep(3200);  // longer than timeout time -- 3000
 
+        assertEquals(1, allQueue.size());
+        assertEquals(1, failQueue.size());
         assertEquals(calculateCount(allQueue), size);
         assertEquals(calculateCount(failQueue), size);
         assertEquals(bitmap.getTimeoutAndRemove().size(), size);
