@@ -8,7 +8,7 @@ public class Command {
 
 	private static AtomicLong CorrelationId = new AtomicLong(0);
 
-	private int m_version;
+	private int m_version = 1;
 
 	private CommandType m_type;
 
