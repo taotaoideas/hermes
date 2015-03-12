@@ -6,14 +6,17 @@
         <artifactId>hermes</artifactId>
         <groupId>com.ctrip.hermes</groupId>
         <version>0.1</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hermes-example</artifactId>
+    <name>Hermes Example</name>
     <dependencies>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
             <artifactId>hermes-broker</artifactId>
             <version>${project.version}</version>
+            <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
@@ -24,6 +27,7 @@
             <groupId>com.ctrip.hermes</groupId>
             <artifactId>hermes-container</artifactId>
             <version>${project.version}</version>
+            <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
