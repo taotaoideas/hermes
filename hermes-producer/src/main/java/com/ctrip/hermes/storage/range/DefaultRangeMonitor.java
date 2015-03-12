@@ -24,26 +24,44 @@ public class DefaultRangeMonitor implements RangeMonitor {
     }
 
     private void runPullingThread() {
+        // pulling success thread
         new Thread(new Runnable() {
             @Override
             public void run() {
                 for (; ; ) {
                     try {
                         Triple<List<Long>, String, Offset> success = successQueue.take();
-                        Triple<List<Long>, String, Offset> fail = failQueue.take();
-
                         List<RangeEvent> successList = translator.buildContinuousRange(success);
-                        List<RangeEvent> failList = translator.buildContinuousRange(fail);
 
-                        if (successList.size() > 0 || failList.size() > 0) {
+                        if (successList.size() > 0) {
                             for (RangeStatusListener listener : m_listeners) {
-                                for (RangeEvent event : failList) {     // send fail first
-                                    listener.onRangeFail(event);
-                                }
                                 for (RangeEvent event : successList) {
                                     listener.onRangeSuccess(event);
                                 }
 
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+        // pulling fail thread
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (; ; ) {
+                    try {
+                        Triple<List<Long>, String, Offset> fail = failQueue.take();
+                        List<RangeEvent> failList = translator.buildContinuousRange(fail);
+
+                        if (failList.size() > 0) {
+                            for (RangeStatusListener listener : m_listeners) {
+                                for (RangeEvent event : failList) {     // send fail first
+                                    listener.onRangeFail(event);
+                                }
                             }
                         }
                     } catch (InterruptedException e) {
