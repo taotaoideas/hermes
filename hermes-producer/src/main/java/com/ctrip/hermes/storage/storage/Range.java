@@ -14,6 +14,4 @@ public interface Range {
 
 	Offset getEndOffset();
 
-	boolean contains(Offset o);
-
 }

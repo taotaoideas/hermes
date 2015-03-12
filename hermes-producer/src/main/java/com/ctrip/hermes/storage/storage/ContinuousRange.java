@@ -1,10 +1,5 @@
 package com.ctrip.hermes.storage.storage;
 
-import java.util.List;
-
-import com.ctrip.hermes.storage.message.Record;
-import com.ctrip.hermes.storage.util.CollectionUtil;
-
 public class ContinuousRange implements Range {
 
 	private String m_id;
@@ -27,14 +22,6 @@ public class ContinuousRange implements Range {
 		m_end = end;
 	}
 
-	public ContinuousRange(List<Offset> offsets) {
-		this(CollectionUtil.first(offsets), CollectionUtil.last(offsets));
-	}
-
-	public ContinuousRange(List<Record> msgs, String dummy) {
-		this(CollectionUtil.first(msgs).getOffset(), CollectionUtil.last(msgs).getOffset());
-	}
-
 	public void setId(String id) {
 		m_id = id;
 	}
@@ -52,14 +39,6 @@ public class ContinuousRange implements Range {
 	@Override
 	public Offset getEndOffset() {
 		return m_end;
-	}
-
-	@Override
-	public boolean contains(Offset o) {
-		long offset = o.getOffset();
-		return o.getId().equals(m_id) && //
-		      offset >= m_start.getOffset() && //
-		      offset <= m_end.getOffset();
 	}
 
 	@Override
