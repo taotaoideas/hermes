@@ -19,12 +19,11 @@ import com.ctrip.hermes.storage.storage.kafka.KafkaGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
-import com.ctrip.hermes.storage.storage.mysql.MysqlGroup;
 
 public class LocalMessageQueueManager implements MessageQueueManager {
 
 	public final static String ID = "local";
-	
+
 	@Inject
 	private MetaService m_meta;
 
@@ -48,8 +47,6 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 			return findMemoryQueue(topic, groupId);
 		} else if (Storage.KAFKA.equals(storage.getType())) {
 			return findKafkaQueue(topic, groupId);
-		} else if (Storage.MYSQL.equals(storage.getType())) {
-			return findMySQLQueue(topic, groupId);
 		} else {
 			// TODO
 			throw new RuntimeException("Unsupported storage type");
@@ -112,24 +109,6 @@ public class LocalMessageQueueManager implements MessageQueueManager {
 
 			StoragePair<Record> main = kg.createMessagePair();
 			StoragePair<Resend> resend = kg.createResendPair();
-			q = new StorageMessageQueue(main, resend);
-
-			m_queues.put(pair, q);
-		}
-
-		return q;
-	}
-
-	private synchronized MessageQueue findMySQLQueue(String topic, String groupId) {
-		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
-
-		MessageQueue q = m_queues.get(pair);
-
-		if (q == null) {
-			MysqlGroup mg = new MysqlGroup(groupId);
-
-			StoragePair<Record> main = mg.createMessagePair();
-			StoragePair<Resend> resend = mg.createResendPair();
 			q = new StorageMessageQueue(main, resend);
 
 			m_queues.put(pair, q);

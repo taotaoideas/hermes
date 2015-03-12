@@ -25,7 +25,7 @@ public interface StoragePair<T extends Locatable> {
 
 	public void addRangeStatusListener(RangeStatusListener listener);
 
-	public void waitForAck(List<Record> msgs);
+	public void waitForAck(List<Record> toBeDone);
 
-	public void waitForAck(List<Record> msgs, Offset offset);
+	public void waitForAck(List<Record> toBeDone, Offset doUpdate);
 }

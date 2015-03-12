@@ -10,6 +10,7 @@ public abstract class BaseOrderConsumer extends BaseConsumer<Order> {
 	@Override
 	public void consume(StoredMessage<Order> msg) {
 		System.out.println(String.format("Consumer %s of %s <<<<<<<<<< %s", getId(), getGroupId(), msg.getBody()));
+		System.out.println(msg.getAckOffset());
 
 		Cat.logEvent("OrderProcessed", msg.getTopic(), Event.SUCCESS, "key=" + msg.getKey());
 
