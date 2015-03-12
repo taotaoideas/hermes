@@ -7,11 +7,11 @@ import com.google.common.util.concurrent.SettableFuture;
 
 public class DefaultFutureManager implements FutureManager {
 
-	private Map<Integer, SettableFuture<Object>> m_futures = new HashMap<>();
+	private Map<Long, SettableFuture<Object>> m_futures = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> SettableFuture<T> newFuture(int correlationId) {
+	public <T> SettableFuture<T> newFuture(long correlationId) {
 		SettableFuture<Object> f = SettableFuture.create();
 		m_futures.put(correlationId, f);
 
@@ -19,7 +19,7 @@ public class DefaultFutureManager implements FutureManager {
 	}
 
 	@Override
-	public void futureDone(int correlationId, Object result) {
+	public void futureDone(long correlationId, Object result) {
 		m_futures.get(correlationId).set(result);
 		m_futures.remove(correlationId);
 	}

@@ -81,9 +81,9 @@ public class LocalConsumerBootstrap implements ConsumerBootstrap, LogEnabled {
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, List<StoredMessage<byte[]>> msgs) {
+	public void deliverMessage(long correlationId, List<StoredMessage<byte[]>> msgs) {
 		// TODO
-		throw new RuntimeException("Unsupported operation");
+		throw new RuntimeException("won't be called");
 	}
 
 }
