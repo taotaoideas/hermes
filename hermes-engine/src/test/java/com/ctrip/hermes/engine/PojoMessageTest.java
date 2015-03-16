@@ -37,7 +37,7 @@ public class PojoMessageTest extends ComponentTestCase {
 					latch.countDown();
 				}
 			}
-		}, Person.class);
+		});
 
 		b.startConsumer(s);
 

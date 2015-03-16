@@ -1,5 +1,8 @@
 package com.ctrip.hermes.engine;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
 import com.ctrip.hermes.consumer.Consumer;
 
 @SuppressWarnings("rawtypes")
@@ -11,13 +14,10 @@ public class Subscriber {
 
 	private Consumer m_consumer;
 
-	private Class<?> m_messageClass;
-
-	public Subscriber(String topicPattern, String groupId, Consumer consumer, Class<?> messageClass) {
+	public Subscriber(String topicPattern, String groupId, Consumer consumer) {
 		m_topicPattern = topicPattern;
 		m_groupId = groupId;
 		m_consumer = consumer;
-		m_messageClass = messageClass;
 	}
 
 	public String getGroupId() {
@@ -33,7 +33,10 @@ public class Subscriber {
 	}
 
 	public Class<?> getMessageClass() {
-		return m_messageClass;
+		Type[] genericInterfaces = m_consumer.getClass().getGenericInterfaces();
+		Type[] actualTypeArguments = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
+		Class type = (Class) actualTypeArguments[0];
+		return type;
 	}
 
 }

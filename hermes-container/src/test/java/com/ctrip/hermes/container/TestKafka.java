@@ -41,7 +41,7 @@ public class TestKafka extends ComponentTestCase {
 					}
 				}
 			}
-		}, String.class);
+		});
 
 		System.out.println("Starting consumer...");
 		b.startConsumer(s);

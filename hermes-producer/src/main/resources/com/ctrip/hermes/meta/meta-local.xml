@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<meta dev-mode='false'>
+<meta dev-mode='true'>
 	<connector type='local'>
 		<storage type='memory' default='true'>
 			<topic name='local.order.new' />

@@ -102,7 +102,7 @@ public class ProduceAndConsume extends ComponentTestCase {
                     public void consume(List<StoredMessage<String>> msgs) {
                         receiveCount.addAndGet(1);
                     }
-                }, String.class);
+                });
 
                 b.startConsumer(s);
             }
