@@ -10,4 +10,7 @@ public interface MessageCodec {
 
 	public Message<byte[]> decode(ByteBuffer buf);
 
+	public void write(Message<?> msg, byte[] msgBody, HermesPrimitiveCodec codec) ;
+	public Message<byte[]> read(HermesPrimitiveCodec codec);
+	public int sizeOf(byte[] body, Message<?> msg);
 }

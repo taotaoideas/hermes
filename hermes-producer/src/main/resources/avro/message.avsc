@@ -1,0 +1,13 @@
+{"namespace": "com.ctrip.hermes.avro",
+ "type": "record",
+ "name": "Message",
+ "fields": [
+     {"name": "topic", "type": "string"},
+     {"name": "key", "type": "string"},
+     {"name": "partition", "type": "string"},
+     {"name": "bornTime", "type": "long"},
+     {"name": "priority", "type": "boolean"},
+     {"name": "body",  "type": "bytes"},
+     {"name":"properties", "type": {"type": "map", "values": "string"}}
+ ]
+}
