@@ -46,6 +46,7 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+					<role-hint>local</role-hint>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.message.Pipeline</role>
