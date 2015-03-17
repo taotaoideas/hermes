@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.broker.storage.mysql.MysqlGroup;
 import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Property;
@@ -20,10 +21,9 @@ import com.ctrip.hermes.storage.storage.kafka.KafkaGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
-import com.ctrip.hermes.storage.storage.mysql.MysqlGroup;
 
 public class BrokerMessageQueueManager implements MessageQueueManager {
-	
+
 	public final static String ID = "broker";
 
 	@Inject
@@ -127,7 +127,7 @@ public class BrokerMessageQueueManager implements MessageQueueManager {
 		MessageQueue q = m_queues.get(pair);
 
 		if (q == null) {
-			MysqlGroup mg = new MysqlGroup(groupId);
+			MysqlGroup mg = new MysqlGroup(topic, groupId);
 
 			StoragePair<Record> main = mg.createMessagePair();
 			StoragePair<Resend> resend = mg.createResendPair();

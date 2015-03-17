@@ -10,7 +10,6 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Subscribe;
-import com.ctrip.hermes.container.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.local.LocalDevServer;
@@ -25,21 +24,19 @@ public class Bootstrap extends ComponentTestCase {
 		startLocalDevServer();
 
 		startConsumers();
-		
+
 		OrderProducer p = new OrderProducer();
-		p.send("order.new");
-		p.send("order.update");
 
 		while (true) {
 			System.in.read();
-			p.send("order.new");
+			p.send("order_new");
 		}
 	}
 
 	private void startConsumers() {
 		List<Subscriber> subs = findSubscribers();
 
-		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, BrokerConsumerBootstrap.ID);
+		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, "broker");
 		for (Subscriber s : subs) {
 			System.out.println("Found consumer class " + s.getConsumer().getClass());
 			cb.startConsumer(s);
@@ -75,6 +72,6 @@ public class Bootstrap extends ComponentTestCase {
 
 	@BeforeClass
 	public static void beforeClass() {
-		System.setProperty("devMode", "false");
+		System.setProperty("devMode", "true");
 	}
 }

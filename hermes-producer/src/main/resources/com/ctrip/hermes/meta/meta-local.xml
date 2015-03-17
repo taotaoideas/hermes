@@ -9,8 +9,11 @@
 	</connector>
 	<connector type='broker'>
 		<storage type='memory'>
-			<topic name="order.new" />
 			<topic name="order.update" />
+			<topic name="order.new" />
+		</storage>
+		<storage type='mysql'>
+			<topic name="order_new" />
 		</storage>
 		<storage type='kafka'>
 			<property name='zookeeper.connect'

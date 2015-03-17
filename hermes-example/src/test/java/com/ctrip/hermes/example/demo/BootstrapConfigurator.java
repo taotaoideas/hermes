@@ -16,9 +16,9 @@ public class BootstrapConfigurator extends AbstractResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(C(Consumer.class, uuid(), OrderNewConsumer1.class));
-		all.add(C(Consumer.class, uuid(), OrderNewConsumer2A.class));
-		all.add(C(Consumer.class, uuid(), OrderNewConsumer2B.class));
-		all.add(C(Consumer.class, uuid(), OrderUpdateConsumer1.class));
+//		all.add(C(Consumer.class, uuid(), OrderNewConsumer2A.class));
+//		all.add(C(Consumer.class, uuid(), OrderNewConsumer2B.class));
+//		all.add(C(Consumer.class, uuid(), OrderUpdateConsumer1.class));
 
 		return all;
 	}

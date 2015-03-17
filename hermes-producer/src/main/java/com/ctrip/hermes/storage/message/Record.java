@@ -62,7 +62,8 @@ public class Record implements Locatable {
 		m_properties.put(key, value);
 	}
 
-	public <T> T getProperty(String key) {
+	@SuppressWarnings("unchecked")
+   public <T> T getProperty(String key) {
 		return (T) m_properties.get(key);
 	}
 

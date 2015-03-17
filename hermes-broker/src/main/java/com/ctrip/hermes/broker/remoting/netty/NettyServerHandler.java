@@ -8,13 +8,13 @@ import com.ctrip.hermes.remoting.netty.AbstractNettyHandler;
 
 public class NettyServerHandler extends AbstractNettyHandler {
 
-	private Map<Integer, ConsumerChannel> m_consumerChannels = new ConcurrentHashMap<>();
+	private Map<Long, ConsumerChannel> m_consumerChannels = new ConcurrentHashMap<>();
 
-	public void addConsumerChannel(int correlationId, ConsumerChannel consumerChannel) {
+	public void addConsumerChannel(long correlationId, ConsumerChannel consumerChannel) {
 		m_consumerChannels.put(correlationId, consumerChannel);
 	}
 
-	public ConsumerChannel getConsumerChannel(int correlationId) {
+	public ConsumerChannel getConsumerChannel(long correlationId) {
 		return m_consumerChannels.get(correlationId);
 	}
 

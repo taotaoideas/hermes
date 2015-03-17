@@ -46,9 +46,9 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 
 	private Logger m_logger;
 
-	private Map<Integer, SinkContext> m_consumerSinks = new ConcurrentHashMap<>();
+	private Map<Long, SinkContext> m_consumerSinks = new ConcurrentHashMap<>();
 
-	private Map<Integer, AckContext> m_acks = new ConcurrentHashMap<>();
+	private Map<Long, AckContext> m_acks = new ConcurrentHashMap<>();
 
 	@Override
 	public void startConsumer(Subscriber s) {
@@ -97,7 +97,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 	}
 
 	@Override
-	public void deliverMessage(int correlationId, List<StoredMessage<byte[]>> msgs) {
+	public void deliverMessage(long correlationId, List<StoredMessage<byte[]>> msgs) {
 		// TODO make it async
 		SinkContext sinkCtx = m_consumerSinks.get(correlationId);
 		PipelineSink<Void> sink = sinkCtx.getSink();
@@ -126,7 +126,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 			public void run() {
 				while (true) {
 					// TODO
-					for (Map.Entry<Integer, AckContext> entry : m_acks.entrySet()) {
+					for (Map.Entry<Long, AckContext> entry : m_acks.entrySet()) {
 						entry.getValue().send(entry.getKey());
 					}
 					try {
@@ -172,7 +172,7 @@ public class BrokerConsumerBootstrap extends ContainerHolder implements LogEnabl
 			m_netty = netty;
 		}
 
-		public void send(int correlationId) {
+		public void send(long correlationId) {
 			OffsetRecord rec = null;
 			while ((rec = m_ackQueue.poll()) != null) {
 				// TODO

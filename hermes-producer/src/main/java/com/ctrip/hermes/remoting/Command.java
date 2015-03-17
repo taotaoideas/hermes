@@ -2,17 +2,17 @@ package com.ctrip.hermes.remoting;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Command {
 
-	private static AtomicInteger CorrelationId = new AtomicInteger(0);
+	private static AtomicLong CorrelationId = new AtomicLong(0);
 
-	private int m_version;
+	private int m_version = 1;
 
 	private CommandType m_type;
 
-	private int m_correlationId = CorrelationId.getAndIncrement();
+	private long m_correlationId = CorrelationId.getAndIncrement();
 
 	private Map<String, String> m_headers = new HashMap<String, String>();
 
@@ -69,13 +69,13 @@ public class Command {
 		m_version = version;
 	}
 
-	public int getCorrelationId() {
+	public long getCorrelationId() {
 		return m_correlationId;
 	}
 
-	public Command setCorrelationId(int correlationId) {
+	public Command setCorrelationId(long correlationId) {
 		m_correlationId = correlationId;
-		
+
 		return this;
 	}
 
