@@ -2,7 +2,7 @@ package com.ctrip.hermes.example.demo;
 
 import com.ctrip.hermes.consumer.Subscribe;
 
-@Subscribe(topicPattern = "order.update", groupId = "group1", messageClass = Order.class)
+@Subscribe(topicPattern = "order.update", groupId = "group1")
 public class OrderUpdateConsumer1 extends BaseOrderConsumer {
 
 	@Override

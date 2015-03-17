@@ -13,7 +13,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
@@ -35,7 +34,7 @@ public class OneBoxTest extends ComponentTestCase {
 	public void test() throws Exception {
 		String topic = "order.new";
 
-		lookup(MessageQueueMonitor.class);
+//		lookup(MessageQueueMonitor.class);
 		Connector connector = lookup(MetaService.class).getConnector(topic);
 
 		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, connector.getType());
@@ -48,7 +47,7 @@ public class OneBoxTest extends ComponentTestCase {
 			String groupId = entry.getKey();
 			Map<String, Integer> nacks = findNacks(groupId);
 			for (String id : entry.getValue()) {
-				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class);
+				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id));
 				System.out.println("Starting consumer " + groupId + ":" + id);
 				b.startConsumer(s);
 			}
@@ -81,7 +80,7 @@ public class OneBoxTest extends ComponentTestCase {
 					String id = parts[2];
 					Map<String, Integer> nacks = findNacks(groupId);
 					System.out.println(String.format("Starting consumer with groupId %s and id %s", groupId, id));
-					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id), String.class));
+					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id)));
 				}
 			} else {
 				send(topic, prefix);
