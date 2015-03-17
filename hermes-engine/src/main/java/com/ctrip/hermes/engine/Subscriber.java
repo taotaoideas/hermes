@@ -2,8 +2,6 @@ package com.ctrip.hermes.engine;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.ctrip.hermes.consumer.Consumer;
 
@@ -16,19 +14,10 @@ public class Subscriber {
 
 	private Consumer m_consumer;
 
-	private Class<?> m_messageClass;
-
 	public Subscriber(String topicPattern, String groupId, Consumer consumer) {
 		m_topicPattern = topicPattern;
 		m_groupId = groupId;
 		m_consumer = consumer;
-	}
-
-	public Subscriber(String topicPattern, String groupId, Consumer consumer, Class<?> messageClass) {
-		m_topicPattern = topicPattern;
-		m_groupId = groupId;
-		m_consumer = consumer;
-		m_messageClass = messageClass;
 	}
 
 	public String getGroupId() {

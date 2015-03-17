@@ -35,7 +35,7 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 		ConsumerBootstrap m = lookup(ConsumerBootstrap.class);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		Subscriber s = new Subscriber("order.new", "groupId", new TestConsumer(latch), String.class);
+		Subscriber s = new Subscriber("order.new", "groupId", new TestConsumer(latch));
 		m.startConsumer(s);
 
 		latch.await(2, TimeUnit.SECONDS);

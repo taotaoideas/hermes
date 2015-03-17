@@ -51,7 +51,7 @@ public class OneProducer extends ComponentTestCase {
                 assertEquals(msgs.get(0).getBody(), msg);
                 latch.countDown();
             }
-        }, String.class);
+        });
 
         b.startConsumer(s);
 

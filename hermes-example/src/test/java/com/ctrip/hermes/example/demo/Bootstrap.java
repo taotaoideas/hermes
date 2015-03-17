@@ -50,7 +50,7 @@ public class Bootstrap extends ComponentTestCase {
 		for (Consumer c : cs) {
 			Subscribe anno = c.getClass().getAnnotation(Subscribe.class);
 			try {
-				result.add(new Subscriber(anno.topicPattern(), anno.groupId(), c, anno.messageClass()));
+				result.add(new Subscriber(anno.topicPattern(), anno.groupId(), c));
 			} catch (Exception e) {
 
 			}

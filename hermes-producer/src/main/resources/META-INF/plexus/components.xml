@@ -248,7 +248,7 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
-					<role-hint>broker</role-hint>
+					<role-hint>local</role-hint>
 				</requirement>
 			</requirements>
 		</component>

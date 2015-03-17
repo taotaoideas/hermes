@@ -37,7 +37,7 @@ public class DefaultStoredMessageCodecTest extends ComponentTestCase {
 
 		StoredMessage<byte[]> msg2 = new StoredMessage<byte[]>();
 		msg2.setBody(new byte[] { 'a', 'b', 'c' });
-		msg2.setAckOffset(new Offset(UUID.randomUUID().toString(), 2));
+		msg2.setAckOffset(null);
 		writeMsgs.add(msg2);
 
 		ByteBuffer buf = codec.encode(writeMsgs);
