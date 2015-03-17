@@ -10,8 +10,6 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.avro.Message;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

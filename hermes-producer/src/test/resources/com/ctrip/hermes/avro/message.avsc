@@ -1,4 +1,4 @@
-{"namespace": "com.ctrip.hermes.avro",
+{"namespace": "com.ctrip.hermes.message.codec",
  "type": "record",
  "name": "Message",
  "fields": [
