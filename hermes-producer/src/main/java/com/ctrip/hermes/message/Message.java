@@ -18,6 +18,20 @@ public class Message<T> {
 
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
 
+	public Message() {
+
+	}
+
+	public Message(Message<T> other) {
+		setTopic(other.getTopic());
+		setBody(other.getBody());
+		setKey(other.getKey());
+		setPriority(other.isPriority());
+		setPartition(other.getPartition());
+		setProperties(other.getProperties());
+		setBornTime(other.getBornTime());
+	}
+
 	public T getBody() {
 		return m_body;
 	}
@@ -30,8 +44,8 @@ public class Message<T> {
 		return m_topic;
 	}
 
-	public void setBody(T body) {
-		m_body = body;
+	public void setBody(Object object) {
+		m_body = (T) object;
 	}
 
 	public void setKey(String key) {
@@ -77,7 +91,7 @@ public class Message<T> {
 	public void addProperty(String name, Object value) {
 		m_properties.put(name, value);
 	}
-	
+
 	public <T> T getProperty(String name) {
 		return (T) m_properties.get(name);
 	}

@@ -93,6 +93,22 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.message.PipelineSink</role>
+			<role-hint>kafka</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.KafkaMessageSink</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.meta.MetaService</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.message.ProducerSinkManager</role>
 			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSinkManager</implementation>
 			<requirements>

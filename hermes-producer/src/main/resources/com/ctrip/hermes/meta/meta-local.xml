@@ -15,15 +15,23 @@
 		<storage type='mysql'>
 			<topic name="order_new" />
 		</storage>
-		<storage type='kafka'>
-			<property name='zookeeper.connect'
-				value='fx-message04:2181,fx-message05:2181,fx-message06:2181' />
+	</connector>
+	<connector type='kafka'>
+		<storage type='producer'>
 			<property name='bootstrap.servers'
 				value='fx-message01:9092,fx-message02:9092,fx-message03:9092' />
 			<property name='request.required.acks' value='1' />
+			<topic name='kafka.SimpleTopic' />
+			<topic name='kafka.SimpleTopic1' />
+			<topic name='kafka.SimpleTopic2' />
+		</storage>
+		<storage type='consumer'>
+			<property name='zookeeper.connect'
+				value='fx-message04:2181,fx-message05:2181,fx-message06:2181' />
 			<property name='offsets.storage' value='kafka' />
-			<topic name='order.kafka' />
-			<topic name='order2.kafka' />
+			<topic name='kafka.SimpleTopic' />
+			<topic name='kafka.SimpleTopic1' />
+			<topic name='kafka.SimpleTopic2' />
 		</storage>
 	</connector>
 </meta>

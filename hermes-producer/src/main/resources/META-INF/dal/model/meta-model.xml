@@ -6,6 +6,7 @@
 			public final static String LOCAL = "local";
 			public final static String BROKER = "broker";
 			public final static String TRANSACTION = "transaction";
+			public final static String KAFKA = "kafka";
 		</snippet>
 	</entity>
 	<entity name="storage">

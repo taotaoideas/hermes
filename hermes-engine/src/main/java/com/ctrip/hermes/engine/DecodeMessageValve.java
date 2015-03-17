@@ -8,7 +8,6 @@ import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.codec.Codec;
 import com.ctrip.hermes.message.codec.CodecManager;
-import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.spi.Valve;
 
 public class DecodeMessageValve implements Valve {
@@ -17,9 +16,6 @@ public class DecodeMessageValve implements Valve {
 
 	@Inject
 	private CodecManager m_codecManager;
-	
-	@Inject
-	private StoredMessageCodec m_codec;
 
 	@Override
 	public void handle(PipelineContext<?> ctx, Object payload) {
@@ -28,11 +24,10 @@ public class DecodeMessageValve implements Valve {
 		Codec codec = m_codecManager.getCodec(topic);
 		List<StoredMessage<byte[]>> msgs = msgCtx.getMessages();
 
-		for (StoredMessage<byte[]> msg : msgs) {
+		for (StoredMessage<byte[]> storedMsg : msgs) {
 			// TODO get or bypass class info
-			msg.setBody(codec.decode(msg.getBody(), msgCtx.getMessageClass()));
+			storedMsg.setBody(codec.decode(storedMsg.getBody(), msgCtx.getMessageClass()));
 		}
-
 		ctx.put("topic", topic);
 		ctx.next(msgs);
 	}

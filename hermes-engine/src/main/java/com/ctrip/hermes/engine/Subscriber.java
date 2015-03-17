@@ -34,10 +34,16 @@ public class Subscriber {
 
 	public Class<?> getMessageClass() {
 		Type genericSuperClass = m_consumer.getClass().getGenericSuperclass();
-		ParameterizedType paraType = (ParameterizedType) genericSuperClass;
-		Type[] actualTypeArguments = paraType.getActualTypeArguments();
-		Class type = (Class) actualTypeArguments[0];
-		return type;
+		if (genericSuperClass instanceof ParameterizedType) {
+			ParameterizedType paraType = (ParameterizedType) genericSuperClass;
+			Type[] actualTypeArguments = paraType.getActualTypeArguments();
+			Class type = (Class) actualTypeArguments[0];
+			return type;
+		} else {
+			Type[] genericInterfaces = m_consumer.getClass().getGenericInterfaces();
+			Type[] actualTypeArguments = ((ParameterizedType) genericInterfaces[0]).getActualTypeArguments();
+			Class type = (Class) actualTypeArguments[0];
+			return type;
+		}
 	}
-
 }
