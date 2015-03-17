@@ -19,6 +19,27 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
+			<role-hint>kafka</role-hint>
+			<implementation>com.ctrip.hermes.container.KafkaConsumerBootstrap</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role-hint>broker-consumer</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.Pipeline</role>
+					<role-hint>broker-consumer</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.message.ValveRegistry</role>
 			<role-hint>broker-consumer</role-hint>
 			<implementation>com.ctrip.hermes.container.ConsumerValveRegistry</implementation>
@@ -47,6 +68,24 @@
 					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.spi.Valve</role>
+			<role-hint>decode-message</role-hint>
+			<implementation>com.ctrip.hermes.engine.DecodeMessageValve</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.message.codec.CodecManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
+			<implementation>com.ctrip.hermes.message.codec.DefaultStoredMessageCodec</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.codec.CodecManager</role>
+			<implementation>com.ctrip.hermes.message.codec.internal.DefaultCodecManager</implementation>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>

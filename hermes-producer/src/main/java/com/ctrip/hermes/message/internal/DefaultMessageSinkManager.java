@@ -36,6 +36,9 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 		case Connector.LOCAL:
 			sink = m_sinks.get(m_meta.getStorage(topic).getType());
 			break;
+		case Connector.KAFKA:
+			sink = m_sinks.get(connector.getType());
+			break;
 		default:
 			throw new RuntimeException(String.format("Unknown connector type %s of topic %s", connector.getType(), topic));
 		}

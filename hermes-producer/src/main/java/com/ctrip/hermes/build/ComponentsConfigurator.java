@@ -27,6 +27,7 @@ import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.message.codec.internal.JsonCodec;
 import com.ctrip.hermes.message.internal.BrokerMessageSink;
 import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
+import com.ctrip.hermes.message.internal.KafkaMessageSink;
 import com.ctrip.hermes.message.internal.MemoryMessageSink;
 import com.ctrip.hermes.message.internal.ProducerPipeline;
 import com.ctrip.hermes.message.internal.ProducerValveRegistry;
@@ -94,6 +95,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MessageCodec.class));
 		all.add(C(PipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
 		      .req(ClientManager.class, FutureManager.class));
+		all.add(C(PipelineSink.class, KafkaMessageSink.ID, KafkaMessageSink.class) //
+		      .req(MetaService.class, StoredMessageCodec.class, MessageCodec.class)); //
 		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 
@@ -126,7 +129,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
 		all.add(C(CommandProcessor.class, SendMessageResponseProcessor.ID, SendMessageResponseProcessor.class) //
-				.req(FutureManager.class));
+		      .req(FutureManager.class));
 
 		all.add(C(MessageCodec.class, DefaultMessageCodec.class) //
 		      .req(CodecManager.class));

@@ -1,6 +1,5 @@
 package com.ctrip.hermes.meta.internal;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -25,11 +24,11 @@ public class DefaultMetaService implements Initializable, MetaService {
 
 	private Storage m_defaultStorage;
 
-	private Map<String, Connector> m_connectors = new HashMap<String, Connector>();
+	private Map<String, Connector> m_connectors = new RegExHashMap<>();
 
-	private Map<String, Storage> m_storages = new HashMap<String, Storage>();
+	private Map<String, Storage> m_storages = new RegExHashMap<>();
 
-	private Map<String, Storage> m_localStorages = new HashMap<String, Storage>();
+	private Map<String, Storage> m_localStorages = new RegExHashMap<>();
 
 	@Override
 	public void initialize() throws InitializationException {
