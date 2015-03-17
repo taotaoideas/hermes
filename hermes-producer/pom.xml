@@ -61,6 +61,7 @@
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
 			<version>1.7.7</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -159,8 +160,8 @@
 							<goal>schema</goal>
 						</goals>
 						<configuration>
-							<sourceDirectory>${project.basedir}/src/main/resources/avro</sourceDirectory>
-							<outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+							<sourceDirectory>${project.basedir}/src/test/resources/com/ctrip/hermes/avro</sourceDirectory>
+							<outputDirectory>${project.basedir}/src/test/java</outputDirectory>
 							<stringType>String</stringType>
 						</configuration>
 					</execution>

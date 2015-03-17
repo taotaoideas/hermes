@@ -179,12 +179,9 @@ public class HermesPrimitiveCodec {
 			// only write [[key element][value element]...] if size > 0
 			if (map.size() > 0) {
 				Object key = null, value = null;
-				for (Object keys : map.keySet()) {
-					key = keys;
-					break;
-				}
-				for (Object values : map.values()) {
-					value = values;
+				for (Object oneKey : map.keySet()) {
+					key = oneKey;
+					value = map.get(oneKey);
 					break;
 				}
 

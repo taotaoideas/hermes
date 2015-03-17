@@ -10,8 +10,6 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.avro.Message;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -32,7 +30,7 @@ public class PerformanceToAvro extends ComponentTestCase {
 
 			ByteBuffer bf = ByteBuffer.allocate(bodyLength);
 			bf.put(bytes);
-			Map<CharSequence, CharSequence> properties = buildMap();
+			Map<String, String> properties = buildMap();
 
 			avroMessages.add(new Message(topic, key, partition, new Date().getTime(), true, bf, properties));
 
@@ -140,8 +138,8 @@ public class PerformanceToAvro extends ComponentTestCase {
 			assertEquals(m1.getPartition(), m2.getPartition().toString());
 			assertEquals(m1.getBornTime(), m2.getBornTime());
 			assertEquals(m1.getBody(), m2.getBody());
-			Map<java.lang.CharSequence, java.lang.CharSequence> map1 = m1.getProperties();
-			Map<java.lang.CharSequence, java.lang.CharSequence> map2 = m2.getProperties();
+			Map<java.lang.String, java.lang.String> map1 = m1.getProperties();
+			Map<java.lang.String, java.lang.String> map2 = m2.getProperties();
 			assertEquals(map1.size(), map2.size());
 
 			//			for (CharSequence key : map1.keySet()) {
@@ -155,16 +153,16 @@ public class PerformanceToAvro extends ComponentTestCase {
 				+ "Size Per Message: %d(byte).", se, de, fileSize, fileSize / messageCount));
 	}
 
-	private Map<String, Object> convertMap(Map<CharSequence, CharSequence> properties) {
+	private Map<String, Object> convertMap(Map<String, String> properties) {
 		Map<String, Object> map = new HashMap<>();
-		for (Map.Entry<CharSequence, CharSequence> entry : properties.entrySet()) {
-			map.put(entry.getKey().toString(), entry.getValue().toString());
+		for (Map.Entry<String, String> entry : properties.entrySet()) {
+			map.put(entry.getKey(), entry.getValue());
 		}
 		return map;
 	}
 
-	private Map<CharSequence, CharSequence> buildMap() {
-		Map<CharSequence, CharSequence> map = new HashMap<>();
+	private Map<String, String> buildMap() {
+		Map<String, String> map = new HashMap<>();
 		for (int i = 0; i < 100; i++) {
 			map.put(String.valueOf(i), String.valueOf(i * i * i));
 		}

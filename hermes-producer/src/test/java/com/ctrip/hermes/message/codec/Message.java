@@ -3,19 +3,19 @@
  * 
  * DO NOT EDIT DIRECTLY
  */
-package com.ctrip.hermes.avro;  
+package com.ctrip.hermes.message.codec;  
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class Message extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Message\",\"namespace\":\"com.ctrip.hermes.avro\",\"fields\":[{\"name\":\"topic\",\"type\":\"string\"},{\"name\":\"key\",\"type\":\"string\"},{\"name\":\"partition\",\"type\":\"string\"},{\"name\":\"bornTime\",\"type\":\"long\"},{\"name\":\"priority\",\"type\":\"boolean\"},{\"name\":\"body\",\"type\":\"bytes\"},{\"name\":\"properties\",\"type\":{\"type\":\"map\",\"values\":\"string\"}}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Message\",\"namespace\":\"com.ctrip.hermes.message.codec\",\"fields\":[{\"name\":\"topic\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"key\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"partition\",\"type\":{\"type\":\"string\",\"avro.java.string\":\"String\"}},{\"name\":\"bornTime\",\"type\":\"long\"},{\"name\":\"priority\",\"type\":\"boolean\"},{\"name\":\"body\",\"type\":\"bytes\"},{\"name\":\"properties\",\"type\":{\"type\":\"map\",\"values\":{\"type\":\"string\",\"avro.java.string\":\"String\"},\"avro.java.string\":\"String\"}}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
-  @Deprecated public java.lang.CharSequence topic;
-  @Deprecated public java.lang.CharSequence key;
-  @Deprecated public java.lang.CharSequence partition;
+  @Deprecated public java.lang.String topic;
+  @Deprecated public java.lang.String key;
+  @Deprecated public java.lang.String partition;
   @Deprecated public long bornTime;
   @Deprecated public boolean priority;
   @Deprecated public java.nio.ByteBuffer body;
-  @Deprecated public java.util.Map<java.lang.CharSequence,java.lang.CharSequence> properties;
+  @Deprecated public java.util.Map<java.lang.String,java.lang.String> properties;
 
   /**
    * Default constructor.  Note that this does not initialize fields
@@ -27,7 +27,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * All-args constructor.
    */
-  public Message(java.lang.CharSequence topic, java.lang.CharSequence key, java.lang.CharSequence partition, java.lang.Long bornTime, java.lang.Boolean priority, java.nio.ByteBuffer body, java.util.Map<java.lang.CharSequence,java.lang.CharSequence> properties) {
+  public Message(java.lang.String topic, java.lang.String key, java.lang.String partition, java.lang.Long bornTime, java.lang.Boolean priority, java.nio.ByteBuffer body, java.util.Map<java.lang.String,java.lang.String> properties) {
     this.topic = topic;
     this.key = key;
     this.partition = partition;
@@ -55,13 +55,13 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
-    case 0: topic = (java.lang.CharSequence)value$; break;
-    case 1: key = (java.lang.CharSequence)value$; break;
-    case 2: partition = (java.lang.CharSequence)value$; break;
+    case 0: topic = (java.lang.String)value$; break;
+    case 1: key = (java.lang.String)value$; break;
+    case 2: partition = (java.lang.String)value$; break;
     case 3: bornTime = (java.lang.Long)value$; break;
     case 4: priority = (java.lang.Boolean)value$; break;
     case 5: body = (java.nio.ByteBuffer)value$; break;
-    case 6: properties = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)value$; break;
+    case 6: properties = (java.util.Map<java.lang.String,java.lang.String>)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -69,7 +69,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * Gets the value of the 'topic' field.
    */
-  public java.lang.CharSequence getTopic() {
+  public java.lang.String getTopic() {
     return topic;
   }
 
@@ -77,14 +77,14 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
    * Sets the value of the 'topic' field.
    * @param value the value to set.
    */
-  public void setTopic(java.lang.CharSequence value) {
+  public void setTopic(java.lang.String value) {
     this.topic = value;
   }
 
   /**
    * Gets the value of the 'key' field.
    */
-  public java.lang.CharSequence getKey() {
+  public java.lang.String getKey() {
     return key;
   }
 
@@ -92,14 +92,14 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
    * Sets the value of the 'key' field.
    * @param value the value to set.
    */
-  public void setKey(java.lang.CharSequence value) {
+  public void setKey(java.lang.String value) {
     this.key = value;
   }
 
   /**
    * Gets the value of the 'partition' field.
    */
-  public java.lang.CharSequence getPartition() {
+  public java.lang.String getPartition() {
     return partition;
   }
 
@@ -107,7 +107,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
    * Sets the value of the 'partition' field.
    * @param value the value to set.
    */
-  public void setPartition(java.lang.CharSequence value) {
+  public void setPartition(java.lang.String value) {
     this.partition = value;
   }
 
@@ -159,7 +159,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
   /**
    * Gets the value of the 'properties' field.
    */
-  public java.util.Map<java.lang.CharSequence,java.lang.CharSequence> getProperties() {
+  public java.util.Map<java.lang.String,java.lang.String> getProperties() {
     return properties;
   }
 
@@ -167,23 +167,23 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
    * Sets the value of the 'properties' field.
    * @param value the value to set.
    */
-  public void setProperties(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+  public void setProperties(java.util.Map<java.lang.String,java.lang.String> value) {
     this.properties = value;
   }
 
   /** Creates a new Message RecordBuilder */
-  public static com.ctrip.hermes.avro.Message.Builder newBuilder() {
-    return new com.ctrip.hermes.avro.Message.Builder();
+  public static com.ctrip.hermes.message.codec.Message.Builder newBuilder() {
+    return new com.ctrip.hermes.message.codec.Message.Builder();
   }
   
   /** Creates a new Message RecordBuilder by copying an existing Builder */
-  public static com.ctrip.hermes.avro.Message.Builder newBuilder(com.ctrip.hermes.avro.Message.Builder other) {
-    return new com.ctrip.hermes.avro.Message.Builder(other);
+  public static com.ctrip.hermes.message.codec.Message.Builder newBuilder(com.ctrip.hermes.message.codec.Message.Builder other) {
+    return new com.ctrip.hermes.message.codec.Message.Builder(other);
   }
   
   /** Creates a new Message RecordBuilder by copying an existing Message instance */
-  public static com.ctrip.hermes.avro.Message.Builder newBuilder(com.ctrip.hermes.avro.Message other) {
-    return new com.ctrip.hermes.avro.Message.Builder(other);
+  public static com.ctrip.hermes.message.codec.Message.Builder newBuilder(com.ctrip.hermes.message.codec.Message other) {
+    return new com.ctrip.hermes.message.codec.Message.Builder(other);
   }
   
   /**
@@ -192,21 +192,21 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<Message>
     implements org.apache.avro.data.RecordBuilder<Message> {
 
-    private java.lang.CharSequence topic;
-    private java.lang.CharSequence key;
-    private java.lang.CharSequence partition;
+    private java.lang.String topic;
+    private java.lang.String key;
+    private java.lang.String partition;
     private long bornTime;
     private boolean priority;
     private java.nio.ByteBuffer body;
-    private java.util.Map<java.lang.CharSequence,java.lang.CharSequence> properties;
+    private java.util.Map<java.lang.String,java.lang.String> properties;
 
     /** Creates a new Builder */
     private Builder() {
-      super(com.ctrip.hermes.avro.Message.SCHEMA$);
+      super(com.ctrip.hermes.message.codec.Message.SCHEMA$);
     }
     
     /** Creates a Builder by copying an existing Builder */
-    private Builder(com.ctrip.hermes.avro.Message.Builder other) {
+    private Builder(com.ctrip.hermes.message.codec.Message.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.topic)) {
         this.topic = data().deepCopy(fields()[0].schema(), other.topic);
@@ -239,8 +239,8 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Creates a Builder by copying an existing Message instance */
-    private Builder(com.ctrip.hermes.avro.Message other) {
-            super(com.ctrip.hermes.avro.Message.SCHEMA$);
+    private Builder(com.ctrip.hermes.message.codec.Message other) {
+            super(com.ctrip.hermes.message.codec.Message.SCHEMA$);
       if (isValidValue(fields()[0], other.topic)) {
         this.topic = data().deepCopy(fields()[0].schema(), other.topic);
         fieldSetFlags()[0] = true;
@@ -272,12 +272,12 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
 
     /** Gets the value of the 'topic' field */
-    public java.lang.CharSequence getTopic() {
+    public java.lang.String getTopic() {
       return topic;
     }
     
     /** Sets the value of the 'topic' field */
-    public com.ctrip.hermes.avro.Message.Builder setTopic(java.lang.CharSequence value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setTopic(java.lang.String value) {
       validate(fields()[0], value);
       this.topic = value;
       fieldSetFlags()[0] = true;
@@ -290,19 +290,19 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'topic' field */
-    public com.ctrip.hermes.avro.Message.Builder clearTopic() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearTopic() {
       topic = null;
       fieldSetFlags()[0] = false;
       return this;
     }
 
     /** Gets the value of the 'key' field */
-    public java.lang.CharSequence getKey() {
+    public java.lang.String getKey() {
       return key;
     }
     
     /** Sets the value of the 'key' field */
-    public com.ctrip.hermes.avro.Message.Builder setKey(java.lang.CharSequence value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setKey(java.lang.String value) {
       validate(fields()[1], value);
       this.key = value;
       fieldSetFlags()[1] = true;
@@ -315,19 +315,19 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'key' field */
-    public com.ctrip.hermes.avro.Message.Builder clearKey() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearKey() {
       key = null;
       fieldSetFlags()[1] = false;
       return this;
     }
 
     /** Gets the value of the 'partition' field */
-    public java.lang.CharSequence getPartition() {
+    public java.lang.String getPartition() {
       return partition;
     }
     
     /** Sets the value of the 'partition' field */
-    public com.ctrip.hermes.avro.Message.Builder setPartition(java.lang.CharSequence value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setPartition(java.lang.String value) {
       validate(fields()[2], value);
       this.partition = value;
       fieldSetFlags()[2] = true;
@@ -340,7 +340,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'partition' field */
-    public com.ctrip.hermes.avro.Message.Builder clearPartition() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearPartition() {
       partition = null;
       fieldSetFlags()[2] = false;
       return this;
@@ -352,7 +352,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Sets the value of the 'bornTime' field */
-    public com.ctrip.hermes.avro.Message.Builder setBornTime(long value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setBornTime(long value) {
       validate(fields()[3], value);
       this.bornTime = value;
       fieldSetFlags()[3] = true;
@@ -365,7 +365,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'bornTime' field */
-    public com.ctrip.hermes.avro.Message.Builder clearBornTime() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearBornTime() {
       fieldSetFlags()[3] = false;
       return this;
     }
@@ -376,7 +376,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Sets the value of the 'priority' field */
-    public com.ctrip.hermes.avro.Message.Builder setPriority(boolean value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setPriority(boolean value) {
       validate(fields()[4], value);
       this.priority = value;
       fieldSetFlags()[4] = true;
@@ -389,7 +389,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'priority' field */
-    public com.ctrip.hermes.avro.Message.Builder clearPriority() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearPriority() {
       fieldSetFlags()[4] = false;
       return this;
     }
@@ -400,7 +400,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Sets the value of the 'body' field */
-    public com.ctrip.hermes.avro.Message.Builder setBody(java.nio.ByteBuffer value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setBody(java.nio.ByteBuffer value) {
       validate(fields()[5], value);
       this.body = value;
       fieldSetFlags()[5] = true;
@@ -413,19 +413,19 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'body' field */
-    public com.ctrip.hermes.avro.Message.Builder clearBody() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearBody() {
       body = null;
       fieldSetFlags()[5] = false;
       return this;
     }
 
     /** Gets the value of the 'properties' field */
-    public java.util.Map<java.lang.CharSequence,java.lang.CharSequence> getProperties() {
+    public java.util.Map<java.lang.String,java.lang.String> getProperties() {
       return properties;
     }
     
     /** Sets the value of the 'properties' field */
-    public com.ctrip.hermes.avro.Message.Builder setProperties(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+    public com.ctrip.hermes.message.codec.Message.Builder setProperties(java.util.Map<java.lang.String,java.lang.String> value) {
       validate(fields()[6], value);
       this.properties = value;
       fieldSetFlags()[6] = true;
@@ -438,7 +438,7 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     }
     
     /** Clears the value of the 'properties' field */
-    public com.ctrip.hermes.avro.Message.Builder clearProperties() {
+    public com.ctrip.hermes.message.codec.Message.Builder clearProperties() {
       properties = null;
       fieldSetFlags()[6] = false;
       return this;
@@ -448,13 +448,13 @@ public class Message extends org.apache.avro.specific.SpecificRecordBase impleme
     public Message build() {
       try {
         Message record = new Message();
-        record.topic = fieldSetFlags()[0] ? this.topic : (java.lang.CharSequence) defaultValue(fields()[0]);
-        record.key = fieldSetFlags()[1] ? this.key : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.partition = fieldSetFlags()[2] ? this.partition : (java.lang.CharSequence) defaultValue(fields()[2]);
+        record.topic = fieldSetFlags()[0] ? this.topic : (java.lang.String) defaultValue(fields()[0]);
+        record.key = fieldSetFlags()[1] ? this.key : (java.lang.String) defaultValue(fields()[1]);
+        record.partition = fieldSetFlags()[2] ? this.partition : (java.lang.String) defaultValue(fields()[2]);
         record.bornTime = fieldSetFlags()[3] ? this.bornTime : (java.lang.Long) defaultValue(fields()[3]);
         record.priority = fieldSetFlags()[4] ? this.priority : (java.lang.Boolean) defaultValue(fields()[4]);
         record.body = fieldSetFlags()[5] ? this.body : (java.nio.ByteBuffer) defaultValue(fields()[5]);
-        record.properties = fieldSetFlags()[6] ? this.properties : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) defaultValue(fields()[6]);
+        record.properties = fieldSetFlags()[6] ? this.properties : (java.util.Map<java.lang.String,java.lang.String>) defaultValue(fields()[6]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
