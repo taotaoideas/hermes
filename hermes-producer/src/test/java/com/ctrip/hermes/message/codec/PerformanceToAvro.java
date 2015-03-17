@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 public class PerformanceToAvro extends ComponentTestCase {
 	private final int bodyLength = 1000;
 
-	private final int messageCount = 20 * 1000;
+	private final int messageCount = 10 * 1000;
 
 	@Test public void runCompareTest() throws IOException, InterruptedException {
 		List<Message> avroMessages = new ArrayList<>();

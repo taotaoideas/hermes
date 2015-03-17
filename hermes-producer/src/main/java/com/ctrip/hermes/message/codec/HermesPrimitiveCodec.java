@@ -46,10 +46,13 @@ public class HermesPrimitiveCodec {
 	}
 
 	public boolean readBoolean() {
-		byte b = m_buf.get();
-		return (b & 0x1) == 1;
+		byte type = m_buf.get();
+		return readBoolean0(type);
 	}
 
+	private boolean readBoolean0(byte b) {
+		return (b & 0x1) == 1;
+	}
 	public void writeBytes(byte[] bytes) {
 		if (null == bytes) {
 			writeNull();
@@ -62,14 +65,19 @@ public class HermesPrimitiveCodec {
 	}
 
 	public byte[] readBytes() {
-		byte[] bytes = null;
 		byte type = m_buf.get();
 
 		if (Prefix.NULL != type) {
-			int length = m_buf.getInt();
-			bytes = new byte[length];
-			m_buf.get(bytes);
+			return readBytes0();
 		}
+		return null;
+	}
+
+	private byte[] readBytes0() {
+		byte[] bytes;
+		int length = m_buf.getInt();
+		bytes = new byte[length];
+		m_buf.get(bytes);
 		return bytes;
 	}
 
@@ -85,15 +93,19 @@ public class HermesPrimitiveCodec {
 	}
 
 	public String readString() {
-		String result = null;
 		byte type = m_buf.get();
-
 		if (Prefix.NULL != type) {
-			int strLen = m_buf.getInt();
-			byte[] strBytes = new byte[strLen];
-			m_buf.get(strBytes);
-			result = new String(strBytes, Charsets.UTF_8);
+			return readString0();
 		}
+		return null;
+	}
+
+	private String readString0() {
+		String result;
+		int strLen = m_buf.getInt();
+		byte[] strBytes = new byte[strLen];
+		m_buf.get(strBytes);
+		result = new String(strBytes, Charsets.UTF_8);
 		return result;
 	}
 
@@ -136,8 +148,6 @@ public class HermesPrimitiveCodec {
 
 			// only write [[element type]...] if size > 0
 			if (list.size() > 0) {
-				Object clazz = list.get(0);
-				m_buf.put(ClassToByte(clazz));
 				for (Object o : list) {
 					writeObject(o);
 				}
@@ -150,26 +160,26 @@ public class HermesPrimitiveCodec {
 	 */
 	public List readList() {
 		byte type = m_buf.get();
-		if (Prefix.NULL == type) {
-			return null;
+		if (Prefix.NULL != type) {
+			return readList0();
 		} else {
-			int length = m_buf.getInt();
-			// return ArrayList as default
-			List result = new ArrayList<>();
-			if (length > 0) {
-				byte listType = m_buf.get();
-
-				Object clazz = byteToClass(listType);
-
-				for (int i = 0; i < length; i++) {
-					result.add(readObject(clazz));
-				}
-			}
-			return result;
+			return null;
 		}
 	}
 
-	public void writeMap(Map map) {
+	private List readList0() {
+		int length = m_buf.getInt();
+		// return ArrayList as default
+		List result = new ArrayList<>();
+		if (length > 0) {
+			for (int i = 0; i < length; i++) {
+				result.add(readObject());
+			}
+		}
+		return result;
+	}
+
+	public void writeMap(Map<?, ?> map) {
 		if (null == map) {
 			writeNull();
 		} else {
@@ -178,21 +188,12 @@ public class HermesPrimitiveCodec {
 
 			// only write [[key element][value element]...] if size > 0
 			if (map.size() > 0) {
-				Object key = null, value = null;
-				for (Object oneKey : map.keySet()) {
-					key = oneKey;
-					value = map.get(oneKey);
-					break;
-				}
-
-				// write [key element][value element]
-				m_buf.put(ClassToByte(key));
-				m_buf.put(ClassToByte(value));
-
-				for (Object tempKey : map.keySet()) {
-					Object tempValue = map.get(tempKey);
-					writeObject(tempKey);
-					writeObject(tempValue);
+				for (Map.Entry<?, ?> entry : map.entrySet()) {
+					// write [key element][value element][...][...]
+					Object key = entry.getKey();
+					Object value = entry.getValue();
+					writeObject(key);
+					writeObject(value);
 				}
 			}
 		}
@@ -206,21 +207,20 @@ public class HermesPrimitiveCodec {
 		if (Prefix.NULL == type) {
 			return null;
 		} else {
-			int length = m_buf.getInt();
-			// return HashMap as default
-			Map result = new HashMap();
-			if (length > 0) {
-				byte keyType = m_buf.get();
-				byte valueType = m_buf.get();
-				Object keyClazz = byteToClass(keyType);
-				Object valueClazz = byteToClass(valueType);
-
-				for (int i = 0; i < length; i++) {
-					result.put(readObject(keyClazz), readObject(valueClazz));
-				}
-			}
-			return result;
+			return readMap0();
 		}
+	}
+
+	private Map readMap0() {
+		int length = m_buf.getInt();
+		// return HashMap as default
+		Map result = new HashMap();
+		if (length > 0) {
+			for (int i = 0; i < length; i++) {
+				result.put(readObject(), readObject());
+			}
+		}
+		return result;
 	}
 
 	public void writeNull() {
@@ -266,27 +266,28 @@ public class HermesPrimitiveCodec {
 		}
 	}
 
-	private Object readObject(Object clazz) {
-		if (null == clazz) {
+	private Object readObject() {
+		byte type = m_buf.get();
+		if (type == Prefix.NULL) {
 			return null;
-		} else if (clazz instanceof Boolean) {
-			return readBoolean();
-		} else if (clazz instanceof byte[]) {
-			return readChar();
-		} else if (clazz.equals(Character.class)) {
-			return readChar();
-		} else if (clazz.equals(Integer.class)) {
-			return readInt();
-		} else if (clazz.equals(Long.class)) {
-			return readLong();
-		} else if (clazz.equals(String.class)) {
-			return readString();
-		} else if (clazz.equals(List.class)) {
-			return readList();
-		} else if (clazz.equals(Map.class)) {
-			return readMap();
+		} else if (type == Prefix.TRUE || type == Prefix.FALSE) {
+			return readBoolean0(type);
+		} else if (type == Prefix.BYTES) {
+			return readBytes0();
+		} else if (type == Prefix.CHAR) {
+			return m_buf.getChar();
+		} else if (type == Prefix.INT) {
+			return m_buf.getInt();
+		} else if (type == Prefix.LONG) {
+			return m_buf.getLong();
+		} else if (type == Prefix.STRING) {
+			return readString0();
+		} else if (type == Prefix.LIST) {
+			return readList0();
+		} else if (type == Prefix.MAP) {
+			return readMap0();
 		} else {
-			throw new RuntimeException("Unsupported class type: " + clazz.getClass());
+			throw new RuntimeException("Unsupported class type: " + type);
 		}
 	}
 
