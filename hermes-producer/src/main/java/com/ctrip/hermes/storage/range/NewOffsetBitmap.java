@@ -18,6 +18,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
+import com.googlecode.javaewah.IntIterator;
 
 /**
  * 每次batch将多个offset存放于各独立的bitmap中。
@@ -354,9 +355,16 @@ public class NewOffsetBitmap {
     }
 
     public static void main(String[] args) {
-        EWAHCompressedBitmap a = EWAHCompressedBitmap.bitmapOf(1,2);
-        EWAHCompressedBitmap b = EWAHCompressedBitmap.bitmapOf(2, 3);
-        EWAHCompressedBitmap c = EWAHCompressedBitmap.bitmapOf(4);
-        System.out.println(a.or(b.or(c)));
+        EWAHCompressedBitmap b = EWAHCompressedBitmap.bitmapOf();
+
+        b.set(1000);
+        b.set(100000);
+
+        IntIterator it = b.reverseIntIterator();
+
+
+        while(it.hasNext())  {
+            System.out.println(it.next());
+        }
     }
 }

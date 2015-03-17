@@ -37,7 +37,7 @@
 			<artifactId>netty-all</artifactId>
 			<version>4.0.25.Final</version>
 		</dependency>
-		<!--bitmap index: https://code.google.com/p/javaewah/ -->
+		<!--bitmap index: https://github.com/lemire/javaewah -->
 		<dependency>
 			<groupId>com.googlecode.javaewah</groupId>
 			<artifactId>JavaEWAH</artifactId>
@@ -54,6 +54,14 @@
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.10</artifactId>
 			<version>0.8.2.0</version>
+		</dependency>
+
+		<!--avro-->
+		<dependency>
+			<groupId>org.apache.avro</groupId>
+			<artifactId>avro</artifactId>
+			<version>1.7.7</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -136,6 +144,25 @@
 							<manifest><![CDATA[
                         ${basedir}/src/main/resources/META-INF/dal/model/meta-manifest.xml,
                      ]]></manifest>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!--avro plugin-->
+			<plugin>
+				<groupId>org.apache.avro</groupId>
+				<artifactId>avro-maven-plugin</artifactId>
+				<version>1.7.7</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>schema</goal>
+						</goals>
+						<configuration>
+							<sourceDirectory>${project.basedir}/src/test/resources/com/ctrip/hermes/avro</sourceDirectory>
+							<outputDirectory>${project.basedir}/src/test/java</outputDirectory>
+							<stringType>String</stringType>
 						</configuration>
 					</execution>
 				</executions>
