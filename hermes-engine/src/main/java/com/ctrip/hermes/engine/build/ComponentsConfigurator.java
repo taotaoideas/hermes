@@ -8,6 +8,7 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
+import com.ctrip.hermes.channel.LocalMessageChannelManager;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.ConsumerPipeline;
@@ -42,7 +43,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(ValveRegistry.class, LOCAL_CONSUMER));
 
 		all.add(C(ConsumerBootstrap.class, LocalConsumerBootstrap.ID, LocalConsumerBootstrap.class) //
-		      .req(MessageChannelManager.class) //
+		      .req(MessageChannelManager.class, LocalMessageChannelManager.ID) //
 		      .req(Pipeline.class, LOCAL_CONSUMER));
 
 		all.add(C(Scanner.class, DefaultScanner.class));

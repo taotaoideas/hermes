@@ -1,4 +1,4 @@
-package com.ctrip.hermes.storage.storage.mysql;
+package com.ctrip.hermes.broker.storage.mysql;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -22,11 +22,11 @@ public class MysqlMessageStorage implements MessageStorage {
 
 	private Connection m_conn;
 
-	private String m_id;
+	private String m_table;
 
-	public MysqlMessageStorage(Connection conn, String id) {
+	public MysqlMessageStorage(Connection conn, String table) {
 		m_conn = conn;
-		m_id = id;
+		m_table = table;
 	}
 
 	public void append(List<Record> msgs) throws StorageException {
@@ -38,7 +38,7 @@ public class MysqlMessageStorage implements MessageStorage {
 	}
 
 	private void doAppend(List<Record> msgs) throws IOException, SQLException {
-		PreparedStatement stmt = m_conn.prepareStatement("insert into msg (c) values (?)",
+		PreparedStatement stmt = m_conn.prepareStatement(String.format("insert into %s (body) values (?)", m_table),
 		      Statement.RETURN_GENERATED_KEYS);
 		for (Record m : msgs) {
 			stmt.setBlob(1, new ByteArrayInputStream(m.getContent()));
@@ -50,7 +50,7 @@ public class MysqlMessageStorage implements MessageStorage {
 		ResultSet rs = stmt.getGeneratedKeys();
 		int i = 0;
 		while (rs.next()) {
-			msgs.get(i).setOffset(new Offset(m_id, rs.getLong(1)));
+			msgs.get(i).setOffset(new Offset(m_table, rs.getLong(1)));
 		}
 
 	}
@@ -60,7 +60,7 @@ public class MysqlMessageStorage implements MessageStorage {
 
 		while (rs.next()) {
 			Record msg = new Record();
-			msg.setOffset(new Offset(m_id, rs.getLong(1)));
+			msg.setOffset(new Offset(m_table, rs.getLong(1)));
 			msg.setContent(rs.getBytes(2));
 
 			result.add(msg);
@@ -77,8 +77,8 @@ public class MysqlMessageStorage implements MessageStorage {
 
 			@Override
 			public List<Record> read(int batchSize) throws Exception {
-				PreparedStatement stmt = m_conn
-				      .prepareStatement("select id,c from msg where id >= ? order by id asc limit ?");
+				PreparedStatement stmt = m_conn.prepareStatement(String.format(
+				      "select id,body from %s where id >= ? order by id asc limit ?", m_table));
 				stmt.setLong(1, m_offset);
 				stmt.setInt(2, batchSize);
 
@@ -97,7 +97,7 @@ public class MysqlMessageStorage implements MessageStorage {
 
 			@Override
 			public void seek(long offset) {
-
+				m_offset = offset;
 			}
 
 			@Override
@@ -108,8 +108,8 @@ public class MysqlMessageStorage implements MessageStorage {
 	}
 
 	public List<Record> read(Range range) throws StorageException {
-		String sqlTpl = "select id,c from msg where id  >= ? and id <= ?";
-		String sql = String.format(sqlTpl, range.getStartOffset().getOffset(), range.getEndOffset().getOffset());
+		String sqlTpl = "select id,body from %s where id  >= %s and id <= %s";
+		String sql = String.format(sqlTpl, m_table, range.getStartOffset().getOffset(), range.getEndOffset().getOffset());
 
 		try {
 			ResultSet rs = m_conn.createStatement().executeQuery(sql);
@@ -121,13 +121,20 @@ public class MysqlMessageStorage implements MessageStorage {
 	}
 
 	public String getId() {
-		return m_id;
+		return m_table;
 	}
 
 	@Override
 	public Record top() {
-		// TODO
-		throw new UnsupportedOperationException();
+		PreparedStatement stmt;
+		try {
+			stmt = m_conn.prepareStatement(String.format("select id,body from %s order by id desc limit 1", m_table));
+			List<Record> msgs = rsToMessage(stmt.executeQuery());
+			return CollectionUtil.first(msgs);
+		} catch (SQLException e) {
+			throw new StorageException("", e);
+		}
+
 	}
 
 }

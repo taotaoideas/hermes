@@ -4,8 +4,8 @@ import com.google.common.util.concurrent.SettableFuture;
 
 public interface FutureManager {
 
-	<T> SettableFuture<T> newFuture(int correlationId);
+	<T> SettableFuture<T> newFuture(long correlationId);
 
-	void futureDone(int correlationId, Object result);
+	void futureDone(long correlationId, Object result);
 
 }

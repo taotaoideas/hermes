@@ -6,16 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
 import kafka.common.ErrorMapping;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
+import kafka.consumer.ConsumerIterator;
+import kafka.consumer.ConsumerTimeoutException;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.FetchResponse;
 import kafka.javaapi.PartitionMetadata;
@@ -30,6 +28,7 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.log4j.Logger;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.storage.message.Record;
@@ -38,9 +37,10 @@ import com.ctrip.hermes.storage.storage.Browser;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
-import com.google.common.collect.ImmutableMap;
 
 public class KafkaMessageStorage implements MessageStorage {
+
+	private static final Logger m_logger = Logger.getLogger(KafkaMessageStorage.class);
 
 	private String m_topic;
 
@@ -50,13 +50,11 @@ public class KafkaMessageStorage implements MessageStorage {
 
 	private ConsumerConnector m_consumer;
 
-	private ExecutorService m_executor;
-
-	private int m_consumer_threads = 1;
+	private static final int CONSUMER_THREADS = 1;
 
 	private Record m_last_msg;
 
-	private Map<String, List<KafkaStream<byte[], byte[]>>> m_topicMessageStreams;
+	private KafkaStream<byte[], byte[]> m_topicMessageStream;
 
 	private List<Pair<String, Integer>> brokers = new ArrayList<>();
 
@@ -75,8 +73,10 @@ public class KafkaMessageStorage implements MessageStorage {
 		}
 
 		m_consumer = Consumer.createJavaConsumerConnector(new ConsumerConfig(cc));
-		m_topicMessageStreams = m_consumer.createMessageStreams(ImmutableMap.of(m_topic, m_consumer_threads));
-		m_executor = Executors.newFixedThreadPool(m_consumer_threads);
+		Map<String, Integer> topicCount = new HashMap<>();
+		topicCount.put(m_topic, CONSUMER_THREADS);
+		Map<String, List<KafkaStream<byte[], byte[]>>> topicMessageStreams = m_consumer.createMessageStreams(topicCount);
+		m_topicMessageStream = topicMessageStreams.get(m_topic).get(0);
 		m_consumers = new HashMap<>();
 
 		String[] brokerList = null;
@@ -90,22 +90,24 @@ public class KafkaMessageStorage implements MessageStorage {
 		TopicMetadata topicMetadata = SimpleConsumerUtil
 		      .getTopicMetadata(brokers.get(0).getKey(), brokers.get(0).getValue(), m_topic).topicsMetadata().get(0);
 		if (topicMetadata.topic() == null) {
-			System.out.println("Can't find topic. Exiting");
+			m_logger.warn(String.format("Can't find topic %s. Exiting", m_topic));
 			return;
 		}
 		if (topicMetadata.partitionsMetadata().size() == 0) {
-			System.out.println("Can't find partition for topic. Exiting");
+			m_logger.warn(String.format("Can't find partition for topic %s. Exiting", m_topic));
 			return;
 		}
 
 		for (PartitionMetadata partitionData : topicMetadata.partitionsMetadata()) {
 			PartitionMetadata metadata = SimpleConsumerUtil.findLeader(brokers, m_topic, partitionData.partitionId());
 			if (metadata == null) {
-				System.out.println("Can't find metadata for Topic and Partition. Exiting");
+				m_logger.warn(String.format("Can't find metadata for topic %s and partition %s. Exiting", m_topic,
+				      partitionData.partitionId()));
 				return;
 			}
 			if (metadata.leader() == null) {
-				System.out.println("Can't find Leader for Topic and Partition. Exiting");
+				m_logger.warn(String.format("Can't find leader for topic %s and partition %s. Exiting", m_topic,
+				      partitionData.partitionId()));
 				return;
 			}
 			String leadBroker = metadata.leader().host();
@@ -139,50 +141,42 @@ public class KafkaMessageStorage implements MessageStorage {
 	@Override
 	public Browser<Record> createBrowser(long offset) {
 		// FIXME unsupport offset still
-		return new KafkaMessageBrowser();
+		return new KafkaMessageBrowser(m_topicMessageStream);
 	}
 
 	class KafkaMessageBrowser implements Browser<Record> {
 
 		private long m_nextReadIdx;
 
-		public KafkaMessageBrowser() {
+		private ConsumerIterator<byte[], byte[]> topicStreamIterator;
+
+		public KafkaMessageBrowser(KafkaStream<byte[], byte[]> topicMessageStream) {
+			if (topicMessageStream != null)
+				topicStreamIterator = topicMessageStream.iterator();
 		}
 
 		@Override
 		public synchronized List<Record> read(final int batchSize) {
-			final List<Record> result = new CopyOnWriteArrayList<>();
-			List<KafkaStream<byte[], byte[]>> streams = m_topicMessageStreams.get(m_topic);
-			final CountDownLatch latch = new CountDownLatch(m_consumer_threads);
-			for (final KafkaStream<byte[], byte[]> stream : streams) {
-				m_executor.submit(new Runnable() {
-					public void run() {
-						try {
-							for (MessageAndMetadata<byte[], byte[]> msgAndMetadata : stream) {
-								if (result.size() == batchSize) {
-									break;
-								}
-								Record msg = new Record();
-								msg.setContent(msgAndMetadata.message());
-								msg.setOffset(new Offset(String.valueOf(msgAndMetadata.partition()), msgAndMetadata.offset()));
-								msg.setPartition(String.valueOf(msgAndMetadata.partition()));
-								m_nextReadIdx = msgAndMetadata.offset();
-								result.add(msg);
-								m_last_msg = msg;
-								if (result.size() == batchSize) {
-									break;
-								}
-							}
-						} finally {
-							latch.countDown();
-						}
-					}
-				});
-			}
+			List<Record> result = new ArrayList<>();
 			try {
-				latch.await();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				if (topicStreamIterator == null || topicStreamIterator.isEmpty())
+					return result;
+
+				while (topicStreamIterator.hasNext()) {
+					MessageAndMetadata<byte[], byte[]> msgAndMetadata = topicStreamIterator.next();
+					Record msg = new Record();
+					msg.setContent(msgAndMetadata.message());
+					msg.setOffset(new Offset(String.valueOf(msgAndMetadata.partition()), msgAndMetadata.offset()));
+					msg.setPartition(String.valueOf(msgAndMetadata.partition()));
+					m_nextReadIdx = msgAndMetadata.offset();
+					result.add(msg);
+					m_last_msg = msg;
+					if (result.size() == batchSize) {
+						break;
+					}
+				}
+			} catch (ConsumerTimeoutException e) {
+				return result;
 			}
 			return result;
 		}
@@ -204,7 +198,7 @@ public class KafkaMessageStorage implements MessageStorage {
 		List<Record> result = new ArrayList<>();
 		SimpleConsumer consumer = m_consumers.get(Integer.parseInt(range.getId()));
 		if (consumer == null) {
-			System.out.println("Wrong range Id: " + range.getId());
+			m_logger.warn(String.format("Wrong range Id: %s", range.getId()));
 			return result;
 		}
 
@@ -217,7 +211,7 @@ public class KafkaMessageStorage implements MessageStorage {
 			if (fetchResponse.hasError()) {
 				numErrors++;
 				short code = fetchResponse.errorCode(m_topic, Integer.parseInt(range.getId()));
-				System.out.println("Error fetching data Reason: " + code);
+				m_logger.warn("Error fetching data Reason: " + code);
 				if (numErrors > 5)
 					break;
 				if (code == ErrorMapping.OffsetOutOfRangeCode()) {
@@ -243,7 +237,7 @@ public class KafkaMessageStorage implements MessageStorage {
 			for (MessageAndOffset messageAndOffset : messageSet) {
 				long currentOffset = messageAndOffset.offset();
 				if (currentOffset < nextReadIdx) {
-					System.out.println("Found an old offset: " + currentOffset + " Expecting: " + nextReadIdx);
+					m_logger.debug(String.format("Found an old offset: %s Expecting: %s", currentOffset, nextReadIdx));
 					continue;
 				}
 				nextReadIdx = messageAndOffset.nextOffset();
@@ -272,4 +266,5 @@ public class KafkaMessageStorage implements MessageStorage {
 	public String getId() {
 		return m_topic;
 	}
+
 }

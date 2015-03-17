@@ -8,6 +8,7 @@ public interface ConsumerBootstrap {
 
 	public void startConsumer(Subscriber subscriber);
 
-	public void deliverMessage(int correlationId, List<StoredMessage<byte[]>> msgs);
+	// TODO remove this method and move to some handler return from startConsumer()
+	public void deliverMessage(long correlationId, List<StoredMessage<byte[]>> msgs);
 
 }

@@ -45,6 +45,11 @@ public class HermesPrimitiveCodec {
 		m_buf.put(b ? Prefix.TRUE : Prefix.FALSE);
 	}
 
+	public boolean readBoolean() {
+		byte b = m_buf.get();
+		return (b & 0x1) == 1;
+	}
+
 	public void writeBytes(byte[] bytes) {
 		if (null == bytes) {
 			writeNull();
@@ -95,11 +100,6 @@ public class HermesPrimitiveCodec {
 	public void writeInt(int i) {
 		m_buf.put(Prefix.INT);
 		m_buf.putInt(i);
-	}
-
-	public boolean readBoolean() {
-		byte b = m_buf.get();
-		return (b & 0x1) == 1;
 	}
 
 	public int readInt() {
@@ -192,7 +192,6 @@ public class HermesPrimitiveCodec {
 				m_buf.put(ClassToByte(key));
 				m_buf.put(ClassToByte(value));
 
-				// todo: change to for(Map.entrySet()) loop
 				for (Object tempKey : map.keySet()) {
 					Object tempValue = map.get(tempKey);
 					writeObject(tempKey);
@@ -373,13 +372,11 @@ public class HermesPrimitiveCodec {
 
 	public static final int BOOLEAN_LENGTH = 1;
 
-	public static final int CHAR_LENGTH = 2;
+	public static final int CHAR_LENGTH = 3;
 
-	public static final int INT_LENGTH = 4;
+	public static final int INT_LENGTH = 5;
 
 	public static final int LONG_LENGTH = 9;
-
-	public static final int STRING_LENGTH = -1;
 
 	private static int calBytesLength(byte[] bytes) {
 		return 1 + 4 + bytes.length;
@@ -400,7 +397,7 @@ public class HermesPrimitiveCodec {
 		int size = 0;
 		size += 1; // Prefix.String
 		size += 4; // int; s.getBytes().length
-		size += s.getBytes().length;
+		size += s.getBytes(Charsets.UTF_8).length;
 		return size;
 	}
 
@@ -408,6 +405,7 @@ public class HermesPrimitiveCodec {
 		int size = 0;
 		size += 1;  // Prefix.Map
 		size += 4;  // Int: map.size()
+		size += 2;  // key element and value element.
 
 		for (Object k : map.keySet()) {
 			int keyLength = calLength(k);

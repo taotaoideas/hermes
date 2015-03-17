@@ -24,15 +24,15 @@ public class DefaultStoredMessageCodec implements StoredMessageCodec {
 	}
 
 	private void writeMsg(HermesPrimitiveCodec codec, StoredMessage<byte[]> msg) {
-		codec.writeObject(msg.getTopic());
-		codec.writeObject(msg.getKey());
-		codec.writeObject(msg.getPartition());
-		codec.writeObject(msg.isPriority());
-		codec.writeObject(msg.getBornTime());
+		codec.writeString(msg.getTopic());
+		codec.writeString(msg.getKey());
+		codec.writeString(msg.getPartition());
+		codec.writeBoolean(msg.isPriority());
+		codec.writeLong(msg.getBornTime());
 
-		codec.writeObject(msg.getProperties());
+		codec.writeMap(msg.getProperties());
 
-		codec.writeObject(msg.getBody());
+		codec.writeBytes(msg.getBody());
 
 		writeOffset(codec, msg.getAckOffset());
 		writeOffset(codec, msg.getOffset());
@@ -77,8 +77,8 @@ public class DefaultStoredMessageCodec implements StoredMessageCodec {
 		if (offset == null) {
 			codec.writeNull();
 		} else {
-			codec.writeObject(offset.getId());
-			codec.writeObject(offset.getOffset());
+			codec.writeString(offset.getId());
+			codec.writeLong(offset.getOffset());
 		}
 	}
 

@@ -2,23 +2,8 @@
 	<components>
 		<component>
 			<role>com.ctrip.hermes.consumer.Consumer</role>
-			<role-hint>8bb6ba27-e6a4-4a22-b5af-bcd34fd53b14</role-hint>
+			<role-hint>0a4c975e-30c2-4c45-bfbb-690ac1a0f6ee</role-hint>
 			<implementation>com.ctrip.hermes.example.demo.OrderNewConsumer1</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.consumer.Consumer</role>
-			<role-hint>95beb7b0-7396-4f59-9472-9c654c3ccd85</role-hint>
-			<implementation>com.ctrip.hermes.example.demo.OrderNewConsumer2A</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.consumer.Consumer</role>
-			<role-hint>3024e3bb-2ee6-4661-8ecc-7041565c955d</role-hint>
-			<implementation>com.ctrip.hermes.example.demo.OrderNewConsumer2B</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.consumer.Consumer</role>
-			<role-hint>68d190df-1401-45db-a40b-79884d1e6a00</role-hint>
-			<implementation>com.ctrip.hermes.example.demo.OrderUpdateConsumer1</implementation>
 		</component>
 	</components>
 </plexus>

@@ -1,10 +1,11 @@
-package com.ctrip.hermes.storage.storage.mysql;
+package com.ctrip.hermes.broker.storage.mysql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +22,14 @@ public class MysqlResendStorage implements ResendStorage {
 
 	private String m_table;
 
+	private String m_topic;
+
 	private Connection m_conn;
 
-	public MysqlResendStorage(Connection conn, String table) {
+	public MysqlResendStorage(Connection conn, String table, String topic) {
 		m_conn = conn;
 		m_table = table;
+		m_topic = topic;
 	}
 
 	@Override
@@ -38,13 +42,15 @@ public class MysqlResendStorage implements ResendStorage {
 	}
 
 	private void doAppend(List<Resend> resends) throws SQLException {
-		String sql = String.format("insert into %s (start, end, sid) values (?,?,?)", m_table);
+		String sql = String.format( //
+		      "insert into %s (start, end, priority, due) values (?,?,?,?)", m_table);
 		PreparedStatement stmt = m_conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		for (Resend resend : resends) {
 			Range r = resend.getRange();
 			stmt.setLong(1, r.getStartOffset().getOffset());
 			stmt.setLong(2, r.getEndOffset().getOffset());
-			stmt.setString(3, r.getId());
+			stmt.setInt(3, parsePriority(r.getId()));
+			stmt.setTimestamp(4, new Timestamp(resend.getDue()));
 
 			stmt.addBatch();
 		}
@@ -54,22 +60,28 @@ public class MysqlResendStorage implements ResendStorage {
 		ResultSet rs = stmt.getGeneratedKeys();
 		int i = 0;
 		while (rs.next()) {
-			resends.get(i).getRange().setOffset(new Offset(m_table, rs.getLong(1)));
+			resends.get(i).setOffset(new Offset(m_table, rs.getLong(1)));
 		}
+	}
+
+	private int parsePriority(String id) {
+		// TODO
+		return 0;
 	}
 
 	private List<Resend> rsToResend(ResultSet rs) throws SQLException {
 		List<Resend> result = new ArrayList<Resend>();
 
 		while (rs.next()) {
-			String id = rs.getString(4);
-			Offset storageOffset = new Offset(id, rs.getLong(1));
+			Offset storageOffset = new Offset(m_table, rs.getLong(1));
+			// TODO
+			String id = "msg_" + rs.getInt(4) + "_" + m_topic;
 			Offset start = new Offset(id, rs.getLong(2));
 			Offset end = new Offset(id, rs.getLong(3));
 			ContinuousRange r = new ContinuousRange(start, end);
-			r.setOffset(storageOffset);
 
-			Resend resend = new Resend(r, rs.getLong(4));
+			Resend resend = new Resend(r, rs.getTimestamp(5).getTime());
+			resend.setOffset(storageOffset);
 
 			result.add(resend);
 		}
@@ -85,8 +97,8 @@ public class MysqlResendStorage implements ResendStorage {
 
 			@Override
 			public List<Resend> read(int batchSize) throws Exception {
-				String sql = String.format("select id,start,end,sid,due from %s where id >= ? order by id asc limit ?",
-				      m_table);
+				String sql = String.format(
+				      "select id,start,end,priority,due from %s where id >= ? order by id asc limit ?", m_table);
 				PreparedStatement stmt = m_conn.prepareStatement(sql);
 				stmt.setLong(1, m_offset);
 				stmt.setInt(2, batchSize);
@@ -95,18 +107,17 @@ public class MysqlResendStorage implements ResendStorage {
 				updateOffset(resends);
 
 				return resends;
-
 			}
 
 			private void updateOffset(List<Resend> resends) {
 				if (CollectionUtil.notEmpty(resends)) {
-					m_offset = CollectionUtil.last(resends).getRange().getOffset().getOffset() + 1;
+					m_offset = CollectionUtil.last(resends).getOffset().getOffset() + 1;
 				}
 			}
 
 			@Override
 			public void seek(long offset) {
-
+				m_offset = offset;
 			}
 
 			@Override
@@ -129,8 +140,15 @@ public class MysqlResendStorage implements ResendStorage {
 
 	@Override
 	public Resend top() {
-		// TODO
-		throw new UnsupportedOperationException();
+		String sql = String.format("select id,start,end,priority,due from %s order by id desc limit 1", m_table);
+		PreparedStatement stmt;
+		try {
+			stmt = m_conn.prepareStatement(sql);
+			List<Resend> resends = rsToResend(stmt.executeQuery());
+			return CollectionUtil.first(resends);
+		} catch (SQLException e) {
+			throw new StorageException("", e);
+		}
 	}
 
 }

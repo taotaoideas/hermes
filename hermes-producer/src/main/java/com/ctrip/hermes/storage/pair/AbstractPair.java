@@ -113,21 +113,21 @@ public abstract class AbstractPair<T extends Locatable> implements StoragePair<T
 	}
 
 	@Override
-	public void waitForAck(List<Record> msgs) {
-		for (Record m : msgs) {
-			m_offsetHandler.startNewRange(new OffsetRecord(m.getOffset(), m.getOffset()));
+	public void waitForAck(List<Record> toBeDone) {
+		for (Record r : toBeDone) {
+			m_offsetHandler.startNewRange(new OffsetRecord(r.getOffset(), r.getOffset()));
 		}
 	}
 
 	@Override
-	public void waitForAck(List<Record> msgs, Offset offset) {
-		m_offsetHandler.startNewRange(new OffsetRecord(Lists.transform(msgs, new Function<Record, Offset>() {
+	public void waitForAck(List<Record> toBeDone, Offset toUpdate) {
+		m_offsetHandler.startNewRange(new OffsetRecord(Lists.transform(toBeDone, new Function<Record, Offset>() {
 
 			@Override
 			public Offset apply(Record m) {
 				return m.getOffset();
 			}
-		}), offset));
+		}), toUpdate));
 	}
 
 	public Storage<T> getMain() {

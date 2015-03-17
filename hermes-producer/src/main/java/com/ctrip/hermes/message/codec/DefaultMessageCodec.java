@@ -8,9 +8,11 @@ import com.ctrip.hermes.message.Message;
 
 public class DefaultMessageCodec implements MessageCodec {
 
-	@Inject private CodecManager m_codecManager;
+	@Inject
+	private CodecManager m_codecManager;
 
-	@Override public ByteBuffer encode(Message<?> msg) {
+	@Override
+	public ByteBuffer encode(Message<?> msg) {
 		Codec bodyCodec = m_codecManager.getCodec(msg.getTopic());
 		byte[] msgBody = bodyCodec.encode(msg.getBody());
 
@@ -22,7 +24,8 @@ public class DefaultMessageCodec implements MessageCodec {
 		return buf;
 	}
 
-	@Override public Message<byte[]> decode(ByteBuffer buf) {
+	@Override
+	public Message<byte[]> decode(ByteBuffer buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 		Message<byte[]> msg = read(codec);
 
@@ -59,11 +62,11 @@ public class DefaultMessageCodec implements MessageCodec {
 	public int sizeOf(byte[] body, Message<?> msg) {
 		// todo: calculate right size.
 		return HermesPrimitiveCodec.calLength(msg.getTopic()) +
-				HermesPrimitiveCodec.calLength(msg.getKey()) +
-				HermesPrimitiveCodec.calLength(msg.getPartition()) +
-				HermesPrimitiveCodec.calLength(msg.isPriority()) +
-				HermesPrimitiveCodec.calLength(msg.getBornTime()) +
-				HermesPrimitiveCodec.calLength(msg.getProperties()) +
-				HermesPrimitiveCodec.calLength(body) + 100;
+				  HermesPrimitiveCodec.calLength(msg.getKey()) +
+				  HermesPrimitiveCodec.calLength(msg.getPartition()) +
+				  HermesPrimitiveCodec.calLength(msg.isPriority()) +
+				  HermesPrimitiveCodec.calLength(msg.getBornTime()) +
+				  HermesPrimitiveCodec.calLength(msg.getProperties()) +
+				  HermesPrimitiveCodec.calLength(body) + 100;
 	}
 }
