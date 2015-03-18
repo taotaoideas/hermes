@@ -52,7 +52,7 @@ public class PerformanceToAvro extends ComponentTestCase {
 	}
 
 	private void runHermes(List<com.ctrip.hermes.message.Message<byte[]>> msgs) throws IOException {
-		MessageCodec msgCodec = lookup(MessageCodec.class);
+		DefaultMessageCodec msgCodec = (DefaultMessageCodec) lookup(MessageCodec.class);
 
 		ByteBuffer buf = ByteBuffer.allocateDirect(msgs.size() * msgCodec.sizeOf(msgs.get(0).getBody(), msgs.get(0)));
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
