@@ -5,8 +5,8 @@ import java.util.concurrent.Future;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.Pipeline;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.producer.Producer;
 
 public class DefaultProducer extends Producer {
@@ -19,10 +19,10 @@ public class DefaultProducer extends Producer {
 	}
 
 	class DefaultHolder implements Holder {
-		private Message<Object> m_msg;
+		private ProducerMessage<Object> m_msg;
 
 		public DefaultHolder(String topic, Object body) {
-			m_msg = new Message<Object>();
+			m_msg = new ProducerMessage<Object>();
 
 			m_msg.setTopic(topic);
 			m_msg.setBody(body);

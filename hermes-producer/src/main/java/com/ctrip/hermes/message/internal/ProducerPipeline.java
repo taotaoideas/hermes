@@ -5,10 +5,10 @@ import java.util.concurrent.Future;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.ProducerSinkManager;
 import com.ctrip.hermes.message.ValveRegistry;
 
@@ -19,10 +19,9 @@ public class ProducerPipeline implements Pipeline<Future<SendResult>> {
 	@Inject
 	private ProducerSinkManager m_sinkManager;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Future<SendResult> put(Object payload) {
-		Message<Object> msg = (Message<Object>) payload;
+		ProducerMessage<?> msg = (ProducerMessage<?>) payload;
 
 		String topic = msg.getTopic();
 		PipelineSink<Future<SendResult>> sink = m_sinkManager.getSink(topic);

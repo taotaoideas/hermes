@@ -19,9 +19,9 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.message.codec.StoredMessageCodec;
@@ -84,7 +84,7 @@ public class KafkaMessageSink implements PipelineSink<Future<SendResult>> {
 		// raw msg
 		ByteBuffer rawMsgBuf = (ByteBuffer) input;
 		rawMsgBuf.flip();
-		Message<byte[]> rawMsg = m_codec.decode(rawMsgBuf);
+		ProducerMessage<byte[]> rawMsg = m_codec.decode(rawMsgBuf);
 		// stored msg list
 		ByteBuffer storedMsg = m_storedCodec.encode(Arrays.asList(new StoredMessage<byte[]>(rawMsg)));
 		storedMsg.flip();

@@ -1,6 +1,5 @@
 package com.ctrip.hermes.local.resource;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 

@@ -2,7 +2,7 @@ package com.ctrip.hermes.consumer;
 
 import java.util.List;
 
-import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.remoting.CatConstants;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
@@ -14,11 +14,11 @@ import com.dianping.cat.message.spi.MessageTree;
 public abstract class BaseConsumer<T> implements Consumer<T> {
 
 	@Override
-	public void consume(List<StoredMessage<T>> msgs) {
+	public void consume(List<Message<T>> msgs) {
 		if (CollectionUtil.notEmpty(msgs)) {
 			String topic = msgs.get(0).getTopic();
 
-			for (StoredMessage<T> msg : msgs) {
+			for (Message<T> msg : msgs) {
 				Transaction t = Cat.newTransaction("Message.Consumed", topic);
 				MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
 				String rootMsgId = msg.getProperty(CatConstants.ROOT_MESSAGE_ID);
@@ -63,6 +63,6 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 		}
 	}
 
-	protected abstract void consume(StoredMessage<T> msg);
+	protected abstract void consume(Message<T> msg);
 
 }

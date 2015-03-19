@@ -16,7 +16,7 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Connector;
 import com.ctrip.hermes.producer.Producer;
@@ -115,8 +115,8 @@ public class OneBoxTest extends ComponentTestCase {
 		}
 
 		@Override
-		public void consume(List<StoredMessage<String>> msgs) {
-			for (StoredMessage<String> msg : msgs) {
+		public void consume(List<Message<String>> msgs) {
+			for (Message<String> msg : msgs) {
 				String body = msg.getBody();
 				System.out.println(m_id + "<<< " + body);
 				if (body.startsWith("NACK-")) {

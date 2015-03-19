@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.Message;
 
 public class ConsumerTest {
 
@@ -24,7 +24,7 @@ public class ConsumerTest {
 	public static class MockConsumer implements Consumer<Object> {
 
 		@Override
-		public void consume(List<StoredMessage<Object>> msgs) {
+		public void consume(List<Message<Object>> msgs) {
 		}
 
 	}

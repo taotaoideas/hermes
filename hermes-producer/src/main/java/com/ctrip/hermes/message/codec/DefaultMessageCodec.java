@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.ProducerMessage;
 
 public class DefaultMessageCodec implements MessageCodec {
 
@@ -12,7 +12,7 @@ public class DefaultMessageCodec implements MessageCodec {
 	private CodecManager m_codecManager;
 
 	@Override
-	public ByteBuffer encode(Message<?> msg) {
+	public ByteBuffer encode(ProducerMessage<?> msg) {
 		Codec bodyCodec = m_codecManager.getCodec(msg.getTopic());
 		byte[] msgBody = bodyCodec.encode(msg.getBody());
 
@@ -25,14 +25,14 @@ public class DefaultMessageCodec implements MessageCodec {
 	}
 
 	@Override
-	public Message<byte[]> decode(ByteBuffer buf) {
+	public ProducerMessage<byte[]> decode(ByteBuffer buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
-		Message<byte[]> msg = read(codec);
+		ProducerMessage<byte[]> msg = read(codec);
 
 		return msg;
 	}
 
-	void write(Message<?> msg, byte[] msgBody, HermesPrimitiveCodec codec) {
+	void write(ProducerMessage<?> msg, byte[] msgBody, HermesPrimitiveCodec codec) {
 		codec.writeString(msg.getTopic());
 		codec.writeString(msg.getKey());
 		codec.writeString(msg.getPartition());
@@ -45,8 +45,8 @@ public class DefaultMessageCodec implements MessageCodec {
 	}
 
 	@SuppressWarnings("unchecked")
-	Message<byte[]> read(HermesPrimitiveCodec codec) {
-		Message<byte[]> msg = new Message<>();
+	ProducerMessage<byte[]> read(HermesPrimitiveCodec codec) {
+		ProducerMessage<byte[]> msg = new ProducerMessage<>();
 
 		msg.setTopic(codec.readString());
 		msg.setKey(codec.readString());
@@ -60,7 +60,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		return msg;
 	}
 
-	int sizeOf(byte[] body, Message<?> msg) {
+	int sizeOf(byte[] body, ProducerMessage<?> msg) {
 		// todo: calculate right size.
 		return HermesPrimitiveCodec.calLength(msg.getTopic()) //
 		      + HermesPrimitiveCodec.calLength(msg.getKey()) //

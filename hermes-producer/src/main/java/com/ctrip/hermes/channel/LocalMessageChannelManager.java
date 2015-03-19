@@ -11,7 +11,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Triple;
 
-import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Record;
@@ -153,7 +153,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 		return new ProducerChannel() {
 
 			@Override
-			public List<SendResult> send(List<Message<byte[]>> msgs) {
+			public List<SendResult> send(List<ProducerMessage<byte[]>> msgs) {
 				List<SendResult> result = new ArrayList<SendResult>(msgs.size());
 				Transaction t = Cat.newTransaction("Receive", topic);
 
@@ -165,7 +165,7 @@ public class LocalMessageChannelManager implements MessageChannelManager, LogEna
 				try {
 
 					List<Record> records = new ArrayList<Record>();
-					for (com.ctrip.hermes.message.Message<byte[]> pMsg : msgs) {
+					for (com.ctrip.hermes.message.ProducerMessage<byte[]> pMsg : msgs) {
 						records.add(new Record(pMsg));
 					}
 

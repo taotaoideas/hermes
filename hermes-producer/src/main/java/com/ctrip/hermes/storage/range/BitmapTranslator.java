@@ -3,17 +3,10 @@ package com.ctrip.hermes.storage.range;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.storage.storage.Offset;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
 public class BitmapTranslator {
 
