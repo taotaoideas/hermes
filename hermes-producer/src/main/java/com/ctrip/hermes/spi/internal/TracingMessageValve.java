@@ -1,7 +1,7 @@
 package com.ctrip.hermes.spi.internal;
 
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.PipelineContext;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.remoting.CatConstants;
 import com.ctrip.hermes.spi.Valve;
 import com.dianping.cat.Cat;
@@ -16,7 +16,7 @@ public class TracingMessageValve implements Valve {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handle(PipelineContext<?> ctx, Object payload) {
-		Message<Object> msg = (Message<Object>) payload;
+		ProducerMessage<Object> msg = (ProducerMessage<Object>) payload;
 		String topic = msg.getTopic();
 
 		Transaction t = Cat.newTransaction("Message.Produced", topic);

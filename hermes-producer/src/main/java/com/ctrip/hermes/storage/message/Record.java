@@ -19,7 +19,7 @@ public class Record implements Locatable {
 
 	private Offset m_ackOffset;
 
-	public Record(com.ctrip.hermes.message.Message<byte[]> msg) {
+	public Record(com.ctrip.hermes.message.ProducerMessage<byte[]> msg) {
 		setContent(msg.getBody());
 		setPartition(msg.getPartition());
 		setPriority(msg.isPriority() ? 0 : 1);

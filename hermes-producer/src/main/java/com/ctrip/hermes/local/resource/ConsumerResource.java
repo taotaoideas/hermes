@@ -16,7 +16,11 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.unidal.lookup.ContainerLoader;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.channel.*;
+import com.ctrip.hermes.channel.ConsumerChannel;
+import com.ctrip.hermes.channel.ConsumerChannelHandler;
+import com.ctrip.hermes.channel.LocalMessageChannelManager;
+import com.ctrip.hermes.channel.MessageChannelManager;
+import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.local.MockConsumers;
 import com.ctrip.hermes.local.pojo.MockConsumer;
 import com.ctrip.hermes.local.pojo.MockConsumerGroup;

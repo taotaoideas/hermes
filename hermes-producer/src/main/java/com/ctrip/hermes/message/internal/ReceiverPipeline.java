@@ -3,10 +3,10 @@ package com.ctrip.hermes.message.internal;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.ValveRegistry;
 
 public class ReceiverPipeline implements Pipeline<Void> {
@@ -17,7 +17,7 @@ public class ReceiverPipeline implements Pipeline<Void> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Void put(Object payload) {
-		Pair<Message<byte[]>, PipelineSink<Void>> pair = (Pair<Message<byte[]>, PipelineSink<Void>>) payload;
+		Pair<ProducerMessage<byte[]>, PipelineSink<Void>> pair = (Pair<ProducerMessage<byte[]>, PipelineSink<Void>>) payload;
 
 		PipelineContext<Void> ctx = new DefaultPipelineContext<>(m_valveRegistry.getValveList(), pair.getValue());
 

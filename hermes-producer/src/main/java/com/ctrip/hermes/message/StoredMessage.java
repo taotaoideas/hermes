@@ -5,7 +5,7 @@ import java.util.Map;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
-public class StoredMessage<T> extends Message<T> {
+public class StoredMessage<T> extends ProducerMessage<T> implements Message<T> {
 
 	private boolean m_success = true;
 
@@ -20,7 +20,7 @@ public class StoredMessage<T> extends Message<T> {
 		setBody(body);
 	}
 
-	public StoredMessage(Message<T> msg) {
+	public StoredMessage(ProducerMessage<T> msg) {
 		super(msg);
 	}
 
@@ -55,6 +55,7 @@ public class StoredMessage<T> extends Message<T> {
 		return m_offset;
 	}
 
+	@Override
 	public void nack() {
 		m_success = false;
 	}

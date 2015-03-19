@@ -13,10 +13,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.engine.LocalConsumerBootstrap;
-import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.message.StoredMessage;
+import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.producer.Producer;
 
 public class PojoMessageTest extends ComponentTestCase {
@@ -31,8 +28,8 @@ public class PojoMessageTest extends ComponentTestCase {
 		Subscriber s = new Subscriber(topic, "group1", new Consumer<Person>() {
 
 			@Override
-			public void consume(List<StoredMessage<Person>> msgs) {
-				for (StoredMessage<Person> m : msgs) {
+			public void consume(List<Message<Person>> msgs) {
+				for (Message<Person> m : msgs) {
 					got.set(m.getBody());
 					latch.countDown();
 				}

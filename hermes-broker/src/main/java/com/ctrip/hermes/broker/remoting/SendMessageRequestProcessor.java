@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.ProducerChannel;
 import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandContext;
@@ -38,7 +38,7 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 		String topic = cmd.getHeader("topic");
 
 		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
-		List<Message<byte[]>> msgs = decode(cmd.getBody());
+		List<ProducerMessage<byte[]>> msgs = decode(cmd.getBody());
 		List<SendResult> results = channel.send(msgs);
 
 		ctx.write(new Command(CommandType.SendMessageResponse) //
@@ -47,9 +47,9 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 	}
 
-	private List<Message<byte[]>> decode(byte[] body) {
+	private List<ProducerMessage<byte[]>> decode(byte[] body) {
 		// TODO use netty bytebuffer
-		Message<byte[]> pMsg = m_msgCodec.decode(ByteBuffer.wrap(body));
+		ProducerMessage<byte[]> pMsg = m_msgCodec.decode(ByteBuffer.wrap(body));
 
 		return Arrays.asList(pMsg);
 	}

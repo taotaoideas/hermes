@@ -20,7 +20,7 @@ public class PerformanceToAvro extends ComponentTestCase {
 
 	@Test public void runCompareTest() throws IOException, InterruptedException {
 		List<Message> avroMessages = new ArrayList<>();
-		List<com.ctrip.hermes.message.Message<byte[]>> hermesMessages = new ArrayList<>();
+		List<com.ctrip.hermes.message.ProducerMessage<byte[]>> hermesMessages = new ArrayList<>();
 
 		for (int i = 0; i < messageCount; i++) {
 			String topic = "test.topic.a.topic.name." + i;
@@ -34,7 +34,7 @@ public class PerformanceToAvro extends ComponentTestCase {
 
 			avroMessages.add(new Message(topic, key, partition, new Date().getTime(), true, bf, properties));
 
-			com.ctrip.hermes.message.Message<byte[]> hermesMessage = new com.ctrip.hermes.message.Message<>();
+			com.ctrip.hermes.message.ProducerMessage<byte[]> hermesMessage = new com.ctrip.hermes.message.ProducerMessage<>();
 			hermesMessage.setTopic(topic);
 			hermesMessage.setKey(key);
 			hermesMessage.setPartition(partition);
@@ -51,20 +51,20 @@ public class PerformanceToAvro extends ComponentTestCase {
 		Thread.sleep(50);
 	}
 
-	private void runHermes(List<com.ctrip.hermes.message.Message<byte[]>> msgs) throws IOException {
+	private void runHermes(List<com.ctrip.hermes.message.ProducerMessage<byte[]>> msgs) throws IOException {
 		MessageCodec msgCodec = lookup(MessageCodec.class);
 
 		ByteBuffer buf = ByteBuffer.allocateDirect(msgs.size() * msgCodec.sizeOf(msgs.get(0).getBody(), msgs.get(0)));
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		long startTime = new Date().getTime();
-		for (com.ctrip.hermes.message.Message<byte[]> msg : msgs) {
+		for (com.ctrip.hermes.message.ProducerMessage<byte[]> msg : msgs) {
 			msgCodec.write(msg, msg.getBody(), codec);
 		}
 		long seEndTime = new Date().getTime();
 		long fileSize = buf.capacity(); // in bytes
 		codec.bufFlip();
-		List<com.ctrip.hermes.message.Message<byte[]>> outputMsgs = new ArrayList<>();
+		List<com.ctrip.hermes.message.ProducerMessage<byte[]>> outputMsgs = new ArrayList<>();
 		for (int i = 0; i < messageCount; i++) {
 			outputMsgs.add(msgCodec.read(codec));
 		}
@@ -74,13 +74,13 @@ public class PerformanceToAvro extends ComponentTestCase {
 		outputResult("[Hermes]\t", seEndTime - startTime, deEndTime - seEndTime, fileSize);
 	}
 
-	private void assertHermosListEquals(List<com.ctrip.hermes.message.Message<byte[]>> list1,
-			List<com.ctrip.hermes.message.Message<byte[]>> list2) {
+	private void assertHermosListEquals(List<com.ctrip.hermes.message.ProducerMessage<byte[]>> list1,
+			List<com.ctrip.hermes.message.ProducerMessage<byte[]>> list2) {
 		assertEquals(list1.size(), list2.size());
 
 		for (int i = 0; i < list1.size(); i++) {
-			com.ctrip.hermes.message.Message<byte[]> m1 = list1.get(i);
-			com.ctrip.hermes.message.Message<byte[]> m2 = list2.get(i);
+			com.ctrip.hermes.message.ProducerMessage<byte[]> m1 = list1.get(i);
+			com.ctrip.hermes.message.ProducerMessage<byte[]> m2 = list2.get(i);
 			assertEquals(m1.getTopic(), m2.getTopic());
 			assertEquals(m1.getKey(), m2.getKey());
 			assertEquals(m1.getPartition(), m2.getPartition());

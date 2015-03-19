@@ -18,9 +18,9 @@ import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.channel.ProducerChannel;
 import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.internal.DeliverPipeline;
 import com.ctrip.hermes.message.internal.ReceiverPipeline;
@@ -198,7 +198,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 		return new ProducerChannel() {
 
 			@Override
-			public List<SendResult> send(final List<Message<byte[]>> msgs) {
+			public List<SendResult> send(final List<ProducerMessage<byte[]>> msgs) {
 				List<SendResult> result = new ArrayList<SendResult>(msgs.size());
 
 				try {
@@ -207,11 +207,11 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 						@SuppressWarnings("unchecked")
 						@Override
 						public Void handle(PipelineContext<Void> ctx, Object payload) {
-							List<Message<byte[]>> sinkMsgs = (List<Message<byte[]>>) payload;
+							List<ProducerMessage<byte[]>> sinkMsgs = (List<ProducerMessage<byte[]>>) payload;
 
 							final List<Record> records = new ArrayList<Record>();
 							String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-							for (Message<byte[]> msg : sinkMsgs) {
+							for (ProducerMessage<byte[]> msg : sinkMsgs) {
 								Transaction t = Cat.newTransaction("Message.Received", topic);
 								MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
 
@@ -243,7 +243,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 				} catch (Throwable e) {
 					m_logger.error("", e);
 				} finally {
-					for (Message<byte[]> msg : msgs) {
+					for (ProducerMessage<byte[]> msg : msgs) {
 						SendResult r = new SendResult();
 						String msgId = (String) msg.getProperty(CatConstants.CURRENT_MESSAGE_ID);
 						r.setCatMessageId(msgId);

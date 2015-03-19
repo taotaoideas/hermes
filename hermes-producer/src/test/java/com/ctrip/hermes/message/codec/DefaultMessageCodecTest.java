@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.ProducerMessage;
 
 public class DefaultMessageCodecTest extends ComponentTestCase {
 
@@ -17,7 +17,7 @@ public class DefaultMessageCodecTest extends ComponentTestCase {
 		MessageCodec msgCodec = lookup(MessageCodec.class);
 
 		Pojo writePojo = new Pojo(UUID.randomUUID().toString(), 99);
-		Message<Pojo> writeMsg = new Message<>();
+		ProducerMessage<Pojo> writeMsg = new ProducerMessage<>();
 		writeMsg.setBody(writePojo);
 		writeMsg.setKey(UUID.randomUUID().toString());
 		writeMsg.setPartition(UUID.randomUUID().toString());
@@ -29,7 +29,7 @@ public class DefaultMessageCodecTest extends ComponentTestCase {
 		ByteBuffer buf = msgCodec.encode(writeMsg);
 		buf.flip();
 		
-		Message<byte[]> readMsg = msgCodec.decode(buf);
+		ProducerMessage<byte[]> readMsg = msgCodec.decode(buf);
 
 		assertEquals(writeMsg.getKey(), readMsg.getKey());
 		assertEquals(writeMsg.getPartition(), readMsg.getPartition());

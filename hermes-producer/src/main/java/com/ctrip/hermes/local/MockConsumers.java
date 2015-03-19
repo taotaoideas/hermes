@@ -7,7 +7,6 @@ import java.util.Random;
 
 import com.ctrip.hermes.local.pojo.MockConsumer;
 import com.ctrip.hermes.local.pojo.MockConsumerGroup;
-import com.ctrip.hermes.local.pojo.OutputMessage;
 import com.ctrip.hermes.message.StoredMessage;
 import com.google.common.collect.ArrayListMultimap;
 

@@ -1,6 +1,6 @@
 package com.ctrip.hermes.broker.mysql;
 
-import com.ctrip.hermes.message.Message;
+import com.ctrip.hermes.message.ProducerMessage;
 
 /**
  * wrap basic action to mysql.
