@@ -18,7 +18,8 @@ public class PerformanceToAvro extends ComponentTestCase {
 
 	private final int messageCount = 10 * 1000;
 
-	@Test public void runCompareTest() throws IOException, InterruptedException {
+	@Test
+	public void runCompareTest() throws IOException, InterruptedException {
 		List<Message> avroMessages = new ArrayList<>();
 		List<com.ctrip.hermes.message.ProducerMessage<byte[]>> hermesMessages = new ArrayList<>();
 
@@ -43,8 +44,8 @@ public class PerformanceToAvro extends ComponentTestCase {
 			hermesMessages.add(hermesMessage);
 		}
 
-		System.out.println("Initiation is done. Serialize [" + messageCount + "] Messages with message body length of " +
-				bodyLength + ", " + "priorities map<String, String> size of 100.");
+		System.out.println("Initiation is done. Serialize [" + messageCount + "] Messages with message body length of "
+		      + bodyLength + ", " + "priorities map<String, String> size of 100.");
 		runAvro(avroMessages);
 
 		runHermes(hermesMessages);
@@ -52,7 +53,7 @@ public class PerformanceToAvro extends ComponentTestCase {
 	}
 
 	private void runHermes(List<com.ctrip.hermes.message.ProducerMessage<byte[]>> msgs) throws IOException {
-		MessageCodec msgCodec = lookup(MessageCodec.class);
+		DefaultMessageCodec msgCodec = (DefaultMessageCodec) lookup(MessageCodec.class);
 
 		ByteBuffer buf = ByteBuffer.allocateDirect(msgs.size() * msgCodec.sizeOf(msgs.get(0).getBody(), msgs.get(0)));
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
@@ -75,7 +76,7 @@ public class PerformanceToAvro extends ComponentTestCase {
 	}
 
 	private void assertHermosListEquals(List<com.ctrip.hermes.message.ProducerMessage<byte[]>> list1,
-			List<com.ctrip.hermes.message.ProducerMessage<byte[]>> list2) {
+	      List<com.ctrip.hermes.message.ProducerMessage<byte[]>> list2) {
 		assertEquals(list1.size(), list2.size());
 
 		for (int i = 0; i < list1.size(); i++) {
@@ -142,15 +143,15 @@ public class PerformanceToAvro extends ComponentTestCase {
 			Map<java.lang.String, java.lang.String> map2 = m2.getProperties();
 			assertEquals(map1.size(), map2.size());
 
-			//			for (CharSequence key : map1.keySet()) {
-			//				assertEquals(map1.get(key), map2.get(key.toString()));
-			//			}
+			// for (CharSequence key : map1.keySet()) {
+			// assertEquals(map1.get(key), map2.get(key.toString()));
+			// }
 		}
 	}
 
 	private void outputResult(String type, long se, long de, long fileSize) {
 		System.out.println(String.format(type + " Serializing: %d(ms), Deserializing: %d(ms), Se-FileSize: %d(byte), "
-				+ "Size Per Message: %d(byte).", se, de, fileSize, fileSize / messageCount));
+		      + "Size Per Message: %d(byte).", se, de, fileSize, fileSize / messageCount));
 	}
 
 	private Map<String, Object> convertMap(Map<String, String> properties) {

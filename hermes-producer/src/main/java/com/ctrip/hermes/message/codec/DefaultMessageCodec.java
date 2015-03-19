@@ -32,7 +32,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		return msg;
 	}
 
-	public void write(ProducerMessage<?> msg, byte[] msgBody, HermesPrimitiveCodec codec) {
+	void write(ProducerMessage<?> msg, byte[] msgBody, HermesPrimitiveCodec codec) {
 		codec.writeString(msg.getTopic());
 		codec.writeString(msg.getKey());
 		codec.writeString(msg.getPartition());
@@ -44,7 +44,8 @@ public class DefaultMessageCodec implements MessageCodec {
 		codec.writeBytes(msgBody);
 	}
 
-	public ProducerMessage<byte[]> read(HermesPrimitiveCodec codec) {
+	@SuppressWarnings("unchecked")
+	ProducerMessage<byte[]> read(HermesPrimitiveCodec codec) {
 		ProducerMessage<byte[]> msg = new ProducerMessage<>();
 
 		msg.setTopic(codec.readString());
@@ -59,14 +60,14 @@ public class DefaultMessageCodec implements MessageCodec {
 		return msg;
 	}
 
-	public int sizeOf(byte[] body, ProducerMessage<?> msg) {
+	int sizeOf(byte[] body, ProducerMessage<?> msg) {
 		// todo: calculate right size.
-		return HermesPrimitiveCodec.calLength(msg.getTopic()) +
-				  HermesPrimitiveCodec.calLength(msg.getKey()) +
-				  HermesPrimitiveCodec.calLength(msg.getPartition()) +
-				  HermesPrimitiveCodec.calLength(msg.isPriority()) +
-				  HermesPrimitiveCodec.calLength(msg.getBornTime()) +
-				  HermesPrimitiveCodec.calLength(msg.getProperties()) +
-				  HermesPrimitiveCodec.calLength(body) + 100;
+		return HermesPrimitiveCodec.calLength(msg.getTopic()) //
+		      + HermesPrimitiveCodec.calLength(msg.getKey()) //
+		      + HermesPrimitiveCodec.calLength(msg.getPartition()) //
+		      + HermesPrimitiveCodec.calLength(msg.isPriority()) //
+		      + HermesPrimitiveCodec.calLength(msg.getBornTime()) //
+		      + HermesPrimitiveCodec.calLength(msg.getProperties()) //
+		      + HermesPrimitiveCodec.calLength(body) + 100;
 	}
 }
