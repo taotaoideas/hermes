@@ -1,17 +1,8 @@
 package com.ctrip.hermes.channel;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldPrepender;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -19,29 +10,23 @@ import java.util.concurrent.ConcurrentMap;
 import com.ctrip.hermes.remoting.command.Ack;
 import com.ctrip.hermes.remoting.command.AckAware;
 import com.ctrip.hermes.remoting.command.Command;
-import com.ctrip.hermes.remoting.netty.NettyDecoder;
-import com.ctrip.hermes.remoting.netty.NettyEncoder;
+import com.ctrip.hermes.remoting.command.CommandContext;
+import com.ctrip.hermes.remoting.command.CommandProcessorManager;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class RemoteEndpointChannel extends SimpleChannelInboundHandler<Command> implements EndpointChannel {
+public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<Command> implements EndpointChannel {
 	private ConcurrentMap<Long, AckAware<Ack>> m_pendingCommands = new ConcurrentHashMap<>();
 
-	private String m_host;
-
-	private int m_port;
-
 	private Channel m_channel;
+	
+	protected CommandProcessorManager m_cmdProcessorManager;
 
-	/**
-	 * @param connectionString
-	 */
-	public RemoteEndpointChannel(String host, int port) {
-		m_host = host;
-		m_port = port;
-	}
+	public NettyEndpointChannel(CommandProcessorManager cmdProcessorManager) {
+	   m_cmdProcessorManager = cmdProcessorManager;
+   }
 
 	/*
 	 * (non-Javadoc)
@@ -68,6 +53,8 @@ public class RemoteEndpointChannel extends SimpleChannelInboundHandler<Command> 
 				reqCommand.onAck((Ack) command);
 				m_pendingCommands.remove(correlationId);
 			}
+		} else {
+			m_cmdProcessorManager.offer(new CommandContext(command, this));
 		}
 
 	}
@@ -83,41 +70,4 @@ public class RemoteEndpointChannel extends SimpleChannelInboundHandler<Command> 
 		super.channelActive(ctx);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.channel.EndpointChannel#start()
-	 */
-	@Override
-	public void start() {
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-		try {
-			Bootstrap b = new Bootstrap();
-			b.group(workerGroup);
-			b.channel(NioSocketChannel.class);
-			b.option(ChannelOption.SO_KEEPALIVE, true);
-			b.handler(new ChannelInitializer<SocketChannel>() {
-				@Override
-				public void initChannel(SocketChannel ch) throws Exception {
-
-					ch.pipeline().addLast( //
-					      // TODO set max frame length
-					      new NettyDecoder(), //
-					      new LengthFieldPrepender(4), //
-					      new NettyEncoder(), //
-					      this);
-				}
-			});
-
-			b.connect(m_host, m_port).sync();
-			
-			// TODO check connected, otherwise reconnect
-
-		} catch (Exception e) {
-			// TODO
-			e.printStackTrace();
-		} finally {
-		}
-	}
 }

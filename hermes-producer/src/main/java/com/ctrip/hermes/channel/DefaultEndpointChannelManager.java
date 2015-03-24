@@ -3,13 +3,20 @@ package com.ctrip.hermes.channel;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.unidal.lookup.annotation.Inject;
+
 import com.ctrip.hermes.meta.entity.Endpoint;
+import com.ctrip.hermes.remoting.command.CommandProcessorManager;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
 public class DefaultEndpointChannelManager implements EndpointChannelManager {
+	
+	@Inject
+	private CommandProcessorManager m_cmdProcessorManager;
+	
 	private ConcurrentMap<Endpoint, EndpointChannel> channels = new ConcurrentHashMap<>();
 
 	/*
@@ -24,7 +31,7 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 			if (!channels.containsKey(endpoint)) {
 				synchronized (channels) {
 					if (!channels.containsKey(endpoint)) {
-						EndpointChannel channel = new RemoteEndpointChannel(endpoint.getHost(), endpoint.getPort());
+						EndpointChannel channel = new NettyClientEndpointChannel(endpoint.getHost(), endpoint.getPort(), m_cmdProcessorManager);
 						channel.start();
 						channels.put(endpoint, channel);
 					}

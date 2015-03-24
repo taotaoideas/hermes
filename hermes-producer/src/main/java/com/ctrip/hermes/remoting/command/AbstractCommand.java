@@ -39,6 +39,10 @@ public abstract class AbstractCommand implements Command {
 
 		return bytes;
 	}
+	
+	public void correlate(Command req) {
+		m_header.setCorrelationId(req.getHeader().getCorrelationId());
+	}
 
 	public abstract ByteBuffer doToByteBuffer();
 

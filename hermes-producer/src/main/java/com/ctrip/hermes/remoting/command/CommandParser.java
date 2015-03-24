@@ -12,6 +12,6 @@ public interface CommandParser {
 	 * @param frame
 	 * @return
 	 */
-	Object parse(ByteBuf frame);
+	Command parse(ByteBuf frame);
 
 }
