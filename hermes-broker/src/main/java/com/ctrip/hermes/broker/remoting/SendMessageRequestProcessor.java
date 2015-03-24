@@ -1,21 +1,19 @@
 package com.ctrip.hermes.broker.remoting;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.channel.MessageChannelManager;
-import com.ctrip.hermes.channel.ProducerChannel;
 import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.ProducerMessage;
-import com.ctrip.hermes.message.codec.MessageCodec;
-import com.ctrip.hermes.remoting.Command;
-import com.ctrip.hermes.remoting.CommandContext;
-import com.ctrip.hermes.remoting.CommandProcessor;
-import com.ctrip.hermes.remoting.CommandType;
+import com.ctrip.hermes.remoting.command.Command;
+import com.ctrip.hermes.remoting.command.CommandContext;
+import com.ctrip.hermes.remoting.command.CommandProcessor;
+import com.ctrip.hermes.remoting.command.CommandType;
+import com.ctrip.hermes.remoting.command.Header;
+import com.ctrip.hermes.remoting.command.SendMessageAckCommand;
 
 public class SendMessageRequestProcessor implements CommandProcessor {
 
@@ -24,34 +22,24 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 	@Inject
 	private MessageChannelManager m_channelManager;
 
-	@Inject
-	private MessageCodec m_msgCodec;
-
 	@Override
 	public List<CommandType> commandTypes() {
-		return Arrays.asList(CommandType.SendMessageRequest);
+		return Arrays.asList(CommandType.MESSAGE_SEND);
 	}
 
 	@Override
 	public void process(CommandContext ctx) {
-		Command cmd = ctx.getCommand();
-		String topic = cmd.getHeader("topic");
+		Command req = ctx.getCommand();
+		Header header = req.getHeader();
 
-		ProducerChannel channel = m_channelManager.getProducerChannel(topic);
-		List<ProducerMessage<byte[]>> msgs = decode(cmd.getBody());
-		List<SendResult> results = channel.send(msgs);
+		List<SendResult> results = Collections.emptyList();
 
-		ctx.write(new Command(CommandType.SendMessageResponse) //
-		      .setBody(JSON.toJSONBytes(results)) //
-		      .setCorrelationId(cmd.getCorrelationId()));
+		SendMessageAckCommand ack = new SendMessageAckCommand();
+		ack.correlate(req);
+		ack.setSendResult(results);
 
-	}
+		ctx.write(ack);
 
-	private List<ProducerMessage<byte[]>> decode(byte[] body) {
-		// TODO use netty bytebuffer
-		ProducerMessage<byte[]> pMsg = m_msgCodec.decode(ByteBuffer.wrap(body));
-
-		return Arrays.asList(pMsg);
 	}
 
 }
