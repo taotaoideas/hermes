@@ -9,6 +9,7 @@ import java.util.Map;
  */
 public enum CommandType {
 	MESSAGE_SEND(1), //
+	ACK_MESSAGE_SEND(2), //
 	;
 
 	private static Map<Integer, CommandType> m_types = new HashMap<Integer, CommandType>();

@@ -1,6 +1,6 @@
 package com.ctrip.hermes.remoting.command;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -9,8 +9,8 @@ import java.nio.ByteBuffer;
 public interface Command {
 	public Header getHeader();
 
-	public void parse(ByteBuffer buf, Header header);
+	public void parse(ByteBuf buf, Header header);
 
-	public ByteBuffer toByteBuffer();
+	public void toBytes(ByteBuf buf);
 
 }

@@ -1,11 +1,12 @@
 package com.ctrip.hermes.remoting.command;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.hermes.channel.SendResult;
+import com.ctrip.hermes.message.codec.HermesPrimitiveCodec;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -13,9 +14,21 @@ import com.ctrip.hermes.channel.SendResult;
  */
 public class SendMessageAckCommand extends AbstractCommand implements Ack {
 
+   public SendMessageAckCommand() {
+	   super(CommandType.ACK_MESSAGE_SEND);
+   }
+
 	private Map<Integer, Boolean> m_successes = new HashMap<>();
 
-	private List<SendResult> m_sendResult;
+	public void addResult(Integer msgSeq, boolean success) {
+		m_successes.put(msgSeq, success);
+	}
+
+	public void addResults(List<Integer> msgSeqs, boolean success) {
+		for (Integer seq : msgSeqs) {
+			m_successes.put(seq, success);
+		}
+	}
 
 	public boolean isSuccess(Integer msgSeqNo) {
 		if (m_successes.containsKey(msgSeqNo)) {
@@ -24,20 +37,17 @@ public class SendMessageAckCommand extends AbstractCommand implements Ack {
 		return false;
 	}
 
-	public void setSendResult(List<SendResult> sendResult) {
-		m_sendResult = sendResult;
+	@SuppressWarnings("unchecked")
+	@Override
+	public void parse0(ByteBuf buf) {
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		m_successes = codec.readMap();
 	}
 
 	@Override
-	public void doParse(ByteBuffer buf) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public ByteBuffer doToByteBuffer() {
-		// TODO Auto-generated method stub
-		return null;
+	public void toBytes0(ByteBuf buf) {
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		codec.writeMap(m_successes);
 	}
 
 }

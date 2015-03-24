@@ -1,12 +1,12 @@
 package com.ctrip.hermes.message.codec;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
 
 import com.ctrip.hermes.message.ProducerMessage;
 
 public interface MessageCodec {
 
-	public ByteBuffer encode(ProducerMessage<?> msg);
+	public void encode(ProducerMessage<?> msg, ByteBuf buf);
 
-	public ProducerMessage<byte[]> decode(ByteBuffer buf);
+	public ProducerMessage<?> decode(ByteBuf buf);
 }

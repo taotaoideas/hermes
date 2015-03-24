@@ -1,5 +1,7 @@
 package com.ctrip.hermes.remoting.command;
 
+import io.netty.buffer.ByteBuf;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -7,8 +9,12 @@ import java.nio.ByteBuffer;
  *
  */
 public abstract class AbstractCommand implements Command {
-	private Header m_header = new Header();
+	protected Header m_header = new Header();
 
+	public AbstractCommand(CommandType commandType){
+		m_header.setType(commandType);
+	}
+	
 	public Header getHeader() {
 		return m_header;
 	}
@@ -22,30 +28,22 @@ public abstract class AbstractCommand implements Command {
 	}
 
 	@Override
-	public void parse(ByteBuffer buf, Header header) {
+	public void parse(ByteBuf buf, Header header) {
 		m_header = header;
-		doParse(buf);
+		parse0(buf);
 	}
 
-	public ByteBuffer toByteBuffer() {
-		ByteBuffer headerBytes = m_header.toByteBuffer();
-		headerBytes.flip();
-		ByteBuffer bodyBytes = doToByteBuffer();
-		bodyBytes.flip();
-
-		ByteBuffer bytes = ByteBuffer.allocate(headerBytes.limit() + bodyBytes.limit());
-		bytes.put(headerBytes).put(bodyBytes);
-		bytes.flip();
-
-		return bytes;
+	public void toBytes(ByteBuf buf) {
+		m_header.toBytes(buf);
+		toBytes0(buf);
 	}
-	
+
 	public void correlate(Command req) {
 		m_header.setCorrelationId(req.getHeader().getCorrelationId());
 	}
 
-	public abstract ByteBuffer doToByteBuffer();
+	protected abstract void toBytes0(ByteBuf buf);
 
-	public abstract void doParse(ByteBuffer buf);
+	protected abstract void parse0(ByteBuf buf);
 
 }

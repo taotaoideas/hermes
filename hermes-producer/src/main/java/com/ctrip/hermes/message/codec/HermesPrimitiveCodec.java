@@ -1,6 +1,7 @@
 package com.ctrip.hermes.message.codec;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
+
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,23 +31,19 @@ import com.google.common.base.Charsets;
  */
 public class HermesPrimitiveCodec {
 
-	private ByteBuffer m_buf;
+	private ByteBuf m_buf;
 
-	public HermesPrimitiveCodec(ByteBuffer buf) {
+	public HermesPrimitiveCodec(ByteBuf buf) {
 		m_buf = buf;
 		m_buf.order(ByteOrder.BIG_ENDIAN);
 	}
 
-	public void bufFlip() {
-		m_buf.flip();
-	}
-
 	public void writeBoolean(boolean b) {
-		m_buf.put(b ? Prefix.TRUE : Prefix.FALSE);
+		m_buf.writeByte(b ? Prefix.TRUE : Prefix.FALSE);
 	}
 
 	public boolean readBoolean() {
-		byte type = m_buf.get();
+		byte type = m_buf.readByte();
 		return readBoolean0(type);
 	}
 
@@ -57,15 +54,15 @@ public class HermesPrimitiveCodec {
 		if (null == bytes) {
 			writeNull();
 		} else {
-			m_buf.put(Prefix.BYTES);
+			m_buf.writeByte(Prefix.BYTES);
 			int length = bytes.length;
-			m_buf.putInt(length);
-			m_buf.put(bytes);
+			m_buf.writeInt(length);
+			m_buf.writeBytes(bytes);
 		}
 	}
 
 	public byte[] readBytes() {
-		byte type = m_buf.get();
+		byte type = m_buf.readByte();
 
 		if (Prefix.NULL != type) {
 			return readBytes0();
@@ -75,9 +72,9 @@ public class HermesPrimitiveCodec {
 
 	private byte[] readBytes0() {
 		byte[] bytes;
-		int length = m_buf.getInt();
+		int length = m_buf.readInt();
 		bytes = new byte[length];
-		m_buf.get(bytes);
+		m_buf.readBytes(bytes);
 		return bytes;
 	}
 
@@ -85,15 +82,15 @@ public class HermesPrimitiveCodec {
 		if (null == str) {
 			writeNull();
 		} else {
-			m_buf.put(Prefix.STRING);
+			m_buf.writeByte(Prefix.STRING);
 			int length = str.getBytes().length;
-			m_buf.putInt(length);
-			m_buf.put(str.getBytes(Charsets.UTF_8));
+			m_buf.writeInt(length);
+			m_buf.writeBytes(str.getBytes(Charsets.UTF_8));
 		}
 	}
 
 	public String readString() {
-		byte type = m_buf.get();
+		byte type = m_buf.readByte();
 		if (Prefix.NULL != type) {
 			return readString0();
 		}
@@ -102,49 +99,49 @@ public class HermesPrimitiveCodec {
 
 	private String readString0() {
 		String result;
-		int strLen = m_buf.getInt();
+		int strLen = m_buf.readInt();
 		byte[] strBytes = new byte[strLen];
-		m_buf.get(strBytes);
+		m_buf.readBytes(strBytes);
 		result = new String(strBytes, Charsets.UTF_8);
 		return result;
 	}
 
 	public void writeInt(int i) {
-		m_buf.put(Prefix.INT);
-		m_buf.putInt(i);
+		m_buf.writeByte(Prefix.INT);
+		m_buf.writeInt(i);
 	}
 
 	public int readInt() {
-		m_buf.get();  // jump over Prefix.INT
-		return m_buf.getInt();
+		m_buf.readByte();  // jump over Prefix.INT
+		return m_buf.readInt();
 	}
 
 	public void writeChar(char c) {
-		m_buf.put(Prefix.CHAR);
-		m_buf.putChar(c);
+		m_buf.writeByte(Prefix.CHAR);
+		m_buf.writeChar(c);
 	}
 
 	public char readChar() {
-		m_buf.get(); // jump over Prefix.CHAR
-		return m_buf.getChar();
+		m_buf.readByte(); // jump over Prefix.CHAR
+		return m_buf.readChar();
 	}
 
 	public void writeLong(long v) {
-		m_buf.put(Prefix.LONG);
-		m_buf.putLong(v);
+		m_buf.writeByte(Prefix.LONG);
+		m_buf.writeLong(v);
 	}
 
 	public long readLong() {
-		m_buf.get(); // jump over Prefix.LONG
-		return m_buf.getLong();
+		m_buf.readByte(); // jump over Prefix.LONG
+		return m_buf.readLong();
 	}
 
 	public void writeList(List list) {
 		if (null == list) {
 			writeNull();
 		} else {
-			m_buf.put(Prefix.LIST);
-			m_buf.putInt(list.size());
+			m_buf.writeByte(Prefix.LIST);
+			m_buf.writeInt(list.size());
 
 			// only write [[element type]...] if size > 0
 			if (list.size() > 0) {
@@ -159,7 +156,7 @@ public class HermesPrimitiveCodec {
 	 * @return new ArrayList()
 	 */
 	public List readList() {
-		byte type = m_buf.get();
+		byte type = m_buf.readByte();
 		if (Prefix.NULL != type) {
 			return readList0();
 		} else {
@@ -168,7 +165,7 @@ public class HermesPrimitiveCodec {
 	}
 
 	private List readList0() {
-		int length = m_buf.getInt();
+		int length = m_buf.readInt();
 		// return ArrayList as default
 		List result = new ArrayList<>();
 		if (length > 0) {
@@ -183,8 +180,8 @@ public class HermesPrimitiveCodec {
 		if (null == map) {
 			writeNull();
 		} else {
-			m_buf.put(Prefix.MAP);
-			m_buf.putInt(map.size());
+			m_buf.writeByte(Prefix.MAP);
+			m_buf.writeInt(map.size());
 
 			// only write [[key element][value element]...] if size > 0
 			if (map.size() > 0) {
@@ -203,7 +200,7 @@ public class HermesPrimitiveCodec {
 	 * @return new HashMap()
 	 */
 	public Map readMap() {
-		byte type = m_buf.get();
+		byte type = m_buf.readByte();
 		if (Prefix.NULL == type) {
 			return null;
 		} else {
@@ -212,7 +209,7 @@ public class HermesPrimitiveCodec {
 	}
 
 	private Map readMap0() {
-		int length = m_buf.getInt();
+		int length = m_buf.readInt();
 		// return HashMap as default
 		Map result = new HashMap();
 		if (length > 0) {
@@ -224,21 +221,21 @@ public class HermesPrimitiveCodec {
 	}
 
 	public void writeNull() {
-		m_buf.put(Prefix.NULL);
+		m_buf.writeByte(Prefix.NULL);
 	}
 
 	public boolean isNextNull() {
-		m_buf.mark();
-		byte type = m_buf.get();
+		m_buf.markReaderIndex();
+		byte type = m_buf.readByte();
 		if (Prefix.NULL == type) {
 			return true;
 		} else {
-			m_buf.reset();
+			m_buf.resetReaderIndex();
 			return false;
 		}
 	}
 
-	public ByteBuffer getBuf() {
+	public ByteBuf getBuf() {
 		return m_buf;
 	}
 
@@ -267,7 +264,7 @@ public class HermesPrimitiveCodec {
 	}
 
 	private Object readObject() {
-		byte type = m_buf.get();
+		byte type = m_buf.readByte();
 		if (type == Prefix.NULL) {
 			return null;
 		} else if (type == Prefix.TRUE || type == Prefix.FALSE) {
@@ -275,11 +272,11 @@ public class HermesPrimitiveCodec {
 		} else if (type == Prefix.BYTES) {
 			return readBytes0();
 		} else if (type == Prefix.CHAR) {
-			return m_buf.getChar();
+			return m_buf.readChar();
 		} else if (type == Prefix.INT) {
-			return m_buf.getInt();
+			return m_buf.readInt();
 		} else if (type == Prefix.LONG) {
-			return m_buf.getLong();
+			return m_buf.readLong();
 		} else if (type == Prefix.STRING) {
 			return readString0();
 		} else if (type == Prefix.LIST) {

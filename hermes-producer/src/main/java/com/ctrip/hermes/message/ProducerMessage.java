@@ -14,6 +14,10 @@ public class ProducerMessage<T> {
 
 	private String m_partition;
 
+	private int m_partitionNo;
+
+	private int m_msgSeqNo;
+
 	private long m_bornTime;
 
 	private Map<String, Object> m_properties = new HashMap<String, Object>();
@@ -35,6 +39,22 @@ public class ProducerMessage<T> {
 		setPartition(other.getPartition());
 		setProperties(other.getProperties());
 		setBornTime(other.getBornTime());
+	}
+
+	public int getMsgSeqNo() {
+		return m_msgSeqNo;
+	}
+
+	public void setMsgSeqNo(int msgSeqNo) {
+		m_msgSeqNo = msgSeqNo;
+	}
+
+	public int getPartitionNo() {
+		return m_partitionNo;
+	}
+
+	public void setPartitionNo(int partitionNo) {
+		m_partitionNo = partitionNo;
 	}
 
 	public T getBody() {

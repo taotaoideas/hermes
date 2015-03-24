@@ -9,8 +9,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.unidal.lookup.annotation.Inject;
-
 import com.ctrip.hermes.channel.EndpointChannel;
 import com.ctrip.hermes.channel.EndpointChannelManager;
 import com.ctrip.hermes.channel.SendResult;
@@ -23,25 +21,14 @@ import com.google.common.util.concurrent.SettableFuture;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class BatchableMessageSender implements MessageSender {
+public class BatchableMessageSender extends AbstractMessageSender implements MessageSender {
 
 	private ConcurrentMap<Endpoint, EndpointWritingWorkerThread> m_workers = new ConcurrentHashMap<>();
 
-	@Inject
-	private EndpointManager m_endpointManager;
-
-	@Inject
-	private EndpointChannelManager m_endpointChannelManager;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.message.internal.MessageSender#send(com.ctrip.hermes.message.ProducerMessage)
-	 */
 	@Override
-	public Future<SendResult> send(ProducerMessage<?> msg) {
+	public Future<SendResult> doSend(ProducerMessage<?> msg) {
 
-		Endpoint endpoint = m_endpointManager.getEndpoint(msg.getTopic(), msg.getPartition());
+		Endpoint endpoint = m_endpointManager.getEndpoint(msg.getTopic(), msg.getPartitionNo());
 
 		createWorkerIfNeeded(endpoint);
 
@@ -111,7 +98,7 @@ public class BatchableMessageSender implements MessageSender {
 						for (ProducerChannelWorkerContext context : contexts) {
 							command.addMessage(context.m_msg, context.m_future);
 						}
-						
+
 						EndpointChannel channel = m_endpointChannelManager.getChannel(m_endpoint);
 
 						channel.write(command);
