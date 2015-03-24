@@ -4,14 +4,14 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import org.unidal.lookup.annotation.Inject;
+import java.nio.ByteBuffer;
 
-import com.ctrip.hermes.remoting.CommandCodec;
+import com.ctrip.hermes.remoting.command.CommandParser;
+import com.ctrip.hermes.remoting.command.DefaultCommandParser;
 
 public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 
-	@Inject
-	private CommandCodec m_codec;
+	private CommandParser m_commandParser = new DefaultCommandParser();
 
 	public NettyDecoder() {
 		super(Integer.MAX_VALUE, 0, 4, 0, 4);
@@ -22,14 +22,11 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 		ByteBuf frame = null;
 		try {
 			frame = (ByteBuf) super.decode(ctx, in);
-			if (null == frame) {
+			if (frame == null) {
 				return null;
 			}
 
-			byte[] data = new byte[frame.readableBytes()];
-			frame.readBytes(data);
-
-			return m_codec.decode(data);
+			return m_commandParser.parse(frame);
 		} catch (Exception e) {
 			// TODO close channel
 			e.printStackTrace();

@@ -13,7 +13,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.producer.Producer;
-import com.ctrip.hermes.producer.Producer.Holder;
+import com.ctrip.hermes.producer.Producer.MessageHolder;
 
 public class ProduerTest extends ComponentTestCase {
 
@@ -26,7 +26,7 @@ public class ProduerTest extends ComponentTestCase {
 		List<Future<SendResult>> result = new ArrayList<>();
 		for (int i = 0; i < 2; i++) {
 			VisitEvent event = generateEvent();
-			Holder holder = producer.message(topic, event);
+			MessageHolder holder = producer.message(topic, event);
 			Future<SendResult> send = holder.send();
 			result.add(send);
 		}

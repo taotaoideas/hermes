@@ -67,28 +67,34 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.PipelineSink</role>
-			<role-hint>memory</role-hint>
-			<implementation>com.ctrip.hermes.message.internal.MemoryMessageSink</implementation>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSink</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
-					<role-hint>local</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+					<role>com.ctrip.hermes.message.internal.MessageSender</role>
+					<role-hint>broker</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.PipelineSink</role>
-			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.message.internal.BrokerMessageSink</implementation>
+			<role-hint>local</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSink</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.remoting.netty.ClientManager</role>
+					<role>com.ctrip.hermes.message.internal.MessageSender</role>
+					<role-hint>local</role-hint>
 				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.PipelineSink</role>
+			<role-hint>transaction</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.DefaultMessageSink</implementation>
+			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.remoting.future.FutureManager</role>
+					<role>com.ctrip.hermes.message.internal.MessageSender</role>
+					<role-hint>transaction</role-hint>
 				</requirement>
 			</requirements>
 		</component>
@@ -118,19 +124,24 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.spi.Valve</role>
-			<role-hint>tracing</role-hint>
-			<implementation>com.ctrip.hermes.spi.internal.TracingMessageValve</implementation>
+			<role>com.ctrip.hermes.message.internal.MessageSender</role>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.BatchableMessageSender</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.internal.MessageSender</role>
+			<role-hint>local</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.SimpleMessageSender</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.message.internal.MessageSender</role>
+			<role-hint>transaction</role-hint>
+			<implementation>com.ctrip.hermes.message.internal.BatchableMessageSender</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.spi.Valve</role>
-			<role-hint>encode-message</role-hint>
-			<implementation>com.ctrip.hermes.spi.internal.EncodeMessageValve</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
-				</requirement>
-			</requirements>
+			<role-hint>tracing</role-hint>
+			<implementation>com.ctrip.hermes.spi.internal.TracingMessageValve</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.message.ValveRegistry</role>
@@ -194,27 +205,6 @@
 			<implementation>com.ctrip.hermes.remoting.internal.DefaultCommandCodec</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.channel.MessageChannelManager</role>
-			<role-hint>local</role-hint>
-			<implementation>com.ctrip.hermes.channel.LocalMessageChannelManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
-					<role-hint>local</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.channel.MessageQueueManager</role>
-			<role-hint>local</role-hint>
-			<implementation>com.ctrip.hermes.channel.LocalMessageQueueManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
 			<role-hint>handshake-response</role-hint>
 			<implementation>com.ctrip.hermes.remoting.HandshakeResponseProcessor</implementation>
@@ -241,16 +231,6 @@
 		<component>
 			<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
 			<implementation>com.ctrip.hermes.message.codec.DefaultStoredMessageCodec</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.channel.MessageQueueMonitor</role>
-			<implementation>com.ctrip.hermes.channel.MessageQueueMonitor</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
-					<role-hint>local</role-hint>
-				</requirement>
-			</requirements>
 		</component>
 	</components>
 </plexus>

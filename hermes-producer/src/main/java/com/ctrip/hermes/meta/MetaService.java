@@ -1,11 +1,24 @@
 package com.ctrip.hermes.meta;
 
-import com.ctrip.hermes.meta.entity.Connector;
-import com.ctrip.hermes.meta.entity.Storage;
+import java.util.List;
+
+import com.ctrip.hermes.meta.entity.Endpoint;
+import com.ctrip.hermes.meta.entity.Partition;
+
 
 public interface MetaService {
 
-	Connector getConnector(String topic);
+	String getEndpointType(String topic);
 
-	Storage getStorage(String topic);
+	/**
+	 * @param topic
+	 * @return
+	 */
+   List<Partition> getPartitions(String topic);
+
+	/**
+	 * @param endpointId
+	 * @return
+	 */
+   Endpoint findEndpoint(String endpointId);
 }

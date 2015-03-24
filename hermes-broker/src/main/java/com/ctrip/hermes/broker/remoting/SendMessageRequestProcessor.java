@@ -37,7 +37,7 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 		Command cmd = ctx.getCommand();
 		String topic = cmd.getHeader("topic");
 
-		ProducerChannel channel = m_channelManager.newProducerChannel(topic);
+		ProducerChannel channel = m_channelManager.getProducerChannel(topic);
 		List<ProducerMessage<byte[]>> msgs = decode(cmd.getBody());
 		List<SendResult> results = channel.send(msgs);
 

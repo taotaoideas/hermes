@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.channel.RemoteEndpointChannel;
 import com.ctrip.hermes.remoting.Command;
 
 public class NettyClient extends ContainerHolder {
@@ -23,7 +24,7 @@ public class NettyClient extends ContainerHolder {
 
 	private NettyClientHandler m_cmdHandler;
 
-	public void start(final Command initCmd) {
+	public void start(RemoteEndpointChannel endPointhannel) {
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 
 		try {
@@ -35,7 +36,7 @@ public class NettyClient extends ContainerHolder {
 				@Override
 				public void initChannel(SocketChannel ch) throws Exception {
 					m_cmdHandler = lookup(NettyClientHandler.class);
-					m_cmdHandler.setInitCmd(initCmd);
+					m_cmdHandler.setEndpointChannel(endPointhannel);
 
 					ch.pipeline().addLast( //
 					      // TODO set max frame length
@@ -65,5 +66,12 @@ public class NettyClient extends ContainerHolder {
 	public NettyClientHandler getCmdHandler() {
 		return m_cmdHandler;
 	}
+
+	/**
+	 * @param remoteEndpointChannel
+	 */
+   public void setRemoteEndpointChannel(RemoteEndpointChannel remoteEndpointChannel) {
+   	
+   }
 
 }

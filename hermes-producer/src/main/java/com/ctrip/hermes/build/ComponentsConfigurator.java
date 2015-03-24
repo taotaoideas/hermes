@@ -8,9 +8,6 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
-import com.ctrip.hermes.channel.LocalMessageChannelManager;
-import com.ctrip.hermes.channel.LocalMessageQueueManager;
-import com.ctrip.hermes.channel.MessageChannelManager;
 import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.message.Pipeline;
@@ -25,14 +22,17 @@ import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.message.codec.internal.JsonCodec;
-import com.ctrip.hermes.message.internal.BrokerMessageSink;
+import com.ctrip.hermes.message.internal.BatchableMessageSender;
+import com.ctrip.hermes.message.internal.DefaultMessageSink;
 import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
 import com.ctrip.hermes.message.internal.KafkaMessageSink;
-import com.ctrip.hermes.message.internal.MemoryMessageSink;
+import com.ctrip.hermes.message.internal.MessageSender;
 import com.ctrip.hermes.message.internal.ProducerPipeline;
 import com.ctrip.hermes.message.internal.ProducerValveRegistry;
+import com.ctrip.hermes.message.internal.SimpleMessageSender;
 import com.ctrip.hermes.meta.MetaManager;
 import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.internal.DefaultMetaManager;
 import com.ctrip.hermes.meta.internal.DefaultMetaService;
 import com.ctrip.hermes.meta.internal.LocalMetaLoader;
@@ -57,7 +57,6 @@ import com.ctrip.hermes.remoting.netty.NettyClientHandler;
 import com.ctrip.hermes.remoting.netty.NettyDecoder;
 import com.ctrip.hermes.remoting.netty.NettyEncoder;
 import com.ctrip.hermes.spi.Valve;
-import com.ctrip.hermes.spi.internal.EncodeMessageValve;
 import com.ctrip.hermes.spi.internal.TracingMessageValve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
@@ -90,20 +89,24 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(FutureManager.class, DefaultFutureManager.class));
 
 		// sinks
-		all.add(C(PipelineSink.class, MemoryMessageSink.ID, MemoryMessageSink.class) //
-		      .req(MessageChannelManager.class, LocalMessageChannelManager.ID) //
-		      .req(MessageCodec.class));
-		all.add(C(PipelineSink.class, BrokerMessageSink.ID, BrokerMessageSink.class) //
-		      .req(ClientManager.class, FutureManager.class));
-		all.add(C(PipelineSink.class, KafkaMessageSink.ID, KafkaMessageSink.class) //
+		all.add(C(PipelineSink.class, Endpoint.BROKER, DefaultMessageSink.class) //
+		      .req(MessageSender.class, Endpoint.BROKER));
+		all.add(C(PipelineSink.class, Endpoint.LOCAL, DefaultMessageSink.class) //
+		      .req(MessageSender.class, Endpoint.LOCAL));
+		all.add(C(PipelineSink.class, Endpoint.TRANSACTION, DefaultMessageSink.class) //
+		      .req(MessageSender.class, Endpoint.TRANSACTION));
+		all.add(C(PipelineSink.class, Endpoint.KAFKA, KafkaMessageSink.class) //
 		      .req(MetaService.class, StoredMessageCodec.class, MessageCodec.class)); //
 		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
 		      .req(MetaService.class));
 
+		// message sender
+		all.add(C(MessageSender.class, Endpoint.BROKER, BatchableMessageSender.class));
+		all.add(C(MessageSender.class, Endpoint.LOCAL, SimpleMessageSender.class));
+		all.add(C(MessageSender.class, Endpoint.TRANSACTION, BatchableMessageSender.class));
+
 		// valves
 		all.add(C(Valve.class, TracingMessageValve.ID, TracingMessageValve.class));
-		all.add(C(Valve.class, EncodeMessageValve.ID, EncodeMessageValve.class) //
-		      .req(MessageCodec.class));
 		all.add(C(ValveRegistry.class, PRODUCER, ProducerValveRegistry.class));
 
 		all.add(C(ClientManager.class, DefaultClientManager.class));
@@ -121,10 +124,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
 
 		// channel
-		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.ID, LocalMessageChannelManager.class) //
-		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
-		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.ID, LocalMessageQueueManager.class) //
-		      .req(MetaService.class));
+//		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.ID, LocalMessageChannelManager.class) //
+//		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
+//		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.ID, LocalMessageQueueManager.class) //
+//		      .req(MetaService.class));
 
 		// command processors
 		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
@@ -135,8 +138,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(CodecManager.class));
 		all.add(C(StoredMessageCodec.class, DefaultStoredMessageCodec.class));
 
-		all.add(C(MessageQueueMonitor.class) //
-		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
+//		all.add(C(MessageQueueMonitor.class) //
+//		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
 
 		return all;
 	}

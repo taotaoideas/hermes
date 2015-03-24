@@ -2,7 +2,8 @@ package com.ctrip.hermes.remoting.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 
-import com.ctrip.hermes.remoting.Command;
+import com.ctrip.hermes.remoting.command.Command;
+
 
 public class NettyClientHandler extends AbstractNettyHandler {
 

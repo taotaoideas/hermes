@@ -26,7 +26,6 @@ public class ProducerPipeline implements Pipeline<Future<SendResult>> {
 		String topic = msg.getTopic();
 		PipelineSink<Future<SendResult>> sink = m_sinkManager.getSink(topic);
 		PipelineContext<Future<SendResult>> ctx = new DefaultPipelineContext<>(m_registry.getValveList(), sink);
-		ctx.put("topic", topic);
 
 		ctx.next(msg);
 

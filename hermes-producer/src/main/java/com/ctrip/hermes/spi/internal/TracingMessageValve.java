@@ -16,7 +16,7 @@ public class TracingMessageValve implements Valve {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handle(PipelineContext<?> ctx, Object payload) {
-		ProducerMessage<Object> msg = (ProducerMessage<Object>) payload;
+		ProducerMessage<?> msg = (ProducerMessage<?>) payload;
 		String topic = msg.getTopic();
 
 		Transaction t = Cat.newTransaction("Message.Produced", topic);

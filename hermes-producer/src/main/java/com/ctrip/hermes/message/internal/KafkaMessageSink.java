@@ -26,7 +26,6 @@ import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.meta.entity.Connector;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 
@@ -51,7 +50,7 @@ public class KafkaMessageSink implements PipelineSink<Future<SendResult>> {
 
 	private Properties getProduerProperties(String topic) {
 		Properties configs = new Properties();
-		Connector connector = m_metaService.getConnector(topic);
+		String endpointType = m_metaService.getEndpointType(topic);
 		Storage targetStorage = null;
 		for (Storage storage : connector.getStorages()) {
 			if ("producer".equalsIgnoreCase(storage.getType())) {

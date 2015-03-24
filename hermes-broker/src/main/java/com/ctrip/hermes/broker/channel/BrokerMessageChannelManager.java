@@ -191,7 +191,7 @@ public class BrokerMessageChannelManager implements MessageChannelManager, LogEn
 	}
 
 	@Override
-	public ProducerChannel newProducerChannel(final String topic) {
+	public ProducerChannel getProducerChannel(final String topic) {
 		final MessageQueue q = m_queueManager.findQueue(topic);
 
 		// TODO

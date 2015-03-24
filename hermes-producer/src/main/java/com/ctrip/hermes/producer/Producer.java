@@ -8,7 +8,7 @@ import org.unidal.lookup.ContainerLoader;
 import com.ctrip.hermes.channel.SendResult;
 
 public abstract class Producer {
-	public abstract Holder message(String topic, Object body);
+	public abstract MessageHolder message(String topic, Object body);
 
 	public static Producer getInstance() {
 		try {
@@ -18,13 +18,13 @@ public abstract class Producer {
 		}
 	}
 
-	public interface Holder {
-		public Holder withKey(String key);
+	public interface MessageHolder {
+		public MessageHolder withKey(String key);
 
 		public Future<SendResult> send();
 
-		public Holder withPriority();
+		public MessageHolder withPriority();
 		
-		public Holder withPartition(String partition);
+		public MessageHolder withPartition(String partition);
 	}
 }

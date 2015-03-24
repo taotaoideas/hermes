@@ -1,5 +1,6 @@
 package com.ctrip.hermes.message.internal;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,7 +15,7 @@ import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.ProducerSinkManager;
 import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.meta.entity.Connector;
+import com.ctrip.hermes.meta.entity.Endpoint;
 
 public class DefaultMessageSinkManager extends ContainerHolder implements Initializable, ProducerSinkManager {
 
@@ -27,20 +28,10 @@ public class DefaultMessageSinkManager extends ContainerHolder implements Initia
 	public PipelineSink<Future<SendResult>> getSink(String topic) {
 		PipelineSink<Future<SendResult>> sink = null;
 
-		Connector connector = m_meta.getConnector(topic);
-		switch (connector.getType()) {
-		case Connector.BROKER:
-		case Connector.TRANSACTION:
-			sink = m_sinks.get(connector.getType());
-			break;
-		case Connector.LOCAL:
-			sink = m_sinks.get(m_meta.getStorage(topic).getType());
-			break;
-		case Connector.KAFKA:
-			sink = m_sinks.get(connector.getType());
-			break;
-		default:
-			throw new RuntimeException(String.format("Unknown connector type %s of topic %s", connector.getType(), topic));
+		String type = m_meta.getEndpointType(topic);
+
+		if (Arrays.asList(Endpoint.BROKER, Endpoint.TRANSACTION, Endpoint.KAFKA, Endpoint.LOCAL).contains(type)) {
+			sink = m_sinks.get(type);
 		}
 
 		if (sink == null) {

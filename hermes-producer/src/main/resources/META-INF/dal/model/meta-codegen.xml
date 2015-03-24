@@ -2,34 +2,42 @@
 <model>
   <entity name="meta" root="true">
     <attribute name="dev-mode" value-type="boolean" />
-    <entity-ref name="connector" type="list" names="connectors" />
-  </entity>
-  <entity name="connector">
-    <attribute name="type" value-type="String" />
-    <entity-ref name="storage" type="list" names="storages" />
-    <entity-ref name="property" type="list" names="properties" />
-  </entity>
-  <entity name="storage">
-    <attribute name="type" value-type="String" />
-    <attribute name="default" value-type="boolean" />
-    <entity-ref name="property" type="list" names="properties" />
+    <attribute name="version" value-type="int" />
     <entity-ref name="topic" type="list" names="topics" />
+    <entity-ref name="endpoint" type="list" names="endpoints" />
+    <entity-ref name="storage" type="list" names="storages" />
+  </entity>
+  <entity name="topic">
+    <attribute name="name" value-type="String" />
+    <attribute name="partition-count" value-type="int" />
+    <entity-ref name="partition" type="list" names="partitions" />
+    <entity-ref name="property" />
+  </entity>
+  <entity name="partition">
+    <attribute name="id" value-type="int" />
+    <attribute name="read-datasource" value-type="String" />
+    <attribute name="write-datasource" value-type="String" />
+    <attribute name="endpoint" value-type="String" />
   </entity>
   <entity name="property">
     <attribute name="name" value-type="String" />
     <attribute name="value" value-type="String" />
   </entity>
-  <entity name="topic">
-    <attribute name="name" value-type="String" />
-    <attribute name="partition-count" value-type="int" />
-    <entity-ref name="property" type="list" names="properties" />
-    <entity-ref name="partition" type="list" names="partitions" />
-  </entity>
-  <entity name="partition">
+  <entity name="endpoint">
+    <attribute name="id" value-type="String" />
     <attribute name="type" value-type="String" />
-    <attribute name="start-index" value-type="int" />
-    <attribute name="end-index" value-type="int" />
-    <attribute name="endpoints" value-type="String" />
+    <attribute name="host" value-type="String" />
+    <attribute name="port" value-type="int" />
+  </entity>
+  <entity name="storage">
+    <attribute name="type" value-type="String" />
+    <attribute name="default" value-type="boolean" />
+    <entity-ref name="property" type="list" names="properties" />
+    <entity-ref name="datasource" type="list" names="datasources" />
+  </entity>
+  <entity name="datasource">
+    <attribute name="id" value-type="String" />
+    <entity-ref name="property" type="list" names="properties" />
   </entity>
 </model>
 

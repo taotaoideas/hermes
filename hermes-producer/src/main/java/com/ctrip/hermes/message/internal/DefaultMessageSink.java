@@ -2,19 +2,22 @@ package com.ctrip.hermes.message.internal;
 
 import java.util.concurrent.Future;
 
+import org.unidal.lookup.annotation.Inject;
+
 import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.PipelineContext;
 import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.message.ProducerMessage;
 
-public class MysqlMessageSink implements PipelineSink<Future<SendResult>> {
-
-	public MysqlMessageSink() {
-		// TODO Auto-generated constructor stub
-	}
+public class DefaultMessageSink implements PipelineSink<Future<SendResult>> {
+	@Inject
+	private MessageSender messageSender;
 
 	@Override
 	public Future<SendResult> handle(PipelineContext<Future<SendResult>> ctx, Object input) {
-		return null;
-	}
+		ProducerMessage<?> msg = (ProducerMessage<?>) input;
 
+		return messageSender.send(msg);
+
+	}
 }

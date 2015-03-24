@@ -13,16 +13,11 @@ import java.util.List;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.remoting.Command;
-import com.ctrip.hermes.remoting.CommandContext;
-import com.ctrip.hermes.remoting.CommandProcessorManager;
+import com.ctrip.hermes.remoting.command.Command;
+
 
 public abstract class AbstractNettyHandler extends SimpleChannelInboundHandler<Command> implements LogEnabled {
-
-	@Inject
-	private CommandProcessorManager m_processorManager;
 
 	private Logger m_logger;
 
@@ -50,7 +45,7 @@ public abstract class AbstractNettyHandler extends SimpleChannelInboundHandler<C
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Command cmd) throws Exception {
-		m_processorManager.offer(new CommandContext(cmd, this));
+		// TODO
 	}
 
 	@Override

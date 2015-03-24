@@ -1,13 +1,13 @@
 package com.ctrip.hermes.channel;
 
-import java.util.List;
+import java.util.concurrent.Future;
 
-import com.ctrip.hermes.message.ProducerMessage;
+import com.ctrip.hermes.remoting.command.Command;
 
 public interface ProducerChannel {
 
-	public List<SendResult> send(List<ProducerMessage<byte[]>> msgs);
-	
+	public Future<SendResult> send(Command command);
+
 	public void close();
 
 }

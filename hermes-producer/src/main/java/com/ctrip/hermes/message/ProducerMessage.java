@@ -22,6 +22,11 @@ public class ProducerMessage<T> {
 
 	}
 
+	public ProducerMessage(String m_topic, T m_body) {
+		this.m_topic = m_topic;
+		this.m_body = m_body;
+	}
+
 	public ProducerMessage(ProducerMessage<T> other) {
 		setTopic(other.getTopic());
 		setBody(other.getBody());
@@ -45,7 +50,7 @@ public class ProducerMessage<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-   public void setBody(Object object) {
+	public void setBody(Object object) {
 		m_body = (T) object;
 	}
 
@@ -94,7 +99,7 @@ public class ProducerMessage<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-   public <V> V getProperty(String name) {
+	public <V> V getProperty(String name) {
 		return (V) m_properties.get(name);
 	}
 

@@ -15,7 +15,7 @@ import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.producer.Producer;
-import com.ctrip.hermes.producer.Producer.Holder;
+import com.ctrip.hermes.producer.Producer.MessageHolder;
 
 public class ConsumerTest extends ComponentTestCase {
 
@@ -48,7 +48,7 @@ public class ConsumerTest extends ComponentTestCase {
 				}
 
 				VisitEvent event = ProduerTest.generateEvent();
-				Holder holder = producer.message(topic, event);
+				MessageHolder holder = producer.message(topic, event);
 				holder.send();
 				System.out.println("Sent: " + event);
 			}
@@ -101,7 +101,7 @@ public class ConsumerTest extends ComponentTestCase {
 				}
 
 				VisitEvent event = ProduerTest.generateEvent();
-				Holder holder = producer.message(topic, event);
+				MessageHolder holder = producer.message(topic, event);
 				holder.send();
 				System.out.println("Sent: " + event);
 			}
@@ -154,7 +154,7 @@ public class ConsumerTest extends ComponentTestCase {
 				}
 
 				VisitEvent event = ProduerTest.generateEvent();
-				Holder holder = producer.message(topic, event);
+				MessageHolder holder = producer.message(topic, event);
 				holder.send();
 				System.out.println("Sent: " + event);
 			}

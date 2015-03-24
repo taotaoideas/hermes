@@ -11,43 +11,40 @@ import com.ctrip.hermes.producer.Producer;
 
 public class DefaultProducer extends Producer {
 	@Inject
-	private Pipeline<Future<SendResult>> m_pipe;
+	private Pipeline<Future<SendResult>> m_pipeline;
 
 	@Override
-	public DefaultHolder message(String topic, Object body) {
-		return new DefaultHolder(topic, body);
+	public DefaultMessageHolder message(String topic, Object body) {
+		return new DefaultMessageHolder(topic, body);
 	}
 
-	class DefaultHolder implements Holder {
+	class DefaultMessageHolder implements MessageHolder {
 		private ProducerMessage<Object> m_msg;
 
-		public DefaultHolder(String topic, Object body) {
-			m_msg = new ProducerMessage<Object>();
-
-			m_msg.setTopic(topic);
-			m_msg.setBody(body);
+		public DefaultMessageHolder(String topic, Object body) {
+			m_msg = new ProducerMessage<Object>(topic, body);
 		}
 
 		@Override
 		public Future<SendResult> send() {
 			m_msg.setBornTime(System.currentTimeMillis());
-			return m_pipe.put(m_msg);
+			return m_pipeline.put(m_msg);
 		}
 
 		@Override
-		public Holder withKey(String key) {
+		public MessageHolder withKey(String key) {
 			m_msg.setKey(key);
 			return this;
 		}
 
 		@Override
-		public Holder withPriority() {
+		public MessageHolder withPriority() {
 			m_msg.setPriority(true);
 			return this;
 		}
 
 		@Override
-		public Holder withPartition(String partition) {
+		public MessageHolder withPartition(String partition) {
 			m_msg.setPartition(partition);
 			return this;
 		}
