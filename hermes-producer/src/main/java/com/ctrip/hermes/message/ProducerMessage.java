@@ -20,7 +20,9 @@ public class ProducerMessage<T> {
 
 	private long m_bornTime;
 
-	private Map<String, Object> m_properties = new HashMap<String, Object>();
+	private Map<String, Object> m_appProperties = new HashMap<String, Object>();
+
+	private Map<String, Object> m_sysProperties = new HashMap<String, Object>();
 
 	public ProducerMessage() {
 
@@ -37,7 +39,8 @@ public class ProducerMessage<T> {
 		setKey(other.getKey());
 		setPriority(other.isPriority());
 		setPartition(other.getPartition());
-		setProperties(other.getProperties());
+		setAppProperties(other.getAppProperties());
+		setSysProperties(other.getSysProperties());
 		setBornTime(other.getBornTime());
 	}
 
@@ -106,21 +109,38 @@ public class ProducerMessage<T> {
 		m_bornTime = bornTime;
 	}
 
-	public Map<String, Object> getProperties() {
-		return m_properties;
+	public Map<String, Object> getAppProperties() {
+		return m_appProperties;
 	}
 
-	public void setProperties(Map<String, Object> properties) {
-		m_properties = properties;
+	public void setAppProperties(Map<String, Object> properties) {
+		m_appProperties = properties;
 	}
 
-	public void addProperty(String name, Object value) {
-		m_properties.put(name, value);
+	public void addAppProperty(String name, Object value) {
+		m_appProperties.put(name, value);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <V> V getProperty(String name) {
-		return (V) m_properties.get(name);
+	public <V> V getAppProperty(String name) {
+		return (V) m_appProperties.get(name);
+	}
+
+	public Map<String, Object> getSysProperties() {
+		return m_sysProperties;
+	}
+
+	public void setSysProperties(Map<String, Object> properties) {
+		m_sysProperties = properties;
+	}
+
+	public void addSysProperty(String name, Object value) {
+		m_sysProperties.put(name, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <V> V getSysProperty(String name) {
+		return (V) m_sysProperties.get(name);
 	}
 
 }

@@ -11,7 +11,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.ctrip.hermes.channel.SendResult;
+import com.ctrip.hermes.message.DecodedProducerMessage;
 import com.ctrip.hermes.message.ProducerMessage;
+import com.ctrip.hermes.message.codec.HermesPrimitiveCodec;
+import com.ctrip.hermes.message.codec.internal.JsonCodec;
 import com.ctrip.hermes.remoting.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
 import com.google.common.util.concurrent.SettableFuture;
@@ -22,15 +25,20 @@ import com.google.common.util.concurrent.SettableFuture;
  */
 public class SendMessageCommandTest {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testEncodeAndDecodeWithSingleMessage() {
+		JsonCodec jsonCodec = new JsonCodec();
 		SendMessageCommand cmd = new SendMessageCommand();
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("1", 1);
+		Map<String, Object> appProperties = new HashMap<String, Object>();
+		appProperties.put("1", 1);
+		Map<String, Object> sysProperties = new HashMap<String, Object>();
+		sysProperties.put("2", 2);
 
 		SettableFuture<SendResult> future = SettableFuture.create();
-		cmd.addMessage(createProducerMessage("topic", "body", "key", "partition", 100, true, properties), future);
+		cmd.addMessage(
+		      createProducerMessage("topic", "body", "key", "partition", 100, true, appProperties, sysProperties), future);
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -51,34 +59,47 @@ public class SendMessageCommandTest {
 		Assert.assertEquals(1, batch.getMsgSeqs().size());
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
 
-		List<ProducerMessage<?>> messages = batch.getMessages();
+		List<DecodedProducerMessage> messages = batch.getMessages();
 		Assert.assertEquals(1, messages.size());
 
-		ProducerMessage<?> msg = messages.get(0);
-		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(0, msg.getMsgSeqNo());
-		Assert.assertEquals(100, msg.getPartitionNo());
-		Assert.assertEquals("body", msg.getBody());
-		Assert.assertEquals("key", msg.getKey());
-		Assert.assertEquals("partition", msg.getPartition());
-		Assert.assertEquals("topic", msg.getTopic());
+		DecodedProducerMessage msg = messages.get(0);
 
-		Map<String, Object> prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		Assert.assertTrue(msg.getBornTime() != 0L);
+
+		byte[] bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body", jsonCodec.decode(bodyRawData, String.class));
+
+		Assert.assertEquals("key", msg.getKey());
+
+		Map<String, Object> decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		Map<String, Object> decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testEncodeAndDecodeWithMultipleMessagesInSameTPP() {
+		JsonCodec jsonCodec = new JsonCodec();
 		SendMessageCommand cmd = new SendMessageCommand();
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("1", 1);
+		Map<String, Object> appProperties = new HashMap<String, Object>();
+		appProperties.put("1", 1);
+		Map<String, Object> sysProperties = new HashMap<String, Object>();
+		sysProperties.put("2", 2);
 
 		SettableFuture<SendResult> future = SettableFuture.create();
-		cmd.addMessage(createProducerMessage("topic", "body1", "key1", "partition1", 100, true, properties), future);
-		cmd.addMessage(createProducerMessage("topic", "body2", "key2", "partition2", 100, true, properties), future);
+		cmd.addMessage(
+		      createProducerMessage("topic", "body1", "key1", "partition", 100, true, appProperties, sysProperties),
+		      future);
+		cmd.addMessage(
+		      createProducerMessage("topic", "body2", "key2", "partition", 100, true, appProperties, sysProperties),
+		      future);
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -90,62 +111,87 @@ public class SendMessageCommandTest {
 
 		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
 
-		Tpp key = new Tpp("topic", 100, true);
+		Tpp tpp = new Tpp("topic", 100, true);
 		Assert.assertEquals(1, messageRawDataBatches.size());
-		Assert.assertTrue(messageRawDataBatches.containsKey(key));
+		Assert.assertTrue(messageRawDataBatches.containsKey(tpp));
 
-		MessageRawDataBatch batch = messageRawDataBatches.get(key);
+		MessageRawDataBatch batch = messageRawDataBatches.get(tpp);
 
 		Assert.assertEquals(2, batch.getMsgSeqs().size());
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
 		Assert.assertTrue(batch.getMsgSeqs().contains(1));
 
-		List<ProducerMessage<?>> messages = batch.getMessages();
+		List<DecodedProducerMessage> messages = batch.getMessages();
 		Assert.assertEquals(2, messages.size());
 
-		// msg1
-		ProducerMessage<?> msg = messages.get(0);
+		// msg1 start
+		DecodedProducerMessage msg = messages.get(0);
+
 		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(0, msg.getMsgSeqNo());
-		Assert.assertEquals(100, msg.getPartitionNo());
-		Assert.assertEquals("body1", msg.getBody());
+
+		byte[] bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body1", jsonCodec.decode(bodyRawData, String.class));
+
 		Assert.assertEquals("key1", msg.getKey());
-		Assert.assertEquals("partition1", msg.getPartition());
-		Assert.assertEquals("topic", msg.getTopic());
 
-		Map<String, Object> prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		Map<String, Object> decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		Map<String, Object> decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
 
-		// msg2
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		// msg1 end
+
+		// msg2 start
 		msg = messages.get(1);
-		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(1, msg.getMsgSeqNo());
-		Assert.assertEquals(100, msg.getPartitionNo());
-		Assert.assertEquals("body2", msg.getBody());
-		Assert.assertEquals("key2", msg.getKey());
-		Assert.assertEquals("partition2", msg.getPartition());
-		Assert.assertEquals("topic", msg.getTopic());
 
-		prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		Assert.assertTrue(msg.getBornTime() != 0L);
+
+		bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body2", jsonCodec.decode(bodyRawData, String.class));
+
+		Assert.assertEquals("key2", msg.getKey());
+
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		// msg1 end
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testEncodeAndDecodeWithMultipleMessagesInDifferentTPP() {
+		JsonCodec jsonCodec = new JsonCodec();
 		SendMessageCommand cmd = new SendMessageCommand();
 
-		Map<String, Object> properties = new HashMap<String, Object>();
-		properties.put("1", 1);
+		Map<String, Object> appProperties = new HashMap<String, Object>();
+		appProperties.put("1", 1);
+		Map<String, Object> sysProperties = new HashMap<String, Object>();
+		sysProperties.put("2", 2);
 
 		SettableFuture<SendResult> future = SettableFuture.create();
-		cmd.addMessage(createProducerMessage("topic1", "body1", "key1", "partition1", 100, true, properties), future);
-		cmd.addMessage(createProducerMessage("topic1", "body2", "key2", "partition2", 100, true, properties), future);
-
-		cmd.addMessage(createProducerMessage("topic2", "body1", "key1", "partition1", 200, true, properties), future);
-		cmd.addMessage(createProducerMessage("topic2", "body2", "key2", "partition2", 200, true, properties), future);
+		// tpp1
+		cmd.addMessage(
+		      createProducerMessage("topic1", "body1", "key1", "partition1", 100, true, appProperties, sysProperties),
+		      future);
+		cmd.addMessage(
+		      createProducerMessage("topic1", "body2", "key2", "partition1", 100, true, appProperties, sysProperties),
+		      future);
+		// tpp2
+		cmd.addMessage(
+		      createProducerMessage("topic2", "body3", "key3", "partition2", 200, false, appProperties, sysProperties),
+		      future);
+		cmd.addMessage(
+		      createProducerMessage("topic2", "body4", "key4", "partition2", 200, false, appProperties, sysProperties),
+		      future);
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -168,42 +214,52 @@ public class SendMessageCommandTest {
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
 		Assert.assertTrue(batch.getMsgSeqs().contains(1));
 
-		List<ProducerMessage<?>> messages = batch.getMessages();
+		List<DecodedProducerMessage> messages = batch.getMessages();
 		Assert.assertEquals(2, messages.size());
 
-		// msg1
-		ProducerMessage<?> msg = messages.get(0);
+		// msg1 start
+		DecodedProducerMessage msg = messages.get(0);
+
 		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(0, msg.getMsgSeqNo());
-		Assert.assertEquals(100, msg.getPartitionNo());
-		Assert.assertEquals("body1", msg.getBody());
+
+		byte[] bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body1", jsonCodec.decode(bodyRawData, String.class));
+
 		Assert.assertEquals("key1", msg.getKey());
-		Assert.assertEquals("partition1", msg.getPartition());
-		Assert.assertEquals("topic1", msg.getTopic());
 
-		Map<String, Object> prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		Map<String, Object> decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		Map<String, Object> decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
 
-		// msg2
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		// msg1 end
+
+		// msg2 start
 		msg = messages.get(1);
-		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(1, msg.getMsgSeqNo());
-		Assert.assertEquals(100, msg.getPartitionNo());
-		Assert.assertEquals("body2", msg.getBody());
-		Assert.assertEquals("key2", msg.getKey());
-		Assert.assertEquals("partition2", msg.getPartition());
-		Assert.assertEquals("topic1", msg.getTopic());
 
-		prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		Assert.assertTrue(msg.getBornTime() != 0L);
+
+		bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body2", jsonCodec.decode(bodyRawData, String.class));
+
+		Assert.assertEquals("key2", msg.getKey());
+
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		// msg1 end
 		// tpp1 end
 
-		// ///////////////////////////////////////////////////////////////////////////
-
 		// tpp2 start
-		tpp = new Tpp("topic2", 200, true);
+		tpp = new Tpp("topic2", 200, false);
 		Assert.assertTrue(messageRawDataBatches.containsKey(tpp));
 
 		batch = messageRawDataBatches.get(tpp);
@@ -215,45 +271,58 @@ public class SendMessageCommandTest {
 		messages = batch.getMessages();
 		Assert.assertEquals(2, messages.size());
 
-		// msg1
+		// msg1 start
 		msg = messages.get(0);
+
 		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(2, msg.getMsgSeqNo());
-		Assert.assertEquals(200, msg.getPartitionNo());
-		Assert.assertEquals("body1", msg.getBody());
-		Assert.assertEquals("key1", msg.getKey());
-		Assert.assertEquals("partition1", msg.getPartition());
-		Assert.assertEquals("topic2", msg.getTopic());
 
-		prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body3", jsonCodec.decode(bodyRawData, String.class));
 
-		// msg2
+		Assert.assertEquals("key3", msg.getKey());
+
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		// msg1 end
+
+		// msg2 start
 		msg = messages.get(1);
-		Assert.assertTrue(msg.getBornTime() != 0L);
-		Assert.assertEquals(3, msg.getMsgSeqNo());
-		Assert.assertEquals(200, msg.getPartitionNo());
-		Assert.assertEquals("body2", msg.getBody());
-		Assert.assertEquals("key2", msg.getKey());
-		Assert.assertEquals("partition2", msg.getPartition());
-		Assert.assertEquals("topic2", msg.getTopic());
 
-		prop = msg.getProperties();
-		Assert.assertEquals(1, prop.size());
-		Assert.assertEquals(Integer.valueOf(1), prop.get("1"));
+		Assert.assertTrue(msg.getBornTime() != 0L);
+
+		bodyRawData = new byte[msg.getBody().readableBytes()];
+		msg.getBody().readBytes(bodyRawData);
+		Assert.assertEquals("body4", jsonCodec.decode(bodyRawData, String.class));
+
+		Assert.assertEquals("key4", msg.getKey());
+
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+
+		Assert.assertEquals(1, decodedAppProperties.size());
+		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals(1, decodedSysProperties.size());
+		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		// msg1 end
 		// tpp2 end
 	}
 
 	public <T> ProducerMessage<T> createProducerMessage(String topic, T body, String key, String partition,
-	      int partitionNo, boolean priority, Map<String, Object> properties) {
+	      int partitionNo, boolean priority, Map<String, Object> appProperties, Map<String, Object> sysProperties) {
 		ProducerMessage<T> msg = new ProducerMessage<T>(topic, body);
 		msg.setBornTime(System.currentTimeMillis());
 		msg.setKey(key);
 		msg.setPartition(partition);
 		msg.setPartitionNo(partitionNo);
 		msg.setPriority(priority);
-		msg.setProperties(properties);
+		msg.setAppProperties(appProperties);
+		msg.setSysProperties(sysProperties);
 
 		return msg;
 	}

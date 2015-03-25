@@ -13,7 +13,6 @@ import com.dianping.cat.message.spi.MessageTree;
 public class TracingMessageValve implements Valve {
 	public static final String ID = "tracing";
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void handle(PipelineContext<?> ctx, Object payload) {
 		ProducerMessage<?> msg = (ProducerMessage<?>) payload;
@@ -33,9 +32,9 @@ public class TracingMessageValve implements Valve {
 			Cat.logEvent("Message:" + topic, "Produced:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 			Cat.logEvent("Producer:" + ip, topic, Event.SUCCESS, "key=" + msg.getKey());
 
-			msg.addProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
-			msg.addProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
-			msg.addProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
+			msg.addSysProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
+			msg.addSysProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
+			msg.addSysProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
 			Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
 
 			ctx.next(payload);

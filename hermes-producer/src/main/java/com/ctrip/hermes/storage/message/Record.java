@@ -26,7 +26,7 @@ public class Record implements Locatable {
 		setKey(msg.getKey());
 		setBornTime(msg.getBornTime());
 
-		for (Map.Entry<String, Object> entry : msg.getProperties().entrySet()) {
+		for (Map.Entry<String, Object> entry : msg.getAppProperties().entrySet()) {
 			setProperty(entry.getKey(), entry.getValue());
 		}
 	}
@@ -63,7 +63,7 @@ public class Record implements Locatable {
 	}
 
 	@SuppressWarnings("unchecked")
-   public <T> T getProperty(String key) {
+	public <T> T getProperty(String key) {
 		return (T) m_properties.get(key);
 	}
 

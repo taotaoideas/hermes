@@ -5,8 +5,6 @@ import com.ctrip.hermes.message.codec.Codec;
 
 public class JsonCodec implements Codec {
 
-	public static final String ID = "json";
-
 	@Override
 	public byte[] encode(Object input) {
 		return JSON.toJSONBytes(input);

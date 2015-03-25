@@ -6,12 +6,8 @@ package com.ctrip.hermes.message.codec;
  */
 public class MessageCodecFactory {
 
-	/**
-	 * @param first
-	 * @return
-	 */
-   public static MessageCodec getMessageCodec(String first) {
-	   return new DefaultMessageCodec();
-   }
+	public static MessageCodec getMessageCodec(String topic) {
+		return new DefaultMessageCodec();
+	}
 
 }

@@ -8,8 +8,6 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
-import com.ctrip.hermes.channel.MessageQueueManager;
-import com.ctrip.hermes.channel.MessageQueueMonitor;
 import com.ctrip.hermes.message.Pipeline;
 import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.ProducerSinkManager;

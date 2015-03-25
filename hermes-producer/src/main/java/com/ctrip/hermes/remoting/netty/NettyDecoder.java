@@ -4,8 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.nio.ByteBuffer;
-
 import com.ctrip.hermes.remoting.command.CommandParser;
 import com.ctrip.hermes.remoting.command.DefaultCommandParser;
 

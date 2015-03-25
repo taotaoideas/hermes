@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.channel.SendResult;
+import com.ctrip.hermes.message.DecodedProducerMessage;
 import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.message.codec.HermesPrimitiveCodec;
 import com.ctrip.hermes.message.codec.MessageCodec;
@@ -91,9 +92,9 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 				msgSeqs.add(codec.readInt());
 			}
 
-			ByteBuf rawData = buf.slice(buf.readerIndex(), tppInfo.getEnd() - buf.readerIndex() + 1);
+			ByteBuf rawData = buf.readSlice(tppInfo.getEnd() - buf.readerIndex() + 1);
 
-			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getTopic(), size, msgSeqs, rawData));
+			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getTopic(), msgSeqs, size, rawData));
 		}
 
 	}
@@ -125,33 +126,35 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 	@Override
 	public void toBytes0(ByteBuf buf) {
-		writeTppNames(m_msgs, buf);
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		writeTppNames(m_msgs, codec);
 
 		buf.markWriterIndex();
-		int tppInfoSize = m_msgs.size() * 10;
-		// TODO fast skip
-		buf.writeBytes(new byte[tppInfoSize]);
 
-		List<TppIndex> tppInfos = writeTpps(m_msgs, buf);
+		// prefill with mock data
+		for (int i = 0; i < m_msgs.size(); i++) {
+			codec.writeInt(-1);
+			codec.writeInt(-1);
+		}
+
+		List<TppIndex> tppInfos = writeTpps(m_msgs, codec, buf);
 
 		int writerIndex = buf.writerIndex();
 		buf.resetWriterIndex();
 
-		writeTppInfos(tppInfos, buf);
+		writeTppIndexes(tppInfos, codec);
 
 		buf.writerIndex(writerIndex);
 	}
 
-	private void writeTppInfos(List<TppIndex> tppInfos, ByteBuf buf) {
-		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+	private void writeTppIndexes(List<TppIndex> tppInfos, HermesPrimitiveCodec codec) {
 		for (TppIndex i : tppInfos) {
 			codec.writeInt(i.getStart());
 			codec.writeInt(i.getEnd());
 		}
 	}
 
-	private void writeTppNames(Map<Tpp, List<ProducerMessage<?>>> msgs, ByteBuf buf) {
-		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+	private void writeTppNames(Map<Tpp, List<ProducerMessage<?>>> msgs, HermesPrimitiveCodec codec) {
 		codec.writeInt(msgs.size());
 
 		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
@@ -162,8 +165,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		}
 	}
 
-	private List<TppIndex> writeTpps(Map<Tpp, List<ProducerMessage<?>>> msgs, ByteBuf buf) {
-		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+	private List<TppIndex> writeTpps(Map<Tpp, List<ProducerMessage<?>>> msgs, HermesPrimitiveCodec codec, ByteBuf buf) {
 		List<TppIndex> tppIndexes = new ArrayList<>();
 
 		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
@@ -264,20 +266,23 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 	public static class MessageRawDataBatch {
 		private String m_topic;
 
-		private int m_size;
-
 		private List<Integer> m_msgSeqs;
 
 		private ByteBuf m_rawData;
 
-		private List<ProducerMessage<?>> m_msgs;
+		private int m_size;
 
-		public MessageRawDataBatch(String topic, int size, List<Integer> msgSeqs, ByteBuf rawData) {
+		private List<DecodedProducerMessage> m_msgs;
+
+		public MessageRawDataBatch(String topic, List<Integer> msgSeqs, int size, ByteBuf rawData) {
 			m_topic = topic;
-			m_size = size;
 			m_msgSeqs = msgSeqs;
 			m_rawData = rawData;
+			m_size = size;
+		}
 
+		public String getTopic() {
+			return m_topic;
 		}
 
 		public List<Integer> getMsgSeqs() {
@@ -288,13 +293,25 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			return m_rawData.duplicate();
 		}
 
-		public List<ProducerMessage<?>> getMessages() {
+		public int size() {
+			return m_size;
+		}
+
+		public List<DecodedProducerMessage> getMessages() {
+
 			if (m_msgs == null) {
-				MessageCodec msgCodec = MessageCodecFactory.getMessageCodec(m_topic);
-				m_msgs = new ArrayList<>(m_size);
-				ByteBuf tmpRawData = m_rawData.duplicate();
-				for (int i = 0; i < m_size; i++) {
-					m_msgs.add(msgCodec.decode(tmpRawData));
+				synchronized (this) {
+					if (m_msgs == null) {
+						m_msgs = new ArrayList<>(m_size);
+
+						ByteBuf tmpBuf = m_rawData.duplicate();
+						MessageCodec messageCodec = MessageCodecFactory.getMessageCodec(m_topic);
+
+						for (int i = 0; i < m_size; i++) {
+							m_msgs.add(messageCodec.decode(tmpBuf));
+						}
+
+					}
 				}
 			}
 
