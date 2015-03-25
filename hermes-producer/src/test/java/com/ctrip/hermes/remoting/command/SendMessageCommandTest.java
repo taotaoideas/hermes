@@ -9,11 +9,11 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.channel.SendResult;
 import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.remoting.command.SendMessageCommand.MessageRawDataBatch;
+import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
@@ -40,14 +40,13 @@ public class SendMessageCommandTest {
 		header.parse(buf);
 		decoded.parse(buf, header);
 
-		Map<Triple<String, Integer, Boolean>, MessageRawDataBatch> messageRawDataBatches = decoded
-		      .getMessageRawDataBatches();
+		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
 
-		Triple<String, Integer, Boolean> key = new Triple<>("topic", 100, true);
+		Tpp tpp = new Tpp("topic", 100, true);
 		Assert.assertEquals(1, messageRawDataBatches.size());
-		Assert.assertTrue(messageRawDataBatches.containsKey(key));
+		Assert.assertTrue(messageRawDataBatches.containsKey(tpp));
 
-		MessageRawDataBatch batch = messageRawDataBatches.get(key);
+		MessageRawDataBatch batch = messageRawDataBatches.get(tpp);
 
 		Assert.assertEquals(1, batch.getMsgSeqs().size());
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
@@ -89,10 +88,9 @@ public class SendMessageCommandTest {
 		header.parse(buf);
 		decoded.parse(buf, header);
 
-		Map<Triple<String, Integer, Boolean>, MessageRawDataBatch> messageRawDataBatches = decoded
-		      .getMessageRawDataBatches();
+		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
 
-		Triple<String, Integer, Boolean> key = new Triple<>("topic", 100, true);
+		Tpp key = new Tpp("topic", 100, true);
 		Assert.assertEquals(1, messageRawDataBatches.size());
 		Assert.assertTrue(messageRawDataBatches.containsKey(key));
 
@@ -157,15 +155,14 @@ public class SendMessageCommandTest {
 		header.parse(buf);
 		decoded.parse(buf, header);
 
-		Map<Triple<String, Integer, Boolean>, MessageRawDataBatch> messageRawDataBatches = decoded
-		      .getMessageRawDataBatches();
+		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
 		Assert.assertEquals(2, messageRawDataBatches.size());
 
 		// tpp1 start
-		Triple<String, Integer, Boolean> key = new Triple<>("topic1", 100, true);
-		Assert.assertTrue(messageRawDataBatches.containsKey(key));
+		Tpp tpp = new Tpp("topic1", 100, true);
+		Assert.assertTrue(messageRawDataBatches.containsKey(tpp));
 
-		MessageRawDataBatch batch = messageRawDataBatches.get(key);
+		MessageRawDataBatch batch = messageRawDataBatches.get(tpp);
 
 		Assert.assertEquals(2, batch.getMsgSeqs().size());
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
@@ -206,10 +203,10 @@ public class SendMessageCommandTest {
 		// ///////////////////////////////////////////////////////////////////////////
 
 		// tpp2 start
-		key = new Triple<>("topic2", 200, true);
-		Assert.assertTrue(messageRawDataBatches.containsKey(key));
+		tpp = new Tpp("topic2", 200, true);
+		Assert.assertTrue(messageRawDataBatches.containsKey(tpp));
 
-		batch = messageRawDataBatches.get(key);
+		batch = messageRawDataBatches.get(tpp);
 
 		Assert.assertEquals(2, batch.getMsgSeqs().size());
 		Assert.assertTrue(batch.getMsgSeqs().contains(2));

@@ -34,14 +34,14 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 	 * value: list of msgSeq-msg pair
 	 * </pre>
 	 */
-	private Map<Triple<String, Integer, Boolean>, List<ProducerMessage<?>>> m_msgs = new HashMap<>();
+	private Map<Tpp, List<ProducerMessage<?>>> m_msgs = new HashMap<>();
 
 	/**
 	 * msgSeq-future mapping
 	 */
 	private Map<Integer, SettableFuture<SendResult>> m_futures = new HashMap<>();
 
-	private Map<Triple<String, Integer, Boolean>, MessageRawDataBatch> m_decodedBatches = new HashMap<>();
+	private Map<Tpp, MessageRawDataBatch> m_decodedBatches = new HashMap<>();
 
 	/**
 	 * @param commandType
@@ -54,14 +54,13 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		int msgSeqNo = m_msgCounter.getAndIncrement();
 		msg.setMsgSeqNo(msgSeqNo);
 
-		Triple<String, Integer, Boolean> key = new Triple<String, Integer, Boolean>(msg.getTopic(), msg.getPartitionNo(),
-		      msg.isPriority());
+		Tpp tpp = new Tpp(msg.getTopic(), msg.getPartitionNo(), msg.isPriority());
 
-		if (!m_msgs.containsKey(key)) {
-			m_msgs.put(key, new ArrayList<ProducerMessage<?>>());
+		if (!m_msgs.containsKey(tpp)) {
+			m_msgs.put(tpp, new ArrayList<ProducerMessage<?>>());
 		}
 
-		m_msgs.get(key).add(msg);
+		m_msgs.get(tpp).add(msg);
 
 		m_futures.put(msgSeqNo, future);
 	}
@@ -76,12 +75,12 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 	@Override
 	public void parse0(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
-		List<Triple<String, Integer, Boolean>> tppNames = readTppNames(buf);
-		List<TppInfo> tppInfos = readTppInfos(buf, tppNames.size());
+		List<Tpp> tppNames = readTppNames(buf);
+		List<TppIndex> tppIndexes = readTppInfos(buf, tppNames.size());
 
 		for (int i = 0; i < tppNames.size(); i++) {
-			Triple<String, Integer, Boolean> tppName = tppNames.get(i);
-			TppInfo tppInfo = tppInfos.get(i);
+			Tpp tppName = tppNames.get(i);
+			TppIndex tppInfo = tppIndexes.get(i);
 
 			buf.readerIndex(tppInfo.getStart());
 
@@ -94,31 +93,31 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 			ByteBuf rawData = buf.slice(buf.readerIndex(), tppInfo.getEnd() - buf.readerIndex() + 1);
 
-			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getFirst(), size, msgSeqs, rawData));
+			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getTopic(), size, msgSeqs, rawData));
 		}
 
 	}
 
-	private List<TppInfo> readTppInfos(ByteBuf buf, int size) {
+	private List<TppIndex> readTppInfos(ByteBuf buf, int size) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
-		List<TppInfo> tppInfos = new ArrayList<>(size);
+		List<TppIndex> tppInfos = new ArrayList<>(size);
 
 		for (int i = 0; i < size; i++) {
-			tppInfos.add(new TppInfo(codec.readInt(), codec.readInt()));
+			tppInfos.add(new TppIndex(codec.readInt(), codec.readInt()));
 		}
 
 		return tppInfos;
 	}
 
-	private List<Triple<String, Integer, Boolean>> readTppNames(ByteBuf buf) {
+	private List<Tpp> readTppNames(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 		int size = codec.readInt();
 
-		List<Triple<String, Integer, Boolean>> tppNames = new ArrayList<>();
+		List<Tpp> tppNames = new ArrayList<>();
 
 		for (int i = 0; i < size; i++) {
-			tppNames.add(new Triple<>(codec.readString(), codec.readInt(), codec.readBoolean()));
+			tppNames.add(new Tpp(codec.readString(), codec.readInt(), codec.readBoolean()));
 		}
 
 		return tppNames;
@@ -133,7 +132,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		// TODO fast skip
 		buf.writeBytes(new byte[tppInfoSize]);
 
-		List<TppInfo> tppInfos = writeTpps(m_msgs, buf);
+		List<TppIndex> tppInfos = writeTpps(m_msgs, buf);
 
 		int writerIndex = buf.writerIndex();
 		buf.resetWriterIndex();
@@ -143,33 +142,33 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		buf.writerIndex(writerIndex);
 	}
 
-	private void writeTppInfos(List<TppInfo> tppInfos, ByteBuf buf) {
+	private void writeTppInfos(List<TppIndex> tppInfos, ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
-		for (TppInfo i : tppInfos) {
+		for (TppIndex i : tppInfos) {
 			codec.writeInt(i.getStart());
 			codec.writeInt(i.getEnd());
 		}
 	}
 
-	private void writeTppNames(Map<Triple<String, Integer, Boolean>, List<ProducerMessage<?>>> msgs, ByteBuf buf) {
+	private void writeTppNames(Map<Tpp, List<ProducerMessage<?>>> msgs, ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 		codec.writeInt(msgs.size());
 
-		for (Map.Entry<Triple<String, Integer, Boolean>, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
-			Triple<String, Integer, Boolean> key = entry.getKey();
-			codec.writeString(key.getFirst());
-			codec.writeInt(key.getMiddle());
-			codec.writeBoolean(key.getLast());
+		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
+			Tpp tpp = entry.getKey();
+			codec.writeString(tpp.getTopic());
+			codec.writeInt(tpp.getPartitionNo());
+			codec.writeBoolean(tpp.isPriority());
 		}
 	}
 
-	private List<TppInfo> writeTpps(Map<Triple<String, Integer, Boolean>, List<ProducerMessage<?>>> msgs, ByteBuf buf) {
+	private List<TppIndex> writeTpps(Map<Tpp, List<ProducerMessage<?>>> msgs, ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
-		List<TppInfo> tppInfos = new ArrayList<>();
+		List<TppIndex> tppIndexes = new ArrayList<>();
 
-		for (Map.Entry<Triple<String, Integer, Boolean>, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
-			Triple<String, Integer, Boolean> key = entry.getKey();
-			MessageCodec msgCodec = MessageCodecFactory.getMessageCodec(key.getFirst());
+		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
+			Tpp tpp = entry.getKey();
+			MessageCodec msgCodec = MessageCodecFactory.getMessageCodec(tpp.getTopic());
 
 			int start = buf.writerIndex();
 
@@ -183,23 +182,71 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 				msgCodec.encode(msg, buf);
 			}
 			int end = buf.writerIndex() - 1;
-			tppInfos.add(new TppInfo(start, end));
+			tppIndexes.add(new TppIndex(start, end));
 		}
 
-		return tppInfos;
+		return tppIndexes;
 	}
 
-	public Map<Triple<String, Integer, Boolean>, MessageRawDataBatch> getMessageRawDataBatches() {
+	public Map<Tpp, MessageRawDataBatch> getMessageRawDataBatches() {
 		return m_decodedBatches;
 	}
 
-	public static class TppInfo {
+	public static class Tpp {
+		private Triple<String, Integer, Boolean> m_triple = new Triple<>();
+
+		public Tpp(String topic, int partitionNo, boolean isPriority) {
+			m_triple.setFirst(topic);
+			m_triple.setMiddle(partitionNo);
+			m_triple.setLast(isPriority);
+		}
+
+		public String getTopic() {
+			return m_triple.getFirst();
+		}
+
+		public int getPartitionNo() {
+			return m_triple.getMiddle();
+		}
+
+		public boolean isPriority() {
+			return m_triple.getLast();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((m_triple == null) ? 0 : m_triple.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Tpp other = (Tpp) obj;
+			if (m_triple == null) {
+				if (other.m_triple != null)
+					return false;
+			} else if (!m_triple.equals(other.m_triple))
+				return false;
+			return true;
+		}
+
+	}
+
+	private static class TppIndex {
 
 		private int m_start;
 
 		private int m_end;
 
-		public TppInfo(int start, int end) {
+		public TppIndex(int start, int end) {
 			m_start = start;
 			m_end = end;
 		}
