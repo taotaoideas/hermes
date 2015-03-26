@@ -5,26 +5,22 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.channel.LocalMessageQueueManager;
-import com.ctrip.hermes.channel.MessageQueueManager;
+import com.ctrip.hermes.broker.channel.MessageQueueManager;
+import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.storage.MessageQueue;
 
 public class DefaultMessageQueueManagerTest extends ComponentTestCase {
 
 	@Test
 	public void sameQueue() {
-		LocalMessageQueueManager m = (LocalMessageQueueManager) lookup(MessageQueueManager.class);
+		MessageQueueManager m = lookup(MessageQueueManager.class);
 
 		String topic = "order.new";
-		String groupId = "group1";
-		
-		MessageQueue q1 = m.findQueue(topic, groupId);
-		MessageQueue q2 = m.findQueue(topic, groupId);
+
+		MessageQueue q1 = m.findQueue(new Tpp(topic, 1, true));
+		MessageQueue q2 = m.findQueue(new Tpp(topic, 1, true));
 		assertTrue(q1.equals(q2));
-		
-		MessageQueue q3 = m.findQueue(topic);
-		MessageQueue q4 = m.findQueue(topic);
-		assertTrue(q3.equals(q4));
+
 	}
 
 }

@@ -3,6 +3,7 @@ package com.ctrip.hermes.storage.message;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ctrip.hermes.message.ProducerMessage;
 import com.ctrip.hermes.storage.storage.Locatable;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.util.StringUtil;
@@ -19,7 +20,7 @@ public class Record implements Locatable {
 
 	private Offset m_ackOffset;
 
-	public Record(com.ctrip.hermes.message.ProducerMessage<byte[]> msg) {
+	public Record(ProducerMessage<byte[]> msg) {
 		setContent(msg.getBody());
 		setPartition(msg.getPartition());
 		setPriority(msg.isPriority() ? 0 : 1);

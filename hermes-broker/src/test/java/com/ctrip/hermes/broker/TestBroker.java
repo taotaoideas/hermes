@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
-import com.ctrip.hermes.channel.MessageQueueMonitor;
 
 public class TestBroker extends ComponentTestCase {
 
@@ -16,7 +15,6 @@ public class TestBroker extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
-		lookup(MessageQueueMonitor.class);
 		lookup(NettyServer.class).start();
 	}
 
