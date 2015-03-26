@@ -13,6 +13,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.channel.NettyServerEndpointChannel;
 import com.ctrip.hermes.remoting.netty.NettyDecoder;
 import com.ctrip.hermes.remoting.netty.NettyEncoder;
 
@@ -35,7 +36,7 @@ public class NettyServer extends ContainerHolder {
 					            lookup(NettyDecoder.class), //
 					            new LengthFieldPrepender(4), //
 					            lookup(NettyEncoder.class), //
-					            lookup(NettyServerHandler.class));
+					            lookup(NettyServerEndpointChannel.class));
 				      }
 			      }).option(ChannelOption.SO_BACKLOG, 128) // TODO set tcp options
 			      .childOption(ChannelOption.SO_KEEPALIVE, true);

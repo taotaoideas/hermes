@@ -7,26 +7,18 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry;
-import com.ctrip.hermes.broker.channel.BrokerMessageChannelManager;
 import com.ctrip.hermes.broker.channel.BrokerMessageQueueManager;
 import com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry;
-import com.ctrip.hermes.broker.remoting.AckRequestProcessor;
-import com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor;
+import com.ctrip.hermes.broker.channel.MessageQueueManager;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
-import com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
-import com.ctrip.hermes.broker.remoting.netty.NettyServerHandler;
-import com.ctrip.hermes.channel.MessageChannelManager;
-import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.message.codec.MessageCodec;
-import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.message.internal.DeliverPipeline;
 import com.ctrip.hermes.message.internal.ReceiverPipeline;
 import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.remoting.CommandProcessor;
-import com.ctrip.hermes.remoting.CommandProcessorManager;
+import com.ctrip.hermes.remoting.command.CommandProcessor;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
@@ -40,13 +32,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(NettyServer.class) //
 		      .req(NettyServerConfig.class));
 
-		all.add(C(NettyServerHandler.class).is(PER_LOOKUP) //
-		      .req(CommandProcessorManager.class));
-
-		all.add(C(MessageChannelManager.class, BrokerMessageChannelManager.ID, BrokerMessageChannelManager.class) //
-		      .req(MessageQueueManager.class, BrokerMessageQueueManager.ID) //
-		      .req(DeliverPipeline.class, BROKER) //
-		      .req(ReceiverPipeline.class, BROKER));
 		all.add(C(MessageQueueManager.class, BrokerMessageQueueManager.ID, BrokerMessageQueueManager.class) //
 		      .req(MetaService.class));
 
@@ -58,14 +43,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(ValveRegistry.class, BrokerReceiverValveRegistry.ID));
 
 		// processors
-		all.add(C(CommandProcessor.class, HandshakeRequestProcessor.ID, HandshakeRequestProcessor.class));
 		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class) //
-		      .req(MessageChannelManager.class, BrokerMessageChannelManager.ID) //
+		      .req(MessageQueueManager.class, BrokerMessageQueueManager.ID) //
 		      .req(MessageCodec.class));
-		all.add(C(CommandProcessor.class, StartConsumerRequestProcessor.ID, StartConsumerRequestProcessor.class) //
-		      .req(MessageChannelManager.class, BrokerMessageChannelManager.ID) //
-		      .req(StoredMessageCodec.class));
-		all.add(C(CommandProcessor.class, AckRequestProcessor.ID, AckRequestProcessor.class));
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());

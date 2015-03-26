@@ -2,22 +2,18 @@ package com.ctrip.hermes.broker.channel;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.broker.storage.mysql.MysqlGroup;
-import com.ctrip.hermes.channel.MessageQueueManager;
 import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.message.Resend;
 import com.ctrip.hermes.storage.pair.StoragePair;
-import com.ctrip.hermes.storage.storage.kafka.KafkaGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroup;
 import com.ctrip.hermes.storage.storage.memory.MemoryGroupConfig;
 import com.ctrip.hermes.storage.storage.memory.MemoryStorageFactory;
@@ -34,48 +30,34 @@ public class BrokerMessageQueueManager implements MessageQueueManager {
 	private MemoryStorageFactory storageFactory = new MemoryStorageFactory();
 
 	@Override
-	public MessageQueue findQueue(String topic, String groupId, String partition) {
-		if (partition == null) {
-			partition = "invalid";
-		}
-		Storage storage = m_meta.getStorage(topic);
+	public MessageQueue findQueue(Tpp tpp) {
+		Storage storage = m_meta.findStorage(tpp.getTopic());
 		if (storage == null) {
-			throw new RuntimeException("Undefined topic: " + topic);
+			throw new RuntimeException("Undefined topic: " + tpp.getTopic());
 		}
 		/**
 		 * if can't find following constance, try run "mvn generate-sources" in command line.
 		 */
 		if (Storage.MEMORY.equals(storage.getType())) {
-			return findMemoryQueue(topic, groupId);
-		} else if (Storage.KAFKA.equals(storage.getType())) {
-			return findKafkaQueue(topic, groupId, partition);
-		} else if (Storage.MYSQL.equals(storage.getType())) {
-			return findMySQLQueue(topic, groupId);
+			return findMemoryQueue(tpp);
 		} else {
 			// TODO
 			throw new RuntimeException("Unsupported storage type");
 		}
 	}
 
-	@Override
-	public MessageQueue findQueue(String topic, String groupId) {
-		return findQueue(topic, groupId, "invalid");
-	}
+	private synchronized MessageQueue findMemoryQueue(Tpp tpp) {
+		String strTpp = tpp.getTopic() + "_" + tpp.getPartitionNo() + "_" + tpp.isPriority();
+		String groupId = "for_producer";
 
-	@Override
-	public MessageQueue findQueue(String topic) {
-		return findQueue(topic, "invalid");
-	}
-
-	private synchronized MessageQueue findMemoryQueue(String topic, String groupId) {
-		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
+		Pair<String, String> pair = new Pair<String, String>(strTpp, groupId);
 
 		MessageQueue q = m_queues.get(pair);
 
 		if (q == null) {
 			MemoryGroupConfig gc = new MemoryGroupConfig();
-			gc.addMainGroup(topic, "offset_" + topic + "_" + groupId);
-			gc.setResendGroupId("resend_" + topic + "_" + groupId, "offset_resend_" + topic + "_" + groupId);
+			gc.addMainGroup(strTpp, "offset_" + strTpp + "_" + groupId);
+			gc.setResendGroupId("resend_" + strTpp + "_" + groupId, "offset_resend_" + strTpp + "_" + groupId);
 			MemoryGroup mg = new MemoryGroup(storageFactory, gc);
 
 			StoragePair<Record> main = mg.createMessagePair();
@@ -87,56 +69,6 @@ public class BrokerMessageQueueManager implements MessageQueueManager {
 
 		return q;
 
-	}
-
-	private synchronized MessageQueue findKafkaQueue(String topic, String groupId, String partition) {
-		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
-
-		MessageQueue q = m_queues.get(pair);
-
-		if (q == null) {
-			Properties producerProp = new Properties();
-			Properties consumerProp = new Properties();
-			Storage storage = m_meta.getStorage(topic);
-			for (Property prop : storage.getProperties()) {
-				producerProp.put(prop.getName(), prop.getValue());
-				consumerProp.put(prop.getName(), prop.getValue());
-			}
-			producerProp.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-			producerProp.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-			producerProp.put("client.id", topic);
-			if (!"invalid".equals(groupId)) {
-				consumerProp.put("group.id", groupId);
-				consumerProp.put("consumer.timeout.ms", "100");
-			}
-			KafkaGroup kg = new KafkaGroup(topic, producerProp, consumerProp);
-
-			StoragePair<Record> main = kg.createMessagePair();
-			StoragePair<Resend> resend = kg.createResendPair();
-			q = new StorageMessageQueue(main, resend);
-
-			m_queues.put(pair, q);
-		}
-
-		return q;
-	}
-
-	private synchronized MessageQueue findMySQLQueue(String topic, String groupId) {
-		Pair<String, String> pair = new Pair<String, String>(topic, groupId);
-
-		MessageQueue q = m_queues.get(pair);
-
-		if (q == null) {
-			MysqlGroup mg = new MysqlGroup(topic, groupId);
-
-			StoragePair<Record> main = mg.createMessagePair();
-			StoragePair<Resend> resend = mg.createResendPair();
-			q = new StorageMessageQueue(main, resend);
-
-			m_queues.put(pair, q);
-		}
-
-		return q;
 	}
 
 	public Map<Pair<String, String>, MessageQueue> getQueues() {

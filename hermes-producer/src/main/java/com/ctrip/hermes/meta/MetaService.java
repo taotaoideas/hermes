@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Partition;
+import com.ctrip.hermes.meta.entity.Storage;
 
 
 public interface MetaService {
@@ -21,4 +22,10 @@ public interface MetaService {
 	 * @return
 	 */
    Endpoint findEndpoint(String endpointId);
+
+   /**
+    * 
+    * @param topic
+    */
+	Storage findStorage(String topic);
 }

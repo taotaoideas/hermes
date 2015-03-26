@@ -1,26 +1,30 @@
 package com.ctrip.hermes.broker.remoting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.channel.MessageChannelManager;
-import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.remoting.command.Command;
+import com.ctrip.hermes.broker.channel.MessageQueueManager;
+import com.ctrip.hermes.message.DecodedProducerMessage;
 import com.ctrip.hermes.remoting.command.CommandContext;
 import com.ctrip.hermes.remoting.command.CommandProcessor;
 import com.ctrip.hermes.remoting.command.CommandType;
-import com.ctrip.hermes.remoting.command.Header;
 import com.ctrip.hermes.remoting.command.SendMessageAckCommand;
+import com.ctrip.hermes.remoting.command.SendMessageCommand;
+import com.ctrip.hermes.remoting.command.SendMessageCommand.MessageRawDataBatch;
+import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.storage.MessageQueue;
+import com.ctrip.hermes.storage.message.Record;
 
 public class SendMessageRequestProcessor implements CommandProcessor {
 
 	public static final String ID = "send-message-request";
 
 	@Inject
-	private MessageChannelManager m_channelManager;
+	private MessageQueueManager m_queueManager;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -29,17 +33,38 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 	@Override
 	public void process(CommandContext ctx) {
-		Command req = ctx.getCommand();
-		Header header = req.getHeader();
+		SendMessageCommand req = (SendMessageCommand) ctx.getCommand();
 
-		List<SendResult> results = Collections.emptyList();
+		Map<Tpp, MessageRawDataBatch> rawBatches = req.getMessageRawDataBatches();
+
+		for (Map.Entry<Tpp, MessageRawDataBatch> entry : rawBatches.entrySet()) {
+			Tpp tpp = entry.getKey();
+			MessageQueue q = m_queueManager.findQueue(tpp);
+			q.write(convertToRecord(entry.getValue().getMessages(), tpp));
+		}
 
 		SendMessageAckCommand ack = new SendMessageAckCommand();
 		ack.correlate(req);
-		ack.setSendResult(results);
 
 		ctx.write(ack);
 
+	}
+
+	private List<Record> convertToRecord(List<DecodedProducerMessage> messages, Tpp tpp) {
+		List<Record> records = new ArrayList<>();
+
+		for (DecodedProducerMessage msg : messages) {
+			Record r = new Record();
+
+			r.setBornTime(msg.getBornTime());
+			r.setContent(msg.readBody());
+			r.setKey(msg.getKey());
+			// TODO should add other fields after refactoring MessageQueue
+
+			records.add(r);
+		}
+
+		return records;
 	}
 
 }
