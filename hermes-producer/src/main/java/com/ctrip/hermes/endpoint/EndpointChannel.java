@@ -8,7 +8,7 @@ import com.ctrip.hermes.remoting.command.Command;
  */
 public interface EndpointChannel {
 
-	void write(Command command);
+	void writeCommand(Command command);
 
 	void start();
 

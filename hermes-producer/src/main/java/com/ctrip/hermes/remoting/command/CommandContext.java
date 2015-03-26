@@ -14,7 +14,7 @@ public class CommandContext {
 	}
 
 	public void write(Command cmd) {
-		m_channel.write(cmd);
+		m_channel.writeCommand(cmd);
 	}
 
 	public Command getCommand() {

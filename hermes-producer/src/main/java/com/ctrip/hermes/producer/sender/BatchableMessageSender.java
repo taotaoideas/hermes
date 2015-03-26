@@ -103,7 +103,7 @@ public class BatchableMessageSender extends AbstractMessageSender implements Mes
 
 						EndpointChannel channel = m_endpointChannelManager.getChannel(m_endpoint);
 
-						channel.write(command);
+						channel.writeCommand(command);
 
 					}
 

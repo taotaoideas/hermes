@@ -25,7 +25,7 @@ public class SimpleMessageSender extends AbstractMessageSender implements Messag
 		Endpoint endpoint = m_endpointManager.getEndpoint(msg.getTopic(), msg.getPartitionNo());
 		EndpointChannel channel = m_endpointChannelManager.getChannel(endpoint);
 
-		channel.write(command);
+		channel.writeCommand(command);
 		return future;
 	}
 }

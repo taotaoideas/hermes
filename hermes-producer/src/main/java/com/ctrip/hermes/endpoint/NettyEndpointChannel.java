@@ -21,12 +21,12 @@ public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<C
 	private ConcurrentMap<Long, AckAware<Ack>> m_pendingCommands = new ConcurrentHashMap<>();
 
 	private Channel m_channel;
-	
+
 	protected CommandProcessorManager m_cmdProcessorManager;
 
 	public NettyEndpointChannel(CommandProcessorManager cmdProcessorManager) {
-	   m_cmdProcessorManager = cmdProcessorManager;
-   }
+		m_cmdProcessorManager = cmdProcessorManager;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -35,7 +35,7 @@ public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<C
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void write(Command command) {
+	public void writeCommand(Command command) {
 		if (command instanceof AckAware) {
 			m_pendingCommands.put(command.getHeader().getCorrelationId(), (AckAware<Ack>) command);
 		}
@@ -43,7 +43,6 @@ public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<C
 		m_channel.writeAndFlush(command);
 	}
 
-	// @SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Command command) throws Exception {
 		if (command instanceof Ack) {

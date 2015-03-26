@@ -48,7 +48,7 @@ public class NettyClientEndpointChannel extends NettyEndpointChannel {
 					      new NettyDecoder(), //
 					      new LengthFieldPrepender(4), //
 					      new NettyEncoder(), //
-					      this);
+					      NettyClientEndpointChannel.this);
 				}
 			});
 

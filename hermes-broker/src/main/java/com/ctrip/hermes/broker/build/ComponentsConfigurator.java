@@ -44,8 +44,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// processors
 		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class) //
-		      .req(MessageQueueManager.class, BrokerMessageQueueManager.ID) //
-		      .req(MessageCodec.class));
+		      .req(MessageQueueManager.class, BrokerMessageQueueManager.ID));
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());
