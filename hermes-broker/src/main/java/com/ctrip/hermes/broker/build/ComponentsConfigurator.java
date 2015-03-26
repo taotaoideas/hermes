@@ -13,12 +13,12 @@ import com.ctrip.hermes.broker.channel.MessageQueueManager;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
-import com.ctrip.hermes.message.ValveRegistry;
-import com.ctrip.hermes.message.codec.MessageCodec;
 import com.ctrip.hermes.message.internal.DeliverPipeline;
 import com.ctrip.hermes.message.internal.ReceiverPipeline;
 import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.pipeline.ValveRegistry;
 import com.ctrip.hermes.remoting.command.CommandProcessor;
+import com.dianping.cat.message.spi.MessageCodec;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 

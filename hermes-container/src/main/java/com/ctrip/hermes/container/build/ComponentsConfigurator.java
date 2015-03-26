@@ -22,7 +22,7 @@ import com.ctrip.hermes.message.codec.StoredMessageCodec;
 import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.remoting.CommandProcessor;
-import com.ctrip.hermes.remoting.netty.ClientManager;
+import com.ctrip.hermes.remoting.codec.ClientManager;
 import com.ctrip.hermes.spi.Valve;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {

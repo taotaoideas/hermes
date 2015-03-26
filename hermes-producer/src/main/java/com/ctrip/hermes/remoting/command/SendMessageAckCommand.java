@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.hermes.message.codec.HermesPrimitiveCodec;
+import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

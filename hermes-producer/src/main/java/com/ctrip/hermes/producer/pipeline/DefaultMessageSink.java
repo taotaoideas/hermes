@@ -1,0 +1,22 @@
+package com.ctrip.hermes.producer.pipeline;
+
+import java.util.concurrent.Future;
+
+import org.unidal.lookup.annotation.Inject;
+
+import com.ctrip.hermes.pipeline.PipelineContext;
+import com.ctrip.hermes.pipeline.PipelineSink;
+import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.producer.api.SendResult;
+import com.ctrip.hermes.producer.sender.MessageSender;
+
+public class DefaultMessageSink implements PipelineSink<Future<SendResult>> {
+	@Inject
+	private MessageSender messageSender;
+
+	@Override
+	public Future<SendResult> handle(PipelineContext<Future<SendResult>> ctx, Object input) {
+		return messageSender.send((ProducerMessage<?>) input);
+
+	}
+}

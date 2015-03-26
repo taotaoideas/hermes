@@ -2,52 +2,35 @@
 <meta dev-mode='true' version='1'>
 
 	<endpoint id='br0' type="broker" host="127.0.0.1" port="4376" />
-	<endpoint id='local' type="local" />
-	<endpoint id='kafka1' type="kafka" />
 
-	<storage type='memory' default='true'>
-		<topic name='local.order.new' partition-count='1'>
-			<partition id='0' endpoint='br0' />
-		</topic>
-		<topic name='test.topic' />
-		<topic name='local.order.new' />
-	</storage>
+	<topic name='order_new' partition-count='1'>
+		<codec type="json" />
+		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
+	</topic>
+	
+	<topic name='topic' partition-count='1'>
+		<codec type="json" />
+		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
+	</topic>
+	
+	<topic name='topic1' partition-count='1'>
+		<codec type="json" />
+		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
+	</topic>
+	
+	<topic name='topic2' partition-count='1'>
+		<codec type="json" />
+		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
+	</topic>
 
 	<storage type='mysql'>
 		<property name="x" value="x" />
 		<property name="x" value="x" />
 		<datasource id='ds0'>
-			<property name='url' value='jdbc:mysql://1.1.1.1/hermes/' />
+			<property name='url' value='jdbc:mysql://127.0.0.1/hermes/' />
 			<property name='username' value='root' />
 			<property name='pwd' value='root' />
 		</datasource>
-		<datasource id='ds1'>
-			<property name='url' value='jdbc:mysql://1.1.1.1/hermes/' />
-		</datasource>
-		<topic name='topic.5' partition-count='2'>
-			<partition id='0' ds='ds0' endpoint='br0' />
-			<partition id='1' ds='ds1' endpoint='br1' />
-			<property name='retry-policy' value='interval:60,300,900' />
-		</topic>
-		<topic name='topic.6' />
-	</storage>
-	
-	
-	<storage type='producer'>
-		<property name='bootstrap.servers'
-			value='fx-message01:9092,fx-message02:9092,fx-message03:9092' />
-		<property name='request.required.acks' value='1' />
-		<topic name='kafka.SimpleTopic' />
-		<topic name='kafka.SimpleTopic1' />
-		<topic name='kafka.SimpleTopic2' />
-	</storage>
-	<storage type='consumer'>
-		<property name='zookeeper.connect'
-			value='fx-message04:2181,fx-message05:2181,fx-message06:2181' />
-		<property name='offsets.storage' value='kafka' />
-		<topic name='kafka.SimpleTopic' />
-		<topic name='kafka.SimpleTopic1' />
-		<topic name='kafka.SimpleTopic2' />
 	</storage>
 
 </meta>

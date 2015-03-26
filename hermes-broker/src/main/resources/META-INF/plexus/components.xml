@@ -24,7 +24,7 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.ValveRegistry</role>
+			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 			<role-hint>broker-deliver</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry</implementation>
 		</component>
@@ -34,13 +34,13 @@
 			<implementation>com.ctrip.hermes.message.internal.DeliverPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 					<role-hint>broker-deliver</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.ValveRegistry</role>
+			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 			<role-hint>broker-receiver</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry</implementation>
 		</component>
@@ -50,7 +50,7 @@
 			<implementation>com.ctrip.hermes.message.internal.ReceiverPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 					<role-hint>broker-receiver</role-hint>
 				</requirement>
 			</requirements>
@@ -65,7 +65,7 @@
 					<role-hint>broker</role-hint>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
+					<role>com.dianping.cat.message.spi.MessageCodec</role>
 				</requirement>
 			</requirements>
 		</component>

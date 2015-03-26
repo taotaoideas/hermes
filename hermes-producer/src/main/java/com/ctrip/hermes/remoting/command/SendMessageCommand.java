@@ -10,12 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.unidal.tuple.Triple;
 
-import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.DecodedProducerMessage;
-import com.ctrip.hermes.message.ProducerMessage;
-import com.ctrip.hermes.message.codec.HermesPrimitiveCodec;
-import com.ctrip.hermes.message.codec.MessageCodec;
-import com.ctrip.hermes.message.codec.MessageCodecFactory;
+import com.ctrip.hermes.producer.DecodedProducerMessage;
+import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.producer.api.SendResult;
+import com.ctrip.hermes.producer.codec.ProducerMessageCodecFactory;
+import com.ctrip.hermes.producer.codec.ProducerMessageCodec;
+import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
@@ -170,7 +170,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
 			Tpp tpp = entry.getKey();
-			MessageCodec msgCodec = MessageCodecFactory.getMessageCodec(tpp.getTopic());
+			ProducerMessageCodec msgCodec = ProducerMessageCodecFactory.getCodec(tpp.getTopic());
 
 			int start = buf.writerIndex();
 
@@ -305,7 +305,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 						m_msgs = new ArrayList<>(m_size);
 
 						ByteBuf tmpBuf = m_rawData.duplicate();
-						MessageCodec messageCodec = MessageCodecFactory.getMessageCodec(m_topic);
+						ProducerMessageCodec messageCodec = ProducerMessageCodecFactory.getCodec(m_topic);
 
 						for (int i = 0; i < m_size; i++) {
 							m_msgs.add(messageCodec.decode(tmpBuf));

@@ -15,8 +15,20 @@ public class DefaultCommandParser implements CommandParser {
 	 */
 	@Override
 	public Command parse(ByteBuf frame) {
-		// TODO Auto-generated method stub
-		return null;
+		Header header = new Header();
+		header.parse(frame);
+
+		Class<? extends Command> cmdClazz = header.getType().getClazz();
+		Command cmd = null;
+		try {
+			cmd = cmdClazz.newInstance();
+			cmd.parse(frame, header);
+			return cmd;
+		} catch (Exception e) {
+			throw new IllegalArgumentException(String.format("Can not construct command instance for type[%s]", header
+			      .getType().getClazz().getName()), e);
+		}
+
 	}
 
 }

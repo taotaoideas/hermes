@@ -13,9 +13,9 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.channel.NettyServerEndpointChannel;
-import com.ctrip.hermes.remoting.netty.NettyDecoder;
-import com.ctrip.hermes.remoting.netty.NettyEncoder;
+import com.ctrip.hermes.endpoint.NettyServerEndpointChannel;
+import com.ctrip.hermes.remoting.codec.NettyDecoder;
+import com.ctrip.hermes.remoting.codec.NettyEncoder;
 
 public class NettyServer extends ContainerHolder {
 	@Inject

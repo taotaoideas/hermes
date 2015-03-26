@@ -1,6 +1,6 @@
 package com.ctrip.hermes.remoting.command;
 
-import com.ctrip.hermes.channel.EndpointChannel;
+import com.ctrip.hermes.endpoint.EndpointChannel;
 
 public class CommandContext {
 

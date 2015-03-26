@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.producer.api.Producer;
+
 public class ProducerTest extends ComponentTestCase {
 	@Test
 	public void simpleSendWithoutLookup() throws IOException {

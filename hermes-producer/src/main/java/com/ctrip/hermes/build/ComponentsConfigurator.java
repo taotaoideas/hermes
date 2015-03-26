@@ -8,26 +8,13 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
-import com.ctrip.hermes.message.Pipeline;
-import com.ctrip.hermes.message.PipelineSink;
-import com.ctrip.hermes.message.ProducerSinkManager;
-import com.ctrip.hermes.message.ValveRegistry;
-import com.ctrip.hermes.message.codec.Codec;
-import com.ctrip.hermes.message.codec.CodecManager;
-import com.ctrip.hermes.message.codec.DefaultMessageCodec;
-import com.ctrip.hermes.message.codec.DefaultStoredMessageCodec;
-import com.ctrip.hermes.message.codec.MessageCodec;
-import com.ctrip.hermes.message.codec.StoredMessageCodec;
-import com.ctrip.hermes.message.codec.internal.DefaultCodecManager;
-import com.ctrip.hermes.message.codec.internal.JsonCodec;
-import com.ctrip.hermes.message.internal.BatchableMessageSender;
-import com.ctrip.hermes.message.internal.DefaultMessageSink;
-import com.ctrip.hermes.message.internal.DefaultMessageSinkManager;
-import com.ctrip.hermes.message.internal.KafkaMessageSink;
-import com.ctrip.hermes.message.internal.MessageSender;
-import com.ctrip.hermes.message.internal.ProducerPipeline;
-import com.ctrip.hermes.message.internal.ProducerValveRegistry;
-import com.ctrip.hermes.message.internal.SimpleMessageSender;
+import com.ctrip.hermes.codec.Codec;
+import com.ctrip.hermes.codec.CodecType;
+import com.ctrip.hermes.codec.JsonCodec;
+import com.ctrip.hermes.endpoint.DefaultEndpointChannelManager;
+import com.ctrip.hermes.endpoint.DefaultEndpointManager;
+import com.ctrip.hermes.endpoint.EndpointChannelManager;
+import com.ctrip.hermes.endpoint.EndpointManager;
 import com.ctrip.hermes.meta.MetaManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Endpoint;
@@ -36,26 +23,26 @@ import com.ctrip.hermes.meta.internal.DefaultMetaService;
 import com.ctrip.hermes.meta.internal.LocalMetaLoader;
 import com.ctrip.hermes.meta.internal.MetaLoader;
 import com.ctrip.hermes.meta.internal.RemoteMetaLoader;
-import com.ctrip.hermes.producer.Producer;
-import com.ctrip.hermes.producer.internal.DefaultProducer;
-import com.ctrip.hermes.remoting.CommandCodec;
-import com.ctrip.hermes.remoting.CommandProcessor;
-import com.ctrip.hermes.remoting.CommandProcessorManager;
-import com.ctrip.hermes.remoting.CommandRegistry;
-import com.ctrip.hermes.remoting.HandshakeResponseProcessor;
-import com.ctrip.hermes.remoting.SendMessageResponseProcessor;
-import com.ctrip.hermes.remoting.future.DefaultFutureManager;
-import com.ctrip.hermes.remoting.future.FutureManager;
-import com.ctrip.hermes.remoting.internal.DefaultCommandCodec;
-import com.ctrip.hermes.remoting.internal.DefaultCommandRegistry;
-import com.ctrip.hermes.remoting.netty.ClientManager;
-import com.ctrip.hermes.remoting.netty.DefaultClientManager;
-import com.ctrip.hermes.remoting.netty.NettyClient;
-import com.ctrip.hermes.remoting.netty.NettyClientHandler;
-import com.ctrip.hermes.remoting.netty.NettyDecoder;
-import com.ctrip.hermes.remoting.netty.NettyEncoder;
-import com.ctrip.hermes.spi.Valve;
-import com.ctrip.hermes.spi.internal.TracingMessageValve;
+import com.ctrip.hermes.partition.HashPartitioningAlgo;
+import com.ctrip.hermes.partition.PartitioningAlgo;
+import com.ctrip.hermes.pipeline.Pipeline;
+import com.ctrip.hermes.pipeline.PipelineSink;
+import com.ctrip.hermes.pipeline.ValveRegistry;
+import com.ctrip.hermes.pipeline.spi.Valve;
+import com.ctrip.hermes.pipeline.spi.internel.TracingMessageValve;
+import com.ctrip.hermes.producer.DefaultProducer;
+import com.ctrip.hermes.producer.api.Producer;
+import com.ctrip.hermes.producer.pipeline.DefaultMessageSink;
+import com.ctrip.hermes.producer.pipeline.DefaultProducerSinkManager;
+import com.ctrip.hermes.producer.pipeline.ProducerPipeline;
+import com.ctrip.hermes.producer.pipeline.ProducerSinkManager;
+import com.ctrip.hermes.producer.pipeline.ProducerValveRegistry;
+import com.ctrip.hermes.producer.sender.BatchableMessageSender;
+import com.ctrip.hermes.producer.sender.MessageSender;
+import com.ctrip.hermes.producer.sender.SimpleMessageSender;
+import com.ctrip.hermes.remoting.command.CommandProcessorManager;
+import com.ctrip.hermes.remoting.command.CommandRegistry;
+import com.ctrip.hermes.remoting.command.DefaultCommandRegistry;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
@@ -67,77 +54,88 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(Module.class, HermesProducerModule.ID, HermesProducerModule.class));
 
+		// producer
+		all.add(C(Producer.class, DefaultProducer.class) //
+		      .req(Pipeline.class, PRODUCER)//
+		);
+
+		// pipeline
+		all.add(C(Pipeline.class, PRODUCER, ProducerPipeline.class) //
+		      .req(ValveRegistry.class, PRODUCER) //
+		      .req(ProducerSinkManager.class)//
+		);
+
+		// valves
+		all.add(C(ValveRegistry.class, PRODUCER, ProducerValveRegistry.class));
+		all.add(C(Valve.class, TracingMessageValve.ID, TracingMessageValve.class));
+
+		// sinks
+		all.add(C(ProducerSinkManager.class, DefaultProducerSinkManager.class) //
+		      .req(MetaService.class)//
+		);
+
+		all.add(C(PipelineSink.class, Endpoint.BROKER, DefaultMessageSink.class) //
+		      .req(MessageSender.class, Endpoint.BROKER)//
+		);
+		all.add(C(PipelineSink.class, Endpoint.LOCAL, DefaultMessageSink.class) //
+		      .req(MessageSender.class, Endpoint.LOCAL)//
+		);
+		all.add(C(PipelineSink.class, Endpoint.TRANSACTION, DefaultMessageSink.class) //
+		      .req(MessageSender.class, Endpoint.TRANSACTION)//
+		);
+		// TODO kafka
+		// all.add(C(PipelineSink.class, Endpoint.KAFKA, KafkaMessageSink.class) //
+		// .req(MetaService.class, StoredMessageCodec.class, MessageCodec.class)); //
+
+		// message sender
+		all.add(C(MessageSender.class, Endpoint.BROKER, BatchableMessageSender.class)//
+		      .req(EndpointManager.class)//
+		      .req(EndpointChannelManager.class)//
+		      .req(PartitioningAlgo.class)//
+		      .req(MetaService.class)//
+		);
+		all.add(C(MessageSender.class, Endpoint.LOCAL, SimpleMessageSender.class)//
+		      .req(EndpointManager.class)//
+		      .req(EndpointChannelManager.class)//
+		      .req(PartitioningAlgo.class)//
+		      .req(MetaService.class)//
+		);
+		all.add(C(MessageSender.class, Endpoint.TRANSACTION, BatchableMessageSender.class)//
+		      .req(EndpointManager.class)//
+		      .req(EndpointChannelManager.class)//
+		      .req(PartitioningAlgo.class)//
+		      .req(MetaService.class)//
+		);
+
+		// partition algo
+		all.add(C(PartitioningAlgo.class, HashPartitioningAlgo.class));
+
 		// meta
 		all.add(C(MetaLoader.class, LocalMetaLoader.ID, LocalMetaLoader.class));
 		all.add(C(MetaLoader.class, RemoteMetaLoader.ID, RemoteMetaLoader.class));
 		all.add(C(MetaManager.class, DefaultMetaManager.class));
 		all.add(C(MetaService.class, DefaultMetaService.class) //
-		      .req(MetaManager.class));
+		      .req(MetaManager.class)//
+		);
 
-		all.add(C(Producer.class, DefaultProducer.class) //
-		      .req(Pipeline.class, PRODUCER));
-		all.add(C(Pipeline.class, PRODUCER, ProducerPipeline.class) //
-		      .req(ValveRegistry.class, PRODUCER) //
-		      .req(ProducerSinkManager.class));
+		// endpoint manager
+		all.add(C(EndpointManager.class, DefaultEndpointManager.class) //
+		      .req(MetaService.class)//
+		);
 
-		// codecs
-		all.add(C(Codec.class, JsonCodec.ID, JsonCodec.class));
-		all.add(C(CodecManager.class, DefaultCodecManager.class));
+		// endpoint channel
+		all.add(C(EndpointChannelManager.class, DefaultEndpointChannelManager.class) //
+		      .req(CommandProcessorManager.class)//
+		);
 
-		all.add(C(FutureManager.class, DefaultFutureManager.class));
-
-		// sinks
-		all.add(C(PipelineSink.class, Endpoint.BROKER, DefaultMessageSink.class) //
-		      .req(MessageSender.class, Endpoint.BROKER));
-		all.add(C(PipelineSink.class, Endpoint.LOCAL, DefaultMessageSink.class) //
-		      .req(MessageSender.class, Endpoint.LOCAL));
-		all.add(C(PipelineSink.class, Endpoint.TRANSACTION, DefaultMessageSink.class) //
-		      .req(MessageSender.class, Endpoint.TRANSACTION));
-		all.add(C(PipelineSink.class, Endpoint.KAFKA, KafkaMessageSink.class) //
-		      .req(MetaService.class, StoredMessageCodec.class, MessageCodec.class)); //
-		all.add(C(ProducerSinkManager.class, DefaultMessageSinkManager.class) //
-		      .req(MetaService.class));
-
-		// message sender
-		all.add(C(MessageSender.class, Endpoint.BROKER, BatchableMessageSender.class));
-		all.add(C(MessageSender.class, Endpoint.LOCAL, SimpleMessageSender.class));
-		all.add(C(MessageSender.class, Endpoint.TRANSACTION, BatchableMessageSender.class));
-
-		// valves
-		all.add(C(Valve.class, TracingMessageValve.ID, TracingMessageValve.class));
-		all.add(C(ValveRegistry.class, PRODUCER, ProducerValveRegistry.class));
-
-		all.add(C(ClientManager.class, DefaultClientManager.class));
-		all.add(C(NettyClientHandler.class).is(PER_LOOKUP) //
-		      .req(CommandProcessorManager.class));
-		all.add(C(NettyClient.class).is(PER_LOOKUP));
-		all.add(C(NettyDecoder.class).is(PER_LOOKUP) //
-		      .req(CommandCodec.class));
-		all.add(C(NettyEncoder.class).is(PER_LOOKUP) //
-		      .req(CommandCodec.class));
-
-		all.add(C(CommandProcessorManager.class) //
-		      .req(CommandRegistry.class));
+		// command processor
+		all.add(C(CommandProcessorManager.class, CommandProcessorManager.class) //
+		      .req(CommandRegistry.class)//
+		);
 		all.add(C(CommandRegistry.class, DefaultCommandRegistry.class));
-		all.add(C(CommandCodec.class, DefaultCommandCodec.class));
 
-		// channel
-//		all.add(C(MessageChannelManager.class, LocalMessageChannelManager.ID, LocalMessageChannelManager.class) //
-//		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
-//		all.add(C(MessageQueueManager.class, LocalMessageQueueManager.ID, LocalMessageQueueManager.class) //
-//		      .req(MetaService.class));
-
-		// command processors
-		all.add(C(CommandProcessor.class, HandshakeResponseProcessor.ID, HandshakeResponseProcessor.class));
-		all.add(C(CommandProcessor.class, SendMessageResponseProcessor.ID, SendMessageResponseProcessor.class) //
-		      .req(FutureManager.class));
-
-		all.add(C(MessageCodec.class, DefaultMessageCodec.class) //
-		      .req(CodecManager.class));
-		all.add(C(StoredMessageCodec.class, DefaultStoredMessageCodec.class));
-
-//		all.add(C(MessageQueueMonitor.class) //
-//		      .req(MessageQueueManager.class, LocalMessageQueueManager.ID));
+		// codec
+		all.add(C(Codec.class, CodecType.JSON.toString(), JsonCodec.class));
 
 		return all;
 	}

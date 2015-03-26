@@ -9,21 +9,22 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.message.DecodedProducerMessage;
-import com.ctrip.hermes.message.ProducerMessage;
-import com.ctrip.hermes.message.codec.HermesPrimitiveCodec;
-import com.ctrip.hermes.message.codec.internal.JsonCodec;
+import com.ctrip.hermes.codec.JsonCodec;
+import com.ctrip.hermes.producer.DecodedProducerMessage;
+import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.producer.api.SendResult;
 import com.ctrip.hermes.remoting.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class SendMessageCommandTest {
+public class SendMessageCommandTest extends ComponentTestCase{
 
 	@SuppressWarnings("unchecked")
 	@Test

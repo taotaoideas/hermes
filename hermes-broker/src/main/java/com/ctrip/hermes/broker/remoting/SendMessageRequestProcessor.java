@@ -8,7 +8,7 @@ import java.util.Map;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
-import com.ctrip.hermes.message.DecodedProducerMessage;
+import com.ctrip.hermes.producer.DecodedProducerMessage;
 import com.ctrip.hermes.remoting.command.CommandContext;
 import com.ctrip.hermes.remoting.command.CommandProcessor;
 import com.ctrip.hermes.remoting.command.CommandType;

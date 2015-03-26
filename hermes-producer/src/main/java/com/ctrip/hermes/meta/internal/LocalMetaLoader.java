@@ -25,7 +25,7 @@ public class LocalMetaLoader implements MetaLoader {
 			try {
 				return DefaultSaxParser.parse(in);
 			} catch (SAXException | IOException e) {
-				throw new RuntimeException(String.format("Error parse local meta file %s", PATH));
+				throw new RuntimeException(String.format("Error parse local meta file %s", PATH), e);
 			}
 		}
 	}

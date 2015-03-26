@@ -26,8 +26,8 @@ import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.remoting.Command;
 import com.ctrip.hermes.remoting.CommandType;
-import com.ctrip.hermes.remoting.netty.ClientManager;
-import com.ctrip.hermes.remoting.netty.NettyClientHandler;
+import com.ctrip.hermes.remoting.codec.ClientManager;
+import com.ctrip.hermes.remoting.codec.NettyClientHandler;
 import com.ctrip.hermes.storage.message.Ack;
 import com.ctrip.hermes.storage.range.OffsetRecord;
 

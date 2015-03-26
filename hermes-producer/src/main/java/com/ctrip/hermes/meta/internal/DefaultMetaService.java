@@ -8,6 +8,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.codec.CodecType;
 import com.ctrip.hermes.meta.MetaManager;
 import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Datasource;
@@ -82,6 +83,16 @@ public class DefaultMetaService implements Initializable, MetaService {
 	public Storage findStorage(String topic) {
 		Partition p0 = m_meta.findTopic(topic).getPartitions().get(0);
 		return m_dsId2Storage.get(p0.getWriteDatasource());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.ctrip.hermes.meta.MetaService#getCodecType(java.lang.String)
+	 */
+	@Override
+	public CodecType getCodecType(String topic) {
+		return CodecType.valueOf(m_meta.findTopic(topic).getCodec().getType().toUpperCase());
 	}
 
 }

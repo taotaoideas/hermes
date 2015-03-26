@@ -3,11 +3,12 @@ package com.ctrip.hermes.message.internal;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.message.Pipeline;
-import com.ctrip.hermes.message.PipelineContext;
-import com.ctrip.hermes.message.PipelineSink;
-import com.ctrip.hermes.message.ProducerMessage;
-import com.ctrip.hermes.message.ValveRegistry;
+import com.ctrip.hermes.pipeline.DefaultPipelineContext;
+import com.ctrip.hermes.pipeline.Pipeline;
+import com.ctrip.hermes.pipeline.PipelineContext;
+import com.ctrip.hermes.pipeline.PipelineSink;
+import com.ctrip.hermes.pipeline.ValveRegistry;
+import com.ctrip.hermes.producer.ProducerMessage;
 
 public class ReceiverPipeline implements Pipeline<Void> {
 

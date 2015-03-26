@@ -8,6 +8,7 @@
 	</topic>
 	<topic name='topic.6' />
 	<topic name='kafka.SimpleTopic' partition-count='1'>
+		<codec type="json"/>
 		<partition id='0' read-datasource='kafka-ds-read' write-datasource='kafka-ds-write' endpoint='kafka-endpoint1' />
 	</topic>
 	<topic name='kafka.SimpleTopic1' />
