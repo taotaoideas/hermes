@@ -1,18 +1,14 @@
 package com.ctrip.hermes.container.remoting;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.core.transport.command.CommandType;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.message.StoredMessage;
-import com.ctrip.hermes.message.codec.StoredMessageCodec;
-import com.ctrip.hermes.remoting.Command;
-import com.ctrip.hermes.remoting.CommandContext;
-import com.ctrip.hermes.remoting.CommandProcessor;
-import com.ctrip.hermes.remoting.CommandType;
 
 public class ConsumeRequestProcessor implements CommandProcessor {
 
@@ -21,21 +17,21 @@ public class ConsumeRequestProcessor implements CommandProcessor {
 	@Inject
 	private ConsumerBootstrap m_bootstrap;
 	
-	@Inject
-	private StoredMessageCodec m_codec;
+//	@Inject
+//	private StoredMessageCodec m_codec;
 
 	@Override
 	public List<CommandType> commandTypes() {
-		return Arrays.asList(CommandType.ConsumeRequest);
+		return Arrays.asList();
 	}
 
 	@Override
-	public void process(CommandContext ctx) {
-		Command cmd = ctx.getCommand();
+	public void process(CommandProcessorContext ctx) {
+		//		Command cmd = ctx.getCommand();
 
 		// TODO use bytebuffer
-		List<StoredMessage<byte[]>> msgs = m_codec.decode(ByteBuffer.wrap(cmd.getBody()));
-		m_bootstrap.deliverMessage(cmd.getCorrelationId(), msgs);
+//		List<StoredMessage<byte[]>> msgs = m_codec.decode(ByteBuffer.wrap(cmd.getBody()));
+//		m_bootstrap.deliverMessage(cmd.getCorrelationId(), msgs);
 	}
 
 }

@@ -14,7 +14,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.message.Message;
-import com.ctrip.hermes.producer.Producer;
+import com.ctrip.hermes.producer.api.Producer;
 
 public class PojoMessageTest extends ComponentTestCase {
 
