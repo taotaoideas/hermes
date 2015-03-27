@@ -18,7 +18,6 @@ import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.message.internal.DeliverPipeline;
 import com.ctrip.hermes.message.internal.ReceiverPipeline;
-import com.dianping.cat.message.spi.MessageCodec;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 

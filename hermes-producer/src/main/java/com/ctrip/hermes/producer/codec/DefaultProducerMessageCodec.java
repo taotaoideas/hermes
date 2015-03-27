@@ -27,6 +27,7 @@ public class DefaultProducerMessageCodec implements ProducerMessageCodec {
 		writeProperties(msg.getAppProperties(), buf, codec);
 		writeProperties(msg.getSysProperties(), buf, codec);
 
+		// TODO pass buf to m_codec
 		byte[] body = m_codec.encode(msg.getBody());
 		int indexBeforeLen = buf.writerIndex();
 		codec.writeInt(-1);

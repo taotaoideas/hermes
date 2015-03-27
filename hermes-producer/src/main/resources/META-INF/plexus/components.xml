@@ -87,10 +87,10 @@
 			<implementation>com.ctrip.hermes.producer.sender.BatchableMessageSender</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
@@ -106,10 +106,10 @@
 			<implementation>com.ctrip.hermes.producer.sender.SimpleMessageSender</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
@@ -125,10 +125,10 @@
 			<implementation>com.ctrip.hermes.producer.sender.BatchableMessageSender</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
@@ -166,8 +166,8 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
-			<implementation>com.ctrip.hermes.core.endpoint.DefaultEndpointManager</implementation>
+			<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
+			<implementation>com.ctrip.hermes.core.transport.endpoint.DefaultEndpointManager</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
@@ -175,8 +175,8 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
-			<implementation>com.ctrip.hermes.core.endpoint.DefaultEndpointChannelManager</implementation>
+			<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
+			<implementation>com.ctrip.hermes.core.transport.endpoint.DefaultEndpointChannelManager</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager</role>
