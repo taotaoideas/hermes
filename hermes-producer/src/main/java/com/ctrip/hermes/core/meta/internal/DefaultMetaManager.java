@@ -1,4 +1,4 @@
-package com.ctrip.hermes.meta.internal;
+package com.ctrip.hermes.core.meta.internal;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;

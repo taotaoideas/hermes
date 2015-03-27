@@ -1,4 +1,4 @@
-package com.ctrip.hermes.meta.internal;
+package com.ctrip.hermes.core.meta.internal;
 
 import com.ctrip.hermes.meta.entity.Meta;
 

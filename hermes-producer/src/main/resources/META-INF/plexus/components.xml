@@ -143,22 +143,22 @@
 			<implementation>com.ctrip.hermes.core.partition.HashPartitioningStrategy</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.meta.internal.MetaLoader</role>
+			<role>com.ctrip.hermes.core.meta.internal.MetaLoader</role>
 			<role-hint>local-meta-loader</role-hint>
-			<implementation>com.ctrip.hermes.meta.internal.LocalMetaLoader</implementation>
+			<implementation>com.ctrip.hermes.core.meta.internal.LocalMetaLoader</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.meta.internal.MetaLoader</role>
+			<role>com.ctrip.hermes.core.meta.internal.MetaLoader</role>
 			<role-hint>remote-meta-loader</role-hint>
-			<implementation>com.ctrip.hermes.meta.internal.RemoteMetaLoader</implementation>
+			<implementation>com.ctrip.hermes.core.meta.internal.RemoteMetaLoader</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.meta.MetaManager</role>
-			<implementation>com.ctrip.hermes.meta.internal.DefaultMetaManager</implementation>
+			<implementation>com.ctrip.hermes.core.meta.internal.DefaultMetaManager</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.meta.MetaService</role>
-			<implementation>com.ctrip.hermes.meta.internal.DefaultMetaService</implementation>
+			<implementation>com.ctrip.hermes.core.meta.internal.DefaultMetaService</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaManager</role>
