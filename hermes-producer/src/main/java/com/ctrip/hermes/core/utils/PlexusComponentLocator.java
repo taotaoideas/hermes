@@ -1,4 +1,4 @@
-package com.ctrip.hermes.utils;
+package com.ctrip.hermes.core.utils;
 
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.unidal.lookup.ContainerLoader;

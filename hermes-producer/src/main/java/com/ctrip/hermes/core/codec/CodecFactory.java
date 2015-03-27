@@ -1,7 +1,7 @@
 package com.ctrip.hermes.core.codec;
 
 import com.ctrip.hermes.core.meta.MetaService;
-import com.ctrip.hermes.utils.PlexusComponentLocator;
+import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

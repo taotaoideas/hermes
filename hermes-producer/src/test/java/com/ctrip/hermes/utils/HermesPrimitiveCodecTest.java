@@ -14,6 +14,8 @@ import java.util.Map;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
+
 public class HermesPrimitiveCodecTest extends ComponentTestCase {
 
 	final static int dataSize = 10000;

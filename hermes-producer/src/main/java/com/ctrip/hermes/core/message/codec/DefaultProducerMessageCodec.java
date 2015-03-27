@@ -8,7 +8,7 @@ import com.ctrip.hermes.core.codec.Codec;
 import com.ctrip.hermes.core.codec.CodecFactory;
 import com.ctrip.hermes.core.message.DecodedProducerMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.utils.HermesPrimitiveCodec;
+import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
 public class DefaultProducerMessageCodec implements ProducerMessageCodec {
 	private Codec m_codec ;

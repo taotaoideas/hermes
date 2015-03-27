@@ -14,8 +14,8 @@ import com.ctrip.hermes.core.message.DecodedProducerMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.codec.ProducerMessageCodec;
 import com.ctrip.hermes.core.message.codec.ProducerMessageCodecFactory;
+import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 import com.ctrip.hermes.producer.api.SendResult;
-import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
