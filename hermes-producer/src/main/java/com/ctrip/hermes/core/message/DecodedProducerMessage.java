@@ -38,9 +38,7 @@ public class DecodedProducerMessage {
 	}
 
 	public byte[] readBody() {
-		byte[] bodyRawData = new byte[m_body.readableBytes()];
-		getBody().readBytes(bodyRawData);
-		return bodyRawData;
+		return readByteBuf(m_body);
 	}
 
 	public String getKey() {
@@ -57,6 +55,20 @@ public class DecodedProducerMessage {
 
 	public ByteBuf getSysProperties() {
 		return m_sysProperties.duplicate();
+	}
+
+	public byte[] readAppProperties() {
+		return readByteBuf(m_appProperties);
+	}
+
+	public byte[] readSysProperties() {
+		return readByteBuf(m_sysProperties);
+	}
+
+	private byte[] readByteBuf(ByteBuf buf) {
+		byte[] bytes = new byte[buf.readableBytes()];
+		buf.readBytes(bytes);
+		return bytes;
 	}
 
 }
