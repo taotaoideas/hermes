@@ -1,4 +1,4 @@
-package com.ctrip.hermes.container.kakfa;
+package com.ctrip.hermes.kakfa;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,9 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.producer.Producer;
-import com.ctrip.hermes.producer.Producer.MessageHolder;
+import com.ctrip.hermes.producer.api.Producer;
+import com.ctrip.hermes.producer.api.Producer.MessageHolder;
+import com.ctrip.hermes.producer.api.SendResult;
 
 public class ProduerTest extends ComponentTestCase {
 

@@ -6,19 +6,6 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
-import com.ctrip.hermes.container.BrokerConsumerBootstrap;
-import com.ctrip.hermes.container.ConsumerValveRegistry;
-import com.ctrip.hermes.container.KafkaConsumerBootstrap;
-import com.ctrip.hermes.container.remoting.ConsumeRequestProcessor;
-import com.ctrip.hermes.core.meta.MetaService;
-import com.ctrip.hermes.core.pipeline.Pipeline;
-import com.ctrip.hermes.core.pipeline.ValveRegistry;
-import com.ctrip.hermes.core.pipeline.spi.Valve;
-import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.engine.ConsumerPipeline;
-import com.ctrip.hermes.engine.DecodeMessageValve;
-
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 	private final static String BROKER_CONSUMER = "broker-consumer";

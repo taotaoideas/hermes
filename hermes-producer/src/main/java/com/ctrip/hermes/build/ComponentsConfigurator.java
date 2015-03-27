@@ -8,6 +8,7 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
+import com.ctrip.hermes.core.codec.AvroCodec;
 import com.ctrip.hermes.core.codec.Codec;
 import com.ctrip.hermes.core.codec.CodecType;
 import com.ctrip.hermes.core.codec.JsonCodec;
@@ -41,6 +42,7 @@ import com.ctrip.hermes.producer.pipeline.ProducerPipeline;
 import com.ctrip.hermes.producer.pipeline.ProducerSinkManager;
 import com.ctrip.hermes.producer.pipeline.ProducerValveRegistry;
 import com.ctrip.hermes.producer.sender.BatchableMessageSender;
+import com.ctrip.hermes.producer.sender.KafkaMessageSender;
 import com.ctrip.hermes.producer.sender.MessageSender;
 import com.ctrip.hermes.producer.sender.SimpleMessageSender;
 
@@ -73,7 +75,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(ProducerSinkManager.class, DefaultProducerSinkManager.class) //
 		      .req(MetaService.class)//
 		);
-
 		all.add(C(PipelineSink.class, Endpoint.BROKER, DefaultMessageSink.class) //
 		      .req(MessageSender.class, Endpoint.BROKER)//
 		);
@@ -83,9 +84,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(PipelineSink.class, Endpoint.TRANSACTION, DefaultMessageSink.class) //
 		      .req(MessageSender.class, Endpoint.TRANSACTION)//
 		);
-		// TODO kafka
-		// all.add(C(PipelineSink.class, Endpoint.KAFKA, KafkaMessageSink.class) //
-		// .req(MetaService.class, StoredMessageCodec.class, MessageCodec.class)); //
+		all.add(C(PipelineSink.class, Endpoint.KAFKA, DefaultMessageSink.class) //
+				.req(MessageSender.class, Endpoint.KAFKA)
+		);
 
 		// message sender
 		all.add(C(MessageSender.class, Endpoint.BROKER, BatchableMessageSender.class)//
@@ -106,7 +107,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(PartitioningStrategy.class)//
 		      .req(MetaService.class)//
 		);
-
+		all.add(C(MessageSender.class, Endpoint.KAFKA, KafkaMessageSender.class)//
+				.req(MetaService.class)
+		);
+		
 		// partition algo
 		all.add(C(PartitioningStrategy.class, HashPartitioningStrategy.class));
 
@@ -136,7 +140,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// codec
 		all.add(C(Codec.class, CodecType.JSON.toString(), JsonCodec.class));
-
+		all.add(C(Codec.class, CodecType.AVRO.toString(), AvroCodec.class));
 		return all;
 	}
 

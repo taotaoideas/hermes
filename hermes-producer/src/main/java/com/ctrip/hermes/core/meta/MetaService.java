@@ -28,7 +28,7 @@ public interface MetaService {
 	 * @param topic
 	 */
 	Storage findStorage(String topic);
-
+	
 	/**
 	 * @param topic
 	 * @return

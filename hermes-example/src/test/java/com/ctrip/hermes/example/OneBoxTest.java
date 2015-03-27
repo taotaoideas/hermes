@@ -17,10 +17,10 @@ import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.meta.MetaService;
-import com.ctrip.hermes.core.meta.entity.Connector;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.producer.Producer;
+import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.producer.api.Producer;
 
 public class OneBoxTest extends ComponentTestCase {
 
@@ -38,9 +38,9 @@ public class OneBoxTest extends ComponentTestCase {
 		String topic = "order.new";
 
 //		lookup(MessageQueueMonitor.class);
-		Connector connector = lookup(MetaService.class).getConnector(topic);
+		Storage storage = lookup(MetaService.class).findStorage(topic);
 
-		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, connector.getType());
+		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, storage.getType());
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
 		subscribers.put("group1", Arrays.asList("1-a", "1-b"));

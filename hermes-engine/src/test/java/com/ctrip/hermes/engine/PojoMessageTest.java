@@ -24,7 +24,7 @@ public class PojoMessageTest extends ComponentTestCase {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final AtomicReference<Person> got = new AtomicReference<PojoMessageTest.Person>();
 
-		String topic = "order.new";
+		String topic = "local.order.new";
 		Subscriber s = new Subscriber(topic, "group1", new Consumer<Person>() {
 
 			@Override

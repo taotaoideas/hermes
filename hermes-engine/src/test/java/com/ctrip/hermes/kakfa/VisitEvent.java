@@ -1,4 +1,4 @@
-package com.ctrip.hermes.container.kakfa;
+package com.ctrip.hermes.kakfa;
 
 import java.util.Date;
 
