@@ -1,10 +1,17 @@
 package com.ctrip.hermes.broker.remoting;
 
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
@@ -16,15 +23,16 @@ import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawData
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
-import com.ctrip.hermes.storage.MessageQueue;
-import com.ctrip.hermes.storage.message.Record;
+import com.mysql.jdbc.Driver;
 
-public class SendMessageRequestProcessor implements CommandProcessor {
+public class SendMessageRequestProcessor implements CommandProcessor, Initializable {
 
 	public static final String ID = "send-message-request";
 
 	@Inject
 	private MessageQueueManager m_queueManager;
+
+	private Connection m_conn;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -39,8 +47,11 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 		for (Map.Entry<Tpp, MessageRawDataBatch> entry : rawBatches.entrySet()) {
 			Tpp tpp = entry.getKey();
-			MessageQueue q = m_queueManager.findQueue(tpp);
-			q.write(convertToRecord(entry.getValue().getMessages(), tpp));
+			try {
+				saveToMysql(entry.getValue().getMessages(), tpp);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		SendMessageAckCommand ack = new SendMessageAckCommand();
@@ -50,21 +61,35 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 	}
 
-	private List<Record> convertToRecord(List<DecodedProducerMessage> messages, Tpp tpp) {
-		List<Record> records = new ArrayList<>();
+	private void saveToMysql(List<DecodedProducerMessage> messages, Tpp tpp) throws SQLException {
+		String sql = "insert into fuck " //
+		      + "values (?,?,?,?,?,?,?)";
+		PreparedStatement stmt = m_conn.prepareStatement(sql);
 
 		for (DecodedProducerMessage msg : messages) {
-			Record r = new Record();
+			stmt.setLong(1, 1);
+			stmt.setLong(2, 0);
+			stmt.setTimestamp(3, new Timestamp(msg.getBornTime()));
+			stmt.setString(4, msg.getKey());
+			stmt.setBlob(5, new ByteArrayInputStream(msg.readAppProperties()));
+			stmt.setBlob(6, new ByteArrayInputStream(msg.readSysProperties()));
+			stmt.setBlob(7, new ByteArrayInputStream(msg.readBody()));
 
-			r.setBornTime(msg.getBornTime());
-			r.setContent(msg.readBody());
-			r.setKey(msg.getKey());
-			// TODO should add other fields after refactoring MessageQueue
-
-			records.add(r);
+			stmt.addBatch();
 		}
 
-		return records;
+		stmt.executeUpdate();
+	}
+
+	@Override
+	public void initialize() throws InitializationException {
+		try {
+			Driver.class.newInstance();
+			m_conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1/hermes", "root", null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new InitializationException("", e);
+		}
 	}
 
 }

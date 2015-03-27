@@ -2,8 +2,8 @@ package com.ctrip.hermes.consumer;
 
 import java.util.List;
 
+import com.ctrip.hermes.core.constants.CatConstants;
 import com.ctrip.hermes.message.Message;
-import com.ctrip.hermes.remoting.CatConstants;
 import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;

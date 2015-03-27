@@ -1,7 +1,7 @@
 package com.ctrip.hermes.engine;
 
-import com.ctrip.hermes.message.PipelineContext;
-import com.ctrip.hermes.spi.Valve;
+import com.ctrip.hermes.core.pipeline.PipelineContext;
+import com.ctrip.hermes.core.pipeline.spi.Valve;
 
 public class ConsumerTracingValve implements Valve {
 

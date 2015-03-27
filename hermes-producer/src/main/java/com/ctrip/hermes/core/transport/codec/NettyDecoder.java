@@ -30,7 +30,8 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 			e.printStackTrace();
 		} finally {
 			if (null != frame) {
-				frame.release();
+				// TODO
+//				frame.release();
 			}
 		}
 
