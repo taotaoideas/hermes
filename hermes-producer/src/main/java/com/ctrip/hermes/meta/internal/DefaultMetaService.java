@@ -8,9 +8,9 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.codec.CodecType;
-import com.ctrip.hermes.meta.MetaManager;
-import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.core.codec.CodecType;
+import com.ctrip.hermes.core.meta.MetaManager;
+import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Meta;

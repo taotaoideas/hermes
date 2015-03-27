@@ -8,14 +8,14 @@ import java.util.Map;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
-import com.ctrip.hermes.producer.DecodedProducerMessage;
-import com.ctrip.hermes.remoting.command.CommandContext;
-import com.ctrip.hermes.remoting.command.CommandProcessor;
-import com.ctrip.hermes.remoting.command.CommandType;
-import com.ctrip.hermes.remoting.command.SendMessageAckCommand;
-import com.ctrip.hermes.remoting.command.SendMessageCommand;
-import com.ctrip.hermes.remoting.command.SendMessageCommand.MessageRawDataBatch;
-import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.transport.command.CommandType;
+import com.ctrip.hermes.core.transport.command.SendMessageAckCommand;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.message.Record;
 
@@ -32,7 +32,7 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 	}
 
 	@Override
-	public void process(CommandContext ctx) {
+	public void process(CommandProcessorContext ctx) {
 		SendMessageCommand req = (SendMessageCommand) ctx.getCommand();
 
 		Map<Tpp, MessageRawDataBatch> rawBatches = req.getMessageRawDataBatches();

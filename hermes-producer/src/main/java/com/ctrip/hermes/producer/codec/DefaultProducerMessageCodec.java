@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.Map;
 
-import com.ctrip.hermes.codec.Codec;
-import com.ctrip.hermes.codec.CodecFactory;
-import com.ctrip.hermes.producer.DecodedProducerMessage;
+import com.ctrip.hermes.core.codec.Codec;
+import com.ctrip.hermes.core.codec.CodecFactory;
+import com.ctrip.hermes.core.message.DecodedProducerMessage;
 import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 

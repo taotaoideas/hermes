@@ -11,9 +11,9 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.meta.entity.Endpoint;
-import com.ctrip.hermes.pipeline.PipelineSink;
 import com.ctrip.hermes.producer.api.SendResult;
 import com.ctrip.hermes.producer.pipeline.ProducerSinkManager;
 

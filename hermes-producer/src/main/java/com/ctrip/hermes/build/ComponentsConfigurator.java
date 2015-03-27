@@ -8,28 +8,31 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
-import com.ctrip.hermes.codec.Codec;
-import com.ctrip.hermes.codec.CodecType;
-import com.ctrip.hermes.codec.JsonCodec;
-import com.ctrip.hermes.endpoint.DefaultEndpointChannelManager;
-import com.ctrip.hermes.endpoint.DefaultEndpointManager;
-import com.ctrip.hermes.endpoint.EndpointChannelManager;
-import com.ctrip.hermes.endpoint.EndpointManager;
-import com.ctrip.hermes.meta.MetaManager;
-import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.core.codec.Codec;
+import com.ctrip.hermes.core.codec.CodecType;
+import com.ctrip.hermes.core.codec.JsonCodec;
+import com.ctrip.hermes.core.endpoint.DefaultEndpointChannelManager;
+import com.ctrip.hermes.core.endpoint.DefaultEndpointManager;
+import com.ctrip.hermes.core.endpoint.EndpointChannelManager;
+import com.ctrip.hermes.core.endpoint.EndpointManager;
+import com.ctrip.hermes.core.meta.MetaManager;
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.partition.HashPartitioningStrategy;
+import com.ctrip.hermes.core.partition.PartitioningStrategy;
+import com.ctrip.hermes.core.pipeline.Pipeline;
+import com.ctrip.hermes.core.pipeline.PipelineSink;
+import com.ctrip.hermes.core.pipeline.ValveRegistry;
+import com.ctrip.hermes.core.pipeline.spi.Valve;
+import com.ctrip.hermes.core.pipeline.spi.internal.TracingMessageValve;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessorRegistry;
+import com.ctrip.hermes.core.transport.command.processor.DefaultCommandProcessorRegistry;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.internal.DefaultMetaManager;
 import com.ctrip.hermes.meta.internal.DefaultMetaService;
 import com.ctrip.hermes.meta.internal.LocalMetaLoader;
 import com.ctrip.hermes.meta.internal.MetaLoader;
 import com.ctrip.hermes.meta.internal.RemoteMetaLoader;
-import com.ctrip.hermes.partition.HashPartitioningAlgo;
-import com.ctrip.hermes.partition.PartitioningAlgo;
-import com.ctrip.hermes.pipeline.Pipeline;
-import com.ctrip.hermes.pipeline.PipelineSink;
-import com.ctrip.hermes.pipeline.ValveRegistry;
-import com.ctrip.hermes.pipeline.spi.Valve;
-import com.ctrip.hermes.pipeline.spi.internel.TracingMessageValve;
 import com.ctrip.hermes.producer.DefaultProducer;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.pipeline.DefaultMessageSink;
@@ -40,9 +43,6 @@ import com.ctrip.hermes.producer.pipeline.ProducerValveRegistry;
 import com.ctrip.hermes.producer.sender.BatchableMessageSender;
 import com.ctrip.hermes.producer.sender.MessageSender;
 import com.ctrip.hermes.producer.sender.SimpleMessageSender;
-import com.ctrip.hermes.remoting.command.CommandProcessorManager;
-import com.ctrip.hermes.remoting.command.CommandRegistry;
-import com.ctrip.hermes.remoting.command.DefaultCommandRegistry;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
@@ -91,24 +91,24 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(MessageSender.class, Endpoint.BROKER, BatchableMessageSender.class)//
 		      .req(EndpointManager.class)//
 		      .req(EndpointChannelManager.class)//
-		      .req(PartitioningAlgo.class)//
+		      .req(PartitioningStrategy.class)//
 		      .req(MetaService.class)//
 		);
 		all.add(C(MessageSender.class, Endpoint.LOCAL, SimpleMessageSender.class)//
 		      .req(EndpointManager.class)//
 		      .req(EndpointChannelManager.class)//
-		      .req(PartitioningAlgo.class)//
+		      .req(PartitioningStrategy.class)//
 		      .req(MetaService.class)//
 		);
 		all.add(C(MessageSender.class, Endpoint.TRANSACTION, BatchableMessageSender.class)//
 		      .req(EndpointManager.class)//
 		      .req(EndpointChannelManager.class)//
-		      .req(PartitioningAlgo.class)//
+		      .req(PartitioningStrategy.class)//
 		      .req(MetaService.class)//
 		);
 
 		// partition algo
-		all.add(C(PartitioningAlgo.class, HashPartitioningAlgo.class));
+		all.add(C(PartitioningStrategy.class, HashPartitioningStrategy.class));
 
 		// meta
 		all.add(C(MetaLoader.class, LocalMetaLoader.ID, LocalMetaLoader.class));
@@ -130,9 +130,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// command processor
 		all.add(C(CommandProcessorManager.class, CommandProcessorManager.class) //
-		      .req(CommandRegistry.class)//
+		      .req(CommandProcessorRegistry.class)//
 		);
-		all.add(C(CommandRegistry.class, DefaultCommandRegistry.class));
+		all.add(C(CommandProcessorRegistry.class, DefaultCommandProcessorRegistry.class));
 
 		// codec
 		all.add(C(Codec.class, CodecType.JSON.toString(), JsonCodec.class));

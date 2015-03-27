@@ -18,12 +18,12 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.pipeline.PipelineContext;
+import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.message.StoredMessage;
-import com.ctrip.hermes.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
-import com.ctrip.hermes.pipeline.PipelineContext;
-import com.ctrip.hermes.pipeline.PipelineSink;
 import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.producer.api.SendResult;
 import com.ctrip.hermes.producer.codec.ProducerMessageCodec;

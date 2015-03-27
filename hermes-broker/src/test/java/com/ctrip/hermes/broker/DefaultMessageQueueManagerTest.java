@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
-import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.storage.MessageQueue;
 
 public class DefaultMessageQueueManagerTest extends ComponentTestCase {

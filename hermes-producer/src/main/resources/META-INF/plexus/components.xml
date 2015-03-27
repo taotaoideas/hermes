@@ -10,18 +10,18 @@
 			<implementation>com.ctrip.hermes.producer.DefaultProducer</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.pipeline.Pipeline</role>
+					<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
 					<role-hint>producer</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.Pipeline</role>
+			<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
 			<role-hint>producer</role-hint>
 			<implementation>com.ctrip.hermes.producer.pipeline.ProducerPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
+					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 					<role-hint>producer</role-hint>
 				</requirement>
 				<requirement>
@@ -30,26 +30,26 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
+			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 			<role-hint>producer</role-hint>
 			<implementation>com.ctrip.hermes.producer.pipeline.ProducerValveRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.spi.Valve</role>
+			<role>com.ctrip.hermes.core.pipeline.spi.Valve</role>
 			<role-hint>tracing</role-hint>
-			<implementation>com.ctrip.hermes.pipeline.spi.internel.TracingMessageValve</implementation>
+			<implementation>com.ctrip.hermes.core.pipeline.spi.internal.TracingMessageValve</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.producer.pipeline.ProducerSinkManager</role>
 			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerSinkManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.PipelineSink</role>
+			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>broker</role-hint>
 			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
 			<requirements>
@@ -60,7 +60,7 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.PipelineSink</role>
+			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>local</role-hint>
 			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
 			<requirements>
@@ -71,7 +71,7 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.PipelineSink</role>
+			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>transaction</role-hint>
 			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
 			<requirements>
@@ -87,16 +87,16 @@
 			<implementation>com.ctrip.hermes.producer.sender.BatchableMessageSender</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.endpoint.EndpointManager</role>
+					<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.endpoint.EndpointChannelManager</role>
+					<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.partition.PartitioningAlgo</role>
+					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -106,16 +106,16 @@
 			<implementation>com.ctrip.hermes.producer.sender.SimpleMessageSender</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.endpoint.EndpointManager</role>
+					<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.endpoint.EndpointChannelManager</role>
+					<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.partition.PartitioningAlgo</role>
+					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -125,22 +125,22 @@
 			<implementation>com.ctrip.hermes.producer.sender.BatchableMessageSender</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.endpoint.EndpointManager</role>
+					<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.endpoint.EndpointChannelManager</role>
+					<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.partition.PartitioningAlgo</role>
+					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.partition.PartitioningAlgo</role>
-			<implementation>com.ctrip.hermes.partition.HashPartitioningAlgo</implementation>
+			<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
+			<implementation>com.ctrip.hermes.core.partition.HashPartitioningStrategy</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.meta.internal.MetaLoader</role>
@@ -153,53 +153,53 @@
 			<implementation>com.ctrip.hermes.meta.internal.RemoteMetaLoader</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.meta.MetaManager</role>
+			<role>com.ctrip.hermes.core.meta.MetaManager</role>
 			<implementation>com.ctrip.hermes.meta.internal.DefaultMetaManager</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.meta.MetaService</role>
+			<role>com.ctrip.hermes.core.meta.MetaService</role>
 			<implementation>com.ctrip.hermes.meta.internal.DefaultMetaService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaManager</role>
+					<role>com.ctrip.hermes.core.meta.MetaManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.endpoint.EndpointManager</role>
-			<implementation>com.ctrip.hermes.endpoint.DefaultEndpointManager</implementation>
+			<role>com.ctrip.hermes.core.endpoint.EndpointManager</role>
+			<implementation>com.ctrip.hermes.core.endpoint.DefaultEndpointManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.endpoint.EndpointChannelManager</role>
-			<implementation>com.ctrip.hermes.endpoint.DefaultEndpointChannelManager</implementation>
+			<role>com.ctrip.hermes.core.endpoint.EndpointChannelManager</role>
+			<implementation>com.ctrip.hermes.core.endpoint.DefaultEndpointChannelManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.remoting.command.CommandProcessorManager</role>
+					<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.command.CommandProcessorManager</role>
-			<implementation>com.ctrip.hermes.remoting.command.CommandProcessorManager</implementation>
+			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager</role>
+			<implementation>com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.remoting.command.CommandRegistry</role>
+					<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessorRegistry</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.command.CommandRegistry</role>
-			<implementation>com.ctrip.hermes.remoting.command.DefaultCommandRegistry</implementation>
+			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessorRegistry</role>
+			<implementation>com.ctrip.hermes.core.transport.command.processor.DefaultCommandProcessorRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.codec.Codec</role>
+			<role>com.ctrip.hermes.core.codec.Codec</role>
 			<role-hint>JSON</role-hint>
-			<implementation>com.ctrip.hermes.codec.JsonCodec</implementation>
+			<implementation>com.ctrip.hermes.core.codec.JsonCodec</implementation>
 		</component>
 	</components>
 </plexus>

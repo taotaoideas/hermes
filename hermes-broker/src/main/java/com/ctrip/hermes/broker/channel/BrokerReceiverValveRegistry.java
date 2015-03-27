@@ -3,7 +3,7 @@ package com.ctrip.hermes.broker.channel;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 
-import com.ctrip.hermes.pipeline.AbstractValveRegistry;
+import com.ctrip.hermes.core.pipeline.AbstractValveRegistry;
 
 public class BrokerReceiverValveRegistry extends AbstractValveRegistry implements Initializable {
 

@@ -4,7 +4,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
 
-import com.ctrip.hermes.meta.MetaManager;
+import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.meta.entity.Meta;
 
 public class DefaultMetaManager extends ContainerHolder implements Initializable, MetaManager {

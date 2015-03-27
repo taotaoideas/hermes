@@ -6,9 +6,9 @@ import java.util.Map;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.meta.MetaService;
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.meta.entity.Storage;
-import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.storage.MessageQueue;
 import com.ctrip.hermes.storage.impl.StorageMessageQueue;
 import com.ctrip.hermes.storage.message.Record;

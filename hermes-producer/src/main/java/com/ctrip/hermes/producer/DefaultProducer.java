@@ -4,7 +4,7 @@ import java.util.concurrent.Future;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.pipeline.Pipeline;
+import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.SendResult;
 

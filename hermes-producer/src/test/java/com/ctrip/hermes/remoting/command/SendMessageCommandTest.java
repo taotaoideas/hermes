@@ -11,12 +11,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.codec.JsonCodec;
-import com.ctrip.hermes.producer.DecodedProducerMessage;
+import com.ctrip.hermes.core.codec.JsonCodec;
+import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.transport.command.Header;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.producer.api.SendResult;
-import com.ctrip.hermes.remoting.command.SendMessageCommand.MessageRawDataBatch;
-import com.ctrip.hermes.remoting.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 import com.google.common.util.concurrent.SettableFuture;
 

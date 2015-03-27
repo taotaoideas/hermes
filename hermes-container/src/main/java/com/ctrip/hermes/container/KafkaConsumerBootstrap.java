@@ -18,6 +18,8 @@ import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.meta.entity.Connector;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.MessageContext;
 import com.ctrip.hermes.engine.Subscriber;
@@ -27,8 +29,6 @@ import com.ctrip.hermes.message.PipelineSink;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.message.ValveRegistry;
 import com.ctrip.hermes.message.codec.StoredMessageCodec;
-import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.meta.entity.Connector;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 

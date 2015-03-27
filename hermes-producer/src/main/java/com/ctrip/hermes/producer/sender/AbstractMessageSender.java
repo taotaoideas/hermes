@@ -4,10 +4,10 @@ import java.util.concurrent.Future;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.endpoint.EndpointChannelManager;
-import com.ctrip.hermes.endpoint.EndpointManager;
-import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.partition.PartitioningAlgo;
+import com.ctrip.hermes.core.endpoint.EndpointChannelManager;
+import com.ctrip.hermes.core.endpoint.EndpointManager;
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.partition.PartitioningStrategy;
 import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.producer.api.SendResult;
 
@@ -24,7 +24,7 @@ public abstract class AbstractMessageSender implements MessageSender {
 	protected EndpointChannelManager m_endpointChannelManager;
 
 	@Inject
-	protected PartitioningAlgo m_partitioningAlgo;
+	protected PartitioningStrategy m_partitioningAlgo;
 
 	@Inject
 	protected MetaService m_metaService;
