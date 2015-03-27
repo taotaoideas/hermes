@@ -4,22 +4,22 @@ import java.util.Map;
 
 public interface ConsumerMessage<T> {
 
-	public abstract void nack();
+	public void nack();
 
-	public abstract <V> V getProperty(String name);
+	public <V> V getProperty(String name);
 
-	public abstract Map<String, Object> getProperties();
+	public Map<String, Object> getProperties();
 
-	public abstract long getBornTime();
+	public long getBornTime();
 
-	public abstract String getPartition();
+	public String getTopic();
 
-	public abstract String getTopic();
+	public String getKey();
 
-	public abstract String getKey();
+	public T getBody();
 
-	public abstract T getBody();
-
-	public abstract boolean isSuccess();
+	public boolean isPriority();
+	
+	public boolean isSuccess();
 
 }

@@ -15,7 +15,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationExce
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
-import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.message.DecodedMessage;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.SendMessageAckCommand;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
@@ -61,12 +61,12 @@ public class SendMessageRequestProcessor implements CommandProcessor, Initializa
 
 	}
 
-	private void saveToMysql(List<DecodedProducerMessage> messages, Tpp tpp) throws SQLException {
+	private void saveToMysql(List<DecodedMessage> messages, Tpp tpp) throws SQLException {
 		String sql = "insert into fuck " //
 		      + "values (?,?,?,?,?,?,?)";
 		PreparedStatement stmt = m_conn.prepareStatement(sql);
 
-		for (DecodedProducerMessage msg : messages) {
+		for (DecodedMessage msg : messages) {
 			stmt.setLong(1, 1);
 			stmt.setLong(2, 0);
 			stmt.setTimestamp(3, new Timestamp(msg.getBornTime()));

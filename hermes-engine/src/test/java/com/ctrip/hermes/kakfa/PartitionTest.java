@@ -33,7 +33,7 @@ public class PartitionTest extends ComponentTestCase {
 			public void consume(List<ConsumerMessage<VisitEvent>> msgs) {
 				for (ConsumerMessage<VisitEvent> msg : msgs) {
 					VisitEvent event = msg.getBody();
-					System.out.println(String.format("Receive from %s %s: %s", msg.getTopic(), msg.getPartition(), event));
+					System.out.println(String.format("Receive from %s: %s", msg.getTopic(), event));
 				}
 			}
 		});
@@ -71,8 +71,7 @@ public class PartitionTest extends ComponentTestCase {
 			public void consume(List<ConsumerMessage<VisitEvent>> msgs) {
 				for (ConsumerMessage<VisitEvent> msg : msgs) {
 					VisitEvent event = msg.getBody();
-					System.out.println(String.format("Consumer1 Receive from %s %s: %s", msg.getTopic(), msg.getPartition(),
-					      event));
+					System.out.println(String.format("Consumer1 Receive from %s: %s", msg.getTopic(), event));
 				}
 			}
 		});
@@ -86,8 +85,7 @@ public class PartitionTest extends ComponentTestCase {
 			public void consume(List<ConsumerMessage<VisitEvent>> msgs) {
 				for (ConsumerMessage<VisitEvent> msg : msgs) {
 					VisitEvent event = msg.getBody();
-					System.out.println(String.format("Consumer2 Receive from %s %s: %s", msg.getTopic(), msg.getPartition(),
-					      event));
+					System.out.println(String.format("Consumer2 Receive from %s: %s", msg.getTopic(), event));
 				}
 			}
 		});
