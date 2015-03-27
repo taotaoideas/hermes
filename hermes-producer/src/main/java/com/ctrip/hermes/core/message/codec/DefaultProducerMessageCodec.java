@@ -1,4 +1,4 @@
-package com.ctrip.hermes.producer.codec;
+package com.ctrip.hermes.core.message.codec;
 
 import io.netty.buffer.ByteBuf;
 
@@ -7,7 +7,7 @@ import java.util.Map;
 import com.ctrip.hermes.core.codec.Codec;
 import com.ctrip.hermes.core.codec.CodecFactory;
 import com.ctrip.hermes.core.message.DecodedProducerMessage;
-import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 
 public class DefaultProducerMessageCodec implements ProducerMessageCodec {

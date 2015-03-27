@@ -1,4 +1,4 @@
-package com.ctrip.hermes.producer;
+package com.ctrip.hermes.core.message;
 
 import java.util.HashMap;
 import java.util.Map;

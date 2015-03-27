@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.message.Message;
 
 public class DefaultConsumerManagerTest extends ComponentTestCase {
 
@@ -23,7 +23,7 @@ public class DefaultConsumerManagerTest extends ComponentTestCase {
 		}
 
 		@Override
-		public void consume(List<Message<Object>> msgs) {
+		public void consume(List<ConsumerMessage<Object>> msgs) {
 			System.out.println("Receive message " + msgs);
 			m_latch.countDown();
 		}

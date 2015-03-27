@@ -3,7 +3,7 @@ package com.ctrip.hermes.storage.message;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.storage.storage.Locatable;
 import com.ctrip.hermes.storage.storage.Offset;
 import com.ctrip.hermes.storage.util.StringUtil;

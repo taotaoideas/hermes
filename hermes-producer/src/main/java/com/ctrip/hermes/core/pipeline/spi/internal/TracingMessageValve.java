@@ -1,9 +1,9 @@
 package com.ctrip.hermes.core.pipeline.spi.internal;
 
 import com.ctrip.hermes.core.constants.CatConstants;
+import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.pipeline.PipelineContext;
 import com.ctrip.hermes.core.pipeline.spi.Valve;
-import com.ctrip.hermes.producer.ProducerMessage;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Event;
