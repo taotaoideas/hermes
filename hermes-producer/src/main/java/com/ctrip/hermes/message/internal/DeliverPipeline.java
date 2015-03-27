@@ -5,11 +5,12 @@ import java.util.List;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
-import com.ctrip.hermes.message.Pipeline;
-import com.ctrip.hermes.message.PipelineContext;
-import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.core.pipeline.DefaultPipelineContext;
+import com.ctrip.hermes.core.pipeline.Pipeline;
+import com.ctrip.hermes.core.pipeline.PipelineContext;
+import com.ctrip.hermes.core.pipeline.PipelineSink;
+import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.message.StoredMessage;
-import com.ctrip.hermes.message.ValveRegistry;
 
 public class DeliverPipeline implements Pipeline<Void> {
 

@@ -14,36 +14,7 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.remoting.netty.NettyServerHandler</role>
-			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServerHandler</implementation>
-			<instantiation-strategy>per-lookup</instantiation-strategy>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.remoting.CommandProcessorManager</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.channel.MessageChannelManager</role>
-			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.broker.channel.BrokerMessageChannelManager</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.channel.MessageQueueManager</role>
-					<role-hint>broker</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.internal.DeliverPipeline</role>
-					<role-hint>broker</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.internal.ReceiverPipeline</role>
-					<role-hint>broker</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.channel.MessageQueueManager</role>
+			<role>com.ctrip.hermes.broker.channel.MessageQueueManager</role>
 			<role-hint>broker</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerMessageQueueManager</implementation>
 			<requirements>
@@ -53,7 +24,7 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.ValveRegistry</role>
+			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 			<role-hint>broker-deliver</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry</implementation>
 		</component>
@@ -63,13 +34,13 @@
 			<implementation>com.ctrip.hermes.message.internal.DeliverPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 					<role-hint>broker-deliver</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.ValveRegistry</role>
+			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 			<role-hint>broker-receiver</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry</implementation>
 		</component>
@@ -79,48 +50,21 @@
 			<implementation>com.ctrip.hermes.message.internal.ReceiverPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.message.ValveRegistry</role>
+					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
 					<role-hint>broker-receiver</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
-			<role-hint>handshake-request</role-hint>
-			<implementation>com.ctrip.hermes.broker.remoting.HandshakeRequestProcessor</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
+			<role>com.ctrip.hermes.remoting.command.CommandProcessor</role>
 			<role-hint>send-message-request</role-hint>
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
+					<role>com.ctrip.hermes.broker.channel.MessageQueueManager</role>
 					<role-hint>broker</role-hint>
 				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.codec.MessageCodec</role>
-				</requirement>
 			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
-			<role-hint>start-consumer-requesut</role-hint>
-			<implementation>com.ctrip.hermes.broker.remoting.StartConsumerRequestProcessor</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.channel.MessageChannelManager</role>
-					<role-hint>broker</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.remoting.CommandProcessor</role>
-			<role-hint>ack-request</role-hint>
-			<implementation>com.ctrip.hermes.broker.remoting.AckRequestProcessor</implementation>
 		</component>
 		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>

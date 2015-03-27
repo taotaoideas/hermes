@@ -2,6 +2,7 @@ package com.ctrip.hermes.message;
 
 import java.util.Map;
 
+import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
@@ -40,7 +41,6 @@ public class StoredMessage<T> extends ProducerMessage<T> implements Message<T> {
 
 		for (Map.Entry<String, Object> entry : r.getProperties().entrySet()) {
 			// TODO remove key, partition, topic
-			addProperty(entry.getKey(), entry.getValue());
 		}
 
 		m_offset = r.getOffset();
@@ -75,5 +75,23 @@ public class StoredMessage<T> extends ProducerMessage<T> implements Message<T> {
 	public void setOffset(Offset offset) {
 		m_offset = offset;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.ctrip.hermes.message.Message#getProperty(java.lang.String)
+	 */
+   @Override
+   public <V> V getProperty(String name) {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
+
+	/* (non-Javadoc)
+	 * @see com.ctrip.hermes.message.Message#getProperties()
+	 */
+   @Override
+   public Map<String, Object> getProperties() {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
 
 }

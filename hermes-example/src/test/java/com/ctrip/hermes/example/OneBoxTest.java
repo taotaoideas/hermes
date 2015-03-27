@@ -13,12 +13,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.meta.entity.Connector;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.Message;
-import com.ctrip.hermes.meta.MetaService;
-import com.ctrip.hermes.meta.entity.Connector;
 import com.ctrip.hermes.producer.Producer;
 
 public class OneBoxTest extends ComponentTestCase {
@@ -32,6 +33,8 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
+		startBroker();
+		
 		String topic = "order.new";
 
 //		lookup(MessageQueueMonitor.class);
@@ -137,5 +140,13 @@ public class OneBoxTest extends ComponentTestCase {
 				}
 			}
 		}
+	}
+	
+	private void startBroker() {
+		new Thread() {
+			public void run() {
+				lookup(NettyServer.class).start();
+			}
+		}.start();
 	}
 }
