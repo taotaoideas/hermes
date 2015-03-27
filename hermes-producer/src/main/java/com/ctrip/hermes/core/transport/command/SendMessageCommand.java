@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.core.message.DecodedProducerMessage;
-import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.core.message.ProducerMessage;
+import com.ctrip.hermes.core.message.codec.ProducerMessageCodec;
+import com.ctrip.hermes.core.message.codec.ProducerMessageCodecFactory;
 import com.ctrip.hermes.producer.api.SendResult;
-import com.ctrip.hermes.producer.codec.ProducerMessageCodecFactory;
-import com.ctrip.hermes.producer.codec.ProducerMessageCodec;
 import com.ctrip.hermes.utils.HermesPrimitiveCodec;
 import com.google.common.util.concurrent.SettableFuture;
 

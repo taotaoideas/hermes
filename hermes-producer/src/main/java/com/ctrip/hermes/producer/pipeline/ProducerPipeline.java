@@ -4,12 +4,12 @@ import java.util.concurrent.Future;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.pipeline.DefaultPipelineContext;
 import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.core.pipeline.PipelineContext;
 import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
-import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.producer.api.SendResult;
 
 public class ProducerPipeline implements Pipeline<Future<SendResult>> {

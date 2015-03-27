@@ -1,4 +1,5 @@
-package com.ctrip.hermes.producer.codec;
+package com.ctrip.hermes.core.message.codec;
+
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

@@ -11,9 +11,9 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.container.KafkaConsumerBootstrap;
+import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.message.Message;
 import com.ctrip.hermes.producer.Producer;
 import com.ctrip.hermes.producer.Producer.MessageHolder;
 
@@ -33,8 +33,8 @@ public class WildcardTopicsTest extends ComponentTestCase {
 		Subscriber s = new Subscriber(topicPattern, group, new Consumer<VisitEvent>() {
 
 			@Override
-			public void consume(List<Message<VisitEvent>> msgs) {
-				for (Message<VisitEvent> msg : msgs) {
+			public void consume(List<ConsumerMessage<VisitEvent>> msgs) {
+				for (ConsumerMessage<VisitEvent> msg : msgs) {
 					VisitEvent event = msg.getBody();
 					System.out.println(String.format("Receive from %s: %s", msg.getTopic(), event));
 				}

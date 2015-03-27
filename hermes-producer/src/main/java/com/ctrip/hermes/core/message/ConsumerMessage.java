@@ -1,8 +1,8 @@
-package com.ctrip.hermes.message;
+package com.ctrip.hermes.core.message;
 
 import java.util.Map;
 
-public interface Message<T> {
+public interface ConsumerMessage<T> {
 
 	public abstract void nack();
 

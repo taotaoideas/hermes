@@ -19,12 +19,12 @@
 			<implementation>com.ctrip.hermes.broker.channel.BrokerMessageQueueManager</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
+			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 			<role-hint>broker-deliver</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry</implementation>
 		</component>
@@ -34,13 +34,13 @@
 			<implementation>com.ctrip.hermes.message.internal.DeliverPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
+					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 					<role-hint>broker-deliver</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
+			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 			<role-hint>broker-receiver</role-hint>
 			<implementation>com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry</implementation>
 		</component>
@@ -50,13 +50,13 @@
 			<implementation>com.ctrip.hermes.message.internal.ReceiverPipeline</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.pipeline.ValveRegistry</role>
+					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 					<role-hint>broker-receiver</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.remoting.command.CommandProcessor</role>
+			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
 			<role-hint>send-message-request</role-hint>
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
 			<requirements>

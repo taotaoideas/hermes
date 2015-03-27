@@ -2,11 +2,12 @@ package com.ctrip.hermes.message;
 
 import java.util.Map;
 
-import com.ctrip.hermes.producer.ProducerMessage;
+import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.storage.message.Record;
 import com.ctrip.hermes.storage.storage.Offset;
 
-public class StoredMessage<T> extends ProducerMessage<T> implements Message<T> {
+public class StoredMessage<T> extends ProducerMessage<T> implements ConsumerMessage<T> {
 
 	private boolean m_success = true;
 
