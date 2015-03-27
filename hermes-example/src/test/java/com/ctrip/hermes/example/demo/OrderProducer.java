@@ -4,8 +4,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
-import com.ctrip.hermes.channel.SendResult;
-import com.ctrip.hermes.producer.Producer;
+import com.ctrip.hermes.producer.api.Producer;
+import com.ctrip.hermes.producer.api.SendResult;
 
 public class OrderProducer {
 

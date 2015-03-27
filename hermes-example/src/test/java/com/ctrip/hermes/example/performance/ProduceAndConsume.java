@@ -15,7 +15,7 @@ import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.LocalConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.producer.Producer;
+import com.ctrip.hermes.producer.api.Producer;
 
 public class ProduceAndConsume extends ComponentTestCase {
 

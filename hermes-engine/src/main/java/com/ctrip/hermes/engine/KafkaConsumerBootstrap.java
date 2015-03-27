@@ -1,6 +1,8 @@
-package com.ctrip.hermes.container;
+package com.ctrip.hermes.engine;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -16,19 +18,17 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
-import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.message.codec.ProducerMessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
-import com.ctrip.hermes.core.meta.entity.Connector;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.engine.MessageContext;
-import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.message.Pipeline;
-import com.ctrip.hermes.message.PipelineContext;
-import com.ctrip.hermes.message.PipelineSink;
+import com.ctrip.hermes.core.pipeline.Pipeline;
+import com.ctrip.hermes.core.pipeline.PipelineContext;
+import com.ctrip.hermes.core.pipeline.PipelineSink;
+import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.message.StoredMessage;
-import com.ctrip.hermes.message.ValveRegistry;
-import com.ctrip.hermes.message.codec.StoredMessageCodec;
+import com.ctrip.hermes.meta.entity.Datasource;
+import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 
@@ -43,7 +43,7 @@ public class KafkaConsumerBootstrap extends ContainerHolder implements ConsumerB
 	private Pipeline<Void> m_pipeline;
 
 	@Inject
-	private StoredMessageCodec m_codec;
+	private ProducerMessageCodec m_codec;
 
 	@Inject
 	private MetaService m_metaService;
@@ -82,16 +82,18 @@ public class KafkaConsumerBootstrap extends ContainerHolder implements ConsumerB
 			for (MessageAndMetadata<byte[], byte[]> msgAndMetadata : stream) {
 				try {
 					// store msg list
-					byte[] storedMsgBytes = msgAndMetadata.message();
-					List<StoredMessage<byte[]>> storedMsgs = m_codec.decode(ByteBuffer.wrap(storedMsgBytes));
-					for (StoredMessage storedMsg : storedMsgs) {
-						storedMsg.setPartition(String.valueOf(msgAndMetadata.partition()));
-					}
-					PipelineSink<Void> sink = sinkCtx.getSink();
-					Subscriber s = sinkCtx.getSubscriber();
+					byte[] bytes = msgAndMetadata.message();
+					ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
+					DecodedProducerMessage msg = m_codec.decode(byteBuf);
 
-					MessageContext ctx = new MessageContext(s.getTopicPattern(), storedMsgs, s.getMessageClass());
-					m_pipeline.put(new Pair<>(sink, ctx));
+//					for (StoredMessage storedMsg : storedMsgs) {
+//						storedMsg.setPartition(String.valueOf(msgAndMetadata.partition()));
+//					}
+//					PipelineSink<Void> sink = sinkCtx.getSink();
+//					Subscriber s = sinkCtx.getSubscriber();
+//
+//					MessageContext ctx = new MessageContext(s.getTopicPattern(), storedMsgs, s.getMessageClass());
+//					m_pipeline.put(new Pair<>(sink, ctx));
 				} catch (Exception e) {
 					m_logger.warn("", e);
 				}
@@ -120,19 +122,18 @@ public class KafkaConsumerBootstrap extends ContainerHolder implements ConsumerB
 
 	private Properties getConsumerProperties(String topic, String group) {
 		Properties configs = new Properties();
-		Connector connector = m_metaService.getConnector(topic);
-		Storage targetStorage = null;
-		for (Storage storage : connector.getStorages()) {
-			if ("consumer".equalsIgnoreCase(storage.getType())) {
-				targetStorage = storage;
+		List<Partition> partitions = m_metaService.getPartitions(topic);
+		String ds = partitions.get(0).getReadDatasource();
+		Storage targetStorage = m_metaService.findStorage(topic);
+		for (Datasource datasource : targetStorage.getDatasources()) {
+			if (ds.equals(datasource.getId())) {
+				for (Property prop : datasource.getProperties()) {
+					configs.put(prop.getName(), prop.getValue());
+				}
 				break;
 			}
 		}
-		for (Property prop : targetStorage.getProperties()) {
-			configs.put(prop.getName(), prop.getValue());
-		}
 		configs.put("group.id", group);
-		configs.put("offsets.storage", "kafka");
 		return configs;
 	}
 

@@ -12,7 +12,6 @@ import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Subscribe;
 import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.local.LocalDevServer;
 
 public class Bootstrap extends ComponentTestCase {
 
@@ -59,7 +58,7 @@ public class Bootstrap extends ComponentTestCase {
 	}
 
 	private void startLocalDevServer() throws Exception {
-		LocalDevServer.getInstance().start();
+//		LocalDevServer.getInstance().start();
 	}
 
 	private void startBroker() {

@@ -7,6 +7,6 @@ package com.ctrip.hermes.core.codec;
 public enum CodecType {
 
 	JSON, //
-	;
+	AVRO;
 
 }
