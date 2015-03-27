@@ -13,10 +13,10 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.core.endpoint.NettyServerEndpointChannel;
 import com.ctrip.hermes.core.transport.codec.NettyDecoder;
 import com.ctrip.hermes.core.transport.codec.NettyEncoder;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager;
+import com.ctrip.hermes.core.transport.endpoint.NettyServerEndpointChannel;
 
 public class NettyServer extends ContainerHolder {
 	@Inject

@@ -4,10 +4,10 @@ import java.util.concurrent.Future;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.core.endpoint.EndpointChannelManager;
-import com.ctrip.hermes.core.endpoint.EndpointManager;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.partition.PartitioningStrategy;
+import com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager;
+import com.ctrip.hermes.core.transport.endpoint.EndpointManager;
 import com.ctrip.hermes.producer.ProducerMessage;
 import com.ctrip.hermes.producer.api.SendResult;
 

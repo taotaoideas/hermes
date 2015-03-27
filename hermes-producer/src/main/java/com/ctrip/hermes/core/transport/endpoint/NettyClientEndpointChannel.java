@@ -1,4 +1,4 @@
-package com.ctrip.hermes.core.endpoint;
+package com.ctrip.hermes.core.transport.endpoint;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;

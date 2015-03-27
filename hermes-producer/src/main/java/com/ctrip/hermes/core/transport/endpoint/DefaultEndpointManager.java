@@ -1,4 +1,4 @@
-package com.ctrip.hermes.core.endpoint;
+package com.ctrip.hermes.core.transport.endpoint;
 
 import org.unidal.lookup.annotation.Inject;
 

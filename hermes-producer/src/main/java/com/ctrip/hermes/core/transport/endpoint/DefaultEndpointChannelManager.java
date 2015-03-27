@@ -1,4 +1,4 @@
-package com.ctrip.hermes.core.endpoint;
+package com.ctrip.hermes.core.transport.endpoint;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

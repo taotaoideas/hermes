@@ -1,4 +1,4 @@
-package com.ctrip.hermes.core.endpoint;
+package com.ctrip.hermes.core.transport.endpoint;
 
 import com.ctrip.hermes.meta.entity.Endpoint;
 
