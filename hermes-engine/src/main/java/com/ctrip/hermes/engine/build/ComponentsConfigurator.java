@@ -8,18 +8,27 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
+import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.core.pipeline.spi.Valve;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
-import com.ctrip.hermes.engine.ConsumerPipeline;
-import com.ctrip.hermes.engine.ConsumerTracingValve;
-import com.ctrip.hermes.engine.DecodeMessageValve;
-import com.ctrip.hermes.engine.KafkaConsumerBootstrap;
-import com.ctrip.hermes.engine.LocalConsumerBootstrap;
-import com.ctrip.hermes.engine.LocalConsumerValveRegistry;
-import com.ctrip.hermes.engine.scanner.DefaultScanner;
-import com.ctrip.hermes.engine.scanner.Scanner;
+import com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager;
+import com.ctrip.hermes.core.transport.endpoint.EndpointManager;
+import com.ctrip.hermes.engine.DefaultEngine;
+import com.ctrip.hermes.engine.Engine;
+import com.ctrip.hermes.engine.bootstrap.BrokerConsumerBootstrap;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapManager;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapRegistry;
+import com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapManager;
+import com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapRegistry;
+import com.ctrip.hermes.engine.bootstrap.KafkaConsumerBootstrap;
+import com.ctrip.hermes.engine.notifier.ConsumerNotifier;
+import com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier;
+import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
+import com.ctrip.hermes.engine.pipeline.ConsumerValveRegistry;
+import com.ctrip.hermes.engine.pipeline.valve.ConsumerTracingValve;
+import com.ctrip.hermes.meta.entity.Endpoint;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
@@ -28,20 +37,23 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
-
 		all.add(C(Module.class, HermesProducerModule.ID, HermesProducerModule.class));
 
-		all.add(C(ValveRegistry.class, LOCAL_CONSUMER, LocalConsumerValveRegistry.class));
-		all.add(C(Valve.class, DecodeMessageValve.ID, DecodeMessageValve.class));
+		all.add(C(Engine.class, DefaultEngine.class) //
+		      .req(ConsumerBootstrapManager.class, MetaService.class));
+		all.add(C(ConsumerBootstrapManager.class, DefaultConsumerBootstrapManager.class) //
+		      .req(ConsumerBootstrapRegistry.class));
+		all.add(C(ConsumerBootstrapRegistry.class, DefaultConsumerBootstrapRegistry.class));
+		all.add(C(ConsumerBootstrap.class, Endpoint.BROKER, BrokerConsumerBootstrap.class) //
+		      .req(EndpointChannelManager.class, EndpointManager.class)//
+		      .req(MetaService.class, ConsumerNotifier.class));
+		all.add(C(ConsumerNotifier.class, DefaultConsumerNotifier.class) //
+		      .req(ConsumerPipeline.class));
+		all.add(C(ConsumerPipeline.class) //
+		      .req(ValveRegistry.class, "consumer"));
+		all.add(C(ValveRegistry.class, "consumer", ConsumerValveRegistry.class));
+
 		all.add(C(Valve.class, ConsumerTracingValve.ID, ConsumerTracingValve.class));
-
-		all.add(C(Pipeline.class, LOCAL_CONSUMER, ConsumerPipeline.class) //
-		      .req(ValveRegistry.class, LOCAL_CONSUMER));
-
-		all.add(C(ConsumerBootstrap.class, LocalConsumerBootstrap.ID, LocalConsumerBootstrap.class) //
-		      .req(Pipeline.class, LOCAL_CONSUMER));
-
-		all.add(C(Scanner.class, DefaultScanner.class));
 
 		// Kafka
 		all.add(C(ConsumerBootstrap.class, KafkaConsumerBootstrap.ID, KafkaConsumerBootstrap.class) //

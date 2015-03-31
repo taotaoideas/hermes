@@ -5,22 +5,31 @@ import java.util.List;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.engine.scanner.Scanner;
+import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapManager;
+import com.ctrip.hermes.meta.entity.Topic;
 
 public class DefaultEngine extends ContainerHolder implements Engine {
 
 	@Inject
-	private Scanner m_scanner;
+	private ConsumerBootstrapManager m_consumerManager;
 
 	@Inject
-	private ConsumerBootstrap m_consumerManager;
+	private MetaService m_metaService;
 
 	@Override
-	public void start() {
-		List<Subscriber> subcribers = m_scanner.scan();
+	public void start(List<Subscriber> subscribers) {
+		for (Subscriber s : subscribers) {
+			List<Topic> topics = m_metaService.findTopicsByPattern(s.getTopicPattern());
 
-		for (Subscriber s : subcribers) {
-			m_consumerManager.startConsumer(s);
+			for (Topic topic : topics) {
+				String endpointType = m_metaService.getEndpointType(topic.getName());
+				ConsumerContext consumerContext = new ConsumerContext(topic, s.getGroupId(), s.getConsumer(),
+				      s.getMessageClass());
+				ConsumerBootstrap consumerBootstrap = m_consumerManager.findConsumerBootStrap(endpointType);
+				consumerBootstrap.start(consumerContext);
+			}
 		}
 	}
 

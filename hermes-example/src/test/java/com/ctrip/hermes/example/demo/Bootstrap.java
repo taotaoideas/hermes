@@ -10,8 +10,8 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Subscribe;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 
 public class Bootstrap extends ComponentTestCase {
 

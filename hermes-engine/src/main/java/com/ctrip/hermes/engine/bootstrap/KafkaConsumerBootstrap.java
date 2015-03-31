@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.bootstrap;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -19,13 +19,14 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.core.message.DecodedMessage;
+import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.core.pipeline.PipelineContext;
 import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
+import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Partition;
@@ -84,7 +85,7 @@ public class KafkaConsumerBootstrap extends ContainerHolder implements ConsumerB
 					// store msg list
 					byte[] bytes = msgAndMetadata.message();
 					ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
-					DecodedMessage msg = m_codec.decode(byteBuf);
+					PartialDecodedMessage msg = m_codec.partialDecode(byteBuf);
 
 //					for (StoredMessage storedMsg : storedMsgs) {
 //						storedMsg.setPartition(String.valueOf(msgAndMetadata.partition()));

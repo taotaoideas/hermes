@@ -7,7 +7,7 @@ import java.util.Map;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public abstract class BaseConsumerMessage<T> implements ConsumerMessage<T> {
+public class BaseConsumerMessage<T> {
 	protected long m_bornTime;
 
 	protected String m_key;
@@ -22,47 +22,60 @@ public abstract class BaseConsumerMessage<T> implements ConsumerMessage<T> {
 
 	protected Map<String, Object> m_sysProperties = new HashMap<String, Object>();
 
-	protected boolean m_priority;
-
-	protected boolean m_success = true;
-
-	public boolean isSuccess() {
-		return m_success;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <V> V getProperty(String name) {
-		return (V) m_appProperties.get(name);
-	}
-
-	@Override
-	public Map<String, Object> getProperties() {
-		return m_appProperties;
-	}
-
-	@Override
 	public long getBornTime() {
 		return m_bornTime;
 	}
 
-	public boolean isPriority() {
-		return m_priority;
+	public void setBornTime(long bornTime) {
+		m_bornTime = bornTime;
 	}
 
-	@Override
-	public String getTopic() {
-		return m_topic;
-	}
-
-	@Override
 	public String getKey() {
 		return m_key;
 	}
 
-	@Override
+	public void setKey(String key) {
+		m_key = key;
+	}
+
+	public String getTopic() {
+		return m_topic;
+	}
+
+	public void setTopic(String topic) {
+		m_topic = topic;
+	}
+
+	public int getPartition() {
+		return m_partition;
+	}
+
+	public void setPartition(int partition) {
+		m_partition = partition;
+	}
+
 	public T getBody() {
 		return m_body;
+	}
+
+	public void setBody(T body) {
+		m_body = body;
+	}
+
+	public Map<String, Object> getAppProperties() {
+		return m_appProperties;
+	}
+
+	public void setAppProperties(Map<String, Object> appProperties) {
+		m_appProperties = appProperties;
+	}
+
+	public Map<String, Object> getSysProperties() {
+		return m_sysProperties;
+	}
+
+	public void setSysProperties(Map<String, Object> sysProperties) {
+		m_sysProperties = sysProperties;
 	}
 
 }

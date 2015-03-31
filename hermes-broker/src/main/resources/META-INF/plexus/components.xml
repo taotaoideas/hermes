@@ -14,9 +14,9 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.channel.MessageQueueManager</role>
+			<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
 			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.broker.channel.BrokerMessageQueueManager</implementation>
+			<implementation>com.ctrip.hermes.broker.queue.DefaultMessageQueueManager</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
@@ -61,8 +61,152 @@
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.channel.MessageQueueManager</role>
+					<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
 					<role-hint>broker</role-hint>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.queue.QueueWriter</role>
+			<role-hint>mysql</role-hint>
+			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueWriter</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>m-topic-shard-priority</role-hint>
+			<implementation>com.ctrip.hermes.broker.dal.HermesTableProvider</implementation>
+			<configuration>
+				<m_table>m-topic-shard-priority</m_table>
+			</configuration>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</role>
+			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</implementation>
+			<configuration>
+				<datasourceFile>/data/appdatas/hermes/datasources.xml</datasourceFile>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>m-topic-shard-priority</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>m-topic-shard-priority</logical-table-name>
+				<physical-table-name>m_topic_shard_priority</physical-table-name>
+				<data-source-name>hermes</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>o-r-topic</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>o-r-topic</logical-table-name>
+				<physical-table-name>o_r_topic</physical-table-name>
+				<data-source-name>hermes</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>o-topic</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>o-topic</logical-table-name>
+				<physical-table-name>o_topic</physical-table-name>
+				<data-source-name>hermes</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>r-topic-groupid</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>r-topic-groupid</logical-table-name>
+				<physical-table-name>r_topic_groupid</physical-table-name>
+				<data-source-name>hermes</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>topic</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>topic</logical-table-name>
+				<physical-table-name>topic</physical-table-name>
+				<data-source-name>hermes</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>topic-group</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>topic-group</logical-table-name>
+				<physical-table-name>topic_group</physical-table-name>
+				<data-source-name>hermes</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.hermes.ORTopicDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.ORTopicDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.hermes.OTopicDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.OTopicDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.hermes.RTopicGroupidDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.RTopicGroupidDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.hermes.TopicDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.TopicDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.hermes.TopicGroupDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.TopicGroupDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
 				</requirement>
 			</requirements>
 		</component>

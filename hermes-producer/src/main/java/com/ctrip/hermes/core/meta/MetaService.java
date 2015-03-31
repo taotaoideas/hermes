@@ -6,6 +6,7 @@ import com.ctrip.hermes.core.codec.CodecType;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.meta.entity.Topic;
 
 public interface MetaService {
 
@@ -28,10 +29,18 @@ public interface MetaService {
 	 * @param topic
 	 */
 	Storage findStorage(String topic);
-	
+
 	/**
 	 * @param topic
 	 * @return
 	 */
 	CodecType getCodecType(String topic);
+
+	Partition findPartition(String topic, int shard);
+
+	/**
+	 * @param topicPattern
+	 * @return
+	 */
+   List<Topic> findTopicsByPattern(String topicPattern);
 }

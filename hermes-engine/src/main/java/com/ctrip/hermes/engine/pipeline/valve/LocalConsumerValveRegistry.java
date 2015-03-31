@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.pipeline.valve;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
@@ -9,7 +9,7 @@ public class LocalConsumerValveRegistry extends AbstractValveRegistry implements
 
 	@Override
 	public void initialize() throws InitializationException {
-		doRegister(DecodeMessageValve.ID, 0);
+		// TODO
 	}
 
 }

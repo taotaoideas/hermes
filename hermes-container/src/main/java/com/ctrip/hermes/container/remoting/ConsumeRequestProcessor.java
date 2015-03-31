@@ -8,7 +8,7 @@ import org.unidal.lookup.annotation.Inject;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 
 public class ConsumeRequestProcessor implements CommandProcessor {
 

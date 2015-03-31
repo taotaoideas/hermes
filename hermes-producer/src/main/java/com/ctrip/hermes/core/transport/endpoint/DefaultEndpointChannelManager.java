@@ -40,7 +40,7 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 			return channels.get(endpoint);
 
 		default:
-			throw new UnsupportedOperationException(String.format("unknow endpoint type: %s", endpoint.getType()));
+			throw new IllegalArgumentException(String.format("unknow endpoint type: %s", endpoint.getType()));
 		}
 	}
 }

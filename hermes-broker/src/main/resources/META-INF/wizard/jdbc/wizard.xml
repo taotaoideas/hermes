@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wizard package="com.ctrip.hermes.broker">
+   <jdbc package="com.ctrip.hermes.broker.dal" name="hermes">
+      <datasource>
+         <driver>com.mysql.jdbc.Driver</driver>
+         <url>jdbc:mysql://localhost:3306/hermes</url>
+         <user>root</user>
+         <password>~{c390930fe33d20909014ccaaaea70}</password>
+         <properties>useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</properties>
+      </datasource>
+      <group name="hermes" package="com.ctrip.hermes.broker.dal.hermes">
+         <table name="m_topic_shard_priority"/>
+         <table name="o_r_topic"/>
+         <table name="o_topic"/>
+         <table name="r_topic_groupid"/>
+         <table name="topic"/>
+         <table name="topic_group"/>
+      </group>
+   </jdbc>
+</wizard>

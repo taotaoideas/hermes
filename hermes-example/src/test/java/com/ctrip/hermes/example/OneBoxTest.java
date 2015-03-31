@@ -17,8 +17,8 @@ import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.meta.MetaService;
-import com.ctrip.hermes.engine.ConsumerBootstrap;
 import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.producer.api.Producer;
 
