@@ -19,5 +19,7 @@ public abstract class Producer {
 		public MessageHolder withPriority();
 
 		public MessageHolder withPartition(String partition);
+
+		public MessageHolder addProperty(String key, Object value);
 	}
 }

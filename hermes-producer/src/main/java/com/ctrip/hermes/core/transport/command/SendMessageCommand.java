@@ -10,10 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.unidal.tuple.Triple;
 
-import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.message.DecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.core.message.codec.ProducerMessageCodec;
-import com.ctrip.hermes.core.message.codec.ProducerMessageCodecFactory;
+import com.ctrip.hermes.core.message.codec.MessageCodec;
+import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 import com.ctrip.hermes.producer.api.SendResult;
 import com.google.common.util.concurrent.SettableFuture;
@@ -94,7 +94,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 			ByteBuf rawData = buf.readSlice(tppInfo.getEnd() - buf.readerIndex() + 1);
 
-			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getTopic(), msgSeqs, size, rawData));
+			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getTopic(), msgSeqs, rawData));
 		}
 
 	}
@@ -170,7 +170,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
 			Tpp tpp = entry.getKey();
-			ProducerMessageCodec msgCodec = ProducerMessageCodecFactory.getCodec(tpp.getTopic());
+			MessageCodec msgCodec = MessageCodecFactory.getCodec(tpp.getTopic());
 
 			int start = buf.writerIndex();
 
@@ -270,15 +270,12 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		private ByteBuf m_rawData;
 
-		private int m_size;
+		private List<DecodedMessage> m_msgs;
 
-		private List<DecodedProducerMessage> m_msgs;
-
-		public MessageRawDataBatch(String topic, List<Integer> msgSeqs, int size, ByteBuf rawData) {
+		public MessageRawDataBatch(String topic, List<Integer> msgSeqs, ByteBuf rawData) {
 			m_topic = topic;
 			m_msgSeqs = msgSeqs;
 			m_rawData = rawData;
-			m_size = size;
 		}
 
 		public String getTopic() {
@@ -293,21 +290,17 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			return m_rawData.duplicate();
 		}
 
-		public int size() {
-			return m_size;
-		}
-
-		public List<DecodedProducerMessage> getMessages() {
+		public List<DecodedMessage> getMessages() {
 
 			if (m_msgs == null) {
 				synchronized (this) {
 					if (m_msgs == null) {
-						m_msgs = new ArrayList<>(m_size);
+						m_msgs = new ArrayList<>();
 
 						ByteBuf tmpBuf = m_rawData.duplicate();
-						ProducerMessageCodec messageCodec = ProducerMessageCodecFactory.getCodec(m_topic);
+						MessageCodec messageCodec = MessageCodecFactory.getCodec(m_topic);
 
-						for (int i = 0; i < m_size; i++) {
+						while (tmpBuf.readableBytes() > 0) {
 							m_msgs.add(messageCodec.decode(tmpBuf));
 						}
 

@@ -32,8 +32,8 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.core.message.codec.DefaultProducerMessageCodec;
-import com.ctrip.hermes.core.message.codec.ProducerMessageCodec;
+import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
+import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
 public class PerformanceToAvro extends ComponentTestCase {

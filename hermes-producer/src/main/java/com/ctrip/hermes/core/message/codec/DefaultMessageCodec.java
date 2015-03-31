@@ -6,14 +6,14 @@ import java.util.Map;
 
 import com.ctrip.hermes.core.codec.Codec;
 import com.ctrip.hermes.core.codec.CodecFactory;
-import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.message.DecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
-public class DefaultProducerMessageCodec implements ProducerMessageCodec {
+public class DefaultMessageCodec implements MessageCodec {
 	private Codec m_codec ;
 
-   public DefaultProducerMessageCodec(String topic) {
+   public DefaultMessageCodec(String topic) {
 	  m_codec = CodecFactory.getCodec(topic);
    }
 
@@ -53,10 +53,10 @@ public class DefaultProducerMessageCodec implements ProducerMessageCodec {
 	}
 
 	@Override
-	public DecodedProducerMessage decode(ByteBuf buf) {
+	public DecodedMessage decode(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
-		DecodedProducerMessage msg = new DecodedProducerMessage();
+		DecodedMessage msg = new DecodedMessage();
 		msg.setKey(codec.readString());
 		msg.setBornTime(codec.readLong());
 

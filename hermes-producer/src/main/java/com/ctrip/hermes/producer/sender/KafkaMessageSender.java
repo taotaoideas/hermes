@@ -21,8 +21,8 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.core.message.codec.DefaultProducerMessageCodec;
-import com.ctrip.hermes.core.message.codec.ProducerMessageCodec;
+import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
+import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Partition;
@@ -68,7 +68,7 @@ public class KafkaMessageSender implements MessageSender {
 
 		KafkaProducer<String, byte[]> producer = m_producers.get(topic);
 
-		ProducerMessageCodec m_codec = new DefaultProducerMessageCodec(topic);
+		MessageCodec m_codec = new DefaultMessageCodec(topic);
 		ByteBuf byteBuf = Unpooled.buffer();
 		m_codec.encode(msg, byteBuf);
 

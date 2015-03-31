@@ -10,7 +10,7 @@ import org.unidal.lookup.annotation.Inject;
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
-import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.message.DecodedMessage;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.SendMessageAckCommand;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
@@ -56,10 +56,9 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 	}
 
-	private void saveToMysql(List<DecodedProducerMessage> messages, Tpp tpp) throws Exception {
-		for (DecodedProducerMessage msg : messages) {
+	private void saveToMysql(List<DecodedMessage> messages, Tpp tpp) throws Exception {
+		for (DecodedMessage msg : messages) {
 			MTopicShardPriority r = new MTopicShardPriority();
-
 			r.setCreationDate(new Date(msg.getBornTime()));
 			r.setPayload(msg.readBody());
 			r.setProducerId(1);

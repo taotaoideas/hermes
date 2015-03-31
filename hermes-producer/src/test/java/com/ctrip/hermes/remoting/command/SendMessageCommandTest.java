@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.core.codec.JsonCodec;
-import com.ctrip.hermes.core.message.DecodedProducerMessage;
+import com.ctrip.hermes.core.message.DecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.transport.command.Header;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
@@ -62,10 +62,10 @@ public class SendMessageCommandTest extends ComponentTestCase{
 		Assert.assertEquals(1, batch.getMsgSeqs().size());
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
 
-		List<DecodedProducerMessage> messages = batch.getMessages();
+		List<DecodedMessage> messages = batch.getMessages();
 		Assert.assertEquals(1, messages.size());
 
-		DecodedProducerMessage msg = messages.get(0);
+		DecodedMessage msg = messages.get(0);
 
 		Assert.assertTrue(msg.getBornTime() != 0L);
 
@@ -124,11 +124,11 @@ public class SendMessageCommandTest extends ComponentTestCase{
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
 		Assert.assertTrue(batch.getMsgSeqs().contains(1));
 
-		List<DecodedProducerMessage> messages = batch.getMessages();
+		List<DecodedMessage> messages = batch.getMessages();
 		Assert.assertEquals(2, messages.size());
 
 		// msg1 start
-		DecodedProducerMessage msg = messages.get(0);
+		DecodedMessage msg = messages.get(0);
 
 		Assert.assertTrue(msg.getBornTime() != 0L);
 
@@ -217,11 +217,11 @@ public class SendMessageCommandTest extends ComponentTestCase{
 		Assert.assertTrue(batch.getMsgSeqs().contains(0));
 		Assert.assertTrue(batch.getMsgSeqs().contains(1));
 
-		List<DecodedProducerMessage> messages = batch.getMessages();
+		List<DecodedMessage> messages = batch.getMessages();
 		Assert.assertEquals(2, messages.size());
 
 		// msg1 start
-		DecodedProducerMessage msg = messages.get(0);
+		DecodedMessage msg = messages.get(0);
 
 		Assert.assertTrue(msg.getBornTime() != 0L);
 

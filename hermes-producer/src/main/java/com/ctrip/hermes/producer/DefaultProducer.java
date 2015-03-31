@@ -48,5 +48,11 @@ public class DefaultProducer extends Producer {
 			m_msg.setPartition(partition);
 			return this;
 		}
+
+		@Override
+		public MessageHolder addProperty(String key, Object value) {
+			m_msg.addAppProperty(key, value);
+			return this;
+		}
 	}
 }
