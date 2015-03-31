@@ -14,9 +14,9 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.channel.MessageQueueManager</role>
+			<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
 			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.broker.channel.BrokerMessageQueueManager</implementation>
+			<implementation>com.ctrip.hermes.broker.queue.DefaultMessageQueueManager</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
@@ -61,9 +61,16 @@
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.channel.MessageQueueManager</role>
+					<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
 					<role-hint>broker</role-hint>
 				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.queue.QueueWriter</role>
+			<role-hint>mysql</role-hint>
+			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueWriter</implementation>
+			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
 				</requirement>

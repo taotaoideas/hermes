@@ -1,16 +1,13 @@
 package com.ctrip.hermes.broker.remoting;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.broker.channel.MessageQueueManager;
-import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
-import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
-import com.ctrip.hermes.core.message.DecodedMessage;
+import com.ctrip.hermes.broker.queue.MessageQueueManager;
+import com.ctrip.hermes.broker.queue.StorageException;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.SendMessageAckCommand;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
@@ -26,9 +23,6 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 	@Inject
 	private MessageQueueManager m_queueManager;
 
-	@Inject
-	private MTopicShardPriorityDao m_dao;
-
 	@Override
 	public List<CommandType> commandTypes() {
 		return Arrays.asList(CommandType.MESSAGE_SEND);
@@ -41,10 +35,10 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 		Map<Tpp, MessageRawDataBatch> rawBatches = req.getMessageRawDataBatches();
 
 		for (Map.Entry<Tpp, MessageRawDataBatch> entry : rawBatches.entrySet()) {
-			Tpp tpp = entry.getKey();
 			try {
-				saveToMysql(entry.getValue().getMessages(), tpp);
-			} catch (Exception e) {
+				m_queueManager.write(entry.getKey(), entry.getValue());
+			} catch (StorageException e) {
+				// TODO
 				e.printStackTrace();
 			}
 		}
@@ -54,23 +48,6 @@ public class SendMessageRequestProcessor implements CommandProcessor {
 
 		ctx.write(ack);
 
-	}
-
-	private void saveToMysql(List<DecodedMessage> messages, Tpp tpp) throws Exception {
-		for (DecodedMessage msg : messages) {
-			MTopicShardPriority r = new MTopicShardPriority();
-			r.setCreationDate(new Date(msg.getBornTime()));
-			r.setPayload(msg.readBody());
-			r.setProducerId(1);
-			r.setProducerIp("1.1.1.1");
-			r.setRefKey(msg.getKey());
-
-			r.setTopic(tpp.getTopic());
-			r.setShard(tpp.getPartitionNo());
-			r.setPriority(tpp.isPriority() ? 0 : 1);
-
-			m_dao.insert(r);
-		}
 	}
 
 }

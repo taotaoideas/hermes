@@ -8,11 +8,13 @@ import org.unidal.dal.jdbc.mapping.TableProvider;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry;
-import com.ctrip.hermes.broker.channel.BrokerMessageQueueManager;
 import com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry;
-import com.ctrip.hermes.broker.channel.MessageQueueManager;
 import com.ctrip.hermes.broker.dal.HermesTableProvider;
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
+import com.ctrip.hermes.broker.queue.DefaultMessageQueueManager;
+import com.ctrip.hermes.broker.queue.MessageQueueManager;
+import com.ctrip.hermes.broker.queue.MysqlQueueWriter;
+import com.ctrip.hermes.broker.queue.QueueWriter;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
@@ -21,6 +23,7 @@ import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.message.internal.DeliverPipeline;
 import com.ctrip.hermes.message.internal.ReceiverPipeline;
+import com.ctrip.hermes.meta.entity.Storage;
 
 public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
@@ -34,7 +37,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(NettyServer.class) //
 		      .req(NettyServerConfig.class));
 
-		all.add(C(MessageQueueManager.class, BrokerMessageQueueManager.ID, BrokerMessageQueueManager.class) //
+		all.add(C(MessageQueueManager.class, DefaultMessageQueueManager.ID, DefaultMessageQueueManager.class) //
 		      .req(MetaService.class));
 
 		all.add(C(ValveRegistry.class, BrokerDeliverValveRegistry.ID, BrokerDeliverValveRegistry.class));
@@ -46,11 +49,13 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		// processors
 		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class) //
-		      .req(MessageQueueManager.class, BrokerMessageQueueManager.ID) //
+		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
+
+		all.add(C(QueueWriter.class, Storage.MYSQL, MysqlQueueWriter.class) //
 		      .req(MTopicShardPriorityDao.class));
 
 		all.add(C(TableProvider.class, "m-topic-shard-priority", HermesTableProvider.class) //
-				.req(MetaService.class) //
+		      .req(MetaService.class) //
 		      .config(E("m_table").value("m-topic-shard-priority")));
 
 		all.add(defineJdbcDataSourceConfigurationManagerComponent("/data/appdatas/hermes/datasources.xml"));
