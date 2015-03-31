@@ -16,6 +16,7 @@ import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.transform.BaseVisitor2;
 
 public class DefaultMetaService implements Initializable, MetaService {
@@ -95,5 +96,12 @@ public class DefaultMetaService implements Initializable, MetaService {
 	public CodecType getCodecType(String topic) {
 		return CodecType.valueOf(m_meta.findTopic(topic).getCodec().getType().toUpperCase());
 	}
+
+	@Override
+	public Partition findPartition(String topicName, int partitionId) {
+	   Topic topic = m_meta.findTopic(topicName);
+		Partition p = topic.findPartition(partitionId);
+	   return p;
+   }
 
 }

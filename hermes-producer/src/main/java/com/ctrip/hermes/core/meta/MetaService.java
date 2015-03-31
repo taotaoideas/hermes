@@ -28,10 +28,13 @@ public interface MetaService {
 	 * @param topic
 	 */
 	Storage findStorage(String topic);
-	
+
 	/**
 	 * @param topic
 	 * @return
 	 */
 	CodecType getCodecType(String topic);
+
+	Partition findPartition(String topic, int shard);
+
 }
