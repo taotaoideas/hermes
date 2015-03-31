@@ -16,7 +16,6 @@ import com.ctrip.hermes.engine.ConsumerPipeline;
 import com.ctrip.hermes.engine.ConsumerTracingValve;
 import com.ctrip.hermes.engine.DecodeMessageValve;
 import com.ctrip.hermes.engine.KafkaConsumerBootstrap;
-import com.ctrip.hermes.engine.LocalConsumerBootstrap;
 import com.ctrip.hermes.engine.LocalConsumerValveRegistry;
 import com.ctrip.hermes.engine.scanner.DefaultScanner;
 import com.ctrip.hermes.engine.scanner.Scanner;
@@ -38,8 +37,6 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(Pipeline.class, LOCAL_CONSUMER, ConsumerPipeline.class) //
 		      .req(ValveRegistry.class, LOCAL_CONSUMER));
 
-		all.add(C(ConsumerBootstrap.class, LocalConsumerBootstrap.ID, LocalConsumerBootstrap.class) //
-		      .req(Pipeline.class, LOCAL_CONSUMER));
 
 		all.add(C(Scanner.class, DefaultScanner.class));
 
