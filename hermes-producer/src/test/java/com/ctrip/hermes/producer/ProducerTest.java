@@ -12,8 +12,7 @@ public class ProducerTest extends ComponentTestCase {
 	public void simpleSendWithoutLookup() throws IOException {
 		Producer p = Producer.getInstance();
 
-		p.message("order_new", 123456L).send();
-		System.in.read();
+		p.message("order_new", 123456L).withKey("key").withPartition("0").send();
 	}
 
 	@Test

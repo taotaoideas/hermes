@@ -1,20 +1,15 @@
 package com.ctrip.hermes.broker.remoting;
 
-import java.io.ByteArrayInputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.channel.MessageQueueManager;
+import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
+import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
 import com.ctrip.hermes.core.message.DecodedProducerMessage;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.SendMessageAckCommand;
@@ -23,16 +18,16 @@ import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawData
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
-import com.mysql.jdbc.Driver;
 
-public class SendMessageRequestProcessor implements CommandProcessor, Initializable {
+public class SendMessageRequestProcessor implements CommandProcessor {
 
 	public static final String ID = "send-message-request";
 
 	@Inject
 	private MessageQueueManager m_queueManager;
 
-	private Connection m_conn;
+	@Inject
+	private MTopicShardPriorityDao m_dao;
 
 	@Override
 	public List<CommandType> commandTypes() {
@@ -61,34 +56,21 @@ public class SendMessageRequestProcessor implements CommandProcessor, Initializa
 
 	}
 
-	private void saveToMysql(List<DecodedProducerMessage> messages, Tpp tpp) throws SQLException {
-		String sql = "insert into fuck " //
-		      + "values (?,?,?,?,?,?,?)";
-		PreparedStatement stmt = m_conn.prepareStatement(sql);
-
+	private void saveToMysql(List<DecodedProducerMessage> messages, Tpp tpp) throws Exception {
 		for (DecodedProducerMessage msg : messages) {
-			stmt.setLong(1, 1);
-			stmt.setLong(2, 0);
-			stmt.setTimestamp(3, new Timestamp(msg.getBornTime()));
-			stmt.setString(4, msg.getKey());
-			stmt.setBlob(5, new ByteArrayInputStream(msg.readAppProperties()));
-			stmt.setBlob(6, new ByteArrayInputStream(msg.readSysProperties()));
-			stmt.setBlob(7, new ByteArrayInputStream(msg.readBody()));
+			MTopicShardPriority r = new MTopicShardPriority();
 
-			stmt.addBatch();
-		}
+			r.setCreationDate(new Date(msg.getBornTime()));
+			r.setPayload(msg.readBody());
+			r.setProducerId(1);
+			r.setProducerIp("1.1.1.1");
+			r.setRefKey(msg.getKey());
 
-		stmt.executeUpdate();
-	}
+			r.setTopic(tpp.getTopic());
+			r.setShard(tpp.getPartitionNo());
+			r.setPriority(tpp.isPriority() ? 0 : 1);
 
-	@Override
-	public void initialize() throws InitializationException {
-		try {
-			Driver.class.newInstance();
-			m_conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1/hermes", "root", null);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new InitializationException("", e);
+			m_dao.insert(r);
 		}
 	}
 

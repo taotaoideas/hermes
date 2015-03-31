@@ -20,6 +20,7 @@
 	</entity>
 	<entity name="storage">
 		<attribute name="type" key='true' />
+		<entity-ref name="partition" type="map" names="partitions" />
 		<snippet lang='java'>
 			public final static String MEMORY = "memory";
 			public final static String KAFKA = "kafka";
@@ -29,6 +30,9 @@
 	</entity>
 	<entity name="topic">
 		<attribute name="name" key='true' />
+	</entity>
+	<entity name="partition">
+    	<attribute name="id" value-type="int" key='true' />
 	</entity>
 </model>
 
