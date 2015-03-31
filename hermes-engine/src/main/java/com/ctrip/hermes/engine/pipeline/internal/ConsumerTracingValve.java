@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine.pipeline.valve;
+package com.ctrip.hermes.engine.pipeline.internal;
 
 import com.ctrip.hermes.core.pipeline.PipelineContext;
 import com.ctrip.hermes.core.pipeline.spi.Valve;

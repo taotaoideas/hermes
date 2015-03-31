@@ -18,8 +18,6 @@ public interface ConsumerMessage<T> {
 
 	public T getBody();
 
-	public boolean isPriority();
-	
 	public boolean isSuccess();
 
 }

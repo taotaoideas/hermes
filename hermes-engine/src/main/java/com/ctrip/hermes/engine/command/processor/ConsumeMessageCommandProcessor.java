@@ -41,14 +41,6 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 		return Arrays.asList(CommandType.MESSAGE_CONSUME);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.ctrip.hermes.core.transport.command.processor.CommandProcessor#process(com.ctrip.hermes.core.transport.command.processor
-	 * .CommandProcessorContext)
-	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void process(CommandProcessorContext ctx) {
 		Command cmd = ctx.getCommand();
@@ -56,29 +48,37 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 			ConsumeMessageCommand consumeMessageCommand = (ConsumeMessageCommand) cmd;
 
 			for (Map.Entry<Long, List<ConsumerMessageBatch>> entry : consumeMessageCommand.getMsgs().entrySet()) {
-				List<ConsumerMessage<?>> msgs = new ArrayList<>();
 				long correlationId = entry.getKey();
-
 				List<ConsumerMessageBatch> batches = entry.getValue();
-				for (ConsumerMessageBatch batch : batches) {
-					List<Long> msgSeqs = batch.getMsgSeqs();
-					ByteBuf batchData = batch.getData();
 
-					MessageCodec codec = MessageCodecFactory.getCodec(batch.getTopic());
-					Class bodyClazz = m_consumerNotifier.find(correlationId).getMessageClazz();
+				Class<?> bodyClazz = m_consumerNotifier.find(correlationId).getMessageClazz();
 
-					for (int j = 0; j < msgSeqs.size(); j++) {
-						BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
-						BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
-						brokerMsg.setMsgSeq(msgSeqs.get(j));
-
-						msgs.add(brokerMsg);
-					}
-				}
+				List<ConsumerMessage<?>> msgs = decodeBatches(batches, bodyClazz);
 
 				m_consumerNotifier.messageReceived(correlationId, msgs);
 			}
 		}
 
+	}
+
+	@SuppressWarnings("rawtypes")
+   private List<ConsumerMessage<?>> decodeBatches(List<ConsumerMessageBatch> batches, Class bodyClazz) {
+		List<ConsumerMessage<?>> msgs = new ArrayList<>();
+		for (ConsumerMessageBatch batch : batches) {
+			List<Long> msgSeqs = batch.getMsgSeqs();
+			ByteBuf batchData = batch.getData();
+
+			MessageCodec codec = MessageCodecFactory.getCodec(batch.getTopic());
+
+			for (int j = 0; j < msgSeqs.size(); j++) {
+				BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
+				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
+				brokerMsg.setMsgSeq(msgSeqs.get(j));
+
+				msgs.add(brokerMsg);
+			}
+		}
+
+		return msgs;
 	}
 }

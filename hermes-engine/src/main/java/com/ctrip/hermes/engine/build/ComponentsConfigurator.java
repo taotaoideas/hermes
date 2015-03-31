@@ -27,7 +27,7 @@ import com.ctrip.hermes.engine.notifier.ConsumerNotifier;
 import com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier;
 import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
 import com.ctrip.hermes.engine.pipeline.ConsumerValveRegistry;
-import com.ctrip.hermes.engine.pipeline.valve.ConsumerTracingValve;
+import com.ctrip.hermes.engine.pipeline.internal.ConsumerTracingValve;
 import com.ctrip.hermes.meta.entity.Endpoint;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {

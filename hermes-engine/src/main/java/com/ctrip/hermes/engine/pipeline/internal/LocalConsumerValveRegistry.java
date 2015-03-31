@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine.pipeline.valve;
+package com.ctrip.hermes.engine.pipeline.internal;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;

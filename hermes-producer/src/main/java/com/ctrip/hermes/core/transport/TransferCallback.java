@@ -8,6 +8,6 @@ import io.netty.buffer.ByteBuf;
  */
 public interface TransferCallback {
 
-	public void transfer(ByteBuf buf);
+	public void transfer(ByteBuf out);
 
 }
