@@ -1,4 +1,6 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.bootstrap;
+
+import com.ctrip.hermes.engine.ConsumerContext;
 
 public interface ConsumerBootstrap {
 

@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.bootstrap;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -26,6 +26,7 @@ import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.core.pipeline.PipelineContext;
 import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
+import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.message.StoredMessage;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Partition;

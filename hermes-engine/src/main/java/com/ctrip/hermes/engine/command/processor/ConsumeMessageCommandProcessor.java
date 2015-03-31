@@ -20,7 +20,7 @@ import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
-import com.ctrip.hermes.engine.ConsumerNotifier;
+import com.ctrip.hermes.engine.notifier.ConsumerNotifier;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

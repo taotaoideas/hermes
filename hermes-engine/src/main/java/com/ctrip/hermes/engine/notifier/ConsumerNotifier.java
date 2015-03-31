@@ -1,8 +1,9 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.notifier;
 
 import java.util.List;
 
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.engine.ConsumerContext;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

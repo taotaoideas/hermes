@@ -6,6 +6,8 @@ import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
+import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapManager;
 import com.ctrip.hermes.meta.entity.Topic;
 
 public class DefaultEngine extends ContainerHolder implements Engine {
@@ -23,9 +25,9 @@ public class DefaultEngine extends ContainerHolder implements Engine {
 
 			for (Topic topic : topics) {
 				String endpointType = m_metaService.getEndpointType(topic.getName());
-				ConsumerContext consumerContext = new ConsumerContext(topic, s.getGroupId(), s.getConsumer(), s.getMessageClass());
-				ConsumerBootstrap consumerBootstrap = m_consumerManager
-				      .findConsumerBootStrap(endpointType);
+				ConsumerContext consumerContext = new ConsumerContext(topic, s.getGroupId(), s.getConsumer(),
+				      s.getMessageClass());
+				ConsumerBootstrap consumerBootstrap = m_consumerManager.findConsumerBootStrap(endpointType);
 				consumerBootstrap.start(consumerContext);
 			}
 		}

@@ -1,9 +1,10 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.bootstrap;
 
 import java.util.List;
 
 import com.ctrip.hermes.core.transport.command.SubscribeCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
+import com.ctrip.hermes.engine.ConsumerContext;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Partition;
 
@@ -11,7 +12,7 @@ import com.ctrip.hermes.meta.entity.Partition;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class BrokerConsumerBootStrap extends BaseConsumerBootstrap {
+public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 
 	@Override
 	protected void doStart(ConsumerContext consumerContext) {

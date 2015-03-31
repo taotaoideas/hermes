@@ -1,4 +1,5 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.bootstrap;
+
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

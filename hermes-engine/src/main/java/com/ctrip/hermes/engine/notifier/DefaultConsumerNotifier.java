@@ -1,4 +1,4 @@
-package com.ctrip.hermes.engine;
+package com.ctrip.hermes.engine.notifier;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +11,8 @@ import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.pipeline.Pipeline;
+import com.ctrip.hermes.engine.ConsumerContext;
+import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -21,7 +23,7 @@ public class DefaultConsumerNotifier implements ConsumerNotifier {
 	private Map<Long, Pair<ConsumerContext, ExecutorService>> m_consumerContexs = new ConcurrentHashMap<>();
 	
 	@Inject
-	protected Pipeline<Void> m_pipeline;
+	protected ConsumerPipeline m_pipeline;
 
 	/*
 	 * (non-Javadoc)

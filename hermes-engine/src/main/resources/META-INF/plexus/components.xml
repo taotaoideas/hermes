@@ -6,64 +6,90 @@
 			<implementation>com.ctrip.hermes.HermesProducerModule</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
-			<role-hint>local-consumer</role-hint>
-			<implementation>com.ctrip.hermes.engine.LocalConsumerValveRegistry</implementation>
+			<role>com.ctrip.hermes.engine.Engine</role>
+			<implementation>com.ctrip.hermes.engine.DefaultEngine</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapManager</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.pipeline.spi.Valve</role>
-			<role-hint>decode-message</role-hint>
-			<implementation>com.ctrip.hermes.engine.DecodeMessageValve</implementation>
+			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapManager</role>
+			<implementation>com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapRegistry</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapRegistry</role>
+			<implementation>com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapRegistry</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap</role>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.engine.bootstrap.BrokerConsumerBootstrap</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.engine.notifier.ConsumerNotifier</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.engine.notifier.ConsumerNotifier</role>
+			<implementation>com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</role>
+			<implementation>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
+					<role-hint>consumer</role-hint>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
+			<role-hint>consumer</role-hint>
+			<implementation>com.ctrip.hermes.engine.pipeline.ConsumerValveRegistry</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.spi.Valve</role>
 			<role-hint>consumer-tracing</role-hint>
-			<implementation>com.ctrip.hermes.engine.ConsumerTracingValve</implementation>
+			<implementation>com.ctrip.hermes.engine.pipeline.valve.ConsumerTracingValve</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
-			<role-hint>local-consumer</role-hint>
-			<implementation>com.ctrip.hermes.engine.ConsumerPipeline</implementation>
+			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap</role>
+			<role-hint>kafka</role-hint>
+			<implementation>com.ctrip.hermes.engine.bootstrap.KafkaConsumerBootstrap</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 					<role-hint>local-consumer</role-hint>
 				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
-			<role-hint>local</role-hint>
-			<implementation>com.ctrip.hermes.engine.LocalConsumerBootstrap</implementation>
-			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
 					<role-hint>local-consumer</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.engine.scanner.Scanner</role>
-			<implementation>com.ctrip.hermes.engine.scanner.DefaultScanner</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.engine.ConsumerBootstrap</role>
-			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.engine.KafkaConsumerBootstrap</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.message.ValveRegistry</role>
-					<role-hint>local-consumer</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.Pipeline</role>
-					<role-hint>local-consumer</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.meta.MetaService</role>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.message.codec.StoredMessageCodec</role>
 				</requirement>
 			</requirements>
 		</component>
