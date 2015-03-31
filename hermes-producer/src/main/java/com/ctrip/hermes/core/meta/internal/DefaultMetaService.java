@@ -1,8 +1,11 @@
 package com.ctrip.hermes.core.meta.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
@@ -86,7 +89,6 @@ public class DefaultMetaService implements Initializable, MetaService {
 		return m_dsId2Storage.get(p0.getWriteDatasource());
 	}
 
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -103,5 +105,20 @@ public class DefaultMetaService implements Initializable, MetaService {
 		Partition p = topic.findPartition(partitionId);
 	   return p;
    }
+	public List<Topic> findTopicsByPattern(String topicPattern) {
+		List<Topic> matchedTopics = new ArrayList<>();
+
+		Collection<Topic> topics = m_meta.getTopics().values();
+
+		Pattern pattern = Pattern.compile(topicPattern);
+
+		for (Topic topic : topics) {
+			if (pattern.matcher((CharSequence) topic).matches()) {
+				matchedTopics.add(topic);
+			}
+		}
+
+		return matchedTopics;
+	}
 
 }

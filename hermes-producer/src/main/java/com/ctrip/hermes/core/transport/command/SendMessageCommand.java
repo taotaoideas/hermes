@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.unidal.tuple.Triple;
 
-import com.ctrip.hermes.core.message.DecodedMessage;
+import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
@@ -77,13 +77,11 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 	public void parse0(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 		List<Tpp> tppNames = readTppNames(buf);
-		List<TppIndex> tppIndexes = readTppInfos(buf, tppNames.size());
+		List<TppIndex> tppIndexes = readTppIndexes(buf, tppNames.size());
 
 		for (int i = 0; i < tppNames.size(); i++) {
 			Tpp tppName = tppNames.get(i);
 			TppIndex tppInfo = tppIndexes.get(i);
-
-			buf.readerIndex(tppInfo.getStart());
 
 			int size = codec.readInt();
 			List<Integer> msgSeqs = new ArrayList<>();
@@ -92,20 +90,20 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 				msgSeqs.add(codec.readInt());
 			}
 
-			ByteBuf rawData = buf.readSlice(tppInfo.getEnd() - buf.readerIndex() + 1);
+			ByteBuf rawData = buf.readSlice(tppInfo.getLength());
 
 			m_decodedBatches.put(tppName, new MessageRawDataBatch(tppName.getTopic(), msgSeqs, rawData));
 		}
 
 	}
 
-	private List<TppIndex> readTppInfos(ByteBuf buf, int size) {
+	private List<TppIndex> readTppIndexes(ByteBuf buf, int size) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		List<TppIndex> tppInfos = new ArrayList<>(size);
 
 		for (int i = 0; i < size; i++) {
-			tppInfos.add(new TppIndex(codec.readInt(), codec.readInt()));
+			tppInfos.add(new TppIndex(codec.readInt()));
 		}
 
 		return tppInfos;
@@ -131,9 +129,8 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		buf.markWriterIndex();
 
-		// prefill with mock data
+		// placeholder for indexes
 		for (int i = 0; i < m_msgs.size(); i++) {
-			codec.writeInt(-1);
 			codec.writeInt(-1);
 		}
 
@@ -147,10 +144,9 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		buf.writerIndex(writerIndex);
 	}
 
-	private void writeTppIndexes(List<TppIndex> tppInfos, HermesPrimitiveCodec codec) {
-		for (TppIndex i : tppInfos) {
-			codec.writeInt(i.getStart());
-			codec.writeInt(i.getEnd());
+	private void writeTppIndexes(List<TppIndex> tppIndexes, HermesPrimitiveCodec codec) {
+		for (TppIndex i : tppIndexes) {
+			codec.writeInt(i.getLength());
 		}
 	}
 
@@ -172,19 +168,20 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			Tpp tpp = entry.getKey();
 			MessageCodec msgCodec = MessageCodecFactory.getCodec(tpp.getTopic());
 
-			int start = buf.writerIndex();
 
 			// write msgSeqs
 			codec.writeInt(entry.getValue().size());
+			
 			for (ProducerMessage<?> msg : entry.getValue()) {
 				codec.writeInt(msg.getMsgSeqNo());
 			}
 
+			int start = buf.writerIndex();
 			for (ProducerMessage<?> msg : entry.getValue()) {
 				msgCodec.encode(msg, buf);
 			}
-			int end = buf.writerIndex() - 1;
-			tppIndexes.add(new TppIndex(start, end));
+			int length = buf.writerIndex() - start;
+			tppIndexes.add(new TppIndex(length));
 		}
 
 		return tppIndexes;
@@ -244,21 +241,14 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 	private static class TppIndex {
 
-		private int m_start;
+		private int m_length;
 
-		private int m_end;
-
-		public TppIndex(int start, int end) {
-			m_start = start;
-			m_end = end;
+		public TppIndex(int length) {
+			m_length = length;
 		}
 
-		public int getStart() {
-			return m_start;
-		}
-
-		public int getEnd() {
-			return m_end;
+		public int getLength() {
+			return m_length;
 		}
 
 	}
@@ -270,7 +260,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		private ByteBuf m_rawData;
 
-		private List<DecodedMessage> m_msgs;
+		private List<PartialDecodedMessage> m_msgs;
 
 		public MessageRawDataBatch(String topic, List<Integer> msgSeqs, ByteBuf rawData) {
 			m_topic = topic;
@@ -290,7 +280,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			return m_rawData.duplicate();
 		}
 
-		public List<DecodedMessage> getMessages() {
+		public List<PartialDecodedMessage> getMessages() {
 
 			if (m_msgs == null) {
 				synchronized (this) {
@@ -301,7 +291,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 						MessageCodec messageCodec = MessageCodecFactory.getCodec(m_topic);
 
 						while (tmpBuf.readableBytes() > 0) {
-							m_msgs.add(messageCodec.decode(tmpBuf));
+							m_msgs.add(messageCodec.partialDecode(tmpBuf));
 						}
 
 					}

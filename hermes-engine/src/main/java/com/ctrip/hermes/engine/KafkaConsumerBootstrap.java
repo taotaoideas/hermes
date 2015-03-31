@@ -19,7 +19,7 @@ import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.core.message.DecodedMessage;
+import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.Pipeline;
@@ -84,7 +84,7 @@ public class KafkaConsumerBootstrap extends ContainerHolder implements ConsumerB
 					// store msg list
 					byte[] bytes = msgAndMetadata.message();
 					ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
-					DecodedMessage msg = m_codec.decode(byteBuf);
+					PartialDecodedMessage msg = m_codec.partialDecode(byteBuf);
 
 //					for (StoredMessage storedMsg : storedMsgs) {
 //						storedMsg.setPartition(String.valueOf(msgAndMetadata.partition()));

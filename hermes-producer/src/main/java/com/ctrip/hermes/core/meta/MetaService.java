@@ -6,6 +6,7 @@ import com.ctrip.hermes.core.codec.CodecType;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.meta.entity.Topic;
 
 public interface MetaService {
 
@@ -37,4 +38,9 @@ public interface MetaService {
 
 	Partition findPartition(String topic, int shard);
 
+	/**
+	 * @param topicPattern
+	 * @return
+	 */
+   List<Topic> findTopicsByPattern(String topicPattern);
 }

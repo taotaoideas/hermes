@@ -2,7 +2,7 @@ package com.ctrip.hermes.core.message;
 
 import io.netty.buffer.ByteBuf;
 
-public class DecodedMessage {
+public class PartialDecodedMessage {
 	private ByteBuf m_body;
 
 	private String m_key;
