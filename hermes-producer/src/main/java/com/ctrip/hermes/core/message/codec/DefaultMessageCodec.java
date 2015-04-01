@@ -14,8 +14,11 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 public class DefaultMessageCodec implements MessageCodec {
 	private Codec m_codec;
 
+	private String m_topic;
+
 	public DefaultMessageCodec(String topic) {
 		m_codec = CodecFactory.getCodec(topic);
+		m_topic = topic;
 	}
 
 	@Override
@@ -51,7 +54,7 @@ public class DefaultMessageCodec implements MessageCodec {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-   @Override
+	@Override
 	public BaseConsumerMessage<?> decode(ByteBuf buf, Class<?> bodyClazz) {
 		BaseConsumerMessage msg = new BaseConsumerMessage();
 
@@ -61,6 +64,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		msg.setAppProperties(readProperties(decodedMessage.getAppProperties()));
 		msg.setSysProperties(readProperties(decodedMessage.getSysProperties()));
 		msg.setBody(m_codec.decode(decodedMessage.readBody(), bodyClazz));
+		msg.setTopic(m_topic);
 
 		return msg;
 	}
@@ -101,7 +105,6 @@ public class DefaultMessageCodec implements MessageCodec {
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> readProperties(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
-		codec.readInt();
 		return codec.readMap();
 	}
 

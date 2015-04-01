@@ -26,7 +26,7 @@ import com.google.common.util.concurrent.SettableFuture;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class SendMessageCommandTest extends ComponentTestCase{
+public class SendMessageCommandTest extends ComponentTestCase {
 
 	@SuppressWarnings("unchecked")
 	@Test

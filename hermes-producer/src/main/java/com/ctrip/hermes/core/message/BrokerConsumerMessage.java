@@ -11,21 +11,19 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	private BaseConsumerMessage<T> m_baseMsg;
 
 	private long m_msgSeq;
+	
+	private boolean m_success = true;
 
 	/**
 	 * @param baseMsg
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-   public BrokerConsumerMessage(BaseConsumerMessage baseMsg) {
+	public BrokerConsumerMessage(BaseConsumerMessage baseMsg) {
 		m_baseMsg = baseMsg;
 	}
 
 	public BaseConsumerMessage<T> getBaseMsg() {
 		return m_baseMsg;
-	}
-
-	public void setBaseMsg(BaseConsumerMessage<T> baseMsg) {
-		m_baseMsg = baseMsg;
 	}
 
 	public long getMsgSeq() {
@@ -36,103 +34,45 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 		this.m_msgSeq = msgSeq;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#nack()
-	 */
 	@Override
 	public void nack() {
-		// TODO Auto-generated method stub
-
+		m_success = false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#getProperty(java.lang.String)
-	 */
-	@Override
+	@SuppressWarnings("unchecked")
+   @Override
 	public <V> V getProperty(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		return (V) m_baseMsg.getAppProperties().get(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#getProperties()
-	 */
 	@Override
 	public Map<String, Object> getProperties() {
-		// TODO Auto-generated method stub
-		return null;
+		return m_baseMsg.getAppProperties();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#getBornTime()
-	 */
 	@Override
 	public long getBornTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return m_baseMsg.getBornTime();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#getTopic()
-	 */
 	@Override
 	public String getTopic() {
-		// TODO Auto-generated method stub
-		return null;
+		return m_baseMsg.getTopic();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#getKey()
-	 */
 	@Override
 	public String getKey() {
-		// TODO Auto-generated method stub
-		return null;
+		return m_baseMsg.getKey();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#getBody()
-	 */
 	@Override
 	public T getBody() {
-		// TODO Auto-generated method stub
-		return null;
+		return m_baseMsg.getBody();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#isPriority()
-	 */
-	@Override
-	public boolean isPriority() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.core.message.ConsumerMessage#isSuccess()
-	 */
 	@Override
 	public boolean isSuccess() {
-		// TODO Auto-generated method stub
-		return false;
+		return m_success;
 	}
 
 }

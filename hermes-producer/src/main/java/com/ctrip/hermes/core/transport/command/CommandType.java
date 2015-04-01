@@ -8,11 +8,13 @@ import java.util.Map;
  *
  */
 public enum CommandType {
-	MESSAGE_SEND(1, SendMessageCommand.class), //
-	ACK_MESSAGE_SEND(2, SendMessageAckCommand.class), //
-	SUBSCRIBE(3, SubscribeCommand.class), //
-	ACK_SUBSCRIBE(4, SubscribeAckCommand.class), //
-	MESSAGE_CONSUME(5, ConsumeMessageCommand.class), //
+	SUBSCRIBE(1, SubscribeCommand.class), //
+
+	MESSAGE_SEND(51, SendMessageCommand.class), //
+	MESSAGE_CONSUME(52, ConsumeMessageCommand.class), //
+
+	ACK_MESSAGE_SEND(101, SendMessageAckCommand.class), //
+	ACK_SUBSCRIBE(102, SubscribeAckCommand.class), //
 	;
 
 	private static Map<Integer, CommandType> m_types = new HashMap<Integer, CommandType>();

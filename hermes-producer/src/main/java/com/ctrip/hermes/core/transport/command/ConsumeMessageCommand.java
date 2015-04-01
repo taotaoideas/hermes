@@ -48,10 +48,10 @@ public class ConsumeMessageCommand extends AbstractCommand {
 
 		for (Map.Entry<Long, List<ConsumerMessageBatch>> entry : m_msgs.entrySet()) {
 			Long correlationId = entry.getKey();
-			List<ConsumerMessageBatch> batchs = entry.getValue();
-			writeBatchMetas(codec, batchs);
+			List<ConsumerMessageBatch> batches = entry.getValue();
+			writeBatchMetas(codec, batches);
 
-			writeBatchDatas(buf, codec, batchs);
+			writeBatchDatas(buf, codec, batches);
 
 			correlationIds.add(correlationId);
 		}
@@ -83,13 +83,13 @@ public class ConsumeMessageCommand extends AbstractCommand {
 
 		for (int i = 0; i < correlationIdCount; i++) {
 			long correlationId = correlationIds.get(i);
-			List<ConsumerMessageBatch> batchs = new ArrayList<>();
+			List<ConsumerMessageBatch> batches = new ArrayList<>();
 
-			readBatchMetas(codec, batchs);
+			readBatchMetas(codec, batches);
 
-			readBatchDatas(buf, codec, batchs);
+			readBatchDatas(buf, codec, batches);
 
-			msgs.put(correlationId, batchs);
+			msgs.put(correlationId, batches);
 		}
 
 		m_msgs = msgs;
@@ -103,8 +103,8 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		return correlationIds;
 	}
 
-	private void writeBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batchs) {
-		for (ConsumerMessageBatch batch : batchs) {
+	private void writeBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
+		for (ConsumerMessageBatch batch : batches) {
 			// placeholder for len
 			int start = buf.writerIndex();
 			codec.writeInt(-1);
@@ -119,15 +119,15 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		}
 	}
 
-	private void readBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batchs) {
-		for (ConsumerMessageBatch batch : batchs) {
+	private void readBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
+		for (ConsumerMessageBatch batch : batches) {
 			int len = codec.readInt();
 			batch.setData(buf.readSlice(len));
 		}
 
 	}
 
-	private void readBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batchs) {
+	private void readBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
 		int batchSize = codec.readInt();
 		for (int i = 0; i < batchSize; i++) {
 			ConsumerMessageBatch batch = new ConsumerMessageBatch();
@@ -137,13 +137,13 @@ public class ConsumeMessageCommand extends AbstractCommand {
 			for (int j = 0; j < seqSize; j++) {
 				batch.addMsgSeq(codec.readLong());
 			}
-			batchs.add(batch);
+			batches.add(batch);
 		}
 	}
 
-	private void writeBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batchs) {
-		codec.writeInt(batchs.size());
-		for (ConsumerMessageBatch batch : batchs) {
+	private void writeBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
+		codec.writeInt(batches.size());
+		for (ConsumerMessageBatch batch : batches) {
 			codec.writeInt(batch.getMsgSeqs().size());
 			codec.writeString(batch.getTopic());
 			for (Long seq : batch.getMsgSeqs()) {

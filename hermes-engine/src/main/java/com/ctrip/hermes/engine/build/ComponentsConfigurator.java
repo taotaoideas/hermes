@@ -27,11 +27,15 @@ import com.ctrip.hermes.engine.notifier.ConsumerNotifier;
 import com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier;
 import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
 import com.ctrip.hermes.engine.pipeline.ConsumerValveRegistry;
-import com.ctrip.hermes.engine.pipeline.valve.ConsumerTracingValve;
+import com.ctrip.hermes.engine.pipeline.internal.ConsumerTracingValve;
 import com.ctrip.hermes.meta.entity.Endpoint;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
+	/**
+	 * 
+	 */
+   private static final String CONSUMER = "consumer";
 	private static final String LOCAL_CONSUMER = "local-consumer";
 
 	@Override
@@ -39,19 +43,31 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 		all.add(C(Module.class, HermesProducerModule.ID, HermesProducerModule.class));
 
+		// engine
 		all.add(C(Engine.class, DefaultEngine.class) //
-		      .req(ConsumerBootstrapManager.class, MetaService.class));
+		      .req(ConsumerBootstrapManager.class)//
+		      .req(MetaService.class)//
+		);
+
+		// bootstrap
 		all.add(C(ConsumerBootstrapManager.class, DefaultConsumerBootstrapManager.class) //
-		      .req(ConsumerBootstrapRegistry.class));
+		      .req(ConsumerBootstrapRegistry.class)//
+		);
 		all.add(C(ConsumerBootstrapRegistry.class, DefaultConsumerBootstrapRegistry.class));
-		all.add(C(ConsumerBootstrap.class, Endpoint.BROKER, BrokerConsumerBootstrap.class) //
-		      .req(EndpointChannelManager.class, EndpointManager.class)//
-		      .req(MetaService.class, ConsumerNotifier.class));
+		all.add(C(ConsumerBootstrap.class, Endpoint.BROKER, BrokerConsumerBootstrap.class)//
+		      .req(EndpointChannelManager.class)//
+		      .req(EndpointManager.class)//
+		      .req(MetaService.class)//
+		      .req(ConsumerNotifier.class)//
+		);
+		
+		// notifier
 		all.add(C(ConsumerNotifier.class, DefaultConsumerNotifier.class) //
-		      .req(ConsumerPipeline.class));
+		      .req(ConsumerPipeline.class)//
+		);
 		all.add(C(ConsumerPipeline.class) //
-		      .req(ValveRegistry.class, "consumer"));
-		all.add(C(ValveRegistry.class, "consumer", ConsumerValveRegistry.class));
+		      .req(ValveRegistry.class, CONSUMER));
+		all.add(C(ValveRegistry.class, CONSUMER, ConsumerValveRegistry.class));
 
 		all.add(C(Valve.class, ConsumerTracingValve.ID, ConsumerTracingValve.class));
 
