@@ -50,6 +50,11 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
+			<role-hint>MESSAGE_CONSUME</role-hint>
+			<implementation>com.ctrip.hermes.engine.command.processor.ConsumeMessageCommandProcessor</implementation>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.engine.notifier.ConsumerNotifier</role>
 			<implementation>com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier</implementation>
 			<requirements>
