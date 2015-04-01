@@ -76,7 +76,7 @@
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.spi.Valve</role>
 			<role-hint>consumer-tracing</role-hint>
-			<implementation>com.ctrip.hermes.engine.pipeline.valve.ConsumerTracingValve</implementation>
+			<implementation>com.ctrip.hermes.engine.pipeline.internal.ConsumerTracingValve</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap</role>

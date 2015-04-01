@@ -31,10 +31,6 @@ import com.ctrip.hermes.engine.pipeline.internal.ConsumerTracingValve;
 import com.ctrip.hermes.meta.entity.Endpoint;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
-
-	/**
-	 * 
-	 */
    private static final String CONSUMER = "consumer";
 	private static final String LOCAL_CONSUMER = "local-consumer";
 

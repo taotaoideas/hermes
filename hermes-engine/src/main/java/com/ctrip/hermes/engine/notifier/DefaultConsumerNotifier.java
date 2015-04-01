@@ -10,7 +10,6 @@ import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.engine.ConsumerContext;
 import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
 
