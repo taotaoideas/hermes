@@ -90,6 +90,46 @@ public class DefaultMessageCodec implements MessageCodec {
 		return msg;
 	}
 
+	@Override
+	public void encode(PartialDecodedMessage msg, ByteBuf buf) {
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+
+		int indexBeginning = buf.writerIndex();
+
+		// placeholder for length
+		codec.writeInt(-1);
+
+		codec.writeString(msg.getKey());
+		codec.writeLong(msg.getBornTime());
+
+		writeProperties(msg.getAppProperties(), buf, codec);
+		writeProperties(msg.getSysProperties(), buf, codec);
+
+		// TODO pass buf to m_codec
+		ByteBuf body = msg.getBody();
+		codec.writeInt(body.readableBytes());
+		buf.writeBytes(body);
+		
+		int indexAfterBody = buf.writerIndex();
+
+		buf.writerIndex(indexBeginning);
+		codec.writeInt(indexAfterBody - indexBeginning);
+
+		buf.writerIndex(indexAfterBody);
+	}
+
+	private void writeProperties(ByteBuf propertiesBuf, ByteBuf buf, HermesPrimitiveCodec codec) {
+		int writeIndexBeforeLength = buf.writerIndex();
+		codec.writeInt(-1);
+		int writeIndexBeforeMap = buf.writerIndex();
+		codec.writeBytes(buf);
+		int mapLength = buf.writerIndex() - writeIndexBeforeMap;
+		int writeIndexEnd = buf.writerIndex();
+		buf.writerIndex(writeIndexBeforeLength);
+		codec.writeInt(mapLength);
+		buf.writerIndex(writeIndexEnd);
+	}
+
 	private void writeProperties(Map<String, Object> properties, ByteBuf buf, HermesPrimitiveCodec codec) {
 		int writeIndexBeforeLength = buf.writerIndex();
 		codec.writeInt(-1);

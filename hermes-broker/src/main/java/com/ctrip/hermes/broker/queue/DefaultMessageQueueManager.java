@@ -22,6 +22,7 @@ public class DefaultMessageQueueManager extends ContainerHolder implements Messa
 			throw new RuntimeException("Undefined topic: " + tpp.getTopic());
 		}
 
+		// TODO support other storage
 		if (Storage.MYSQL.equals(storage.getType())) {
 			QueueWriter writer = lookup(QueueWriter.class, Storage.MYSQL);
 			writer.write(tpp, data);
@@ -29,8 +30,23 @@ public class DefaultMessageQueueManager extends ContainerHolder implements Messa
 			// TODO
 			throw new RuntimeException("Unsupported storage type " + storage.getType());
 		}
-		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public QueueReader createReader(String topic, int partition) {
+		Storage storage = m_meta.findStorage(topic);
+		if (storage == null) {
+			throw new RuntimeException("Undefined topic: " + topic);
+		}
+
+		// TODO support other storage
+		if (Storage.MYSQL.equals(storage.getType())) {
+			return lookup(QueueReader.class);
+		} else {
+			// TODO
+			throw new RuntimeException("Unsupported storage type " + storage.getType());
+		}
 	}
 
 }

@@ -16,10 +16,12 @@ import com.ctrip.hermes.broker.queue.MessageQueueManager;
 import com.ctrip.hermes.broker.queue.MysqlQueueWriter;
 import com.ctrip.hermes.broker.queue.QueueWriter;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
+import com.ctrip.hermes.broker.remoting.SubscribeCommandProcessor;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
+import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.message.internal.DeliverPipeline;
 import com.ctrip.hermes.message.internal.ReceiverPipeline;
@@ -49,6 +51,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 
 		// processors
 		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class) //
+		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
+		all.add(C(CommandProcessor.class, CommandType.SUBSCRIBE.toString(), SubscribeCommandProcessor.class) //
 		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
 
 		all.add(C(QueueWriter.class, Storage.MYSQL, MysqlQueueWriter.class) //
