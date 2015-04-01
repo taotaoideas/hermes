@@ -7,4 +7,6 @@ public interface MessageQueueManager {
 
 	public void write(Tpp tpp, MessageRawDataBatch data) throws StorageException;
 
+	public QueueReader createReader(String topic, int partition);
+
 }

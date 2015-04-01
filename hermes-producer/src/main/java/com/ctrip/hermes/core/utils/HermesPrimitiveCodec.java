@@ -11,23 +11,12 @@ import java.util.Map;
 import com.google.common.base.Charsets;
 
 /**
- * Element      Prefix
- * +--------------------------------------------------------------+
- * Fixed Width:                          Following Octets
- * null         0x01                     0 OCTET
- * boolean      0x10(false) 0x11(true)   0 OCTET
- * char         0x20                     2 OCTET
- * int          0x30                     4 OCTET
- * long         0x40                     8 OCTET
- * +--------------------------------------------------------------+
- * Variable Width:                       Following Data Size
- * Bytes        0x24                     4 OCTET  (max size:2^32 = 2G)
- * String       0x54                     4 OCTET  (max size:2^32 = 2G)
- * +----------------------------------------------+---------------+
- * Array:       [count][Element][...]
- * 0x64                     followed 4 octet of data count
- * Map:         [count][[key Element][value Element]][...]
- * 0x74                     followed 4 octet of data count
+ * Element Prefix +--------------------------------------------------------------+ Fixed Width: Following Octets null 0x01 0 OCTET
+ * boolean 0x10(false) 0x11(true) 0 OCTET char 0x20 2 OCTET int 0x30 4 OCTET long 0x40 8 OCTET
+ * +--------------------------------------------------------------+ Variable Width: Following Data Size Bytes 0x24 4 OCTET (max
+ * size:2^32 = 2G) String 0x54 4 OCTET (max size:2^32 = 2G) +----------------------------------------------+---------------+ Array:
+ * [count][Element][...] 0x64 followed 4 octet of data count Map: [count][[key Element][value Element]][...] 0x74 followed 4 octet
+ * of data count
  */
 public class HermesPrimitiveCodec {
 
@@ -50,6 +39,7 @@ public class HermesPrimitiveCodec {
 	private boolean readBoolean0(byte b) {
 		return (b & 0x1) == 1;
 	}
+
 	public void writeBytes(byte[] bytes) {
 		if (null == bytes) {
 			writeNull();
@@ -58,6 +48,17 @@ public class HermesPrimitiveCodec {
 			int length = bytes.length;
 			m_buf.writeInt(length);
 			m_buf.writeBytes(bytes);
+		}
+	}
+
+	public void writeBytes(ByteBuf buf) {
+		if (null == buf) {
+			writeNull();
+		} else {
+			m_buf.writeByte(Prefix.BYTES);
+			int length = buf.readableBytes();
+			m_buf.writeInt(length);
+			m_buf.writeBytes(buf);
 		}
 	}
 
@@ -112,7 +113,7 @@ public class HermesPrimitiveCodec {
 	}
 
 	public int readInt() {
-		m_buf.readByte();  // jump over Prefix.INT
+		m_buf.readByte(); // jump over Prefix.INT
 		return m_buf.readInt();
 	}
 
@@ -398,9 +399,9 @@ public class HermesPrimitiveCodec {
 
 	public static int calMapLength(Map map) {
 		int size = 0;
-		size += 1;  // Prefix.Map
-		size += 4;  // Int: map.size()
-		size += 2;  // key element and value element.
+		size += 1; // Prefix.Map
+		size += 4; // Int: map.size()
+		size += 2; // key element and value element.
 
 		for (Object k : map.keySet()) {
 			int keyLength = calLength(k);
@@ -416,20 +417,20 @@ public class HermesPrimitiveCodec {
 
 		static final byte TRUE = Byte.parseByte("11", 16); // 0x11
 
-		static final byte FALSE = Byte.parseByte("10", 16); //0x10
+		static final byte FALSE = Byte.parseByte("10", 16); // 0x10
 
-		static final byte CHAR = Byte.parseByte("20", 16); //"0x20"
+		static final byte CHAR = Byte.parseByte("20", 16); // "0x20"
 
-		static final byte BYTES = Byte.parseByte("24", 16); //"0x24"
+		static final byte BYTES = Byte.parseByte("24", 16); // "0x24"
 
-		static final byte INT = Byte.parseByte("30", 16); //"0x30"
+		static final byte INT = Byte.parseByte("30", 16); // "0x30"
 
-		static final byte LONG = Byte.parseByte("40", 16); //"0x40"
+		static final byte LONG = Byte.parseByte("40", 16); // "0x40"
 
-		static final byte STRING = Byte.parseByte("54", 16); //"0x54"
+		static final byte STRING = Byte.parseByte("54", 16); // "0x54"
 
-		static final byte LIST = Byte.parseByte("64", 16); //"0x64"
+		static final byte LIST = Byte.parseByte("64", 16); // "0x64"
 
-		static final byte MAP = Byte.parseByte("74", 16); //"0x74"
+		static final byte MAP = Byte.parseByte("74", 16); // "0x74"
 	}
 }
