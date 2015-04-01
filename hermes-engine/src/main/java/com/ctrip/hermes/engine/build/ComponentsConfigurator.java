@@ -12,6 +12,8 @@ import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.core.pipeline.spi.Valve;
+import com.ctrip.hermes.core.transport.command.CommandType;
+import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager;
 import com.ctrip.hermes.core.transport.endpoint.EndpointManager;
 import com.ctrip.hermes.engine.DefaultEngine;
@@ -23,6 +25,7 @@ import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapRegistry;
 import com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapManager;
 import com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapRegistry;
 import com.ctrip.hermes.engine.bootstrap.KafkaConsumerBootstrap;
+import com.ctrip.hermes.engine.command.processor.ConsumeMessageCommandProcessor;
 import com.ctrip.hermes.engine.notifier.ConsumerNotifier;
 import com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier;
 import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
@@ -31,7 +34,8 @@ import com.ctrip.hermes.engine.pipeline.internal.ConsumerTracingValve;
 import com.ctrip.hermes.meta.entity.Endpoint;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
-   private static final String CONSUMER = "consumer";
+	private static final String CONSUMER = "consumer";
+
 	private static final String LOCAL_CONSUMER = "local-consumer";
 
 	@Override
@@ -56,7 +60,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      .req(MetaService.class)//
 		      .req(ConsumerNotifier.class)//
 		);
-		
+
+		all.add(C(CommandProcessor.class, CommandType.MESSAGE_CONSUME, ConsumeMessageCommandProcessor.class));
+
 		// notifier
 		all.add(C(ConsumerNotifier.class, DefaultConsumerNotifier.class) //
 		      .req(ConsumerPipeline.class)//
