@@ -16,7 +16,6 @@ import kafka.message.MessageAndMetadata;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.storage.message.Resend;
@@ -26,8 +25,6 @@ import com.ctrip.hermes.storage.storage.Range;
 import com.ctrip.hermes.storage.storage.StorageException;
 
 public class KafkaResendStorage implements ResendStorage {
-
-	private static final Logger m_logger = Logger.getLogger(KafkaResendStorage.class);
 
 	private String m_topic;
 

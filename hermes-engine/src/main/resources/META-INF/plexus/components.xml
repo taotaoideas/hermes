@@ -1,11 +1,6 @@
 <plexus>
 	<components>
 		<component>
-			<role>org.unidal.initialization.Module</role>
-			<role-hint>hermes-producer</role-hint>
-			<implementation>com.ctrip.hermes.HermesProducerModule</implementation>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.engine.Engine</role>
 			<implementation>com.ctrip.hermes.engine.DefaultEngine</implementation>
 			<requirements>
@@ -59,16 +54,7 @@
 			<implementation>com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</role>
-			<implementation>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
+					<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
 					<role-hint>consumer</role-hint>
 				</requirement>
 			</requirements>
@@ -80,23 +66,28 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.spi.Valve</role>
+			<role-hint>decode-message</role-hint>
+			<implementation>com.ctrip.hermes.engine.DecodeMessageValve</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.core.pipeline.spi.Valve</role>
 			<role-hint>consumer-tracing</role-hint>
 			<implementation>com.ctrip.hermes.engine.pipeline.internal.ConsumerTracingValve</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap</role>
-			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.engine.bootstrap.KafkaConsumerBootstrap</implementation>
+			<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
+			<role-hint>consumer</role-hint>
+			<implementation>com.ctrip.hermes.engine.pipeline.ConsumerPipeline</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
-					<role-hint>local-consumer</role-hint>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.core.pipeline.Pipeline</role>
-					<role-hint>local-consumer</role-hint>
+					<role-hint>consumer</role-hint>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.engine.scanner.Scanner</role>
+			<implementation>com.ctrip.hermes.engine.scanner.DefaultScanner</implementation>
 		</component>
 	</components>
 </plexus>

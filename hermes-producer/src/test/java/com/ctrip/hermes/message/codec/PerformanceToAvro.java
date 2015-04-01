@@ -1,40 +1,6 @@
 package com.ctrip.hermes.message.codec;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.apache.avro.io.BinaryDecoder;
-import org.apache.avro.io.BinaryEncoder;
-import org.apache.avro.io.DatumReader;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.io.DecoderFactory;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.avro.specific.SpecificDatumWriter;
-import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
-
-import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
-import com.ctrip.hermes.core.message.codec.MessageCodec;
-import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
 public class PerformanceToAvro extends ComponentTestCase {
 //	private final int bodyLength = 1000;

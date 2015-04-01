@@ -7,9 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
+import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.transport.command.CommandType;
 
+@Named(type = CommandProcessorRegistry.class)
 public class DefaultCommandProcessorRegistry extends ContainerHolder implements Initializable, CommandProcessorRegistry {
 
 	private Map<CommandType, CommandProcessor> m_processors = new ConcurrentHashMap<CommandType, CommandProcessor>();

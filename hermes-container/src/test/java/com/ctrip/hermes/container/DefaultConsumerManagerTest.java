@@ -1,16 +1,6 @@
 package com.ctrip.hermes.container;
 
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
-
-import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 
 public class DefaultConsumerManagerTest extends ComponentTestCase {
 

@@ -3,6 +3,7 @@ package com.ctrip.hermes.example.feature.producer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -14,8 +15,8 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.engine.Engine;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class OneProducer extends ComponentTestCase {
@@ -42,7 +43,7 @@ public class OneProducer extends ComponentTestCase {
         Producer p = lookup(Producer.class);
         p.message(TOPIC, msg).send();
 
-        ConsumerBootstrap b = lookup(ConsumerBootstrap.class);
+        Engine engine = lookup(Engine.class);
         Subscriber s = new Subscriber(TOPIC, "group1", new Consumer<String>() {
             @Override
             public void consume(List<ConsumerMessage<String>> msgs) {
@@ -52,7 +53,7 @@ public class OneProducer extends ComponentTestCase {
             }
         });
 
-        b.startConsumer(s);
+  		engine.start(Arrays.asList(s));
 
         assertTrue(latch.await(1, TimeUnit.SECONDS));
     }

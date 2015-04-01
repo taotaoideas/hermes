@@ -2,6 +2,8 @@ package com.ctrip.hermes.producer.sender;
 
 import java.util.concurrent.Future;
 
+import org.unidal.lookup.annotation.Named;
+
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
@@ -13,6 +15,7 @@ import com.google.common.util.concurrent.SettableFuture;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = MessageSender.class, value = Endpoint.LOCAL)
 public class SimpleMessageSender extends AbstractMessageSender implements MessageSender {
 
 	@Override

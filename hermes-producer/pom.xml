@@ -22,6 +22,12 @@
 			<version>2.2.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.unidal.framework</groupId>
+			<artifactId>test-framework</artifactId>
+			<version>2.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.dianping.cat</groupId>
 			<artifactId>cat-client</artifactId>
 			<version>1.1.5</version>
@@ -54,13 +60,6 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.25</version>
 		</dependency>
-		<!--kafka -->
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.10</artifactId>
-			<version>0.8.2.0</version>
-		</dependency>
-
 		<!--avro -->
 		<dependency>
 			<groupId>org.apache.avro</groupId>
@@ -119,12 +118,6 @@
 		<!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-json</artifactId> 
 			<version>1.8</version> </dependency> -->
 		<!--jersey END -->
-		<dependency>
-			<groupId>org.unidal.framework</groupId>
-			<artifactId>test-framework</artifactId>
-			<version>2.1.0</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -161,7 +154,6 @@
 						<configuration>
 							<sourceDirectory>${project.basedir}/src/test/resources/com/ctrip/hermes/avro</sourceDirectory>
 							<outputDirectory>${project.basedir}/src/test/java</outputDirectory>
-							<stringType>String</stringType>
 						</configuration>
 					</execution>
 				</executions>

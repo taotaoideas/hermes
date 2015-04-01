@@ -1,20 +1,6 @@
 package com.ctrip.hermes.engine;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
-
-import com.ctrip.hermes.consumer.Consumer;
-import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.producer.api.Producer;
 
 public class PojoMessageTest extends ComponentTestCase {
 

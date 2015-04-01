@@ -1,5 +1,7 @@
 package com.ctrip.hermes.core.pipeline.spi.internal;
 
+import org.unidal.lookup.annotation.Named;
+
 import com.ctrip.hermes.core.constants.CatConstants;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.pipeline.PipelineContext;
@@ -10,6 +12,7 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.message.spi.MessageTree;
 
+@Named(type = Valve.class, value = TracingMessageValve.ID)
 public class TracingMessageValve implements Valve {
 	public static final String ID = "tracing";
 

@@ -6,11 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.ContainerHolder;
+import org.unidal.lookup.annotation.Named;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = ConsumerBootstrapRegistry.class)
 public class DefaultConsumerBootstrapRegistry extends ContainerHolder implements Initializable,
       ConsumerBootstrapRegistry {
 
