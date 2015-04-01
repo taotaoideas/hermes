@@ -1,4 +1,4 @@
-package com.ctrip.hermes.kakfa;
+package com.ctrip.hermes.consumer;
 
 import java.util.ArrayList;
 import java.util.Date;

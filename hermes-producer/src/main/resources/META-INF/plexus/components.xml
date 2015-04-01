@@ -82,20 +82,9 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
-			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.producer.sender.MessageSender</role>
-					<role-hint>kafka</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.producer.sender.MessageSender</role>
-			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.producer.sender.BatchableMessageSender</implementation>
+			<role-hint>local</role-hint>
+			<implementation>com.ctrip.hermes.producer.sender.SimpleMessageSender</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
@@ -113,8 +102,8 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.producer.sender.MessageSender</role>
-			<role-hint>local</role-hint>
-			<implementation>com.ctrip.hermes.producer.sender.SimpleMessageSender</implementation>
+			<role-hint>broker</role-hint>
+			<implementation>com.ctrip.hermes.producer.sender.BatchableMessageSender</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
@@ -144,16 +133,6 @@
 				<requirement>
 					<role>com.ctrip.hermes.core.partition.PartitioningStrategy</role>
 				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.core.meta.MetaService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.producer.sender.MessageSender</role>
-			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.producer.sender.KafkaMessageSender</implementation>
-			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
@@ -218,14 +197,13 @@
 			<implementation>com.ctrip.hermes.core.transport.command.processor.DefaultCommandProcessorRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.codec.Codec</role>
-			<role-hint>JSON</role-hint>
-			<implementation>com.ctrip.hermes.core.codec.JsonCodec</implementation>
+			<role>com.ctrip.hermes.core.message.codec.MessageCodec</role>
+			<implementation>com.ctrip.hermes.core.message.codec.DefaultMessageCodec</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.codec.Codec</role>
-			<role-hint>AVRO</role-hint>
-			<implementation>com.ctrip.hermes.core.codec.AvroCodec</implementation>
+			<role-hint>json</role-hint>
+			<implementation>com.ctrip.hermes.core.codec.JsonCodec</implementation>
 		</component>
 	</components>
 </plexus>

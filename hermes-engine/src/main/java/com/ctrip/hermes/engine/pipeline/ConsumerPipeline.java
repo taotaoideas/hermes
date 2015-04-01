@@ -3,6 +3,7 @@ package com.ctrip.hermes.engine.pipeline;
 import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.core.message.ConsumerMessage;
@@ -14,9 +15,12 @@ import com.ctrip.hermes.core.pipeline.ValveRegistry;
 import com.ctrip.hermes.core.pipeline.spi.Valve;
 import com.ctrip.hermes.engine.ConsumerContext;
 
+@Named(type = Pipeline.class, value = ConsumerPipeline.CONSUMER)
 public class ConsumerPipeline implements Pipeline<Void> {
 
-	@Inject
+	public static final String CONSUMER = "consumer";
+
+	@Inject(CONSUMER)
 	private ValveRegistry m_registry;
 
 	@SuppressWarnings("unchecked")

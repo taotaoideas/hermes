@@ -1,6 +1,7 @@
 package com.ctrip.hermes.example.performance;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -12,9 +13,8 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.engine.LocalConsumerBootstrap;
+import com.ctrip.hermes.engine.Engine;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class ProduceAndConsume extends ComponentTestCase {
@@ -94,7 +94,7 @@ public class ProduceAndConsume extends ComponentTestCase {
 			@Override
 			public void run() {
 				String topic = "order.new";
-				ConsumerBootstrap b = lookup(ConsumerBootstrap.class, LocalConsumerBootstrap.ID);
+				Engine engine = lookup(Engine.class);
 
 				Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
 					@Override
@@ -103,7 +103,7 @@ public class ProduceAndConsume extends ComponentTestCase {
 					}
 				});
 
-				b.startConsumer(s);
+				engine.start(Arrays.asList(s));
 			}
 		}).start();
 	}

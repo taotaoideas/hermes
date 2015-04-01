@@ -30,6 +30,13 @@
 		<codec type="json" />
 		<partition id='0' read-datasource='kafka-consumer' write-datasource='kafka-produer' endpoint='kafka-endpoint'/>
 	</topic>
+	
+	<topic name='kafka.AvroTopic' partition-count='1'>
+		<codec type="avro">
+			<property name="schema.registry.url" value="http://fx-message06:8081" /> 
+		</codec>
+		<partition id='0' read-datasource='kafka-consumer' write-datasource='kafka-produer' endpoint='kafka-endpoint'/>
+	</topic>
 
 	<storage type='mysql'>
 		<property name="x" value="x" />

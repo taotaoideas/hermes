@@ -7,22 +7,24 @@ import java.util.concurrent.ExecutorService;
 
 import org.unidal.helper.Threads;
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.engine.ConsumerContext;
-import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = ConsumerNotifier.class)
 public class DefaultConsumerNotifier implements ConsumerNotifier {
 
 	private Map<Long, Pair<ConsumerContext, ExecutorService>> m_consumerContexs = new ConcurrentHashMap<>();
-	
-	@Inject
-	protected ConsumerPipeline m_pipeline;
+
+	@Inject("consumer")
+	protected Pipeline m_pipeline;
 
 	/*
 	 * (non-Javadoc)
@@ -54,12 +56,10 @@ public class DefaultConsumerNotifier implements ConsumerNotifier {
 
 	}
 
-   @Override
-   public ConsumerContext find(long correlationId) {
-   	// TODO npe
-	   return m_consumerContexs.get(correlationId).getKey();
-   }
+	@Override
+	public ConsumerContext find(long correlationId) {
+		// TODO npe
+		return m_consumerContexs.get(correlationId).getKey();
+	}
 
-	
-	
 }

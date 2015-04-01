@@ -26,6 +26,11 @@
   </entity>
   <entity name="codec">
     <attribute name="type" value-type="String" />
+    <entity-ref name="property" type="list" names="properties" />
+    <snippet lang='java'>
+		public final static String JSON = "json";
+		public final static String AVRO = "avro";
+	</snippet>
   </entity>
   <entity name="endpoint">
     <attribute name="id" value-type="String" />

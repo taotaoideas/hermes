@@ -2,6 +2,8 @@ package com.ctrip.hermes.engine.bootstrap;
 
 import java.util.List;
 
+import org.unidal.lookup.annotation.Named;
+
 import com.ctrip.hermes.core.transport.command.SubscribeCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 import com.ctrip.hermes.engine.ConsumerContext;
@@ -12,6 +14,7 @@ import com.ctrip.hermes.meta.entity.Partition;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = ConsumerBootstrap.class, value = Endpoint.BROKER)
 public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 
 	@Override

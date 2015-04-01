@@ -10,10 +10,11 @@ import java.util.regex.Pattern;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
 
-import com.ctrip.hermes.core.codec.CodecType;
 import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.meta.entity.Codec;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Meta;
@@ -22,6 +23,7 @@ import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.transform.BaseVisitor2;
 
+@Named(type = MetaService.class)
 public class DefaultMetaService implements Initializable, MetaService {
 
 	@Inject
@@ -95,8 +97,8 @@ public class DefaultMetaService implements Initializable, MetaService {
 	 * @see com.ctrip.hermes.meta.MetaService#getCodecType(java.lang.String)
 	 */
 	@Override
-	public CodecType getCodecType(String topic) {
-		return CodecType.valueOf(m_meta.findTopic(topic).getCodec().getType().toUpperCase());
+	public Codec getCodec(String topic) {
+		return m_meta.findTopic(topic).getCodec();
 	}
 
 	@Override
@@ -113,7 +115,7 @@ public class DefaultMetaService implements Initializable, MetaService {
 		Pattern pattern = Pattern.compile(topicPattern);
 
 		for (Topic topic : topics) {
-			if (pattern.matcher((CharSequence) topic).matches()) {
+			if (pattern.matcher(topic.getName()).matches()) {
 				matchedTopics.add(topic);
 			}
 		}

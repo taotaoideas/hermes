@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.Map;
 
+import org.unidal.lookup.annotation.Named;
+
 import com.ctrip.hermes.core.codec.Codec;
 import com.ctrip.hermes.core.codec.CodecFactory;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
@@ -11,6 +13,7 @@ import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
+@Named(type = MessageCodec.class)
 public class DefaultMessageCodec implements MessageCodec {
 	private Codec m_codec;
 
@@ -20,7 +23,10 @@ public class DefaultMessageCodec implements MessageCodec {
 		m_codec = CodecFactory.getCodec(topic);
 		m_topic = topic;
 	}
-
+	public DefaultMessageCodec() {
+		
+	}
+	
 	@Override
 	public void encode(ProducerMessage<?> msg, ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
@@ -37,7 +43,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		writeProperties(msg.getSysProperties(), buf, codec);
 
 		// TODO pass buf to m_codec
-		byte[] body = m_codec.encode(msg.getBody());
+		byte[] body = m_codec.encode(msg.getTopic(), msg.getBody());
 		int indexBeforeLen = buf.writerIndex();
 		codec.writeInt(-1);
 		int indexBeforeBody = buf.writerIndex();

@@ -2,10 +2,13 @@ package com.ctrip.hermes.core.partition;
 
 import java.util.Random;
 
+import org.unidal.lookup.annotation.Named;
+
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = PartitioningStrategy.class)
 public class HashPartitioningStrategy implements PartitioningStrategy {
 
 	private Random m_random = new Random();

@@ -1,19 +1,18 @@
-package com.ctrip.hermes.kakfa;
+package com.ctrip.hermes.consumer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.engine.Engine;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
-import com.ctrip.hermes.engine.bootstrap.KafkaConsumerBootstrap;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
@@ -28,7 +27,7 @@ public class WildcardTopicsTest extends ComponentTestCase {
 
 		Producer producer = lookup(Producer.class);
 
-		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, KafkaConsumerBootstrap.ID);
+		Engine engine = lookup(Engine.class);
 
 		Subscriber s = new Subscriber(topicPattern, group, new Consumer<VisitEvent>() {
 
@@ -42,7 +41,7 @@ public class WildcardTopicsTest extends ComponentTestCase {
 		});
 
 		System.out.println("Starting consumer...");
-		b.startConsumer(s);
+		engine.start(Arrays.asList(s));
 
 		Random random = new Random();
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {

@@ -10,8 +10,8 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Subscribe;
+import com.ctrip.hermes.engine.Engine;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 
 public class Bootstrap extends ComponentTestCase {
 
@@ -35,11 +35,11 @@ public class Bootstrap extends ComponentTestCase {
 	private void startConsumers() {
 		List<Subscriber> subs = findSubscribers();
 
-		ConsumerBootstrap cb = lookup(ConsumerBootstrap.class, "broker");
+		Engine engine = lookup(Engine.class);
 		for (Subscriber s : subs) {
 			System.out.println("Found consumer class " + s.getConsumer().getClass());
-			cb.startConsumer(s);
 		}
+		engine.start(subs);
 	}
 
 	@SuppressWarnings("rawtypes")

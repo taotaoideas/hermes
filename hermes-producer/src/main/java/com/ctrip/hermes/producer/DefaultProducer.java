@@ -3,14 +3,17 @@ package com.ctrip.hermes.producer;
 import java.util.concurrent.Future;
 
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.build.BuildConstants;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.pipeline.Pipeline;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.SendResult;
 
+@Named(type = Producer.class)
 public class DefaultProducer extends Producer {
-	@Inject
+	@Inject(BuildConstants.PRODUCER)
 	private Pipeline<Future<SendResult>> m_pipeline;
 
 	@Override

@@ -9,20 +9,21 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.unidal.lookup.annotation.Named;
+
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.producer.api.SendResult;
-import com.ctrip.hermes.producer.sender.AbstractMessageSender;
-import com.ctrip.hermes.producer.sender.MessageSender;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = MessageSender.class, value = Endpoint.BROKER)
 public class BatchableMessageSender extends AbstractMessageSender implements MessageSender {
 
 	private ConcurrentMap<Endpoint, EndpointWritingWorkerThread> m_workers = new ConcurrentHashMap<>();

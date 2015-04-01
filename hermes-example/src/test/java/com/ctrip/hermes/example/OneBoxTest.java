@@ -16,10 +16,8 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.engine.Engine;
 import com.ctrip.hermes.engine.Subscriber;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
-import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class OneBoxTest extends ComponentTestCase {
@@ -34,13 +32,11 @@ public class OneBoxTest extends ComponentTestCase {
 	@Test
 	public void test() throws Exception {
 		startBroker();
-		
+
 		String topic = "order.new";
 
-//		lookup(MessageQueueMonitor.class);
-		Storage storage = lookup(MetaService.class).findStorage(topic);
-
-		ConsumerBootstrap b = lookup(ConsumerBootstrap.class, storage.getType());
+		// lookup(MessageQueueMonitor.class);
+		Engine engine = lookup(Engine.class);
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
 		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
@@ -52,7 +48,7 @@ public class OneBoxTest extends ComponentTestCase {
 			for (String id : entry.getValue()) {
 				Subscriber s = new Subscriber(topic, groupId, new MyConsumer(nacks, id));
 				System.out.println("Starting consumer " + groupId + ":" + id);
-				b.startConsumer(s);
+				engine.start(Arrays.asList(s));
 			}
 
 		}
@@ -83,7 +79,7 @@ public class OneBoxTest extends ComponentTestCase {
 					String id = parts[2];
 					Map<String, Integer> nacks = findNacks(groupId);
 					System.out.println(String.format("Starting consumer with groupId %s and id %s", groupId, id));
-					b.startConsumer(new Subscriber(topic, groupId, new MyConsumer(nacks, id)));
+					engine.start(Arrays.asList((new Subscriber(topic, groupId, new MyConsumer(nacks, id)))));
 				}
 			} else {
 				send(topic, prefix);
@@ -141,7 +137,7 @@ public class OneBoxTest extends ComponentTestCase {
 			}
 		}
 	}
-	
+
 	private void startBroker() {
 		new Thread() {
 			public void run() {
