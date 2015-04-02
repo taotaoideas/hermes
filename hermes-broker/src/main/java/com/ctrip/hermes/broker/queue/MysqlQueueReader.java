@@ -2,10 +2,12 @@ package com.ctrip.hermes.broker.queue;
 
 import java.util.List;
 
+import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
+import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityEntity;
 
 public class MysqlQueueReader implements QueueReader {
 
@@ -17,9 +19,16 @@ public class MysqlQueueReader implements QueueReader {
 	private int m_shard;
 
 	@Override
-	public List<MTopicShardPriority> read(long startId, int batchSize) {
-		// m_msgDao.find(m_topic, m_shard, 0);
-		return null;
+	public List<MTopicShardPriority> read(int priority, long startId) throws DalException {
+		return m_msgDao.find(m_topic, m_shard, priority, startId, MTopicShardPriorityEntity.READSET_FULL);
+	}
+
+	public void setTopic(String topic) {
+		m_topic = topic;
+	}
+
+	public void setShard(int shard) {
+		m_shard = shard;
 	}
 
 }

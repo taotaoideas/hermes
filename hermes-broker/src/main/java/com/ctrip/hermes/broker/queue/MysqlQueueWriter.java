@@ -1,5 +1,7 @@
 package com.ctrip.hermes.broker.queue;
 
+import io.netty.buffer.ByteBuf;
+
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class MysqlQueueWriter implements QueueWriter {
 		List<PartialDecodedMessage> messages = batch.getMessages();
 		for (PartialDecodedMessage msg : messages) {
 			MTopicShardPriority r = new MTopicShardPriority();
+			r.setAttributes(new String(readByteBuf(msg.getAppProperties())));
 			r.setCreationDate(new Date(msg.getBornTime()));
 			r.setPayload(msg.readBody());
 			r.setProducerId(1);
@@ -37,6 +40,12 @@ public class MysqlQueueWriter implements QueueWriter {
 				throw new StorageException("", e);
 			}
 		}
+	}
+
+	private byte[] readByteBuf(ByteBuf buf) {
+		byte[] dst = new byte[buf.readableBytes()];
+		buf.readBytes(dst);
+		return dst;
 	}
 
 }

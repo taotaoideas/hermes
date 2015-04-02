@@ -50,11 +50,11 @@ public class PartialDecodedMessage {
 	}
 
 	public ByteBuf getAppProperties() {
-		return m_appProperties.duplicate();
+		return m_appProperties == null ? null : m_appProperties.duplicate();
 	}
 
 	public ByteBuf getSysProperties() {
-		return m_sysProperties.duplicate();
+		return m_sysProperties == null ? null : m_sysProperties.duplicate();
 	}
 
 	public byte[] readAppProperties() {
@@ -66,6 +66,10 @@ public class PartialDecodedMessage {
 	}
 
 	private byte[] readByteBuf(ByteBuf buf) {
+		if (buf == null) {
+			return null;
+		}
+		
 		byte[] bytes = new byte[buf.readableBytes()];
 		buf.readBytes(bytes);
 		return bytes;

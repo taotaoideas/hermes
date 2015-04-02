@@ -23,10 +23,11 @@ public class DefaultMessageCodec implements MessageCodec {
 		m_codec = CodecFactory.getCodec(topic);
 		m_topic = topic;
 	}
+
 	public DefaultMessageCodec() {
-		
+
 	}
-	
+
 	@Override
 	public void encode(ProducerMessage<?> msg, ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
@@ -67,8 +68,14 @@ public class DefaultMessageCodec implements MessageCodec {
 		PartialDecodedMessage decodedMessage = partialDecode(buf);
 		msg.setKey(decodedMessage.getKey());
 		msg.setBornTime(decodedMessage.getBornTime());
-		msg.setAppProperties(readProperties(decodedMessage.getAppProperties()));
-		msg.setSysProperties(readProperties(decodedMessage.getSysProperties()));
+		Map<String, Object> appProperties = readProperties(decodedMessage.getAppProperties());
+		if (appProperties != null) {
+			msg.setAppProperties(appProperties);
+		}
+		Map<String, Object> sysProperties = readProperties(decodedMessage.getSysProperties());
+		if (sysProperties != null) {
+			msg.setSysProperties(sysProperties);
+		}
 		msg.setBody(m_codec.decode(decodedMessage.readBody(), bodyClazz));
 		msg.setTopic(m_topic);
 
@@ -115,7 +122,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		ByteBuf body = msg.getBody();
 		codec.writeInt(body.readableBytes());
 		buf.writeBytes(body);
-		
+
 		int indexAfterBody = buf.writerIndex();
 
 		buf.writerIndex(indexBeginning);
@@ -124,16 +131,20 @@ public class DefaultMessageCodec implements MessageCodec {
 		buf.writerIndex(indexAfterBody);
 	}
 
-	private void writeProperties(ByteBuf propertiesBuf, ByteBuf buf, HermesPrimitiveCodec codec) {
-		int writeIndexBeforeLength = buf.writerIndex();
+	private void writeProperties(ByteBuf propertiesBuf, ByteBuf out, HermesPrimitiveCodec codec) {
+		int writeIndexBeforeLength = out.writerIndex();
 		codec.writeInt(-1);
-		int writeIndexBeforeMap = buf.writerIndex();
-		codec.writeBytes(buf);
-		int mapLength = buf.writerIndex() - writeIndexBeforeMap;
-		int writeIndexEnd = buf.writerIndex();
-		buf.writerIndex(writeIndexBeforeLength);
+		int writeIndexBeforeMap = out.writerIndex();
+		if (propertiesBuf != null) {
+			out.writeBytes(propertiesBuf);
+		} else {
+			codec.writeNull();
+		}
+		int mapLength = out.writerIndex() - writeIndexBeforeMap;
+		int writeIndexEnd = out.writerIndex();
+		out.writerIndex(writeIndexBeforeLength);
 		codec.writeInt(mapLength);
-		buf.writerIndex(writeIndexEnd);
+		out.writerIndex(writeIndexEnd);
 	}
 
 	private void writeProperties(Map<String, Object> properties, ByteBuf buf, HermesPrimitiveCodec codec) {

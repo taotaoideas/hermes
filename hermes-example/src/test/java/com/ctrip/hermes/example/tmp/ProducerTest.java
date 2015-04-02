@@ -1,10 +1,18 @@
 package com.ctrip.hermes.example.tmp;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
+import com.ctrip.hermes.consumer.BaseConsumer;
+import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.engine.Engine;
+import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class ProducerTest extends ComponentTestCase {
@@ -25,9 +33,17 @@ public class ProducerTest extends ComponentTestCase {
 		Thread.sleep(1000);
 		Producer p = Producer.getInstance();
 
-		p.message("order_new", 0L).withKey("key0").withPartition("0").send();
-		p.message("order_new", 1L).withKey("key1").withPartition("1").withPriority().send();
+		p.message("order_new", 0L).withKey("key0").withPartition("0").addProperty("k", "v").send();
 		
+		List<Subscriber> subscribers = Arrays.asList(new Subscriber("order_new", "xx", new BaseConsumer<String>() {
+
+			@Override
+			protected void consume(ConsumerMessage<String> msg) {
+				System.out.println(JSON.toJSONString(msg));
+			}
+		}));
+		lookup(Engine.class).start(subscribers);
+
 		System.in.read();
 	}
 

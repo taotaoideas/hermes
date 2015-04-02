@@ -14,6 +14,7 @@ import com.ctrip.hermes.engine.bootstrap.BrokerConsumerBootstrap;
 import com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapManager;
 import com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapRegistry;
 import com.ctrip.hermes.engine.command.processor.ConsumeMessageCommandProcessor;
+import com.ctrip.hermes.engine.notifier.ConsumerNotifier;
 import com.ctrip.hermes.engine.notifier.DefaultConsumerNotifier;
 import com.ctrip.hermes.engine.pipeline.ConsumerPipeline;
 import com.ctrip.hermes.engine.pipeline.ConsumerValveRegistry;
@@ -31,7 +32,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(DefaultEngine.class));
 
 		// bootstrap
-		all.add(C(CommandProcessor.class, CommandType.MESSAGE_CONSUME, ConsumeMessageCommandProcessor.class));
+		all.add(C(CommandProcessor.class, CommandType.MESSAGE_CONSUME, ConsumeMessageCommandProcessor.class) //
+				.req(ConsumerNotifier.class));
 
 		all.add(A(DefaultConsumerBootstrapManager.class));
 		all.add(A(DefaultConsumerBootstrapRegistry.class));

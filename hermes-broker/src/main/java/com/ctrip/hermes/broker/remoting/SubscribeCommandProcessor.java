@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 import java.util.List;
 
+import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
@@ -44,20 +45,32 @@ public class SubscribeCommandProcessor implements CommandProcessor {
 		final QueueReader reader = m_queueManager.createReader(req.getTopic(), req.getPartition());
 		new Thread() {
 			public void run() {
+				try {
+					doRun();
+				} catch (DalException e) {
+					e.printStackTrace();
+				}
+			}
+
+			private void doRun() throws DalException {
 				long startMsgId = 0;
 				while (true) {
-					final List<MTopicShardPriority> dataObjs = reader.read(startMsgId, 10);
+					// TODO only support priority 1
+					final List<MTopicShardPriority> dataObjs = reader.read(1, startMsgId);
 
 					if (CollectionUtil.notEmpty(dataObjs)) {
-						startMsgId = CollectionUtil.last(dataObjs).getId();
+						startMsgId = CollectionUtil.last(dataObjs).getId() + 1;
 
 						final ConsumerMessageBatch batch = new ConsumerMessageBatch();
+						for (MTopicShardPriority dataObj : dataObjs) {
+							batch.addMsgSeq(dataObj.getId());
+						}
+						batch.setTopic(req.getTopic());
 						batch.setTransferCallback(new TransferCallback() {
 
 							@Override
 							public void transfer(ByteBuf out) {
 								for (MTopicShardPriority dataObj : dataObjs) {
-									batch.addMsgSeq(dataObj.getId());
 
 									MessageCodec codec = MessageCodecFactory.getCodec(req.getTopic());
 									PartialDecodedMessage partialMsg = new PartialDecodedMessage();

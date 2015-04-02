@@ -67,9 +67,30 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
+			<role-hint>SUBSCRIBE</role-hint>
+			<implementation>com.ctrip.hermes.broker.remoting.SubscribeCommandProcessor</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
+					<role-hint>broker</role-hint>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.broker.queue.QueueWriter</role>
 			<role-hint>mysql</role-hint>
 			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueWriter</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.queue.QueueReader</role>
+			<role-hint>mysql</role-hint>
+			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueReader</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>

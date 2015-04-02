@@ -8,7 +8,6 @@
 	<topic name='order_new' partition-count='1'>
 		<codec type="json" />
 		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
-		<partition id='1' read-datasource='ds1' write-datasource='ds1' endpoint='br0' />
 	</topic>
 	
 	<topic name='topic' partition-count='1'>

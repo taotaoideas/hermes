@@ -33,7 +33,7 @@ public class OneBoxTest extends ComponentTestCase {
 	public void test() throws Exception {
 		startBroker();
 
-		String topic = "order.new";
+		String topic = "order_new";
 
 		// lookup(MessageQueueMonitor.class);
 		Engine engine = lookup(Engine.class);
