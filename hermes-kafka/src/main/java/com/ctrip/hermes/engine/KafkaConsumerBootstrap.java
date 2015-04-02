@@ -50,7 +50,7 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 		      .createJavaConsumerConnector(new ConsumerConfig(prop));
 		Map<String, Integer> topicCountMap = new HashMap<>();
 		topicCountMap.put(topic.getName(), 1);
-		List<KafkaStream<byte[], byte[]>> streams = consumerConnector.createMessageStreams(topicCountMap).get(0);
+		List<KafkaStream<byte[], byte[]>> streams = consumerConnector.createMessageStreams(topicCountMap).get(topic.getName());
 		KafkaStream<byte[], byte[]> stream = streams.get(0);
 
 		m_consumerNotifier.register(stream.hashCode(), consumerContext);
