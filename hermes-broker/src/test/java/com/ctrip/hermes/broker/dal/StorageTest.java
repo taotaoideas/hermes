@@ -24,7 +24,7 @@ public class StorageTest extends ComponentTestCase {
 
 	@Test
 	public void testFind() throws Exception {
-		List<MTopicShardPriority> result = msgDao.find("order_new", 0, 0, 0, MTopicShardPriorityEntity.READSET_FULL);
+		List<MTopicShardPriority> result = msgDao.findIdAfter("order_new", 0, 0, 0, 10, MTopicShardPriorityEntity.READSET_FULL);
 		for (MTopicShardPriority r : result) {
 			System.out.println(r);
 		}

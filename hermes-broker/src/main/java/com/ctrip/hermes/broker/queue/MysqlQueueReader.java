@@ -19,8 +19,8 @@ public class MysqlQueueReader implements QueueReader {
 	private int m_shard;
 
 	@Override
-	public List<MTopicShardPriority> read(int priority, long startId) throws DalException {
-		return m_msgDao.find(m_topic, m_shard, priority, startId, MTopicShardPriorityEntity.READSET_FULL);
+	public List<MTopicShardPriority> read(int priority, long startId, int batchSize) throws DalException {
+		return m_msgDao.findIdAfter(m_topic, m_shard, priority, startId, batchSize, MTopicShardPriorityEntity.READSET_FULL);
 	}
 
 	public void setTopic(String topic) {

@@ -8,6 +8,6 @@ import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
 
 public interface QueueReader {
 
-	List<MTopicShardPriority> read(int priority, long startId) throws DalException;
+	List<MTopicShardPriority> read(int priority, long startId, int batchSize) throws DalException;
 
 }

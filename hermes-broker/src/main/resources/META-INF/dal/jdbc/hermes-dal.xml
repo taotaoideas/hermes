@@ -4,17 +4,20 @@
 		<var name="topic" value-type="String" />
 		<var name="shard" value-type="int" />
 		<var name="priority" value-type="int" />
+		<var name="start-id" value-type="long" />
+		<var name="batch-size" value-type="int" />
 
 		<query-defs>
-			<query name="find" type="SELECT" multiple="true">
+			<query name="findIdAfter" type="SELECT" multiple="true">
 				<param name="topic" />
 				<param name="shard" />
 				<param name="priority" />
-				<param name="id" />
+				<param name="start-id" />
+				<param name="batch-size" />
 				<statement><![CDATA[SELECT <FIELDS/>
         		FROM <TABLE/>
-        		WHERE <FIELD name='id'/> >= ${id}
-        		LIMIT 10]]></statement>
+        		WHERE <FIELD name='id'/> >= ${start-id}
+        		LIMIT ${batch-size}]]></statement>
 			</query>
 		</query-defs>
 	</entity>

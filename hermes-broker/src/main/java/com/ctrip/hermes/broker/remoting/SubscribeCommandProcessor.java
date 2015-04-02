@@ -56,7 +56,7 @@ public class SubscribeCommandProcessor implements CommandProcessor {
 				long startMsgId = 0;
 				while (true) {
 					// TODO only support priority 1
-					final List<MTopicShardPriority> dataObjs = reader.read(1, startMsgId);
+					final List<MTopicShardPriority> dataObjs = reader.read(1, startMsgId, 10);
 
 					if (CollectionUtil.notEmpty(dataObjs)) {
 						startMsgId = CollectionUtil.last(dataObjs).getId() + 1;
