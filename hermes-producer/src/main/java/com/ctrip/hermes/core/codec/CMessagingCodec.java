@@ -2,8 +2,11 @@ package com.ctrip.hermes.core.codec;
 
 import java.util.Map;
 
+import org.unidal.lookup.annotation.Named;
+
 import com.google.common.base.Charsets;
 
+@Named(type = Codec.class, value = "cmessaging")
 public class CMessagingCodec implements Codec {
 
 	@Override

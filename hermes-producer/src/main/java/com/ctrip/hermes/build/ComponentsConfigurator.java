@@ -7,6 +7,7 @@ import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.HermesProducerModule;
+import com.ctrip.hermes.core.codec.CMessagingCodec;
 import com.ctrip.hermes.core.codec.JsonCodec;
 import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
@@ -98,6 +99,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// codec
 		all.add(A(DefaultMessageCodec.class));
 		all.add(A(JsonCodec.class));
+		all.add(A(CMessagingCodec.class));
 		return all;
 	}
 

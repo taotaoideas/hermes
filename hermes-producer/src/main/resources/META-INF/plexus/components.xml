@@ -205,5 +205,10 @@
 			<role-hint>json</role-hint>
 			<implementation>com.ctrip.hermes.core.codec.JsonCodec</implementation>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.core.codec.Codec</role>
+			<role-hint>cmessaging</role-hint>
+			<implementation>com.ctrip.hermes.core.codec.CMessagingCodec</implementation>
+		</component>
 	</components>
 </plexus>
