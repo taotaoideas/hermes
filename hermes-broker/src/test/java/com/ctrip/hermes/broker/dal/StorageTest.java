@@ -1,6 +1,7 @@
 package com.ctrip.hermes.broker.dal;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
+import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityEntity;
 
 public class StorageTest extends ComponentTestCase {
 
@@ -21,7 +23,15 @@ public class StorageTest extends ComponentTestCase {
 	}
 
 	@Test
-	public void test() throws Exception {
+	public void testFind() throws Exception {
+		List<MTopicShardPriority> result = msgDao.find("order_new", 0, 0, 0, MTopicShardPriorityEntity.READSET_FULL);
+		for (MTopicShardPriority r : result) {
+			System.out.println(r);
+		}
+	}
+
+	@Test
+	public void testInsert() throws Exception {
 		MTopicShardPriority m = new MTopicShardPriority();
 		Random rnd = new Random();
 

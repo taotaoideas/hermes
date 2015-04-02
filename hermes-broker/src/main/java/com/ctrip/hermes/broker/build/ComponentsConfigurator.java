@@ -13,7 +13,9 @@ import com.ctrip.hermes.broker.dal.HermesTableProvider;
 import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
 import com.ctrip.hermes.broker.queue.DefaultMessageQueueManager;
 import com.ctrip.hermes.broker.queue.MessageQueueManager;
+import com.ctrip.hermes.broker.queue.MysqlQueueReader;
 import com.ctrip.hermes.broker.queue.MysqlQueueWriter;
+import com.ctrip.hermes.broker.queue.QueueReader;
 import com.ctrip.hermes.broker.queue.QueueWriter;
 import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
 import com.ctrip.hermes.broker.remoting.SubscribeCommandProcessor;
@@ -56,6 +58,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
 
 		all.add(C(QueueWriter.class, Storage.MYSQL, MysqlQueueWriter.class) //
+		      .req(MTopicShardPriorityDao.class));
+		all.add(C(QueueReader.class, Storage.MYSQL, MysqlQueueReader.class) //
 		      .req(MTopicShardPriorityDao.class));
 
 		all.add(C(TableProvider.class, "m-topic-shard-priority", HermesTableProvider.class) //

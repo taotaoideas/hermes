@@ -1,8 +1,10 @@
 package com.ctrip.hermes.remoting.command;
 
+import static org.junit.Assert.assertEquals;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.core.codec.JsonCodec;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
+import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
 import com.ctrip.hermes.core.transport.command.Header;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
@@ -27,6 +30,35 @@ import com.google.common.util.concurrent.SettableFuture;
  *
  */
 public class SendMessageCommandTest extends ComponentTestCase {
+
+	@Test
+	public void testEncodePartialDecodecMessage() {
+		Map<String, Object> appProperties = new HashMap<String, Object>();
+		appProperties.put("1", 1);
+		Map<String, Object> sysProperties = new HashMap<String, Object>();
+		sysProperties.put("2", 2);
+		ProducerMessage<String> msg = createProducerMessage("topic1", "body", "key", "partition", 100, true, null, null);
+
+		DefaultMessageCodec codec = new DefaultMessageCodec("topic1");
+
+		ByteBuf buf = Unpooled.buffer();
+		codec.encode(msg, buf);
+		ByteBuf exp = buf.duplicate();
+
+		PartialDecodedMessage pdMsg = codec.partialDecode(buf);
+		pdMsg.setSysProperties(null);
+
+		ByteBuf buf2 = Unpooled.buffer();
+		codec.encode(pdMsg, buf2);
+
+		assertEquals(Arrays.toString(readByteBuf(exp)), Arrays.toString(readByteBuf(buf2)));
+	}
+
+	private byte[] readByteBuf(ByteBuf buf) {
+		byte[] dst = new byte[buf.readableBytes()];
+		buf.readBytes(dst);
+		return dst;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Test

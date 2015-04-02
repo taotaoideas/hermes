@@ -5,13 +5,18 @@
 		<var name="shard" value-type="int" />
 		<var name="priority" value-type="int" />
 
-<!-- 		<query-defs>
-			<query name="find" type="SELECT">
+		<query-defs>
+			<query name="find" type="SELECT" multiple="true">
+				<param name="topic" />
+				<param name="shard" />
+				<param name="priority" />
+				<param name="id" />
 				<statement><![CDATA[SELECT <FIELDS/>
         		FROM <TABLE/>
-        		WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+        		WHERE <FIELD name='id'/> >= ${id}
+        		LIMIT 10]]></statement>
 			</query>
 		</query-defs>
- -->	</entity>
+	</entity>
 </entities>
 

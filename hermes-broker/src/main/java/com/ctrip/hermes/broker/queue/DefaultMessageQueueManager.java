@@ -34,7 +34,7 @@ public class DefaultMessageQueueManager extends ContainerHolder implements Messa
 	}
 
 	@Override
-	public QueueReader createReader(String topic, int partition) {
+	public QueueReader createReader(String topic, int shard) {
 		Storage storage = m_meta.findStorage(topic);
 		if (storage == null) {
 			throw new RuntimeException("Undefined topic: " + topic);
@@ -42,7 +42,11 @@ public class DefaultMessageQueueManager extends ContainerHolder implements Messa
 
 		// TODO support other storage
 		if (Storage.MYSQL.equals(storage.getType())) {
-			return lookup(QueueReader.class);
+			MysqlQueueReader reader = (MysqlQueueReader) lookup(QueueReader.class, Storage.MYSQL);
+			reader.setTopic(topic);
+			reader.setShard(shard);
+			
+			return reader;
 		} else {
 			// TODO
 			throw new RuntimeException("Unsupported storage type " + storage.getType());

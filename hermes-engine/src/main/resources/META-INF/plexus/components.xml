@@ -13,6 +13,16 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
+			<role-hint>MESSAGE_CONSUME</role-hint>
+			<implementation>com.ctrip.hermes.engine.command.processor.ConsumeMessageCommandProcessor</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.engine.notifier.ConsumerNotifier</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.engine.bootstrap.ConsumerBootstrapManager</role>
 			<implementation>com.ctrip.hermes.engine.bootstrap.DefaultConsumerBootstrapManager</implementation>
 			<requirements>
@@ -43,11 +53,6 @@
 					<role>com.ctrip.hermes.engine.notifier.ConsumerNotifier</role>
 				</requirement>
 			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
-			<role-hint>MESSAGE_CONSUME</role-hint>
-			<implementation>com.ctrip.hermes.engine.command.processor.ConsumeMessageCommandProcessor</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.engine.notifier.ConsumerNotifier</role>
