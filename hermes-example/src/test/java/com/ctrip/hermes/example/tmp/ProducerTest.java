@@ -10,9 +10,9 @@ import org.unidal.lookup.ComponentTestCase;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.BaseConsumer;
+import com.ctrip.hermes.consumer.engine.Engine;
+import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.engine.Engine;
-import com.ctrip.hermes.engine.Subscriber;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class ProducerTest extends ComponentTestCase {

@@ -22,7 +22,6 @@ import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.command.SubscribeCommand;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
-import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.google.common.base.Charsets;
 
 public class SubscribeCommandProcessor implements CommandProcessor {
@@ -58,8 +57,8 @@ public class SubscribeCommandProcessor implements CommandProcessor {
 					// TODO only support priority 1
 					final List<MTopicPartitionPriority> dataObjs = reader.read(1, startMsgId, 10);
 
-					if (CollectionUtil.notEmpty(dataObjs)) {
-						startMsgId = CollectionUtil.last(dataObjs).getId() + 1;
+					if (dataObjs != null && !dataObjs.isEmpty()) {
+						startMsgId = dataObjs.get(dataObjs.size() - 1).getId() + 1;
 
 						final ConsumerMessageBatch batch = new ConsumerMessageBatch();
 						for (MTopicPartitionPriority dataObj : dataObjs) {

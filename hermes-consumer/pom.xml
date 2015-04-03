@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <parent>
-      <groupId>com.ctrip.hermes</groupId>
-      <artifactId>hermes</artifactId>
-      <version>0.1</version>
-      <relativePath>../pom.xml</relativePath>
-   </parent>
-   <modelVersion>4.0.0</modelVersion>
-   <artifactId>hermes-consumer</artifactId>
-   <name>Hermes Consumer</name>
-   <dependencies>
-      <dependency>
-         <groupId>com.ctrip.hermes</groupId>
-         <artifactId>hermes-producer</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-   </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>com.ctrip.hermes</groupId>
+		<artifactId>hermes</artifactId>
+		<version>0.1</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>hermes-consumer</artifactId>
+	<name>Hermes Consumer</name>
+	<dependencies>
+		<dependency>
+			<groupId>com.ctrip.hermes</groupId>
+			<artifactId>hermes-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dianping.cat</groupId>
+			<artifactId>cat-client</artifactId>
+		</dependency>
+	</dependencies>
 </project>
 

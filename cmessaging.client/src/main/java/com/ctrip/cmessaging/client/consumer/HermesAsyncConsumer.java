@@ -7,10 +7,10 @@ import com.ctrip.cmessaging.client.IAsyncConsumer;
 import com.ctrip.cmessaging.client.event.IConsumerCallbackEventHandler;
 import com.ctrip.cmessaging.client.message.HermesIMessage;
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.consumer.engine.Engine;
+import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
-import com.ctrip.hermes.engine.Engine;
-import com.ctrip.hermes.engine.Subscriber;
 
 public class HermesAsyncConsumer implements IAsyncConsumer {
 

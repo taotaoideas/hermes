@@ -13,8 +13,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.PipelineSink;
-import com.ctrip.hermes.producer.api.SendResult;
-import com.ctrip.hermes.producer.pipeline.ProducerSinkManager;
+import com.ctrip.hermes.core.result.SendResult;
 
 @Named(type = ProducerSinkManager.class)
 public class DefaultProducerSinkManager extends ContainerHolder implements Initializable, ProducerSinkManager {

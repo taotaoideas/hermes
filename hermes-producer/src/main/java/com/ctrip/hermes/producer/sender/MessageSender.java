@@ -3,7 +3,7 @@ package com.ctrip.hermes.producer.sender;
 import java.util.concurrent.Future;
 
 import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.producer.api.SendResult;
+import com.ctrip.hermes.core.result.SendResult;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

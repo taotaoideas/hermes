@@ -20,13 +20,14 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.consumer.engine.ConsumerContext;
+import com.ctrip.hermes.consumer.engine.bootstrap.BaseConsumerBootstrap;
+import com.ctrip.hermes.consumer.engine.bootstrap.ConsumerBootstrap;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.message.KafkaConsumerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
-import com.ctrip.hermes.engine.bootstrap.BaseConsumerBootstrap;
-import com.ctrip.hermes.engine.bootstrap.ConsumerBootstrap;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Partition;
