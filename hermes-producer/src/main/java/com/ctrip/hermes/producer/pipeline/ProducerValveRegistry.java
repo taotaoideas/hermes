@@ -6,7 +6,6 @@ import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.pipeline.AbstractValveRegistry;
 import com.ctrip.hermes.core.pipeline.ValveRegistry;
-import com.ctrip.hermes.core.pipeline.spi.internal.TracingMessageValve;
 
 @Named(type = ValveRegistry.class, value = ProducerValveRegistry.ID)
 public class ProducerValveRegistry extends AbstractValveRegistry implements Initializable {

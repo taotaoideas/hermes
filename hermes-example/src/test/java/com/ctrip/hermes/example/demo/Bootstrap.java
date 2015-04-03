@@ -10,26 +10,26 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Subscribe;
-import com.ctrip.hermes.engine.Engine;
-import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.consumer.engine.Engine;
+import com.ctrip.hermes.consumer.engine.Subscriber;
 
 public class Bootstrap extends ComponentTestCase {
 
 	@Test
 	public void start() throws Exception {
-		System.setProperty("devMode", "true");
-		
-		startBroker();
-		startLocalDevServer();
-
-		startConsumers();
-
-		OrderProducer p = new OrderProducer();
-
-		while (true) {
-			System.in.read();
-			p.send("order_new");
-		}
+//		System.setProperty("devMode", "true");
+//		
+//		startBroker();
+//		startLocalDevServer();
+//
+//		startConsumers();
+//
+//		OrderProducer p = new OrderProducer();
+//
+//		while (true) {
+//			System.in.read();
+//			p.send("order_new");
+//		}
 	}
 
 	private void startConsumers() {

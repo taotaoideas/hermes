@@ -11,9 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
-import com.ctrip.hermes.producer.api.SendResult;
 
 public class ProduerTest extends ComponentTestCase {
 

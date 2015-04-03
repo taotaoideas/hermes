@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.ctrip.hermes.core.constants.CatConstants;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.storage.util.CollectionUtil;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Event;
@@ -15,7 +14,7 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 
 	@Override
 	public void consume(List<ConsumerMessage<T>> msgs) {
-		if (CollectionUtil.notEmpty(msgs)) {
+		if (msgs != null && !msgs.isEmpty()) {
 			String topic = msgs.get(0).getTopic();
 
 			for (ConsumerMessage<T> msg : msgs) {

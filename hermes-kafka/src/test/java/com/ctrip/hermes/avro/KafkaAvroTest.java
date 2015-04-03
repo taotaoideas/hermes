@@ -16,12 +16,12 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
+import com.ctrip.hermes.consumer.engine.Engine;
+import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.engine.Engine;
-import com.ctrip.hermes.engine.Subscriber;
+import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
-import com.ctrip.hermes.producer.api.SendResult;
 
 public class KafkaAvroTest extends ComponentTestCase {
 

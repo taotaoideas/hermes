@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model model-package="com.ctrip.hermes.meta" enable-base-visitor2='true'
+	enable-sax-parser="true">
+	<entity name="meta" root="true">
+		<entity-ref name="topic" type="map" names="topics" />
+		<entity-ref name="endpoint" type="map" names="endpoints" />
+		<entity-ref name="storage" type="map" names="storages" />
+	</entity>
+
+	<entity name="endpoint">
+		<attribute name="id" key='true' />
+		<snippet lang='java'>
+			public final static String LOCAL = "local";
+			public final static String BROKER = "broker";
+			public final static
+			String TRANSACTION = "transaction";
+			public final static String KAFKA =
+			"kafka";
+		</snippet>
+	</entity>
+	<entity name="storage">
+		<attribute name="type" key='true' />
+		<entity-ref name="partition" type="map" names="partitions" />
+		<snippet lang='java'>
+			public final static String MEMORY = "memory";
+			public final static String KAFKA = "kafka";
+			public final static String
+			MYSQL = "mysql";
+		</snippet>
+	</entity>
+	<entity name="topic">
+		<attribute name="name" key='true' />
+	</entity>
+	<entity name="codec">
+		<attribute name="type" value-type="String" />
+		<entity-ref name="property" type="list" names="properties" />
+		<snippet lang='java'>
+			public final static String JSON = "json";
+			public final static String AVRO = "avro";
+		</snippet>
+	</entity>
+	<entity name="partition">
+		<attribute name="id" value-type="int" key='true' />
+	</entity>
+</model>
+

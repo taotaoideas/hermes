@@ -2,10 +2,23 @@ package com.ctrip.hermes.broker.deliver;
 
 import java.util.List;
 
-import com.ctrip.hermes.storage.message.Ack;
-import com.ctrip.hermes.storage.storage.Locatable;
-
 public interface AckMonitor<T> {
+
+	/**
+    * @author Leo Liang(jhliang@ctrip.com)
+    *
+    */
+   public interface Ack {
+
+   }
+
+	/**
+    * @author Leo Liang(jhliang@ctrip.com)
+    *
+    */
+   public interface Locatable {
+
+   }
 
 	void delivered(List<Locatable> locatables, T ctx);
 

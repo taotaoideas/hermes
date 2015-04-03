@@ -5,10 +5,10 @@ import java.util.concurrent.Future;
 import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.message.ProducerMessage;
+import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 import com.ctrip.hermes.meta.entity.Endpoint;
-import com.ctrip.hermes.producer.api.SendResult;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**

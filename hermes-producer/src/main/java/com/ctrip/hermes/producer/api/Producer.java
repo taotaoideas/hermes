@@ -2,6 +2,7 @@ package com.ctrip.hermes.producer.api;
 
 import java.util.concurrent.Future;
 
+import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
 public abstract class Producer {

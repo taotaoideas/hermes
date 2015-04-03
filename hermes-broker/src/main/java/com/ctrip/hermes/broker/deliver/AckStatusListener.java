@@ -1,8 +1,15 @@
 package com.ctrip.hermes.broker.deliver;
 
-import com.ctrip.hermes.storage.storage.Range;
 
 public interface AckStatusListener<T> {
+
+	/**
+    * @author Leo Liang(jhliang@ctrip.com)
+    *
+    */
+   public interface Range {
+
+   }
 
 	public void onSuccess(Range range, T ctx);
 

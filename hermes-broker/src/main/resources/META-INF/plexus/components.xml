@@ -29,33 +29,6 @@
 			<implementation>com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.message.internal.DeliverPipeline</role>
-			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.message.internal.DeliverPipeline</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
-					<role-hint>broker-deliver</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
-			<role-hint>broker-receiver</role-hint>
-			<implementation>com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.message.internal.ReceiverPipeline</role>
-			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.message.internal.ReceiverPipeline</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
-					<role-hint>broker-receiver</role-hint>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
 			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
 			<role-hint>send-message-request</role-hint>
 			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>

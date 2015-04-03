@@ -16,13 +16,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.ctrip.cmessaging</groupId>
-            <artifactId>cmessaging.client</artifactId>
-            <version>1.0.2-hermes-adapter</version>
+            <groupId>com.ctrip.hermes</groupId>
+            <artifactId>hermes-producer</artifactId>
+            <version>0.1</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
-            <artifactId>hermes-producer</artifactId>
+            <artifactId>hermes-core</artifactId>
             <version>0.1</version>
         </dependency>
         <dependency>
@@ -30,12 +30,6 @@
             <artifactId>hermes-consumer</artifactId>
             <version>0.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.ctrip.hermes</groupId>
-            <artifactId>hermes-engine</artifactId>
-            <version>0.1</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libfb303</artifactId>
