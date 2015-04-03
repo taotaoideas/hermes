@@ -10,7 +10,7 @@ import org.unidal.lookup.configuration.Component;
 import com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry;
 import com.ctrip.hermes.broker.channel.BrokerReceiverValveRegistry;
 import com.ctrip.hermes.broker.dal.HermesTableProvider;
-import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao;
+import com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao;
 import com.ctrip.hermes.broker.queue.DefaultMessageQueueManager;
 import com.ctrip.hermes.broker.queue.MessageQueueManager;
 import com.ctrip.hermes.broker.queue.MysqlQueueReader;
@@ -58,13 +58,13 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
 
 		all.add(C(QueueWriter.class, Storage.MYSQL, MysqlQueueWriter.class) //
-		      .req(MTopicShardPriorityDao.class));
+		      .req(MTopicPartitionPriorityDao.class));
 		all.add(C(QueueReader.class, Storage.MYSQL, MysqlQueueReader.class) //
-		      .req(MTopicShardPriorityDao.class));
+		      .req(MTopicPartitionPriorityDao.class));
 
-		all.add(C(TableProvider.class, "m-topic-shard-priority", HermesTableProvider.class) //
+		all.add(C(TableProvider.class, "m-topic-partition-priority", HermesTableProvider.class) //
 		      .req(MetaService.class) //
-		      .config(E("m_table").value("m-topic-shard-priority")));
+		      .config(E("m_table").value("m-topic-partition-priority")));
 
 		all.add(defineJdbcDataSourceConfigurationManagerComponent("/data/appdatas/hermes/datasources.xml"));
 

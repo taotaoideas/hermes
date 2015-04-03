@@ -83,7 +83,7 @@
 			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueWriter</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
+					<role>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -93,16 +93,16 @@
 			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueReader</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
+					<role>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>m-topic-shard-priority</role-hint>
+			<role-hint>m-topic-partition-priority</role-hint>
 			<implementation>com.ctrip.hermes.broker.dal.HermesTableProvider</implementation>
 			<configuration>
-				<m_table>m-topic-shard-priority</m_table>
+				<m_table>m-topic-partition-priority</m_table>
 			</configuration>
 			<requirements>
 				<requirement>
@@ -119,11 +119,11 @@
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>m-topic-shard-priority</role-hint>
+			<role-hint>m-topic-partition-priority</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>m-topic-shard-priority</logical-table-name>
-				<physical-table-name>m_topic_shard_priority</physical-table-name>
+				<logical-table-name>m-topic-partition-priority</logical-table-name>
+				<physical-table-name>m_topic_partition_priority</physical-table-name>
 				<data-source-name>hermes</data-source-name>
 			</configuration>
 		</component>
@@ -178,8 +178,8 @@
 			</configuration>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.MTopicShardPriorityDao</implementation>
+			<role>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.QueryEngine</role>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entities do-package="com.ctrip.hermes.broker.dal.hermes" gen="true">
-	<entity name="m-topic-shard-priority">
+	<entity name="m-topic-partition-priority">
 		<var name="topic" value-type="String" />
-		<var name="shard" value-type="int" />
+		<var name="partition" value-type="int" />
 		<var name="priority" value-type="int" />
 		<var name="start-id" value-type="long" />
 		<var name="batch-size" value-type="int" />
@@ -10,7 +10,7 @@
 		<query-defs>
 			<query name="findIdAfter" type="SELECT" multiple="true">
 				<param name="topic" />
-				<param name="shard" />
+				<param name="partition" />
 				<param name="priority" />
 				<param name="start-id" />
 				<param name="batch-size" />

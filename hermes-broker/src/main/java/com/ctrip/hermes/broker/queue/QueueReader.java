@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
 
-import com.ctrip.hermes.broker.dal.hermes.MTopicShardPriority;
+import com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriority;
 
 public interface QueueReader {
 
-	List<MTopicShardPriority> read(int priority, long startId, int batchSize) throws DalException;
+	List<MTopicPartitionPriority> read(int priority, long startId, int batchSize) throws DalException;
 
 }
