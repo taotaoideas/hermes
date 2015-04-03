@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.ctrip.hermes</groupId>
+        <artifactId>hermes</artifactId>
+        <version>0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.ctrip.cmessaging</groupId>
+    <artifactId>cmessaging.client</artifactId>
+    <version>1.0.2-hermes-adapter</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ctrip.cmessaging</groupId>
+            <artifactId>cmessaging.client</artifactId>
+            <version>1.0.2-hermes-adapter</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.hermes</groupId>
+            <artifactId>hermes-producer</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.hermes</groupId>
+            <artifactId>hermes-consumer</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.hermes</groupId>
+            <artifactId>hermes-engine</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libfb303</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+    </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>
+                http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxrelease
+            </url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>
+                http://maven.dev.sh.ctripcorp.com:8081/nexus/content/repositories/fxsnapshot
+            </url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

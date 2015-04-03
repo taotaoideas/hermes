@@ -140,24 +140,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--avro plugin -->
-			<plugin>
-				<groupId>org.apache.avro</groupId>
-				<artifactId>avro-maven-plugin</artifactId>
-				<version>1.7.7</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>schema</goal>
-						</goals>
-						<configuration>
-							<sourceDirectory>${project.basedir}/src/test/resources/com/ctrip/hermes/avro</sourceDirectory>
-							<outputDirectory>${project.basedir}/src/test/java</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 </project>

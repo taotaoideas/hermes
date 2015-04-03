@@ -6,7 +6,7 @@
 	<endpoint id='kafka-endpoint' type="kafka" />
 
 	<topic name='order_new' partition-count='1'>
-		<codec type="json" />
+		<codec type="cmessaging" />
 		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
 	</topic>
 	
