@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
@@ -23,15 +22,16 @@ import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
-public class KafkaAvroTest extends ComponentTestCase {
+public class KafkaAvroTest {
 
 	// @Test
 	public void testByConsole() throws InterruptedException, ExecutionException, IOException {
 		String topic = "kafka.AvroTopic";
 		String group = "avroGroup";
 
-		Producer producer = lookup(Producer.class);
-		Engine engine = lookup(Engine.class);
+		Producer producer = Producer.getInstance();
+
+		Engine engine = Engine.getInstance();
 
 		final List<AvroVisitEvent> actualResult = new ArrayList<>();
 		final List<AvroVisitEvent> expectedResult = new ArrayList<>();
@@ -77,8 +77,9 @@ public class KafkaAvroTest extends ComponentTestCase {
 		String topic = "kafka.AvroTopic";
 		String group = "avroGroup";
 
-		Producer producer = lookup(Producer.class);
-		Engine engine = lookup(Engine.class);
+		Producer producer = Producer.getInstance();
+
+		Engine engine = Engine.getInstance();
 
 		final List<AvroVisitEvent> actualResult = new ArrayList<>();
 		final List<AvroVisitEvent> expectedResult = new ArrayList<>();

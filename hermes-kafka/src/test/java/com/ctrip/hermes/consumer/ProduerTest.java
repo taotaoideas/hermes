@@ -9,19 +9,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
-public class ProduerTest extends ComponentTestCase {
+public class ProduerTest {
 
 	@Test
 	public void testSimpleProducer() throws InterruptedException, ExecutionException {
 		String topic = "kafka.SimpleTopic";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
 		List<Future<SendResult>> result = new ArrayList<>();
 		for (int i = 0; i < 2; i++) {

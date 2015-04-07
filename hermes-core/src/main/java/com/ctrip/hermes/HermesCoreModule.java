@@ -7,7 +7,7 @@ import org.unidal.lookup.annotation.Named;
 
 @Named(type = Module.class, value = HermesCoreModule.ID)
 public class HermesCoreModule extends AbstractModule {
-	public static final String ID = "hermes-producer";
+	public static final String ID = "hermes-core";
 
 	@Override
 	public Module[] getDependencies(ModuleContext ctx) {

@@ -2,8 +2,13 @@ package com.ctrip.hermes.consumer.engine;
 
 import java.util.List;
 
-public interface Engine {
+import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
-	public void start(List<Subscriber> subscribers);
+public abstract class Engine {
 
+	public abstract void start(List<Subscriber> subscribers);
+
+	public static Engine getInstance() {
+		return PlexusComponentLocator.lookup(Engine.class);
+	}
 }
