@@ -48,5 +48,12 @@ public interface MetaService {
     * @param topic
     * @return
     */
+   Topic findTopic(String topic);
+   
+   /**
+    * 
+    * @param topic
+    * @return
+    */
    Codec getCodec(String topic);
 }

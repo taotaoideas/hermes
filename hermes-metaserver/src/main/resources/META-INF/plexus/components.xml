@@ -1,0 +1,8 @@
+<plexus>
+	<components>
+		<component>
+			<role>com.ctrip.hermes.meta.rest.MetaRestServer</role>
+			<implementation>com.ctrip.hermes.meta.rest.MetaRestServer</implementation>
+		</component>
+	</components>
+</plexus>
