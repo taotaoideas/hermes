@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.ctrip.hermes</groupId>
         <artifactId>hermes</artifactId>
-        <version>0.1</version>
+        <version>0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -18,17 +18,17 @@
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
             <artifactId>hermes-producer</artifactId>
-            <version>0.1</version>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
             <artifactId>hermes-core</artifactId>
-            <version>0.1</version>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.ctrip.hermes</groupId>
             <artifactId>hermes-consumer</artifactId>
-            <version>0.1</version>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
