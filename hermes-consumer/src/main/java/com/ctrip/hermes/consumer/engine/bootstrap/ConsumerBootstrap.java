@@ -6,4 +6,6 @@ public interface ConsumerBootstrap {
 
 	public void start(ConsumerContext consumerContext);
 
+	public void stop(ConsumerContext consumerContext);
+
 }
