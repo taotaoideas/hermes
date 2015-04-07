@@ -71,8 +71,12 @@ public class DefaultMetaService implements Initializable, MetaService {
 	 * @see com.ctrip.hermes.meta.MetaService#getPartitions(java.lang.String)
 	 */
 	@Override
-	public List<Partition> getPartitions(String topic) {
-		return m_meta.findTopic(topic).getPartitions();
+	public List<Partition> getPartitions(String topicName) {
+		Topic topic = m_meta.findTopic(topicName);
+		if (topic != null) {
+			return topic.getPartitions();
+		}
+		return null;
 	}
 
 	/*
@@ -86,9 +90,13 @@ public class DefaultMetaService implements Initializable, MetaService {
 	}
 
 	@Override
-	public Storage findStorage(String topic) {
-		Partition p0 = m_meta.findTopic(topic).getPartitions().get(0);
-		return m_dsId2Storage.get(p0.getWriteDatasource());
+	public Storage findStorage(String topicName) {
+		Topic topic = m_meta.findTopic(topicName);
+		if (topic != null) {
+			Partition p0 = topic.getPartitions().get(0);
+			return m_dsId2Storage.get(p0.getWriteDatasource());
+		}
+		return null;
 	}
 
 	/*
@@ -97,16 +105,23 @@ public class DefaultMetaService implements Initializable, MetaService {
 	 * @see com.ctrip.hermes.meta.MetaService#getCodecType(java.lang.String)
 	 */
 	@Override
-	public Codec getCodec(String topic) {
-		return m_meta.findTopic(topic).getCodec();
+	public Codec getCodec(String topicName) {
+		Topic topic = m_meta.findTopic(topicName);
+		if (topic != null)
+			return topic.getCodec();
+		else
+			return null;
 	}
 
 	@Override
 	public Partition findPartition(String topicName, int partitionId) {
-	   Topic topic = m_meta.findTopic(topicName);
-		Partition p = topic.findPartition(partitionId);
-	   return p;
-   }
+		Topic topic = m_meta.findTopic(topicName);
+		if (topic != null)
+			return topic.findPartition(partitionId);
+		else
+			return null;
+	}
+
 	public List<Topic> findTopicsByPattern(String topicPattern) {
 		List<Topic> matchedTopics = new ArrayList<>();
 
@@ -121,6 +136,11 @@ public class DefaultMetaService implements Initializable, MetaService {
 		}
 
 		return matchedTopics;
+	}
+
+	@Override
+	public Topic findTopic(String topicName) {
+		return m_meta.findTopic(topicName);
 	}
 
 }
