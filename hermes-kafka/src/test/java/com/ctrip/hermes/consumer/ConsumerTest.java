@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -15,16 +14,16 @@ import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
-public class ConsumerTest extends ComponentTestCase {
+public class ConsumerTest {
 
 	@Test
 	public void testOneConsumerOneGroup() throws IOException {
 		String topic = "kafka.SimpleTopic";
 		String group = "group1";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
-		Engine engine = lookup(Engine.class);
+		Engine engine = Engine.getInstance();
 
 		Subscriber s = new Subscriber(topic, group, new BaseConsumer<VisitEvent>() {
 
@@ -59,9 +58,9 @@ public class ConsumerTest extends ComponentTestCase {
 		String topic = "kafka.SimpleTopic";
 		String group = "group1";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
-		Engine engine = lookup(Engine.class);
+		Engine engine = Engine.getInstance();
 
 		Subscriber s1 = new Subscriber(topic, group, new Consumer<VisitEvent>() {
 
@@ -112,9 +111,9 @@ public class ConsumerTest extends ComponentTestCase {
 		String group1 = "group1";
 		String group2 = "group2";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
-		Engine engine = lookup(Engine.class);
+		Engine engine = Engine.getInstance();
 
 		Subscriber s1 = new Subscriber(topic, group1, new Consumer<VisitEvent>() {
 

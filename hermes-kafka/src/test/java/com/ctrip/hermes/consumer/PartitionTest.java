@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -15,16 +14,16 @@ import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
-public class PartitionTest extends ComponentTestCase {
+public class PartitionTest  {
 
 	@Test
 	public void testTwoPartitionOneConsumer() throws IOException {
 		String topicPattern = "kafka.SimpleTopic";
 		String group = "group2";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
-		Engine engine = lookup(Engine.class);
+		Engine engine = Engine.getInstance();
 
 		Subscriber s = new Subscriber(topicPattern, group, new Consumer<VisitEvent>() {
 
@@ -60,9 +59,9 @@ public class PartitionTest extends ComponentTestCase {
 		String topicPattern = "kafka.SimpleTopic";
 		String group = "group2";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
-		Engine engine = lookup(Engine.class);
+		Engine engine = Engine.getInstance();
 
 		Subscriber s1 = new Subscriber(topicPattern, group, new Consumer<VisitEvent>() {
 

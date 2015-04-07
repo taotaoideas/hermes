@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -16,7 +15,7 @@ import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
-public class WildcardTopicsTest extends ComponentTestCase {
+public class WildcardTopicsTest {
 
 	@Test
 	public void testWildcardTopics() throws IOException {
@@ -25,9 +24,9 @@ public class WildcardTopicsTest extends ComponentTestCase {
 		String sendTopic2 = "kafka.SimpleTopic2";
 		String group = "group1";
 
-		Producer producer = lookup(Producer.class);
+		Producer producer = Producer.getInstance();
 
-		Engine engine = lookup(Engine.class);
+		Engine engine = Engine.getInstance();
 
 		Subscriber s = new Subscriber(topicPattern, group, new Consumer<VisitEvent>() {
 

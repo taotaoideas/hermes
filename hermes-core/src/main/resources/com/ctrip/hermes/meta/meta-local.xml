@@ -32,7 +32,7 @@
 	
 	<topic name='kafka.AvroTopic' partition-count='1'>
 		<codec type="avro">
-			<property name="schema.registry.url" value="http://fx-message06:8081" /> 
+			<property name="schema.registry.url" value="http://10.3.8.63:8081" /> 
 		</codec>
 		<partition id='0' read-datasource='kafka-consumer' write-datasource='kafka-produer' endpoint='kafka-endpoint'/>
 	</topic>
@@ -49,10 +49,10 @@
 
 	<storage type='kafka'>
 		<datasource id='kafka-produer'>
-			<property name='bootstrap.servers' value='fx-message01:9092,fx-message02:9092,fx-message03:9092' />
+			<property name='bootstrap.servers' value='10.3.6.237:9092,10.3.6.239:9092,10.3.6.24:9092' />
 		</datasource>
 		<datasource id='kafka-consumer'>
-			<property name='zookeeper.connect' value='fx-message04:2181,fx-message05:2181,fx-message06:2181' />
+			<property name='zookeeper.connect' value='10.3.6.90:2181,10.3.8.62:2181,10.3.8.63:2181' />
 			<property name='offsets.storage' value='kafka' />
 		</datasource>
 	</storage>
