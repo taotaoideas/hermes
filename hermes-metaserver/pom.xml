@@ -11,6 +11,20 @@
 	<artifactId>hermes-metaserver</artifactId>
 	<name>Hermes Meta Server</name>
 	<dependencies>
+		<dependency>
+			<groupId>com.ctrip.hermes</groupId>
+			<artifactId>hermes-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.19</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-json</artifactId>
+			<version>1.19</version>
+		</dependency>
 	</dependencies>
 </project>
 
