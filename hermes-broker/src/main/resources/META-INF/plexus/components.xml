@@ -56,7 +56,7 @@
 			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueWriter</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</role>
+					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -66,16 +66,42 @@
 			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueReader</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</role>
+					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>m-topic-partition-priority</role-hint>
+			<role-hint>message-priority</role-hint>
 			<implementation>com.ctrip.hermes.broker.dal.HermesTableProvider</implementation>
 			<configuration>
-				<m_table>m-topic-partition-priority</m_table>
+				<m_table>message-priority</m_table>
+			</configuration>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>resend-group-id</role-hint>
+			<implementation>com.ctrip.hermes.broker.dal.HermesTableProvider</implementation>
+			<configuration>
+				<m_table>resend-group-id</m_table>
+			</configuration>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>offset-message</role-hint>
+			<implementation>com.ctrip.hermes.broker.dal.HermesTableProvider</implementation>
+			<configuration>
+				<m_table>offset-message</m_table>
 			</configuration>
 			<requirements>
 				<requirement>
@@ -92,67 +118,47 @@
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>m-topic-partition-priority</role-hint>
+			<role-hint>message-priority</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>m-topic-partition-priority</logical-table-name>
-				<physical-table-name>m_topic_partition_priority</physical-table-name>
+				<logical-table-name>message-priority</logical-table-name>
+				<physical-table-name>message_priority</physical-table-name>
 				<data-source-name>hermes</data-source-name>
 			</configuration>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>o-r-topic</role-hint>
+			<role-hint>offset-message</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>o-r-topic</logical-table-name>
-				<physical-table-name>o_r_topic</physical-table-name>
+				<logical-table-name>offset-message</logical-table-name>
+				<physical-table-name>offset_message</physical-table-name>
 				<data-source-name>hermes</data-source-name>
 			</configuration>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>o-topic</role-hint>
+			<role-hint>offset-resend</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>o-topic</logical-table-name>
-				<physical-table-name>o_topic</physical-table-name>
+				<logical-table-name>offset-resend</logical-table-name>
+				<physical-table-name>offset_resend</physical-table-name>
 				<data-source-name>hermes</data-source-name>
 			</configuration>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>r-topic-groupid</role-hint>
+			<role-hint>resend-group-id</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>r-topic-groupid</logical-table-name>
-				<physical-table-name>r_topic_groupid</physical-table-name>
+				<logical-table-name>resend-group-id</logical-table-name>
+				<physical-table-name>resend_group_id</physical-table-name>
 				<data-source-name>hermes</data-source-name>
 			</configuration>
 		</component>
 		<component>
-			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>topic</role-hint>
-			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
-			<configuration>
-				<logical-table-name>topic</logical-table-name>
-				<physical-table-name>topic</physical-table-name>
-				<data-source-name>hermes</data-source-name>
-			</configuration>
-		</component>
-		<component>
-			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>topic-group</role-hint>
-			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
-			<configuration>
-				<logical-table-name>topic-group</logical-table-name>
-				<physical-table-name>topic_group</physical-table-name>
-				<data-source-name>hermes</data-source-name>
-			</configuration>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao</implementation>
+			<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.QueryEngine</role>
@@ -160,8 +166,8 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.ORTopicDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.ORTopicDao</implementation>
+			<role>com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.QueryEngine</role>
@@ -169,8 +175,8 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.OTopicDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.OTopicDao</implementation>
+			<role>com.ctrip.hermes.broker.dal.hermes.OffsetResendDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.OffsetResendDao</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.QueryEngine</role>
@@ -178,26 +184,8 @@
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.RTopicGroupidDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.RTopicGroupidDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.TopicDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.TopicDao</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.dal.jdbc.QueryEngine</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.dal.hermes.TopicGroupDao</role>
-			<implementation>com.ctrip.hermes.broker.dal.hermes.TopicGroupDao</implementation>
+			<role>com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao</role>
+			<implementation>com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.dal.jdbc.QueryEngine</role>

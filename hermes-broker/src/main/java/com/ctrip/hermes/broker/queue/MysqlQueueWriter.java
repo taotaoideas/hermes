@@ -8,21 +8,21 @@ import java.util.List;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriority;
-import com.ctrip.hermes.broker.dal.hermes.MTopicPartitionPriorityDao;
+import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
+import com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 
 public class MysqlQueueWriter implements QueueWriter {
 	@Inject
-	private MTopicPartitionPriorityDao m_dao;
+	private MessagePriorityDao m_dao;
 
 	@Override
 	public void write(Tpp tpp, MessageRawDataBatch batch) throws StorageException {
 		List<PartialDecodedMessage> messages = batch.getMessages();
 		for (PartialDecodedMessage msg : messages) {
-			MTopicPartitionPriority r = new MTopicPartitionPriority();
+			MessagePriority r = new MessagePriority();
 			r.setAttributes(new String(readByteBuf(msg.getAppProperties())));
 			r.setCreationDate(new Date(msg.getBornTime()));
 			r.setPayload(msg.readBody());

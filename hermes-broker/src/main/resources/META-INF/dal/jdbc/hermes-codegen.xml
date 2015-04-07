@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entities>
-  <entity name="m-topic-partition-priority" table="m_topic_partition_priority" alias="mtpp">
+  <entity name="message-priority" table="message_priority" alias="mp">
     <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
     <member name="producer-ip" field="producer_ip" value-type="String" length="15" nullable="false" />
     <member name="producer-id" field="producer_id" value-type="int" length="10" nullable="false" />
@@ -41,7 +41,47 @@
       </query>
     </query-defs>
   </entity>
-  <entity name="o-r-topic" table="o_r_topic" alias="ort">
+  <entity name="offset-message" table="offset_message" alias="om">
+    <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
+    <member name="partition-no" field="partition_no" value-type="int" length="10" nullable="false" />
+    <member name="priority" field="priority" value-type="int" length="3" nullable="false" />
+    <member name="group-id" field="group_id" value-type="int" length="10" nullable="false" />
+    <member name="offset" field="offset" value-type="long" length="19" nullable="false" />
+    <member name="creation-date" field="creation_date" value-type="Date" nullable="false" />
+    <member name="last-modified-date" field="last_modified_date" value-type="Date" nullable="false" />
+    <var name="key-id" value-type="long" key-member="id" />
+    <primary-key name="PRIMARY" members="id" />
+    <readsets>
+      <readset name="FULL" all="true" />
+    </readsets>
+    <updatesets>
+      <updateset name="FULL" all="true" />
+    </updatesets>
+    <query-defs>
+      <query name="find-by-PK" type="SELECT">
+        <param name="key-id" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="insert" type="INSERT">
+        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
+        VALUES(<VALUES/>)]]></statement>
+      </query>
+      <query name="update-by-PK" type="UPDATE">
+        <param name="key-id" />
+        <statement><![CDATA[UPDATE <TABLE/>
+        SET <FIELDS/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="delete-by-PK" type="DELETE">
+        <param name="key-id" />
+        <statement><![CDATA[DELETE FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+    </query-defs>
+  </entity>
+  <entity name="offset-resend" table="offset_resend" alias="or">
     <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
     <member name="group-id" field="group_id" value-type="int" length="10" nullable="false" />
     <member name="last-schedule-date" field="last_schedule_date" value-type="Date" nullable="false" />
@@ -80,47 +120,7 @@
       </query>
     </query-defs>
   </entity>
-  <entity name="o-topic" table="o_topic" alias="ot">
-    <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
-    <member name="partition" field="partition" value-type="int" length="10" nullable="false" />
-    <member name="priority" field="priority" value-type="int" length="3" nullable="false" />
-    <member name="group-id" field="group_id" value-type="int" length="10" nullable="false" />
-    <member name="offset" field="offset" value-type="long" length="19" nullable="false" />
-    <member name="creation-date" field="creation_date" value-type="Date" nullable="false" />
-    <member name="last-modified-date" field="last_modified_date" value-type="Date" nullable="false" />
-    <var name="key-id" value-type="long" key-member="id" />
-    <primary-key name="PRIMARY" members="id" />
-    <readsets>
-      <readset name="FULL" all="true" />
-    </readsets>
-    <updatesets>
-      <updateset name="FULL" all="true" />
-    </updatesets>
-    <query-defs>
-      <query name="find-by-PK" type="SELECT">
-        <param name="key-id" />
-        <statement><![CDATA[SELECT <FIELDS/>
-        FROM <TABLE/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-      <query name="insert" type="INSERT">
-        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
-        VALUES(<VALUES/>)]]></statement>
-      </query>
-      <query name="update-by-PK" type="UPDATE">
-        <param name="key-id" />
-        <statement><![CDATA[UPDATE <TABLE/>
-        SET <FIELDS/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-      <query name="delete-by-PK" type="DELETE">
-        <param name="key-id" />
-        <statement><![CDATA[DELETE FROM <TABLE/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-    </query-defs>
-  </entity>
-  <entity name="r-topic-groupid" table="r_topic_groupid" alias="rtg">
+  <entity name="resend-group-id" table="resend_group_id" alias="rgi">
     <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
     <member name="producer-ip" field="producer_ip" value-type="String" length="15" nullable="false" />
     <member name="producer-id" field="producer_id" value-type="int" length="10" nullable="false" />
@@ -133,86 +133,6 @@
     <var name="key-id" value-type="long" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
     <index name="key" members="ref_key ASC" />
-    <readsets>
-      <readset name="FULL" all="true" />
-    </readsets>
-    <updatesets>
-      <updateset name="FULL" all="true" />
-    </updatesets>
-    <query-defs>
-      <query name="find-by-PK" type="SELECT">
-        <param name="key-id" />
-        <statement><![CDATA[SELECT <FIELDS/>
-        FROM <TABLE/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-      <query name="insert" type="INSERT">
-        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
-        VALUES(<VALUES/>)]]></statement>
-      </query>
-      <query name="update-by-PK" type="UPDATE">
-        <param name="key-id" />
-        <statement><![CDATA[UPDATE <TABLE/>
-        SET <FIELDS/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-      <query name="delete-by-PK" type="DELETE">
-        <param name="key-id" />
-        <statement><![CDATA[DELETE FROM <TABLE/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-    </query-defs>
-  </entity>
-  <entity name="topic" table="topic" alias="t">
-    <member name="id" field="id" value-type="int" length="10" nullable="false" key="true" auto-increment="true" />
-    <member name="topic" field="topic" value-type="String" length="50" nullable="false" />
-    <member name="partitions" field="partitions" value-type="String" length="30" nullable="false" />
-    <member name="partition-strategy" field="partition_strategy" value-type="String" length="30" nullable="false" />
-    <member name="priorities" field="priorities" value-type="int" length="3" nullable="false" />
-    <member name="creation-date" field="creation_date" value-type="Date" nullable="false" />
-    <member name="last-modified-date" field="last_modified_date" value-type="Date" nullable="false" />
-    <var name="key-id" value-type="int" key-member="id" />
-    <primary-key name="PRIMARY" members="id" />
-    <index name="idx_topic" unique="true" members="topic ASC" />
-    <readsets>
-      <readset name="FULL" all="true" />
-    </readsets>
-    <updatesets>
-      <updateset name="FULL" all="true" />
-    </updatesets>
-    <query-defs>
-      <query name="find-by-PK" type="SELECT">
-        <param name="key-id" />
-        <statement><![CDATA[SELECT <FIELDS/>
-        FROM <TABLE/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-      <query name="insert" type="INSERT">
-        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
-        VALUES(<VALUES/>)]]></statement>
-      </query>
-      <query name="update-by-PK" type="UPDATE">
-        <param name="key-id" />
-        <statement><![CDATA[UPDATE <TABLE/>
-        SET <FIELDS/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-      <query name="delete-by-PK" type="DELETE">
-        <param name="key-id" />
-        <statement><![CDATA[DELETE FROM <TABLE/>
-        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
-      </query>
-    </query-defs>
-  </entity>
-  <entity name="topic-group" table="topic_group" alias="tg">
-    <member name="id" field="id" value-type="int" length="10" nullable="false" key="true" auto-increment="true" />
-    <member name="topic" field="topic" value-type="String" length="50" nullable="false" />
-    <member name="group-id" field="group_id" value-type="int" length="10" nullable="false" />
-    <member name="group-name" field="group_name" value-type="String" length="50" nullable="false" />
-    <member name="max-retries" field="max_retries" value-type="int" length="3" nullable="false" />
-    <member name="retry-strategy" field="retry_strategy" value-type="String" length="30" />
-    <var name="key-id" value-type="int" key-member="id" />
-    <primary-key name="PRIMARY" members="id" />
     <readsets>
       <readset name="FULL" all="true" />
     </readsets>

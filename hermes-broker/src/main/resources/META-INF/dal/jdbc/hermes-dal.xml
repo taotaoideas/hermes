@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entities do-package="com.ctrip.hermes.broker.dal.hermes" gen="true">
-	<entity name="m-topic-partition-priority">
+	<entity name="message-priority">
 		<var name="topic" value-type="String" />
 		<var name="partition" value-type="int" />
 		<var name="priority" value-type="int" />
@@ -17,9 +17,68 @@
 				<statement><![CDATA[SELECT <FIELDS/>
         		FROM <TABLE/>
         		WHERE <FIELD name='id'/> >= ${start-id}
-        		LIMIT ${batch-size}]]></statement>
+        		LIMIT ${batch-size}]]>
+				</statement>
+			</query>
+			<query name="top" type="SELECT" multiple="true">
+				<param name="topic" />
+				<param name="partition" />
+				<param name="priority" />
+				<statement><![CDATA[SELECT <FIELDS/>
+        		FROM <TABLE/>
+        		ORDER BY <FIELD name='id'/> DESC
+        		LIMIT 1]]>
+				</statement>
 			</query>
 		</query-defs>
 	</entity>
+
+	<entity name="offset-message">
+		<member name="partition-no" alias="partition" />
+		<var name="topic" value-type="String" />
+		<query-defs>
+			<query name="find" type="SELECT" multiple="true">
+				<param name="topic" />
+				<param name="partition" />
+				<param name="priority" />
+				<param name="group-id" />
+
+				<statement><![CDATA[SELECT <FIELDS/>
+        		FROM <TABLE/>
+        		WHERE <FIELD name='partition'/> = ${partition}
+        		AND <FIELD name='priority'/> = ${priority}
+        		AND <FIELD name='group-id'/> = ${group-id}]]>
+				</statement>
+			</query>
+		</query-defs>
+	</entity>
+
+	<entity name="resend-group-id">
+		<var name="topic" value-type="String" />
+		<var name="partition" value-type="int" />
+		<var name="group-id" value-type="int" />
+
+	</entity>
+
+	<entity name="offset-resend">
+		<var name="topic" value-type="String" />
+		<var name="partition" value-type="int" />
+
+		<query-defs>
+			<query name="top" type="SELECT" multiple="true">
+				<param name="topic" />
+				<param name="partition" />
+				<param name="group-id" />
+
+				<statement><![CDATA[SELECT <FIELDS/>
+        		FROM <TABLE/>
+        		WHERE <FIELD name='group-id'/> = ${group-id}
+        		]]>
+				</statement>
+			</query>
+		</query-defs>
+	</entity>
+
+
 </entities>
 

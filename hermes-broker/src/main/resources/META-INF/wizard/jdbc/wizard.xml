@@ -9,12 +9,10 @@
          <properties>useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</properties>
       </datasource>
       <group name="hermes" package="com.ctrip.hermes.broker.dal.hermes">
-         <table name="m_topic_shard_priority"/>
-         <table name="o_r_topic"/>
-         <table name="o_topic"/>
-         <table name="r_topic_groupid"/>
-         <table name="topic"/>
-         <table name="topic_group"/>
+         <table name="message_priority"/>
+         <table name="offset_message"/>
+         <table name="resend_group_id"/>
+         <table name="offset_resend"/>
       </group>
    </jdbc>
 </wizard>
