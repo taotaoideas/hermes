@@ -35,6 +35,14 @@ public abstract class BaseConsumerBootstrap implements ConsumerBootstrap {
 		doStart(consumerContext);
 	}
 
+	public void stop(ConsumerContext consumerContext) {
+		doStop(consumerContext);
+	}
+	
+   protected void doStop(ConsumerContext consumerContext) {
+	   
+   }
+
 	protected abstract void doStart(ConsumerContext consumerContext);
 	
 }
