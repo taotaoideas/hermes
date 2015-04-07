@@ -24,6 +24,11 @@ public class DefaultMessageCodec implements MessageCodec {
 		m_topic = topic;
 	}
 
+	public DefaultMessageCodec(String topic, Codec codec) {
+		m_codec = codec;
+		m_topic = topic;
+	}
+
 	public DefaultMessageCodec() {
 
 	}
