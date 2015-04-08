@@ -60,7 +60,7 @@
 							<goal>schema</goal>
 						</goals>
 						<configuration>
-							<sourceDirectory>${project.basedir}/src/test/resources/com/ctrip/hermes/avro</sourceDirectory>
+							<sourceDirectory>${project.basedir}/src/test/resources/com/ctrip/hermes/kafka/avro</sourceDirectory>
 							<outputDirectory>${project.basedir}/src/test/java</outputDirectory>
 						</configuration>
 					</execution>

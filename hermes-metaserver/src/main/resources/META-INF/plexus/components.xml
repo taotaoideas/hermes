@@ -1,0 +1,26 @@
+<plexus>
+	<components>
+		<component>
+			<role>com.ctrip.hermes.meta.server.MetaRestServer</role>
+			<implementation>com.ctrip.hermes.meta.server.MetaRestServer</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.meta.service.SchemaService</role>
+			<implementation>com.ctrip.hermes.meta.service.SchemaService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.meta.service.TopicService</role>
+			<implementation>com.ctrip.hermes.meta.service.TopicService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
+		</component>
+	</components>
+</plexus>
