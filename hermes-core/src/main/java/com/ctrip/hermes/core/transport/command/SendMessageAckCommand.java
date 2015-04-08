@@ -2,9 +2,8 @@ package com.ctrip.hermes.core.transport.command;
 
 import io.netty.buffer.ByteBuf;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
@@ -14,20 +13,21 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  */
 public class SendMessageAckCommand extends AbstractCommand implements Ack {
 
-   public SendMessageAckCommand() {
-	   super(CommandType.ACK_MESSAGE_SEND);
-   }
+	private Map<Integer, Boolean> m_successes = new ConcurrentHashMap<>();
 
-	private Map<Integer, Boolean> m_successes = new HashMap<>();
-
-	public void addResult(Integer msgSeq, boolean success) {
-		m_successes.put(msgSeq, success);
+	private int m_totalSize;
+	
+	public SendMessageAckCommand(int totalSize) {
+		super(CommandType.ACK_MESSAGE_SEND);
+		m_totalSize = totalSize;
 	}
 
-	public void addResults(List<Integer> msgSeqs, boolean success) {
-		for (Integer seq : msgSeqs) {
-			m_successes.put(seq, success);
-		}
+	public boolean isAllResultsSet() {
+		return m_successes.size() == m_totalSize;
+	}
+
+	public void addResults(Map<Integer, Boolean> results) {
+		m_successes.putAll(results);
 	}
 
 	public boolean isSuccess(Integer msgSeqNo) {

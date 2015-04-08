@@ -22,4 +22,8 @@ public class CommandProcessorContext {
 		return m_command;
 	}
 
+	public EndpointChannel getChannel() {
+		return m_channel;
+	}
+
 }

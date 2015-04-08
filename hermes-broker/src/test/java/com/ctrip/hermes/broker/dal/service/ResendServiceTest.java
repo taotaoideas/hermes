@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.dal.hermes.ResendGroupId;
-import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.bo.Tpp;
 
 public class ResendServiceTest extends ComponentTestCase {
 

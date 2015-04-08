@@ -1,56 +1,46 @@
 package com.ctrip.hermes.broker.queue;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.unidal.lookup.ContainerHolder;
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.tuple.Pair;
 
+import com.ctrip.hermes.core.bo.Tpg;
+import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
-import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
-import com.ctrip.hermes.meta.entity.Storage;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class DefaultMessageQueueManager extends ContainerHolder implements MessageQueueManager {
 
-	public final static String ID = "broker";
-
 	@Inject
-	private MetaService m_meta;
+	private MetaService m_metaService;
+
+	private Map<Pair<String, Integer>, MessageQueue> m_messageQueues = new ConcurrentHashMap<>();
 
 	@Override
-	public void write(Tpp tpp, MessageRawDataBatch data) throws StorageException {
-		Storage storage = m_meta.findStorage(tpp.getTopic());
-		if (storage == null) {
-			throw new RuntimeException("Undefined topic: " + tpp.getTopic());
-		}
-
-		// TODO support other storage
-		if (Storage.MYSQL.equals(storage.getType())) {
-			QueueWriter writer = lookup(QueueWriter.class, Storage.MYSQL);
-			writer.write(tpp, data);
-		} else {
-			// TODO
-			throw new RuntimeException("Unsupported storage type " + storage.getType());
-		}
-
+	public ListenableFuture<Map<Integer, Boolean>> appendMessageAsync(Tpp tpp, MessageRawDataBatch data) {
+		return getMessageQueue(tpp.getTopic(), tpp.getPartition()).appendMessageAsync(data, tpp.isPriority());
 	}
 
 	@Override
-	public QueueReader createReader(String topic, int shard) {
-		Storage storage = m_meta.findStorage(topic);
-		if (storage == null) {
-			throw new RuntimeException("Undefined topic: " + topic);
-		}
-
-		// TODO support other storage
-		if (Storage.MYSQL.equals(storage.getType())) {
-			MysqlQueueReader reader = (MysqlQueueReader) lookup(QueueReader.class, Storage.MYSQL);
-			reader.setTopic(topic);
-			reader.setShard(shard);
-			
-			return reader;
-		} else {
-			// TODO
-			throw new RuntimeException("Unsupported storage type " + storage.getType());
-		}
+	public MessageQueueCursor createCursor(Tpg tpg) {
+		return getMessageQueue(tpg.getTopic(), tpg.getPartition()).createCursor(tpg.getGroupId());
 	}
 
+	private MessageQueue getMessageQueue(String topic, int partition) {
+		Pair<String, Integer> key = new Pair<>(topic, partition);
+		if (!m_messageQueues.containsKey(key)) {
+			synchronized (this) {
+				if (!m_messageQueues.containsKey(key)) {
+					MessageQueue mq = MessageQueueFactory.createMessageQueue(topic, partition);
+					m_messageQueues.put(key, mq);
+				}
+			}
+		}
+
+		return m_messageQueues.get(key);
+	}
 }

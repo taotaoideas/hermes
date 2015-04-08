@@ -36,7 +36,8 @@
 		<entity-ref name="property" type="list" names="properties" />
 		<snippet lang='java'>
 			public final static String JSON = "json";
-			public final static String AVRO = "avro";
+			public
+			final static String AVRO = "avro";
 		</snippet>
 	</entity>
 	<entity name="partition">

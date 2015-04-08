@@ -1,6 +1,9 @@
 package com.ctrip.hermes.core.transport.command.processor;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,7 +25,7 @@ public class CommandProcessorManager implements Initializable, LogEnabled {
 	@Inject
 	private CommandProcessorRegistry m_registry;
 
-	private ExecutorService m_executor;
+	private Map<CommandType, ExecutorService> m_executors = new ConcurrentHashMap<>();
 
 	private Logger m_logger;
 
@@ -43,20 +46,33 @@ public class CommandProcessorManager implements Initializable, LogEnabled {
 	}
 
 	public void offer(final CommandProcessorContext ctx) {
-		m_executor.submit(new Runnable() {
+		Command cmd = ctx.getCommand();
+		CommandType type = cmd.getHeader().getType();
+		ExecutorService executorService = m_executors.get(type);
 
-			@Override
-			public void run() {
-				process(ctx);
-			}
-		});
+		if (executorService == null) {
+			throw new IllegalArgumentException(String.format("Unknown command type[%s]", type));
+		} else {
+			executorService.submit(new Runnable() {
+
+				@Override
+				public void run() {
+					process(ctx);
+				}
+			});
+		}
 	}
 
 	@Override
 	public void initialize() throws InitializationException {
 		// TODO
-		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
-		m_executor = new ThreadPoolExecutor(10, 10, Integer.MAX_VALUE, TimeUnit.SECONDS, workQueue);
+		Set<CommandType> commandTypes = m_registry.listAllCommandTypes();
+
+		for (CommandType type : commandTypes) {
+			BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
+			m_executors.put(type, new ThreadPoolExecutor(10, 10, Integer.MAX_VALUE, TimeUnit.SECONDS, workQueue));
+		}
+
 	}
 
 	@Override

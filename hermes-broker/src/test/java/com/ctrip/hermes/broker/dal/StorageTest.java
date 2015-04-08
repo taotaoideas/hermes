@@ -20,7 +20,7 @@ import com.ctrip.hermes.broker.dal.hermes.OffsetMessageEntity;
 import com.ctrip.hermes.broker.dal.hermes.ResendGroupId;
 import com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao;
 import com.ctrip.hermes.broker.dal.hermes.ResendGroupIdEntity;
-import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.bo.Tpp;
 
 public class StorageTest extends ComponentTestCase {
 

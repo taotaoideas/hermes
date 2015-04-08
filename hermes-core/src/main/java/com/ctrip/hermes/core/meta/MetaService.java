@@ -57,4 +57,12 @@ public interface MetaService {
 	 */
 	Codec getCodec(String topic);
 
+   List<Partition> getPartitions(String topic, String groupId);
+
+	/**
+	 * @param groupId
+	 * @return
+	 */
+   int getGroupIdInt(String groupId);
+
 }

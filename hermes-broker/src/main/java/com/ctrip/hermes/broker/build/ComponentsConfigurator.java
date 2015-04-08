@@ -13,12 +13,10 @@ import com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao;
 import com.ctrip.hermes.broker.dal.service.MessageService;
 import com.ctrip.hermes.broker.dal.service.ResendService;
 import com.ctrip.hermes.broker.queue.DefaultMessageQueueManager;
+import com.ctrip.hermes.broker.queue.MessageQueueCursor;
 import com.ctrip.hermes.broker.queue.MessageQueueManager;
-import com.ctrip.hermes.broker.queue.MysqlQueueReader;
-import com.ctrip.hermes.broker.queue.MysqlQueueWriter;
-import com.ctrip.hermes.broker.queue.QueueReader;
-import com.ctrip.hermes.broker.queue.QueueWriter;
-import com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor;
+import com.ctrip.hermes.broker.queue.MySQLMessageQueueCursor;
+import com.ctrip.hermes.broker.remoting.SendMessageCommandProcessor;
 import com.ctrip.hermes.broker.remoting.SubscribeCommandProcessor;
 import com.ctrip.hermes.broker.remoting.netty.NettyServer;
 import com.ctrip.hermes.broker.remoting.netty.NettyServerConfig;
@@ -40,20 +38,20 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(NettyServer.class) //
 		      .req(NettyServerConfig.class));
 
-		all.add(C(MessageQueueManager.class, DefaultMessageQueueManager.ID, DefaultMessageQueueManager.class) //
+		all.add(C(MessageQueueManager.class, DefaultMessageQueueManager.class) //
 		      .req(MetaService.class));
 
 		all.add(C(ValveRegistry.class, BrokerDeliverValveRegistry.ID, BrokerDeliverValveRegistry.class));
 
 		// processors
-		all.add(C(CommandProcessor.class, SendMessageRequestProcessor.ID, SendMessageRequestProcessor.class) //
-		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
+		all.add(C(CommandProcessor.class, CommandType.MESSAGE_SEND.toString(), SendMessageCommandProcessor.class) //
+		      .req(MessageQueueManager.class));
 		all.add(C(CommandProcessor.class, CommandType.SUBSCRIBE.toString(), SubscribeCommandProcessor.class) //
-		      .req(MessageQueueManager.class, DefaultMessageQueueManager.ID));
+		      .req(MessageQueueManager.class));
 
-		all.add(C(QueueWriter.class, Storage.MYSQL, MysqlQueueWriter.class) //
-		      .req(MessagePriorityDao.class));
-		all.add(C(QueueReader.class, Storage.MYSQL, MysqlQueueReader.class) //
+//		all.add(C(QueueWriter.class, Storage.MYSQL, MysqlQueueWriter.class) //
+//		      .req(MessagePriorityDao.class));
+		all.add(C(MessageQueueCursor.class, Storage.MYSQL, MySQLMessageQueueCursor.class) //
 		      .req(MessagePriorityDao.class));
 
 		all.add(C(TableProvider.class, "message-priority", HermesTableProvider.class) //

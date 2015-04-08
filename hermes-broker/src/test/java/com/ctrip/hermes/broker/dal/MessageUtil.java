@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
-import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.bo.Tpp;
 
 public class MessageUtil {
 
@@ -38,7 +38,7 @@ public class MessageUtil {
 		m.setProducerId(producerId);
 		m.setProducerIp(producerIp);
 		m.setRefKey(uuid());
-		m.setPartition(tpp.getPartitionNo());
+		m.setPartition(tpp.getPartition());
 		m.setTopic(tpp.getTopic());
 		return m;
 	}

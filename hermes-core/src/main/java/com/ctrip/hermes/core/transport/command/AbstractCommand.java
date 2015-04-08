@@ -11,10 +11,10 @@ import java.nio.ByteBuffer;
 public abstract class AbstractCommand implements Command {
 	protected Header m_header = new Header();
 
-	public AbstractCommand(CommandType commandType){
+	public AbstractCommand(CommandType commandType) {
 		m_header.setType(commandType);
 	}
-	
+
 	public Header getHeader() {
 		return m_header;
 	}
