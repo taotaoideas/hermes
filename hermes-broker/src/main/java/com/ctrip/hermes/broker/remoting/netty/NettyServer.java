@@ -46,7 +46,7 @@ public class NettyServer extends ContainerHolder {
 			ChannelFuture f = b.bind(m_serverConfig.getListenPort()).sync();
 
 			// Wait until the server socket is closed.
-			 f.channel().closeFuture().sync();
+//			 f.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
 			// TODO
 			e.printStackTrace();

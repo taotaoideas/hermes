@@ -2,9 +2,11 @@ package com.ctrip.hermes.consumer.engine.bootstrap;
 
 import java.util.List;
 
+import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.consumer.engine.ConsumerContext;
+import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.transport.command.SubscribeCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 import com.ctrip.hermes.meta.entity.Endpoint;
@@ -16,11 +18,14 @@ import com.ctrip.hermes.meta.entity.Partition;
  */
 @Named(type = ConsumerBootstrap.class, value = Endpoint.BROKER)
 public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
+	
+	@Inject
+	private MetaService m_metaService;
 
 	@Override
 	protected void doStart(ConsumerContext consumerContext) {
 
-		List<Partition> partitions = consumerContext.getTopic().getPartitions();
+		List<Partition> partitions = m_metaService.getPartitions(consumerContext.getTopic().getName(), consumerContext.getGroupId());
 
 		for (Partition partition : partitions) {
 

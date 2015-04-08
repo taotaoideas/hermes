@@ -2,6 +2,7 @@ package com.ctrip.hermes.core.transport.command.processor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -39,6 +40,11 @@ public class DefaultCommandProcessorRegistry extends ContainerHolder implements 
 				registerProcessor(type, p);
 			}
 		}
+	}
+
+	@Override
+	public Set<CommandType> listAllCommandTypes() {
+		return m_processors.keySet();
 	}
 
 }

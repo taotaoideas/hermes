@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
+import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.codec.JsonCodec;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
@@ -21,7 +22,6 @@ import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.core.transport.command.Header;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
-import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -78,12 +78,14 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
 
-		SendMessageCommand decoded = new SendMessageCommand();
+		SendMessageCommand decodedCmd = new SendMessageCommand();
 		Header header = new Header();
 		header.parse(buf);
-		decoded.parse(buf, header);
+		decodedCmd.parse(buf, header);
+		
+		Assert.assertEquals(1, decodedCmd.getMessageCount());
 
-		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
+		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decodedCmd.getMessageRawDataBatches();
 
 		Tpp tpp = new Tpp("topic", 100, true);
 		Assert.assertEquals(1, messageRawDataBatches.size());
@@ -139,12 +141,14 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
 
-		SendMessageCommand decoded = new SendMessageCommand();
+		SendMessageCommand decodedCmd = new SendMessageCommand();
 		Header header = new Header();
 		header.parse(buf);
-		decoded.parse(buf, header);
+		decodedCmd.parse(buf, header);
+		
+		Assert.assertEquals(2, decodedCmd.getMessageCount());
 
-		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
+		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decodedCmd.getMessageRawDataBatches();
 
 		Tpp tpp = new Tpp("topic", 100, true);
 		Assert.assertEquals(1, messageRawDataBatches.size());
@@ -231,12 +235,14 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
 
-		SendMessageCommand decoded = new SendMessageCommand();
+		SendMessageCommand decodedCmd = new SendMessageCommand();
 		Header header = new Header();
 		header.parse(buf);
-		decoded.parse(buf, header);
+		decodedCmd.parse(buf, header);
+		
+		Assert.assertEquals(4, decodedCmd.getMessageCount());
 
-		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decoded.getMessageRawDataBatches();
+		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decodedCmd.getMessageRawDataBatches();
 		Assert.assertEquals(2, messageRawDataBatches.size());
 
 		// tpp1 start

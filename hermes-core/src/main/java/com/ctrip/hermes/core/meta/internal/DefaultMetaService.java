@@ -121,4 +121,16 @@ public class DefaultMetaService implements Initializable, MetaService {
 		return m_meta.findTopic(topic);
 	}
 
+	@Override
+	public List<Partition> getPartitions(String topic, String groupId) {
+		// TODO 对一个group的不同机器返回不一样的Partition
+		return getPartitions(topic);
+	}
+
+	@Override
+	public int getGroupIdInt(String groupId) {
+		// TODO Auto-generated method stub
+		return 111;
+	}
+
 }

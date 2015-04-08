@@ -49,8 +49,8 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		for (Map.Entry<Long, List<ConsumerMessageBatch>> entry : m_msgs.entrySet()) {
 			Long correlationId = entry.getKey();
 			List<ConsumerMessageBatch> batches = entry.getValue();
+			
 			writeBatchMetas(codec, batches);
-
 			writeBatchDatas(buf, codec, batches);
 
 			correlationIds.add(correlationId);

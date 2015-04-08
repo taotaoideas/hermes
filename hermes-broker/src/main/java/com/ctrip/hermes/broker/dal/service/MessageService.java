@@ -13,7 +13,7 @@ import com.ctrip.hermes.broker.dal.hermes.MessagePriorityEntity;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessage;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessageEntity;
-import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
+import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.utils.CollectionUtil;
 
 @Named(type = MessageService.class)
@@ -31,7 +31,7 @@ public class MessageService {
 
 	public OffsetMessage findLastOffset(Tpp tpp, int groupId) throws DalException {
 		String topic = tpp.getTopic();
-		int partition = tpp.getPartitionNo();
+		int partition = tpp.getPartition();
 		int priority = tpp.getPriorityInt();
 
 		List<OffsetMessage> lastOffset = m_offsetDao.find(topic, partition, priority, groupId,
@@ -61,7 +61,7 @@ public class MessageService {
 	}
 
 	public List<MessagePriority> read(Tpp tpp, long startId, int batchSize) throws DalException {
-		return m_msgDao.findIdAfter(tpp.getTopic(), tpp.getPartitionNo(), tpp.getPriorityInt(), startId, batchSize,
+		return m_msgDao.findIdAfter(tpp.getTopic(), tpp.getPartition(), tpp.getPriorityInt(), startId, batchSize,
 		      MessagePriorityEntity.READSET_FULL);
 	}
 
