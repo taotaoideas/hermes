@@ -14,7 +14,7 @@
 		<component>
 			<role>com.ctrip.hermes.producer.sender.MessageSender</role>
 			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.producer.sender.KafkaMessageSender</implementation>
+			<implementation>com.ctrip.hermes.kafka.producer.KafkaMessageSender</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
@@ -24,7 +24,7 @@
 		<component>
 			<role>com.ctrip.hermes.consumer.engine.bootstrap.ConsumerBootstrap</role>
 			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.engine.KafkaConsumerBootstrap</implementation>
+			<implementation>com.ctrip.hermes.kafka.engine.KafkaConsumerBootstrap</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
@@ -43,7 +43,7 @@
 		<component>
 			<role>com.ctrip.hermes.core.codec.Codec</role>
 			<role-hint>avro</role-hint>
-			<implementation>com.ctrip.hermes.core.codec.AvroCodec</implementation>
+			<implementation>com.ctrip.hermes.kafka.codec.AvroCodec</implementation>
 		</component>
 	</components>
 </plexus>
