@@ -7,7 +7,7 @@ package com.ctrip.hermes.kafka.avro;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class AvroVisitEvent extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AvroVisitEvent\",\"namespace\":\"com.ctrip.hermes.avro\",\"fields\":[{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"tz\",\"type\":\"long\",\"java-class\":\"java.util.Date\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AvroVisitEvent\",\"namespace\":\"com.ctrip.hermes.kafka.avro\",\"fields\":[{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"tz\",\"type\":\"long\",\"java-class\":\"java.util.Date\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public java.lang.CharSequence ip;
   @Deprecated public java.lang.CharSequence url;
