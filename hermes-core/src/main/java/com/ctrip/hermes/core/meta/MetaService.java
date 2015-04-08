@@ -49,4 +49,6 @@ public interface MetaService {
     * @return
     */
    Codec getCodec(String topic);
+
+	Topic findTopic(String topic);
 }

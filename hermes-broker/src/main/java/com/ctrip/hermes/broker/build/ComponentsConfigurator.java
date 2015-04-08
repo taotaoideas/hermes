@@ -10,6 +10,8 @@ import org.unidal.lookup.configuration.Component;
 import com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry;
 import com.ctrip.hermes.broker.dal.HermesTableProvider;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao;
+import com.ctrip.hermes.broker.dal.service.MessageService;
+import com.ctrip.hermes.broker.dal.service.ResendService;
 import com.ctrip.hermes.broker.queue.DefaultMessageQueueManager;
 import com.ctrip.hermes.broker.queue.MessageQueueManager;
 import com.ctrip.hermes.broker.queue.MysqlQueueReader;
@@ -63,6 +65,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(TableProvider.class, "offset-message", HermesTableProvider.class) //
 		      .req(MetaService.class) //
 		      .config(E("m_table").value("offset-message")));
+		
+		all.add(A(MessageService.class));
+		all.add(A(ResendService.class));
 
 		all.add(defineJdbcDataSourceConfigurationManagerComponent("/data/appdatas/hermes/datasources.xml"));
 

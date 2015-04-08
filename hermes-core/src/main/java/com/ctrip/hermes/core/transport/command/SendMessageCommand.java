@@ -168,10 +168,9 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			Tpp tpp = entry.getKey();
 			MessageCodec msgCodec = MessageCodecFactory.getCodec(tpp.getTopic());
 
-
 			// write msgSeqs
 			codec.writeInt(entry.getValue().size());
-			
+
 			for (ProducerMessage<?> msg : entry.getValue()) {
 				codec.writeInt(msg.getMsgSeqNo());
 			}
@@ -210,6 +209,11 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		public boolean isPriority() {
 			return m_triple.getLast();
+		}
+
+		public int getPriorityInt() {
+			// TODO move to other place
+			return isPriority() ? 0 : 1;
 		}
 
 		@Override

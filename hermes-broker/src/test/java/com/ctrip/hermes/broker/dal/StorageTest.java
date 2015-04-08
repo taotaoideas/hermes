@@ -1,14 +1,11 @@
 package com.ctrip.hermes.broker.dal;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
-import org.apache.xbean.propertyeditor.CollectionUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.unidal.dal.jdbc.DalException;
@@ -20,9 +17,10 @@ import com.ctrip.hermes.broker.dal.hermes.MessagePriorityEntity;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessage;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessageEntity;
-import com.ctrip.hermes.broker.dal.hermes.OffsetResend;
 import com.ctrip.hermes.broker.dal.hermes.ResendGroupId;
 import com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao;
+import com.ctrip.hermes.broker.dal.hermes.ResendGroupIdEntity;
+import com.ctrip.hermes.core.transport.command.SendMessageCommand.Tpp;
 
 public class StorageTest extends ComponentTestCase {
 
@@ -32,25 +30,26 @@ public class StorageTest extends ComponentTestCase {
 
 	private ResendGroupIdDao resendDao;
 
-	private OffsetResend resendOffsetDao;
+//	private OffsetResendDao resendOffsetDao;
 
 	private String topic = "order_new";
 
-	private String groupName = "group1";
+	int partition = 0;
 
-	private int groupId = 1;
+	private int groupId = 100;
 
 	@Before
 	public void before() {
 		msgDao = lookup(MessagePriorityDao.class);
 		msgOffsetDao = lookup(OffsetMessageDao.class);
 		resendDao = lookup(ResendGroupIdDao.class);
-		resendOffsetDao = lookup(OffsetResend.class);
+//		resendOffsetDao = lookup(OffsetResendDao.class);
 	}
 
 	@Test
 	public void full() throws Exception {
-		List<MessagePriority> wMsgs = makeMessages(5);
+		Tpp tpp = new Tpp(topic, partition, true);
+		List<MessagePriority> wMsgs = MessageUtil.makeMessages(tpp, 5);
 		for (MessagePriority wMsg : wMsgs) {
 			appendMessage(wMsg);
 		}
@@ -60,38 +59,55 @@ public class StorageTest extends ComponentTestCase {
 
 		appendResend(rMsgs.get(1));
 
-//		updateOffset(CollectionUtil.last(rMsgs));
+		updateMessageOffset(rMsgs.get(rMsgs.size() - 1));
 
-		readResendMessage();
+		List<ResendGroupId> resends = readResendMessage();
+
+		assertEquals(1, resends.size());
+		assertMessageResendEquals(rMsgs.get(1), resends.get(0));
+
+		updateResendOffset(resends.get(0));
+
 	}
 
-	private void readResendMessage() {
+	private void updateResendOffset(ResendGroupId resendGroupId) {
 	}
 
-	private void updateOffset(MessagePriority msg) throws DalException {
+	private void assertMessageResendEquals(MessagePriority msg, ResendGroupId resend) {
+		assertArrayEquals(msg.getPayload(), resend.getPayload());
+		// TODO assert other fields
+	}
+
+	private List<ResendGroupId> readResendMessage() throws DalException {
+		return resendDao.find(topic, partition, groupId, new Date(), 10, ResendGroupIdEntity.READSET_FULL);
+	}
+
+	private void updateMessageOffset(MessagePriority msg) throws DalException {
 		String topic = msg.getTopic();
 		int partition = msg.getPartition();
 		int priority = msg.getPriority();
 
-		List<OffsetMessage> offset = msgOffsetDao.find(topic, partition, priority, groupId,
+		List<OffsetMessage> offsets = msgOffsetDao.find(topic, partition, priority, groupId,
 		      OffsetMessageEntity.READSET_FULL);
 
-		if (offset.isEmpty()) {
-			List<MessagePriority> topMsg = msgDao.top(topic, partition, priority, MessagePriorityEntity.READSET_FULL);
-			long startOffset = 0;
-			if (!topMsg.isEmpty()) {
-				startOffset = topMsg.get(0).getId();
-			}
-
+		if (offsets.isEmpty()) {
 			OffsetMessage initOffset = new OffsetMessage();
 			initOffset.setCreationDate(new Date());
 			initOffset.setGroupId(groupId);
-			initOffset.setOffset(startOffset);
+			initOffset.setOffset(msg.getId());
 			initOffset.setPartition(partition);
 			initOffset.setPriority(priority);
 			initOffset.setTopic(topic);
 
 			msgOffsetDao.insert(initOffset);
+		} else {
+			OffsetMessage offset = offsets.get(0);
+			offset.setTopic(topic);
+			offset.setPartition(partition);
+
+			offset.setOffset(msg.getId());
+
+			msgOffsetDao.updateByPK(offset, OffsetMessageEntity.UPDATESET_OFFSET);
 		}
 	}
 
@@ -139,48 +155,10 @@ public class StorageTest extends ComponentTestCase {
 
 	@Test
 	public void testInsert() throws Exception {
-		MessagePriority m = makeMessage();
+		Tpp tpp = new Tpp(topic, partition, true);
+		MessagePriority m = MessageUtil.makeMessage(tpp);
 
 		msgDao.insert(m);
-	}
-
-	private List<MessagePriority> makeMessages(int count) {
-		List<MessagePriority> result = new ArrayList<>();
-
-		for (int i = 0; i < count; i++) {
-			result.add(makeMessage());
-		}
-
-		return result;
-	}
-
-	private MessagePriority makeMessage() {
-		MessagePriority m = new MessagePriority();
-		Random rnd = new Random();
-
-		String attributes = uuid();
-		Date creationDate = new Date();
-		byte[] payload = uuid().getBytes();
-		int priority = 0;
-		int producerId = rnd.nextInt(1000);
-		String producerIp = uuid().substring(0, 10);
-		int shard = 0;
-		String topic = "order_new";
-
-		m.setAttributes(attributes);
-		m.setCreationDate(creationDate);
-		m.setPayload(payload);
-		m.setPriority(priority);
-		m.setProducerId(producerId);
-		m.setProducerIp(producerIp);
-		m.setRefKey(uuid());
-		m.setPartition(shard);
-		m.setTopic(topic);
-		return m;
-	}
-
-	private String uuid() {
-		return UUID.randomUUID().toString();
 	}
 
 }

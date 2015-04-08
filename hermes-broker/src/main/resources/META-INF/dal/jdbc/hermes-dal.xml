@@ -8,6 +8,11 @@
 		<var name="batch-size" value-type="int" />
 
 		<query-defs>
+			<query name="insert" type="INSERT" batch='true'>
+				<statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
+        		VALUES(<VALUES/>)]]>
+				</statement>
+			</query>
 			<query name="findIdAfter" type="SELECT" multiple="true">
 				<param name="topic" />
 				<param name="partition" />
@@ -16,7 +21,7 @@
 				<param name="batch-size" />
 				<statement><![CDATA[SELECT <FIELDS/>
         		FROM <TABLE/>
-        		WHERE <FIELD name='id'/> >= ${start-id}
+        		WHERE <FIELD name='id'/> > ${start-id}
         		LIMIT ${batch-size}]]>
 				</statement>
 			</query>
@@ -34,8 +39,13 @@
 	</entity>
 
 	<entity name="offset-message">
-		<member name="partition-no" alias="partition" />
+		<var name="partition" value-type="int" />
 		<var name="topic" value-type="String" />
+		<updatesets>
+			<updateset name="OFFSET">
+				<member name='offset' />
+			</updateset>
+		</updatesets>
 		<query-defs>
 			<query name="find" type="SELECT" multiple="true">
 				<param name="topic" />
@@ -45,8 +55,7 @@
 
 				<statement><![CDATA[SELECT <FIELDS/>
         		FROM <TABLE/>
-        		WHERE <FIELD name='partition'/> = ${partition}
-        		AND <FIELD name='priority'/> = ${priority}
+        		WHERE <FIELD name='priority'/> = ${priority}
         		AND <FIELD name='group-id'/> = ${group-id}]]>
 				</statement>
 			</query>
@@ -57,12 +66,40 @@
 		<var name="topic" value-type="String" />
 		<var name="partition" value-type="int" />
 		<var name="group-id" value-type="int" />
+		<var name="batch-size" value-type="int" />
 
+		<query-defs>
+			<query name="insert" type="INSERT" batch='true'>
+				<statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
+        		VALUES(<VALUES/>)]]>
+				</statement>
+			</query>
+			<query name="find" type="SELECT" multiple="true">
+				<param name="topic" />
+				<param name="partition" />
+				<param name="group-id" />
+				<param name="schedule-date" />
+				<param name="batch-size" />
+				<statement><![CDATA[SELECT <FIELDS/>
+        		FROM <TABLE/>
+        		WHERE <FIELD name='schedule-date'/> <= ${schedule-date}
+        		ORDER BY <FIELD name='schedule-date'/> ASC
+        		LIMIT ${batch-size}]]>
+				</statement>
+			</query>
+		</query-defs>
 	</entity>
 
 	<entity name="offset-resend">
 		<var name="topic" value-type="String" />
 		<var name="partition" value-type="int" />
+
+		<updatesets>
+			<updateset name="OFFSET">
+				<member name='last-schedule-date' />
+				<member name='last-id' />
+			</updateset>
+		</updatesets>
 
 		<query-defs>
 			<query name="top" type="SELECT" multiple="true">

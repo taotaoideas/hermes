@@ -58,7 +58,7 @@ public class SubscribeCommandProcessor implements CommandProcessor {
 					final List<MessagePriority> dataObjs = reader.read(1, startMsgId, 10);
 
 					if (dataObjs != null && !dataObjs.isEmpty()) {
-						startMsgId = dataObjs.get(dataObjs.size() - 1).getId() + 1;
+						startMsgId = dataObjs.get(dataObjs.size() - 1).getId();
 
 						final ConsumerMessageBatch batch = new ConsumerMessageBatch();
 						for (MessagePriority dataObj : dataObjs) {

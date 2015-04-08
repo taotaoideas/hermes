@@ -110,6 +110,30 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.broker.dal.service.MessageService</role>
+			<implementation>com.ctrip.hermes.broker.dal.service.MessageService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.service.ResendService</role>
+			<implementation>com.ctrip.hermes.broker.dal.service.ResendService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.OffsetResendDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</role>
 			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</implementation>
 			<configuration>

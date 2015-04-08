@@ -9,7 +9,9 @@
   </entity>
   <entity name="topic">
     <attribute name="name" value-type="String" />
+    <attribute name="id" value-type="int" />
     <attribute name="partition-count" value-type="int" />
+    <attribute name="storage-type" value-type="String" />
     <entity-ref name="partition" type="list" names="partitions" />
     <entity-ref name="property" />
     <entity-ref name="codec" />

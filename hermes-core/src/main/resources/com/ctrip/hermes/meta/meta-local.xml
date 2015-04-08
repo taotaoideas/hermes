@@ -5,7 +5,7 @@
 
 	<endpoint id='kafka-endpoint' type="kafka" />
 
-	<topic name='order_new' partition-count='1'>
+	<topic name='order_new' id='100' partition-count='1' storage-type='mysql'>
 		<codec type="json" />
 		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
 	</topic>

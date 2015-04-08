@@ -64,6 +64,15 @@ public class HermesTableProvider implements TableProvider, Initializable {
 		}
 	}
 
+	private int findTopicId(String topic) {
+		return m_metaService.findTopic(topic).getId();
+	}
+
+	private String toDbName(String topic, int partition) {
+		String fmt = "%s_%s";
+		return String.format(fmt, findTopicId(topic), partition);
+	}
+
 	@Override
 	public void initialize() throws InitializationException {
 		m_providers.put(MessagePriority.class, new InnerTableProvider<MessagePriority>() {
@@ -75,9 +84,11 @@ public class HermesTableProvider implements TableProvider, Initializable {
 
 			@Override
 			public String getPhysicalTableName(MessagePriority dataObject) {
-				String fmt = "m_%s_%s_%s";
-				return String.format(fmt, dataObject.getTopic(), dataObject.getPartition(), dataObject.getPriority());
+				String fmt = "%s.message_%s";
+				String db = toDbName(dataObject.getTopic(), dataObject.getPartition());
+				return String.format(fmt, db, dataObject.getPriority());
 			}
+
 		});
 
 		m_providers.put(ResendGroupId.class, new InnerTableProvider<ResendGroupId>() {
@@ -89,8 +100,9 @@ public class HermesTableProvider implements TableProvider, Initializable {
 
 			@Override
 			public String getPhysicalTableName(ResendGroupId dataObject) {
-				String fmt = "r_%s_%s";
-				return String.format(fmt, dataObject.getTopic(), dataObject.getGroupId());
+				String fmt = "%s.resend_%s";
+				String db = toDbName(dataObject.getTopic(), dataObject.getPartition());
+				return String.format(fmt, db, dataObject.getGroupId());
 			}
 		});
 
@@ -103,8 +115,9 @@ public class HermesTableProvider implements TableProvider, Initializable {
 
 			@Override
 			public String getPhysicalTableName(OffsetMessage dataObject) {
-				String fmt = "o_%s";
-				return String.format(fmt, dataObject.getTopic());
+				String fmt = "%s.offset_message";
+				String db = toDbName(dataObject.getTopic(), dataObject.getPartition());
+				return String.format(fmt, db);
 			}
 		});
 
@@ -117,8 +130,9 @@ public class HermesTableProvider implements TableProvider, Initializable {
 
 			@Override
 			public String getPhysicalTableName(OffsetResend dataObject) {
-				String fmt = "o_%s";
-				return String.format(fmt, dataObject.getTopic());
+				String fmt = "%s.offset_resend";
+				String db = toDbName(dataObject.getTopic(), dataObject.getPartition());
+				return String.format(fmt, db);
 			}
 		});
 	}
