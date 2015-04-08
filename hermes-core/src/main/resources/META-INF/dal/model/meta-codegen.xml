@@ -10,10 +10,15 @@
   <entity name="topic">
     <attribute name="name" value-type="String" />
     <attribute name="id" value-type="int" />
+    <attribute name="description" value-type="String" />
+    <attribute name="status" value-type="String" />
+    <attribute name="createTime" value-type="Date" format="yyyy-HH-dd hh:mm:ss"/>
+    <attribute name="lastModifiedTime" value-type="Date" format="yyyy-HH-dd hh:mm:ss"/>
+    <attribute name="schemaName" value-type="String" />
     <attribute name="partition-count" value-type="int" />
     <attribute name="storage-type" value-type="String" />
     <entity-ref name="partition" type="list" names="partitions" />
-    <entity-ref name="property" />
+    <entity-ref name="property" type="list" names="properties" />
     <entity-ref name="codec" />
   </entity>
   <entity name="partition">
@@ -28,6 +33,7 @@
   </entity>
   <entity name="codec">
     <attribute name="type" value-type="String" />
+    <entity-ref name="property" type="list" names="properties" />
   </entity>
   <entity name="endpoint">
     <attribute name="id" value-type="String" />

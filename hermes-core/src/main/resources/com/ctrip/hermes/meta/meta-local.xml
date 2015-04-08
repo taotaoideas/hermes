@@ -25,12 +25,14 @@
 		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
 	</topic>
 
-	<topic name='kafka.SimpleTopic' partition-count='1'>
+	<topic name='kafka.SimpleTopic' partition-count='1' storage-type='kafka'>
 		<codec type="json" />
 		<partition id='0' read-datasource='kafka-consumer' write-datasource='kafka-produer' endpoint='kafka-endpoint'/>
 	</topic>
 	
-	<topic name='kafka.AvroTopic' partition-count='1'>
+	<topic name='kafka.AvroTopic' partition-count='1' storage-type='kafka' id='101' description='topic for Avro Test' status='valid' createTime='2015-01-01 00:00:00' lastModifiedTime='2015-04-01 00:00:00' schemaName='ClickEvent'>
+		<property name='replication-factor' value='3' />
+		<property name='partitions' value='5' />
 		<codec type="avro">
 			<property name="schema.registry.url" value="http://10.3.8.63:8081" /> 
 		</codec>

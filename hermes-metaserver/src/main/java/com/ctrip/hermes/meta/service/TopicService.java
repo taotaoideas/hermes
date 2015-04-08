@@ -1,5 +1,7 @@
 package com.ctrip.hermes.meta.service;
 
+import java.util.List;
+
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -15,4 +17,8 @@ public class TopicService {
 	public Topic getTopic(String topic) {
 		return m_meta.findTopic(topic);
 	}
+
+	public List<Topic> findTopics(String pattern) {
+		return m_meta.findTopicsByPattern(pattern);
+   }
 }
