@@ -41,21 +41,20 @@ public interface MetaService {
 	 * @param topicPattern
 	 * @return
 	 */
-   List<Topic> findTopicsByPattern(String topicPattern);
+	List<Topic> findTopicsByPattern(String topicPattern);
 
-   /**
-    * 
-    * @param topic
-    * @return
-    */
-   Topic findTopic(String topic);
-   
-   /**
-    * 
-    * @param topic
-    * @return
-    */
-   Codec getCodec(String topic);
-
+	/**
+	 * 
+	 * @param topic
+	 * @return
+	 */
 	Topic findTopic(String topic);
+
+	/**
+	 * 
+	 * @param topic
+	 * @return
+	 */
+	Codec getCodec(String topic);
+
 }
