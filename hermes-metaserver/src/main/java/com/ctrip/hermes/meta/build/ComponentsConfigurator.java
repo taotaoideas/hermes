@@ -6,7 +6,9 @@ import java.util.List;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
-import com.ctrip.hermes.meta.rest.MetaRestServer;
+import com.ctrip.hermes.meta.server.MetaRestServer;
+import com.ctrip.hermes.meta.service.SchemaService;
+import com.ctrip.hermes.meta.service.TopicService;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
@@ -15,6 +17,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(A(MetaRestServer.class));
+		all.add(A(SchemaService.class));
+		all.add(A(TopicService.class));
 
 		return all;
 	}

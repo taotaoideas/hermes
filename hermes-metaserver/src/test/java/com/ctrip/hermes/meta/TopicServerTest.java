@@ -1,7 +1,5 @@
 package com.ctrip.hermes.meta;
 
-import java.util.List;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation.Builder;
@@ -14,7 +12,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.meta.entity.Topic;
-import com.ctrip.hermes.meta.rest.MetaRestServer;
+import com.ctrip.hermes.meta.server.MetaRestServer;
 
 public class TopicServerTest extends ComponentTestCase {
 
@@ -37,8 +35,8 @@ public class TopicServerTest extends ComponentTestCase {
 		WebTarget webTarget = client.target("http://0.0.0.0:8080/");
 		String topic = "kafka.AvroTopic";
 		Builder request = webTarget.path("topic/" + topic).request();
-		List<Topic> actual = request.get(List.class);
-		Assert.assertTrue(actual.size()>0);
+		Topic actual = request.get(Topic.class);
+		Assert.assertNotNull(actual);
 		System.out.println(actual);
 	}
 }
