@@ -23,6 +23,23 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.core.meta.MetaManager</role>
+			<role-hint>meta-server</role-hint>
+			<implementation>com.ctrip.hermes.meta.service.ServerMetaManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.meta.dal.meta.MetaDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</role>
+			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</implementation>
+			<configuration>
+				<datasourceFile>/data/appdatas/hermes/datasources.xml</datasourceFile>
+			</configuration>
+		</component>
+		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
 			<role-hint>meta</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>

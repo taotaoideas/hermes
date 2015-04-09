@@ -38,5 +38,7 @@ public class SchemaServerTest extends ComponentTestCase {
 		Assert.assertNotNull(actual);
 		System.out.println(actual);
 	}
+	
+	
 
 }

@@ -8,4 +8,5 @@ public interface MetaManager {
 
 	public Meta getMeta();
 
+	public boolean updateMeta(Meta meta);
 }

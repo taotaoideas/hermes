@@ -48,7 +48,9 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 	@Inject
 	private ClientEnvironment m_environment;
-	
+
+	private Map<ConsumerContext, ConsumerConnector> consumers = new HashMap<>();
+
 	@Override
 	protected void doStart(ConsumerContext consumerContext) {
 		Topic topic = consumerContext.getTopic();
@@ -69,6 +71,15 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 		m_consumerNotifier.register(subscribeCommand.getHeader().getCorrelationId(), consumerContext);
 		m_executor.submit(new KafkaConsumerThread(stream, consumerContext, subscribeCommand.getHeader()
 		      .getCorrelationId()));
+		consumers.put(consumerContext, consumerConnector);
+	}
+
+	@Override
+	protected void doStop(ConsumerContext consumerContext) {
+		ConsumerConnector consumerConnector = consumers.remove(consumerContext);
+		consumerConnector.shutdown();
+
+		super.doStop(consumerContext);
 	}
 
 	class KafkaConsumerThread implements Runnable {
@@ -108,14 +119,14 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 	private Properties getConsumerProperties(String topic, String group) {
 		Properties configs = new Properties();
-		
+
 		try {
 			Properties envProperties = m_environment.getProducerConfig(topic);
 			configs.putAll(envProperties);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		List<Partition> partitions = m_metaService.getPartitions(topic);
 		if (partitions == null || partitions.size() < 1) {
 			return configs;
@@ -129,8 +140,9 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 		for (Datasource datasource : targetStorage.getDatasources()) {
 			if (consumerDatasource.equals(datasource.getId())) {
-				for (Property prop : datasource.getProperties()) {
-					configs.put(prop.getName(), prop.getValue());
+				Map<String, Property> properties = datasource.getProperties();
+				for (Map.Entry<String, Property> prop : properties.entrySet()) {
+					configs.put(prop.getValue().getName(), prop.getValue().getValue());
 				}
 				break;
 			}

@@ -21,7 +21,20 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.meta.MetaManager</role>
-			<implementation>com.ctrip.hermes.core.meta.internal.DefaultMetaManager</implementation>
+			<role-hint>meta-client</role-hint>
+			<implementation>com.ctrip.hermes.core.meta.internal.ClientMetaManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.internal.MetaLoader</role>
+					<role-hint>local-meta-loader</role-hint>
+					<field-name>m_localMeta</field-name>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.internal.MetaLoader</role>
+					<role-hint>remote-meta-loader</role-hint>
+					<field-name>m_remoteMeta</field-name>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.meta.MetaService</role>
@@ -29,6 +42,7 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaManager</role>
+					<role-hint>meta-client</role-hint>
 				</requirement>
 			</requirements>
 		</component>

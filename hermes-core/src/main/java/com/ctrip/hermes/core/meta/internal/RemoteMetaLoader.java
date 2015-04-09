@@ -1,10 +1,13 @@
 package com.ctrip.hermes.core.meta.internal;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.unidal.lookup.annotation.Named;
@@ -22,20 +25,19 @@ public class RemoteMetaLoader implements MetaLoader {
 		Meta meta = null;
 		try {
 			// TODO meta server URL
-			InputStream is = new URL("http://0.0.0.0:8080/meta").openStream();
-			String content = toString(is);
-			meta = JSON.parseObject(content, Meta.class);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			URL metaURL = new URL("http://0.0.0.0:8080/meta");
+			InputStream is = metaURL.openStream();
+			String jsonString = toString(is);
+			meta = JSON.parseObject(jsonString, Meta.class);
+		} catch (Exception e) {
+			throw new RuntimeException("Load remote meta failed", e);
 		}
 		return meta;
 	}
 
 	private static String toString(InputStream is) throws IOException {
 		StringWriter writer = new StringWriter();
-		InputStreamReader reader = new InputStreamReader(is);
+		InputStreamReader reader = new InputStreamReader(is, "UTF-8");
 		int bufferSize = 2 * 8192;
 		char buffer[] = new char[bufferSize];
 		int len = bufferSize;
@@ -47,5 +49,22 @@ public class RemoteMetaLoader implements MetaLoader {
 			writer.write(buffer, 0, len);
 		}
 		return writer.toString();
+	}
+
+	@Override
+	public boolean save(Meta meta) {
+		try {
+			URL metaURL = new URL("http://0.0.0.0:8080/meta");
+			HttpURLConnection conn = (HttpURLConnection) metaURL.openConnection();
+			conn.setRequestMethod("POST");
+			OutputStream os = conn.getOutputStream();
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+			String jsonString = JSON.toJSONString(meta);
+			writer.write(jsonString);
+			writer.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Save remote meta failed", e);
+		}
+		return true;
 	}
 }
