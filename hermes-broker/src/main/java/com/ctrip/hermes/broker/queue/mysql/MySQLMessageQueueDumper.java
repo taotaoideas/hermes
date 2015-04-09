@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker.queue;
+package com.ctrip.hermes.broker.queue.mysql;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,7 +9,7 @@ import org.unidal.dal.jdbc.DalException;
 
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.broker.dal.service.MessageService;
-import com.ctrip.hermes.core.bo.Tpg;
+import com.ctrip.hermes.broker.queue.AbstractMessageQueueDumper;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
@@ -19,16 +19,15 @@ import com.google.common.base.Charsets;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class MySQLMessageQueue extends AbstractMessageQueue {
+public class MySQLMessageQueueDumper extends AbstractMessageQueueDumper {
 
 	private MessageService m_messageService;
 
-	public MySQLMessageQueue(String topic, int partition) {
+	public MySQLMessageQueueDumper(String topic, int partition) {
 		super(topic, partition);
 		m_messageService = PlexusComponentLocator.lookup(MessageService.class);
 	}
 
-	@Override
 	protected void doAppendMessageSync(MessageRawDataBatch batch, boolean isPriority, Map<Integer, Boolean> result) {
 
 		List<PartialDecodedMessage> pdmsgs = batch.getMessages();
@@ -59,11 +58,7 @@ public class MySQLMessageQueue extends AbstractMessageQueue {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
 
-	@Override
-	protected MessageQueueCursor doCreateCursor(String groupId) {
-		return new MySQLMessageQueueCursor(new Tpg(m_topic, m_partition, groupId));
 	}
 
 }

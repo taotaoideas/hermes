@@ -4,7 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.remoting.netty.NettyServer;
+import com.ctrip.hermes.broker.transport.NettyServer;
 
 public class TestBroker extends ComponentTestCase {
 

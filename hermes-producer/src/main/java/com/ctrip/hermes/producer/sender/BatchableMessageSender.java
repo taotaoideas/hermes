@@ -33,12 +33,12 @@ public class BatchableMessageSender extends AbstractMessageSender implements Mes
 
 		Endpoint endpoint = m_endpointManager.getEndpoint(msg.getTopic(), msg.getPartitionNo());
 
-		createWorkerIfNeeded(endpoint);
+		createWorkerIfNecessary(endpoint);
 
 		return m_workers.get(endpoint).submit(msg);
 	}
 
-	private void createWorkerIfNeeded(Endpoint endpoint) {
+	private void createWorkerIfNecessary(Endpoint endpoint) {
 		if (!m_workers.containsKey(endpoint)) {
 			synchronized (m_workers) {
 				if (!m_workers.containsKey(endpoint)) {

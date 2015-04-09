@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker.remoting;
+package com.ctrip.hermes.broker.transport.command.processor;
 
 import java.util.Arrays;
 import java.util.List;

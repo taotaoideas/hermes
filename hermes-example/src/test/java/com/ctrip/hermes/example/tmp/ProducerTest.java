@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.alibaba.fastjson.JSON;
-import com.ctrip.hermes.broker.remoting.netty.NettyServer;
+import com.ctrip.hermes.broker.transport.NettyServer;
 import com.ctrip.hermes.consumer.BaseConsumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
