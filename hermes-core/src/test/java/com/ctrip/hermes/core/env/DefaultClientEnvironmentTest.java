@@ -16,10 +16,12 @@ public class DefaultClientEnvironmentTest extends ComponentTestCase {
 		Properties config = env.getProducerConfig("test_topic");
 		assertNotNull(config);
 		assertEquals(config.getProperty("hermes"), "mq");
+		assertEquals(config.getProperty("inherited"), "got");
 
 		config = env.getProducerConfig("not_exist");
 		assertNotNull(config);
-		assertEquals(0, config.size());
+		assertEquals(config.getProperty("hermes"), "default");
+		assertEquals(config.getProperty("inherited"), "got");
 	}
 
 }
