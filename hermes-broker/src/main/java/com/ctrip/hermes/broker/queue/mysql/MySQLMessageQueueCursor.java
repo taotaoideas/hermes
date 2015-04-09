@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker.queue;
+package com.ctrip.hermes.broker.queue.mysql;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -9,6 +9,7 @@ import org.unidal.dal.jdbc.DalException;
 
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.broker.dal.service.MessageService;
+import com.ctrip.hermes.broker.queue.AbstractMessageQueueCursor;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.message.ConsumerMessageBatch;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;

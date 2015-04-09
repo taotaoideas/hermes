@@ -1,6 +1,5 @@
 package com.ctrip.hermes.core.bo;
 
-import org.unidal.tuple.Triple;
 
 /**
  * Topic-Partition-Priority Wrapper
@@ -9,24 +8,29 @@ import org.unidal.tuple.Triple;
  *
  */
 public class Tpp {
-	private Triple<String, Integer, Boolean> m_triple = new Triple<>();
+	private String m_topic;
 
-	public Tpp(String topic, int partition, boolean isPriority) {
-		m_triple.setFirst(topic);
-		m_triple.setMiddle(partition);
-		m_triple.setLast(isPriority);
+	private int m_partition;
+
+	private boolean m_priority;
+
+	public Tpp(String topic, int partition, boolean priority) {
+		super();
+		m_topic = topic;
+		m_partition = partition;
+		m_priority = priority;
 	}
 
 	public String getTopic() {
-		return m_triple.getFirst();
+		return m_topic;
 	}
 
 	public int getPartition() {
-		return m_triple.getMiddle();
+		return m_partition;
 	}
 
 	public boolean isPriority() {
-		return m_triple.getLast();
+		return m_priority;
 	}
 
 	public int getPriorityInt() {
@@ -38,7 +42,9 @@ public class Tpp {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((m_triple == null) ? 0 : m_triple.hashCode());
+		result = prime * result + m_partition;
+		result = prime * result + (m_priority ? 1231 : 1237);
+		result = prime * result + ((m_topic == null) ? 0 : m_topic.hashCode());
 		return result;
 	}
 
@@ -51,10 +57,14 @@ public class Tpp {
 		if (getClass() != obj.getClass())
 			return false;
 		Tpp other = (Tpp) obj;
-		if (m_triple == null) {
-			if (other.m_triple != null)
+		if (m_partition != other.m_partition)
+			return false;
+		if (m_priority != other.m_priority)
+			return false;
+		if (m_topic == null) {
+			if (other.m_topic != null)
 				return false;
-		} else if (!m_triple.equals(other.m_triple))
+		} else if (!m_topic.equals(other.m_topic))
 			return false;
 		return true;
 	}

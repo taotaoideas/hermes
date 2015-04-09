@@ -1,7 +1,6 @@
-package com.ctrip.hermes.broker.remoting.netty;
+package com.ctrip.hermes.broker.transport;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -43,7 +42,7 @@ public class NettyServer extends ContainerHolder {
 			      .childOption(ChannelOption.SO_KEEPALIVE, true);
 
 			// Bind and start to accept incoming connections.
-			ChannelFuture f = b.bind(m_serverConfig.getListenPort()).sync();
+			b.bind(m_serverConfig.getListenPort()).sync();
 
 			// Wait until the server socket is closed.
 //			 f.channel().closeFuture().sync();

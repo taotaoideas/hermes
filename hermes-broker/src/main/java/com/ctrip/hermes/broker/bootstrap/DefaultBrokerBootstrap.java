@@ -2,7 +2,7 @@ package com.ctrip.hermes.broker.bootstrap;
 
 import org.unidal.lookup.ContainerHolder;
 
-import com.ctrip.hermes.broker.remoting.netty.NettyServer;
+import com.ctrip.hermes.broker.transport.NettyServer;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)

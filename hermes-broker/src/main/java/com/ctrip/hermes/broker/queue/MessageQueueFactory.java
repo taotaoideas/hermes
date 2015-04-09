@@ -1,5 +1,6 @@
 package com.ctrip.hermes.broker.queue;
 
+import com.ctrip.hermes.broker.queue.mysql.MySQLMessageQueue;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.entity.Storage;
