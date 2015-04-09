@@ -2,7 +2,7 @@
 	<components>
 		<component>
 			<role>org.unidal.initialization.Module</role>
-			<role-hint>hermes-producer</role-hint>
+			<role-hint>hermes-core</role-hint>
 			<implementation>com.ctrip.hermes.HermesCoreModule</implementation>
 		</component>
 		<component>
@@ -76,6 +76,10 @@
 			<role>com.ctrip.hermes.core.codec.Codec</role>
 			<role-hint>cmessaging</role-hint>
 			<implementation>com.ctrip.hermes.core.codec.CMessagingCodec</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.core.env.ClientEnvironment</role>
+			<implementation>com.ctrip.hermes.core.env.DefaultClientEnvironment</implementation>
 		</component>
 	</components>
 </plexus>

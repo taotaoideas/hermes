@@ -16,6 +16,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
+@SuppressWarnings({ "rawtypes" })
 public class HermesPrimitiveCodecTest extends ComponentTestCase {
 
 	final static int dataSize = 10000;

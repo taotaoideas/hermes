@@ -9,6 +9,7 @@ import org.unidal.lookup.configuration.Component;
 import com.ctrip.hermes.HermesCoreModule;
 import com.ctrip.hermes.core.codec.CMessagingCodec;
 import com.ctrip.hermes.core.codec.JsonCodec;
+import com.ctrip.hermes.core.env.DefaultClientEnvironment;
 import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
 import com.ctrip.hermes.core.meta.internal.DefaultMetaManager;
 import com.ctrip.hermes.core.meta.internal.DefaultMetaService;
@@ -51,6 +52,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(DefaultMessageCodec.class));
 		all.add(A(JsonCodec.class));
 		all.add(A(CMessagingCodec.class));
+		
+		// env
+		all.add(A(DefaultClientEnvironment.class));
+		
 		return all;
 	}
 
