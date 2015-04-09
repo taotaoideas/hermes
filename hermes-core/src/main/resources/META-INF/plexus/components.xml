@@ -2,7 +2,7 @@
 	<components>
 		<component>
 			<role>org.unidal.initialization.Module</role>
-			<role-hint>hermes-producer</role-hint>
+			<role-hint>hermes-core</role-hint>
 			<implementation>com.ctrip.hermes.HermesCoreModule</implementation>
 		</component>
 		<component>

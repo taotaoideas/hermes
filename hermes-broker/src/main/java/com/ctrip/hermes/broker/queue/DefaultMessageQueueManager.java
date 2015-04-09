@@ -4,19 +4,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.unidal.lookup.ContainerHolder;
-import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
-import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.google.common.util.concurrent.ListenableFuture;
 
+@Named(type = MessageQueueManager.class)
 public class DefaultMessageQueueManager extends ContainerHolder implements MessageQueueManager {
-
-	@Inject
-	private MetaService m_metaService;
 
 	private Map<Pair<String, Integer>, MessageQueue> m_messageQueues = new ConcurrentHashMap<>();
 

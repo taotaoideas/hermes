@@ -1,6 +1,8 @@
 package com.ctrip.hermes.broker.bootstrap;
 
 import org.unidal.lookup.ContainerHolder;
+import org.unidal.lookup.annotation.Inject;
+import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.broker.transport.NettyServer;
 
@@ -8,11 +10,15 @@ import com.ctrip.hermes.broker.transport.NettyServer;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@Named(type = BrokerBootstrap.class)
 public class DefaultBrokerBootstrap extends ContainerHolder implements BrokerBootstrap {
+	
+	@Inject
+	private NettyServer m_nettyServer;
 
 	@Override
 	public void start() throws Exception {
-		lookup(NettyServer.class).start();
+		m_nettyServer.start();
 	}
 
 	@Override

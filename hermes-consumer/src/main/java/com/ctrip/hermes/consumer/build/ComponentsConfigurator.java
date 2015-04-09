@@ -29,7 +29,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(DefaultEngine.class));
 
 		// bootstrap
-		all.add(C(CommandProcessor.class, CommandType.MESSAGE_CONSUME, ConsumeMessageCommandProcessor.class) //
+		all.add(C(CommandProcessor.class, CommandType.MESSAGE_CONSUME.toString(), ConsumeMessageCommandProcessor.class) //
 		      .req(ConsumerNotifier.class));
 
 		all.add(A(DefaultConsumerBootstrapManager.class));
