@@ -69,6 +69,23 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.unidal.maven.plugins</groupId>
+				<artifactId>plexus-maven-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>generate plexus component descriptor</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>plexus</goal>
+						</goals>
+						<configuration>
+							<className>com.ctrip.hermes.broker.build.ComponentsConfigurator</className>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.1.1</version>
 				<configuration>
@@ -90,16 +107,6 @@
 							<manifest><![CDATA[,
                         ${basedir}/src/main/resources/META-INF/dal/jdbc/hermes-manifest.xml,
                      ,]]></manifest>
-						</configuration>
-					</execution>
-					<execution>
-						<id>generate plexus component descriptor</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>plexus</goal>
-						</goals>
-						<configuration>
-							<className>com.ctrip.hermes.broker.build.ComponentsConfigurator</className>
 						</configuration>
 					</execution>
 				</executions>
