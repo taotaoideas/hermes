@@ -13,5 +13,9 @@
 				</requirement>
 			</requirements>
 		</component>
+		<component>
+			<role>com.ctrip.hermes.meta.service.SchemaService</role>
+			<implementation>com.ctrip.hermes.meta.service.SchemaService</implementation>
+		</component>
 	</components>
 </plexus>
