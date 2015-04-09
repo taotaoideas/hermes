@@ -9,7 +9,12 @@
 			<implementation>com.ctrip.hermes.meta.service.TopicService</implementation>
 			<requirements>
 				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaManager</role>
+					<role-hint>meta-server</role-hint>
+				</requirement>
+				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
+					<role-hint>server-meta</role-hint>
 				</requirement>
 			</requirements>
 		</component>
@@ -29,6 +34,17 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.meta.dal.meta.MetaDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.core.meta.MetaService</role>
+			<role-hint>server-meta</role-hint>
+			<implementation>com.ctrip.hermes.meta.service.ServerMetaService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaManager</role>
+					<role-hint>meta-server</role-hint>
 				</requirement>
 			</requirements>
 		</component>

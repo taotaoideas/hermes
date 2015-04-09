@@ -22,6 +22,8 @@ public class ServerMetaManager implements MetaManager {
 
 	private Meta m_cachedMeta;
 
+	private long lastUpdatedHashCode;
+
 	@Override
 	public Meta getMeta() {
 		if (m_cachedMeta == null) {
@@ -37,10 +39,10 @@ public class ServerMetaManager implements MetaManager {
 
 	@Override
 	public boolean updateMeta(Meta meta) {
-		if (m_cachedMeta != null && meta.hashCode() == m_cachedMeta.hashCode()) {
+		if (m_cachedMeta != null && meta.hashCode() == lastUpdatedHashCode) {
 			return false;
 		}
-		
+
 		com.ctrip.hermes.meta.dal.meta.Meta dalMeta = new com.ctrip.hermes.meta.dal.meta.Meta();
 		try {
 			dalMeta.setValue(JSON.toJSONString(meta));
@@ -50,6 +52,7 @@ public class ServerMetaManager implements MetaManager {
 			throw new RuntimeException("Update meta failed.", e);
 		}
 		m_cachedMeta = meta;
+		lastUpdatedHashCode = meta.hashCode();
 		return true;
 	}
 

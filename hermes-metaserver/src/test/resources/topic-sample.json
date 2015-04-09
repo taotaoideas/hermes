@@ -1,7 +1,7 @@
 {
-  "name" : "kafka.AvroTopic",
+  "name" : "Sample.SampleTopic",
   "storageType" : "kafka",
-  "description" : "topic for Avro Test",
+  "description" : "topic for Sample Test",
   "config" : {
     "partitions" : "5",
     "replication-factor" : "3"

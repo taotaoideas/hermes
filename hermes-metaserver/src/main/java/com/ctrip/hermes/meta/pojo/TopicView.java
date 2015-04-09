@@ -129,4 +129,23 @@ public class TopicView {
 		this.codec = codec;
 	}
 
+	public Topic toMetaTopic() {
+		Topic topic = new Topic();
+		topic.setId(this.id);
+		topic.setName(this.name);
+		topic.setStorageType(this.storageType);
+		topic.setDescription(this.description);
+		for (Map.Entry<String, String> entry : this.config.entrySet()) {
+			Property prop = new Property();
+			prop.setName(entry.getKey());
+			prop.setValue(entry.getValue());
+			topic.addProperty(prop);
+		}
+		topic.setStatus(this.status);
+		topic.setCreateTime(this.createTime);
+		topic.setLastModifiedTime(this.lastModifiedTime);
+		topic.setSchemaName(this.schemaName);
+		topic.setCodec(this.codec.toMetaCodec());
+		return topic;
+	}
 }
