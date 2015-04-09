@@ -18,6 +18,7 @@ import com.google.common.base.Charsets;
  * [count][Element][...] 0x64 followed 4 octet of data count Map: [count][[key Element][value Element]][...] 0x74 followed 4 octet
  * of data count
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class HermesPrimitiveCodec {
 
 	private ByteBuf m_buf;
@@ -286,57 +287,6 @@ public class HermesPrimitiveCodec {
 			return readMap0();
 		} else {
 			throw new RuntimeException("Unsupported class type: " + type);
-		}
-	}
-
-	/**
-	 * type: won't be Prefix.NULL
-	 */
-	private Object byteToClass(byte type) {
-		if (type == Prefix.TRUE) {
-			return Boolean.TRUE;
-		} else if (type == Prefix.FALSE) {
-			return Boolean.FALSE;
-		} else if (type == Prefix.BYTES) {
-			return Byte[].class;
-		} else if (type == Prefix.CHAR) {
-			return Character.class;
-		} else if (type == Prefix.INT) {
-			return Integer.class;
-		} else if (type == Prefix.LONG) {
-			return Long.class;
-		} else if (type == Prefix.STRING) {
-			return String.class;
-		} else if (type == Prefix.LIST) {
-			return List.class;
-		} else if (type == Prefix.MAP) {
-			return Map.class;
-		} else {
-			throw new RuntimeException("Unknown type in Codec: " + type);
-		}
-	}
-
-	private byte ClassToByte(Object object) {
-		if (null == object) {
-			return Prefix.NULL;
-		} else if (object instanceof Boolean) {
-			return ((boolean) object) ? Prefix.TRUE : Prefix.FALSE;
-		} else if (object instanceof Character) {
-			return Prefix.CHAR;
-		} else if (object instanceof byte[]) {
-			return Prefix.BYTES;
-		} else if (object instanceof Integer) {
-			return Prefix.INT;
-		} else if (object instanceof Long) {
-			return Prefix.LONG;
-		} else if (object instanceof String) {
-			return Prefix.STRING;
-		} else if (object instanceof List) {
-			return Prefix.LIST;
-		} else if (object instanceof Map) {
-			return Prefix.MAP;
-		} else {
-			throw new RuntimeException("Unsupported Class in Codec: " + object.getClass());
 		}
 	}
 
