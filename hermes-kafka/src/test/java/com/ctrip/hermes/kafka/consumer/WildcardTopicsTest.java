@@ -51,7 +51,7 @@ public class WildcardTopicsTest {
 					break;
 				}
 
-				VisitEvent event = ProduerTest.generateEvent();
+				VisitEvent event = ProducerTest.generateEvent();
 				String topic = random.nextBoolean() ? sendTopic1 : sendTopic2;
 				MessageHolder holder = producer.message(topic, event);
 				holder.send();

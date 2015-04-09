@@ -1,11 +1,15 @@
 package com.ctrip.hermes.meta.pojo;
 
+import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
+
 import java.util.Date;
 
 public class SchemaView {
+	private int id;
+
 	private String name;
 
-	private Integer version;
+	private int version;
 
 	private Object schema;
 
@@ -13,6 +17,12 @@ public class SchemaView {
 
 	public SchemaView() {
 
+	}
+
+	public SchemaView(SchemaMetadata avroSchemaMeta) {
+		this.id = avroSchemaMeta.getId();
+		this.schema = avroSchemaMeta.getSchema();
+		this.version = avroSchemaMeta.getVersion();
 	}
 
 	public Date getCreateTime() {
@@ -45,5 +55,13 @@ public class SchemaView {
 
 	public void setVersion(Integer version) {
 		this.version = version;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

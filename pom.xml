@@ -15,9 +15,9 @@
 		<module>hermes-container</module>
 		<module>hermes-example</module>
 		<module>hermes-metaserver</module>
+		<module>hermes-kafka</module>
 		<module>cmessaging.client</module>
 		<module>old-cmessage</module>
-		<module>hermes-kafka</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

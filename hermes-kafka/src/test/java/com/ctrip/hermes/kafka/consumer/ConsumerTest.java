@@ -46,7 +46,7 @@ public class ConsumerTest {
 					break;
 				}
 
-				VisitEvent event = ProduerTest.generateEvent();
+				VisitEvent event = ProducerTest.generateEvent();
 				MessageHolder holder = producer.message(topic, event);
 				holder.send();
 				System.out.println("Sent: " + event);
@@ -99,7 +99,7 @@ public class ConsumerTest {
 					break;
 				}
 
-				VisitEvent event = ProduerTest.generateEvent();
+				VisitEvent event = ProducerTest.generateEvent();
 				MessageHolder holder = producer.message(topic, event);
 				holder.send();
 				System.out.println("Sent: " + event);
@@ -152,7 +152,7 @@ public class ConsumerTest {
 					break;
 				}
 
-				VisitEvent event = ProduerTest.generateEvent();
+				VisitEvent event = ProducerTest.generateEvent();
 				MessageHolder holder = producer.message(topic, event);
 				holder.send();
 				System.out.println("Sent: " + event);

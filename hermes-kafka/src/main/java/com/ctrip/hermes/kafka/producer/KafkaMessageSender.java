@@ -3,6 +3,7 @@ package com.ctrip.hermes.kafka.producer;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
@@ -44,8 +46,19 @@ public class KafkaMessageSender implements MessageSender {
 	@Inject
 	private MetaService m_metaService;
 
+	@Inject
+	private ClientEnvironment m_environment;
+
 	private Properties getProduerProperties(String topic) {
 		Properties configs = new Properties();
+
+		try {
+			Properties envProperties = m_environment.getProducerConfig(topic);
+			configs.putAll(envProperties);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		List<Partition> partitions = m_metaService.getPartitions(topic);
 		if (partitions == null || partitions.size() < 1) {
 			return configs;
@@ -67,10 +80,12 @@ public class KafkaMessageSender implements MessageSender {
 		}
 		configs.put("value.serializer", ByteArraySerializer.class.getCanonicalName());
 		configs.put("key.serializer", StringSerializer.class.getCanonicalName());
-		try {
-			configs.put("client.id", InetAddress.getLocalHost().getHostAddress() + "_" + topic);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
+		if (!configs.containsKey("client.id")) {
+			try {
+				configs.put("client.id", InetAddress.getLocalHost().getHostAddress() + "_" + topic);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
 		}
 		return configs;
 	}

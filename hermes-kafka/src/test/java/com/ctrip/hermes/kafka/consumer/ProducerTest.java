@@ -14,7 +14,7 @@ import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.api.Producer.MessageHolder;
 
-public class ProduerTest {
+public class ProducerTest {
 
 	@Test
 	public void testSimpleProducer() throws InterruptedException, ExecutionException {
