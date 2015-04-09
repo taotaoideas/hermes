@@ -3,6 +3,9 @@ package com.ctrip.hermes.core.meta.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -27,9 +30,22 @@ public class DefaultMetaService implements Initializable, MetaService {
 
 	private Meta m_meta;
 
+	private ScheduledExecutorService executor;
+
+	private static final int REFRESH_PERIOD_MINUTES = 1;
+
 	@Override
 	public void initialize() throws InitializationException {
 		m_meta = m_manager.getMeta();
+		executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				m_meta = m_manager.getMeta();
+			}
+
+		}, REFRESH_PERIOD_MINUTES, REFRESH_PERIOD_MINUTES, TimeUnit.MINUTES);
 	}
 
 	@Override

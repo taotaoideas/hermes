@@ -3,6 +3,7 @@ package com.ctrip.hermes.kafka.engine;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,11 +19,13 @@ import kafka.message.MessageAndMetadata;
 
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
+import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.consumer.engine.ConsumerContext;
 import com.ctrip.hermes.consumer.engine.bootstrap.BaseConsumerBootstrap;
 import com.ctrip.hermes.consumer.engine.bootstrap.ConsumerBootstrap;
+import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
@@ -43,6 +46,9 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 	private ExecutorService m_executor = Executors.newCachedThreadPool();
 
+	@Inject
+	private ClientEnvironment m_environment;
+	
 	@Override
 	protected void doStart(ConsumerContext consumerContext) {
 		Topic topic = consumerContext.getTopic();
@@ -102,6 +108,14 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 	private Properties getConsumerProperties(String topic, String group) {
 		Properties configs = new Properties();
+		
+		try {
+			Properties envProperties = m_environment.getProducerConfig(topic);
+			configs.putAll(envProperties);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		List<Partition> partitions = m_metaService.getPartitions(topic);
 		if (partitions == null || partitions.size() < 1) {
 			return configs;

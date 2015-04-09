@@ -47,7 +47,7 @@ public class PartitionTest {
 					break;
 				}
 
-				VisitEvent event = ProduerTest.generateEvent();
+				VisitEvent event = ProducerTest.generateEvent();
 				MessageHolder holder = producer.message(topicPattern, event);
 				holder.send();
 				System.out.println(String.format("Sent to %s: %s", topicPattern, event));
@@ -99,7 +99,7 @@ public class PartitionTest {
 					break;
 				}
 
-				VisitEvent event = ProduerTest.generateEvent();
+				VisitEvent event = ProducerTest.generateEvent();
 				MessageHolder holder = producer.message(topicPattern, event);
 				holder.send();
 				System.out.println(String.format("Sent to %s: %s", topicPattern, event));
