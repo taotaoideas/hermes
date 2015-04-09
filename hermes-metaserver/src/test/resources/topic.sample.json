@@ -1,0 +1,16 @@
+{
+  "name" : "kafka.AvroTopic",
+  "storageType" : "kafka",
+  "description" : "topic for Avro Test",
+  "config" : {
+    "partitions" : "5",
+    "replication-factor" : "3"
+  },
+  "schemaName" : "ClickEvent",
+  "codec" : {
+    "type" : "avro",
+    "config" : {
+      "schema.registry.url" : "http://10.3.8.63:8081"
+    }
+  }
+}

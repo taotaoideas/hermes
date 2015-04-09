@@ -72,8 +72,9 @@ public class KafkaMessageSender implements MessageSender {
 
 		for (Datasource datasource : produerStorage.getDatasources()) {
 			if (producerDatasource.equals(datasource.getId())) {
-				for (Property prop : datasource.getProperties()) {
-					configs.put(prop.getName(), prop.getValue());
+				Map<String, Property> properties = datasource.getProperties();
+				for (Map.Entry<String, Property> prop : properties.entrySet()) {
+					configs.put(prop.getValue().getName(), prop.getValue().getValue());
 				}
 				break;
 			}

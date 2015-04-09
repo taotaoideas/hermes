@@ -27,7 +27,7 @@ import com.ctrip.hermes.meta.transform.BaseVisitor2;
 @Named(type = MetaService.class)
 public class DefaultMetaService implements Initializable, MetaService {
 
-	@Inject
+	@Inject(ClientMetaManager.ID)
 	private MetaManager m_manager;
 
 	private Meta m_meta;

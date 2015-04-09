@@ -1,0 +1,219 @@
+{
+  "version" : 1,
+  "devMode" : false,
+  "topics" : {
+    "order_new" : {
+      "name" : "order_new",
+      "properties" : [ ],
+      "id" : 100,
+      "lastModifiedTime" : null,
+      "status" : null,
+      "description" : null,
+      "createTime" : null,
+      "partitions" : [ {
+        "id" : 0,
+        "endpoint" : "br0",
+        "readDatasource" : "ds0",
+        "writeDatasource" : "ds0"
+      } ],
+      "storageType" : "mysql",
+      "codec" : {
+        "properties" : [ ],
+        "type" : "json"
+      },
+      "schemaName" : null,
+      "partitionCount" : 1
+    },
+    "topic" : {
+      "name" : "topic",
+      "properties" : [ ],
+      "id" : null,
+      "lastModifiedTime" : null,
+      "status" : null,
+      "description" : null,
+      "createTime" : null,
+      "partitions" : [ {
+        "id" : 0,
+        "endpoint" : "br0",
+        "readDatasource" : "ds0",
+        "writeDatasource" : "ds0"
+      } ],
+      "storageType" : null,
+      "codec" : {
+        "properties" : [ ],
+        "type" : "json"
+      },
+      "schemaName" : null,
+      "partitionCount" : 1
+    },
+    "topic1" : {
+      "name" : "topic1",
+      "properties" : [ ],
+      "id" : null,
+      "lastModifiedTime" : null,
+      "status" : null,
+      "description" : null,
+      "createTime" : null,
+      "partitions" : [ {
+        "id" : 0,
+        "endpoint" : "br0",
+        "readDatasource" : "ds0",
+        "writeDatasource" : "ds0"
+      } ],
+      "storageType" : null,
+      "codec" : {
+        "properties" : [ ],
+        "type" : "json"
+      },
+      "schemaName" : null,
+      "partitionCount" : 1
+    },
+    "topic2" : {
+      "name" : "topic2",
+      "properties" : [ ],
+      "id" : null,
+      "lastModifiedTime" : null,
+      "status" : null,
+      "description" : null,
+      "createTime" : null,
+      "partitions" : [ {
+        "id" : 0,
+        "endpoint" : "br0",
+        "readDatasource" : "ds0",
+        "writeDatasource" : "ds0"
+      } ],
+      "storageType" : null,
+      "codec" : {
+        "properties" : [ ],
+        "type" : "json"
+      },
+      "schemaName" : null,
+      "partitionCount" : 1
+    },
+    "kafka.SimpleTopic" : {
+      "name" : "kafka.SimpleTopic",
+      "properties" : [ ],
+      "id" : null,
+      "lastModifiedTime" : null,
+      "status" : null,
+      "description" : null,
+      "createTime" : null,
+      "partitions" : [ {
+        "id" : 0,
+        "endpoint" : "kafka-endpoint",
+        "readDatasource" : "kafka-consumer",
+        "writeDatasource" : "kafka-produer"
+      } ],
+      "storageType" : "kafka",
+      "codec" : {
+        "properties" : [ ],
+        "type" : "json"
+      },
+      "schemaName" : null,
+      "partitionCount" : 1
+    },
+    "kafka.AvroTopic" : {
+      "name" : "kafka.AvroTopic",
+      "properties" : [ {
+        "name" : "replication-factor",
+        "value" : "3"
+      }, {
+        "name" : "partitions",
+        "value" : "5"
+      } ],
+      "id" : 101,
+      "lastModifiedTime" : 1420056000000,
+      "status" : "valid",
+      "description" : "topic for Avro Test",
+      "createTime" : 1420045200000,
+      "partitions" : [ {
+        "id" : 0,
+        "endpoint" : "kafka-endpoint",
+        "readDatasource" : "kafka-consumer",
+        "writeDatasource" : "kafka-produer"
+      } ],
+      "storageType" : "kafka",
+      "codec" : {
+        "properties" : [ {
+          "name" : "schema.registry.url",
+          "value" : "http://10.3.8.63:8081"
+        } ],
+        "type" : "avro"
+      },
+      "schemaName" : "ClickEvent",
+      "partitionCount" : 1
+    }
+  },
+  "endpoints" : {
+    "br0" : {
+      "host" : "127.0.0.1",
+      "id" : "br0",
+      "type" : "broker",
+      "port" : 4376
+    },
+    "kafka-endpoint" : {
+      "host" : null,
+      "id" : "kafka-endpoint",
+      "type" : "kafka",
+      "port" : null
+    }
+  },
+  "storages" : {
+    "mysql" : {
+      "default" : null,
+      "properties" : [ {
+        "name" : "x",
+        "value" : "x"
+      }, {
+        "name" : "x",
+        "value" : "x"
+      } ],
+      "type" : "mysql",
+      "partitions" : { },
+      "datasources" : [ {
+        "properties" : {
+          "url" : {
+            "name" : "url",
+            "value" : "jdbc:mysql://127.0.0.1/"
+          },
+          "user" : {
+            "name" : "user",
+            "value" : "root"
+          },
+          "password" : {
+            "name" : "password",
+            "value" : ""
+          }
+        },
+        "id" : "ds0"
+      } ]
+    },
+    "kafka" : {
+      "default" : null,
+      "properties" : [ ],
+      "type" : "kafka",
+      "partitions" : { },
+      "datasources" : [ {
+        "properties" : {
+          "bootstrap.servers" : {
+            "name" : "bootstrap.servers",
+            "value" : "10.3.6.237:9092,10.3.6.239:9092,10.3.6.24:9092"
+          }
+        },
+        "id" : "kafka-produer"
+      }, {
+        "properties" : {
+          "zookeeper.connect" : {
+            "name" : "zookeeper.connect",
+            "value" : "10.3.6.90:2181,10.3.8.62:2181,10.3.8.63:2181"
+          },
+          "offsets.storage" : {
+            "name" : "offsets.storage",
+            "value" : "kafka"
+          }
+        },
+        "id" : "kafka-consumer"
+      } ]
+    }
+  }
+}

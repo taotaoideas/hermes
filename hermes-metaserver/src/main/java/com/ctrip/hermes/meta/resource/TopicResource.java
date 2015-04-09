@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.plexus.util.StringUtils;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.TopicView;
@@ -35,7 +36,13 @@ public class TopicResource {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
-		return Response.status(Status.CREATED).entity(content).build();
+		TopicView topic = JSON.parseObject(content, TopicView.class);
+		try {
+			topicService.createTopic(topic);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.CREATED).entity(topic).build();
 	}
 
 	@GET
