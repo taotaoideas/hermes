@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import com.ctrip.hermes.broker.dal.hermes.DeadLetter;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.core.bo.Tpp;
 
@@ -19,6 +20,28 @@ public class MessageUtil {
 		}
 
 		return result;
+	}
+
+	public static DeadLetter makeDeadletter(String topic, int partition) {
+		DeadLetter dl = new DeadLetter();
+		Random rnd = new Random();
+
+		String attributes = uuid();
+		Date creationDate = new Date();
+		byte[] payload = uuid().getBytes();
+		int producerId = rnd.nextInt(1000);
+		String producerIp = uuid().substring(0, 10);
+
+		dl.setAttributes(attributes);
+		dl.setCreationDate(creationDate);
+		dl.setDeadDate(new Date());
+		dl.setPayload(payload);
+		dl.setProducerId(producerId);
+		dl.setProducerIp(producerIp);
+		dl.setRefKey(uuid());
+		dl.setPartition(partition);
+		dl.setTopic(topic);
+		return dl;
 	}
 
 	public static MessagePriority makeMessage(Tpp tpp) {

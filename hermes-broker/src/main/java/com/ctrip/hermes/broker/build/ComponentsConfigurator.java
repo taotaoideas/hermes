@@ -56,6 +56,9 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(TableProvider.class, "offset-message", HermesTableProvider.class) //
 		      .req(MetaService.class) //
 		      .config(E("m_table").value("offset-message")));
+		all.add(C(TableProvider.class, "dead-letter", HermesTableProvider.class) //
+				.req(MetaService.class) //
+				.config(E("m_table").value("dead-letter")));
 
 
 		all.add(A(HermesJdbcDataSourceDescriptorManager.class));

@@ -3,7 +3,7 @@
    <jdbc package="com.ctrip.hermes.broker.dal" name="hermes">
       <datasource>
          <driver>com.mysql.jdbc.Driver</driver>
-         <url>jdbc:mysql://localhost:3306/hermes</url>
+         <url>jdbc:mysql://localhost:3306/100_0</url>
          <user>root</user>
          <password>~{c390930fe33d20909014ccaaaea70}</password>
          <properties>useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</properties>
@@ -13,6 +13,7 @@
          <table name="offset_message"/>
          <table name="resend_group_id"/>
          <table name="offset_resend"/>
+         <table name="dead_letter"/>
       </group>
    </jdbc>
 </wizard>

@@ -1,5 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entities>
+  <entity name="dead-letter" table="dead_letter" alias="dl">
+    <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
+    <member name="producer-ip" field="producer_ip" value-type="String" length="15" nullable="false" />
+    <member name="producer-id" field="producer_id" value-type="int" length="10" nullable="false" />
+    <member name="ref-key" field="ref_key" value-type="String" length="100" />
+    <member name="attributes" field="attributes" value-type="String" length="4000" />
+    <member name="creation-date" field="creation_date" value-type="Date" nullable="false" />
+    <member name="payload" field="payload" value-type="byte[]" length="16777215" nullable="false" />
+    <member name="dead-date" field="dead_date" value-type="Date" nullable="false" />
+    <var name="key-id" value-type="long" key-member="id" />
+    <primary-key name="PRIMARY" members="id" />
+    <index name="key" members="ref_key ASC" />
+    <readsets>
+      <readset name="FULL" all="true" />
+    </readsets>
+    <updatesets>
+      <updateset name="FULL" all="true" />
+    </updatesets>
+    <query-defs>
+      <query name="find-by-PK" type="SELECT">
+        <param name="key-id" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="insert" type="INSERT">
+        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
+        VALUES(<VALUES/>)]]></statement>
+      </query>
+      <query name="update-by-PK" type="UPDATE">
+        <param name="key-id" />
+        <statement><![CDATA[UPDATE <TABLE/>
+        SET <FIELDS/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="delete-by-PK" type="DELETE">
+        <param name="key-id" />
+        <statement><![CDATA[DELETE FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+    </query-defs>
+  </entity>
   <entity name="message-priority" table="message_priority" alias="mp">
     <member name="id" field="id" value-type="long" length="20" nullable="false" key="true" auto-increment="true" />
     <member name="producer-ip" field="producer_ip" value-type="String" length="15" nullable="false" />

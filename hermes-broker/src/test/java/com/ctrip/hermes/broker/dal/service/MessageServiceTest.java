@@ -20,6 +20,8 @@ public class MessageServiceTest extends ComponentTestCase {
 
 	private String topic = "order_new";
 
+	private int partition = 0;
+
 	@Before
 	public void before() {
 		s = lookup(MessageService.class);
@@ -27,7 +29,6 @@ public class MessageServiceTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
-		int partition = 0;
 		Tpp tpp = new Tpp(topic, partition, true);
 		int groupId = 200;
 
@@ -50,7 +51,11 @@ public class MessageServiceTest extends ComponentTestCase {
 
 		rmsgs = s.read(tpp, lastOffset.getOffset() + 1, 10);
 		assertEquals(0L, rmsgs.size());
+	}
 
+	@Test
+	public void testDeadLetter() throws Exception {
+		s.deadLetter(MessageUtil.makeDeadletter(topic, partition));
 	}
 
 }
