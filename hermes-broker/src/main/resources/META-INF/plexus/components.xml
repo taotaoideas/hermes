@@ -118,50 +118,12 @@
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</role>
-			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceDescriptorManager</implementation>
-			<configuration>
-				<datasourceFile>/data/appdatas/hermes/datasources.xml</datasourceFile>
-			</configuration>
-		</component>
-		<component>
-			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>message-priority</role-hint>
-			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
-			<configuration>
-				<logical-table-name>message-priority</logical-table-name>
-				<physical-table-name>message_priority</physical-table-name>
-				<data-source-name>hermes</data-source-name>
-			</configuration>
-		</component>
-		<component>
-			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>offset-message</role-hint>
-			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
-			<configuration>
-				<logical-table-name>offset-message</logical-table-name>
-				<physical-table-name>offset_message</physical-table-name>
-				<data-source-name>hermes</data-source-name>
-			</configuration>
-		</component>
-		<component>
-			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>offset-resend</role-hint>
-			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
-			<configuration>
-				<logical-table-name>offset-resend</logical-table-name>
-				<physical-table-name>offset_resend</physical-table-name>
-				<data-source-name>hermes</data-source-name>
-			</configuration>
-		</component>
-		<component>
-			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
-			<role-hint>resend-group-id</role-hint>
-			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
-			<configuration>
-				<logical-table-name>resend-group-id</logical-table-name>
-				<physical-table-name>resend_group_id</physical-table-name>
-				<data-source-name>hermes</data-source-name>
-			</configuration>
+			<implementation>com.ctrip.hermes.broker.dal.HermesJdbcDataSourceDescriptorManager</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>

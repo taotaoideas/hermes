@@ -11,9 +11,9 @@ final class HermesDatabaseConfigurator extends AbstractJdbcResourceConfigurator 
    public List<Component> defineComponents() {
       List<Component> all = new ArrayList<Component>();
 
-      // all.add(defineJdbcDataSourceComponent("hermes", "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/hermes", "root", "***", "<![CDATA[useUnicode=true&characterEncoding=UTF-8&autoReconnect=true]]>"));
+//       all.add(defineJdbcDataSourceComponent("hermes", "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/hermes", "root", "***", "<![CDATA[useUnicode=true&characterEncoding=UTF-8&autoReconnect=true]]>"));
 
-      defineSimpleTableProviderComponents(all, "hermes", com.ctrip.hermes.broker.dal.hermes._INDEX.getEntityClasses());
+//      defineSimpleTableProviderComponents(all, "hermes", com.ctrip.hermes.broker.dal.hermes._INDEX.getEntityClasses());
       defineDaoComponents(all, com.ctrip.hermes.broker.dal.hermes._INDEX.getDaoClasses());
 
       return all;

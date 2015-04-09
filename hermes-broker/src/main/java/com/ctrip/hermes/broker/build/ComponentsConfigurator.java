@@ -8,6 +8,7 @@ import org.unidal.dal.jdbc.mapping.TableProvider;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.broker.bootstrap.DefaultBrokerBootstrap;
+import com.ctrip.hermes.broker.dal.HermesJdbcDataSourceDescriptorManager;
 import com.ctrip.hermes.broker.dal.HermesTableProvider;
 import com.ctrip.hermes.broker.dal.service.MessageService;
 import com.ctrip.hermes.broker.dal.service.ResendService;
@@ -57,7 +58,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		      .config(E("m_table").value("offset-message")));
 
 
-		all.add(defineJdbcDataSourceConfigurationManagerComponent("/data/appdatas/hermes/datasources.xml"));
+		all.add(A(HermesJdbcDataSourceDescriptorManager.class));
 
 		all.addAll(new HermesDatabaseConfigurator().defineComponents());
 

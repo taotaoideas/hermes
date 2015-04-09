@@ -16,11 +16,13 @@ import org.unidal.lookup.annotation.Named;
 import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Codec;
+import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
+import com.ctrip.hermes.meta.transform.BaseVisitor2;
 
 @Named(type = MetaService.class)
 public class DefaultMetaService implements Initializable, MetaService {
@@ -149,4 +151,25 @@ public class DefaultMetaService implements Initializable, MetaService {
 		return 111;
 	}
 
+	@Override
+	public List<Datasource> listMysqlDataSources() {
+		final List<Datasource> dataSources = new ArrayList<>();
+
+		m_meta.accept(new BaseVisitor2() {
+
+			@Override
+			protected void visitDatasourceChildren(Datasource ds) {
+				Storage storage = getAncestor(2);
+
+				if ("mysql".equalsIgnoreCase(storage.getType())) {
+					dataSources.add(ds);
+				}
+
+				super.visitDatasourceChildren(ds);
+			}
+
+		});
+
+		return dataSources;
+	}
 }
