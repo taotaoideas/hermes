@@ -24,7 +24,7 @@ public class DefaultConsumerNotifier implements ConsumerNotifier {
 	private Map<Long, Pair<ConsumerContext, ExecutorService>> m_consumerContexs = new ConcurrentHashMap<>();
 
 	@Inject("consumer")
-	protected Pipeline m_pipeline;
+	protected Pipeline<Void> m_pipeline;
 
 	/*
 	 * (non-Javadoc)
@@ -37,7 +37,7 @@ public class DefaultConsumerNotifier implements ConsumerNotifier {
 		m_consumerContexs.put(
 		      correlationId,
 		      new Pair<>(consumerContext, Threads.forPool().getFixedThreadPool(
-		            "ConsumerThread-" + consumerContext.getTopic(), 10)));
+		            "ConsumerThread-" + consumerContext.getTopic().getName(), 10)));
 	}
 
 	@Override

@@ -16,7 +16,11 @@ public class SendMessageAckCommand extends AbstractCommand implements Ack {
 	private Map<Integer, Boolean> m_successes = new ConcurrentHashMap<>();
 
 	private int m_totalSize;
-	
+
+	public SendMessageAckCommand() {
+		this(0);
+	}
+
 	public SendMessageAckCommand(int totalSize) {
 		super(CommandType.ACK_MESSAGE_SEND);
 		m_totalSize = totalSize;
@@ -41,12 +45,14 @@ public class SendMessageAckCommand extends AbstractCommand implements Ack {
 	@Override
 	public void parse0(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		m_totalSize = codec.readInt();
 		m_successes = codec.readMap();
 	}
 
 	@Override
 	public void toBytes0(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		codec.writeInt(m_totalSize);
 		codec.writeMap(m_successes);
 	}
 

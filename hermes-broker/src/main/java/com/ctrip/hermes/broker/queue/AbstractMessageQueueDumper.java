@@ -1,6 +1,7 @@
 package com.ctrip.hermes.broker.queue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -53,7 +54,7 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 		});
 		// TODO
 		m_workerThread.setDaemon(true);
-		m_workerThread.setName(String.format("MessageQueueDumper-%s-%s-%d", this.getClass().getCanonicalName(), topic,
+		m_workerThread.setName(String.format("MessageQueueDumper-%s-%s-%d", this.getClass().getSimpleName(), topic,
 		      partition));
 
 	}
@@ -72,11 +73,17 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 	      boolean isPriority) {
 
 		Map<Integer, Boolean> result = new HashMap<>();
-		addResults(result, false);
+		addResults(result, batch.getMsgSeqs(), false);
 
 		doAppendMessageSync(batch, isPriority, result);
 
 		future.set(result);
+	}
+
+	protected void addResults(Map<Integer, Boolean> result, List<Integer> seqs, boolean success) {
+		for (Integer seq : seqs) {
+			result.put(seq, success);
+		}
 	}
 
 	protected void addResults(Map<Integer, Boolean> result, boolean success) {
