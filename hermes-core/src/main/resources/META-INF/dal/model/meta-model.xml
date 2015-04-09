@@ -9,23 +9,22 @@
 
 	<entity name="endpoint">
 		<attribute name="id" key='true' />
-		<snippet lang='java'>
+		<snippet lang='java'><![CDATA[
 			public final static String LOCAL = "local";
 			public final static String BROKER = "broker";
-			public final static
-			String TRANSACTION = "transaction";
-			public final static String KAFKA =
-			"kafka";
+			public final static String TRANSACTION = "transaction";
+			public final static String KAFKA ="kafka";
+			]]>
 		</snippet>
 	</entity>
 	<entity name="storage">
 		<attribute name="type" key='true' />
 		<entity-ref name="partition" type="map" names="partitions" />
-		<snippet lang='java'>
+		<snippet lang='java'><![CDATA[
 			public final static String MEMORY = "memory";
 			public final static String KAFKA = "kafka";
-			public final static String
-			MYSQL = "mysql";
+			public final static String MYSQL = "mysql";
+			]]>
 		</snippet>
 	</entity>
 	<entity name="topic">
@@ -34,14 +33,20 @@
 	<entity name="codec">
 		<attribute name="type" value-type="String" />
 		<entity-ref name="property" type="list" names="properties" />
-		<snippet lang='java'>
+		<snippet lang='java'><![CDATA[
 			public final static String JSON = "json";
-			public
-			final static String AVRO = "avro";
+			public final static String AVRO = "avro";
+			]]>
 		</snippet>
 	</entity>
 	<entity name="partition">
 		<attribute name="id" value-type="int" key='true' />
+	</entity>
+	<entity name="datasource">
+		<entity-ref name="property" type="map" names="properties" />
+	</entity>
+	<entity name="property">
+		<attribute name="name" key='true' />
 	</entity>
 </model>
 

@@ -3,6 +3,7 @@ package com.ctrip.hermes.core.meta;
 import java.util.List;
 
 import com.ctrip.hermes.meta.entity.Codec;
+import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Storage;
@@ -64,5 +65,7 @@ public interface MetaService {
 	 * @return
 	 */
    int getGroupIdInt(String groupId);
+
+	List<Datasource> listMysqlDataSources();
 
 }
