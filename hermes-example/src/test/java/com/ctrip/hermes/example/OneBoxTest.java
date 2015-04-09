@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,6 +22,7 @@ import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class OneBoxTest extends ComponentTestCase {
@@ -44,7 +47,7 @@ public class OneBoxTest extends ComponentTestCase {
 	@Test
 	public void testConsumer() throws Exception {
 		startBroker();
-		
+
 		Thread.sleep(2000);
 		Engine engine = lookup(Engine.class);
 
@@ -125,11 +128,15 @@ public class OneBoxTest extends ComponentTestCase {
 		return m_nacks.get(groupId);
 	}
 
-	private void send(String topic, String prefix) {
+	private void send(String topic, String prefix) throws Exception {
 		String uuid = UUID.randomUUID().toString();
 		String msg = prefix + uuid;
 		System.out.println(">>> " + msg);
-		Producer.getInstance().message(topic, msg).withKey(uuid).send();
+		Future<SendResult> future = Producer.getInstance().message(topic, msg).withKey(uuid).send();
+
+		SendResult sendResult = future.get();
+
+		System.out.println(sendResult.getCatMessageId());
 	}
 
 	static class MyConsumer implements Consumer<String> {
@@ -183,5 +190,7 @@ public class OneBoxTest extends ComponentTestCase {
 				}
 			};
 		}.start();
+
+		Thread.sleep(2000);
 	}
 }
