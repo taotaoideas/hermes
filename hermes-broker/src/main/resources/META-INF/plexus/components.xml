@@ -1,72 +1,79 @@
 <plexus>
 	<components>
 		<component>
-			<role>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</role>
-			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</implementation>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.remoting.netty.NettyServer</role>
-			<implementation>com.ctrip.hermes.broker.remoting.netty.NettyServer</implementation>
+			<role>com.ctrip.hermes.broker.bootstrap.BrokerBootstrap</role>
+			<implementation>com.ctrip.hermes.broker.bootstrap.DefaultBrokerBootstrap</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.remoting.netty.NettyServerConfig</role>
+					<role>com.ctrip.hermes.broker.transport.NettyServer</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
-			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.broker.queue.DefaultMessageQueueManager</implementation>
+			<role>com.ctrip.hermes.broker.transport.NettyServer</role>
+			<implementation>com.ctrip.hermes.broker.transport.NettyServer</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.core.meta.MetaService</role>
+					<role>com.ctrip.hermes.broker.transport.NettyServerConfig</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
-			<role-hint>broker-deliver</role-hint>
-			<implementation>com.ctrip.hermes.broker.channel.BrokerDeliverValveRegistry</implementation>
+			<role>com.ctrip.hermes.broker.transport.NettyServerConfig</role>
+			<implementation>com.ctrip.hermes.broker.transport.NettyServerConfig</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
-			<role-hint>send-message-request</role-hint>
-			<implementation>com.ctrip.hermes.broker.remoting.SendMessageRequestProcessor</implementation>
+			<role-hint>MESSAGE_SEND</role-hint>
+			<implementation>com.ctrip.hermes.broker.transport.command.processor.SendMessageCommandProcessor</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
-					<role-hint>broker</role-hint>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.transport.command.processor.CommandProcessor</role>
 			<role-hint>SUBSCRIBE</role-hint>
-			<implementation>com.ctrip.hermes.broker.remoting.SubscribeCommandProcessor</implementation>
+			<implementation>com.ctrip.hermes.broker.transport.command.processor.SubscribeCommandProcessor</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
-					<role-hint>broker</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.broker.queue.MessageQueuePullerManager</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.queue.QueueWriter</role>
-			<role-hint>mysql</role-hint>
-			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueWriter</implementation>
+			<role>com.ctrip.hermes.broker.queue.MessageQueueManager</role>
+			<implementation>com.ctrip.hermes.broker.queue.DefaultMessageQueueManager</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.queue.MessageQueuePullerManager</role>
+			<implementation>com.ctrip.hermes.broker.queue.DefaultMessageQueuePullerManager</implementation>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.dal.service.MessageService</role>
+			<implementation>com.ctrip.hermes.broker.dal.service.MessageService</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.broker.queue.QueueReader</role>
-			<role-hint>mysql</role-hint>
-			<implementation>com.ctrip.hermes.broker.queue.MysqlQueueReader</implementation>
+			<role>com.ctrip.hermes.broker.dal.service.ResendService</role>
+			<implementation>com.ctrip.hermes.broker.dal.service.ResendService</implementation>
 			<requirements>
 				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
+					<role>com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.broker.dal.hermes.OffsetResendDao</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -106,30 +113,6 @@
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.dal.service.MessageService</role>
-			<implementation>com.ctrip.hermes.broker.dal.service.MessageService</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.OffsetMessageDao</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.ctrip.hermes.broker.dal.service.ResendService</role>
-			<implementation>com.ctrip.hermes.broker.dal.service.ResendService</implementation>
-			<requirements>
-				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao</role>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.broker.dal.hermes.OffsetResendDao</role>
 				</requirement>
 			</requirements>
 		</component>

@@ -1,5 +1,7 @@
 package com.ctrip.hermes.broker.queue;
 
+import java.util.concurrent.TimeUnit;
+
 import io.netty.buffer.ByteBuf;
 
 import com.ctrip.hermes.core.bo.Tpg;
@@ -75,7 +77,11 @@ public abstract class AbstractMessageQueueCursor implements MessageQueueCursor {
 
 				if (!result.getMsgSeqs().isEmpty()) {
 					return result;
+				}else{
+					TimeUnit.MILLISECONDS.sleep(10);
 				}
+			}catch(InterruptedException e){
+				Thread.currentThread().interrupt();
 			} catch (Exception e) {
 				// TODO
 			}

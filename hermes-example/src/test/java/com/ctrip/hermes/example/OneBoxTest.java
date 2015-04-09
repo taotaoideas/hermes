@@ -12,8 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
+import org.unidal.lookup.LookupException;
 
-import com.ctrip.hermes.broker.transport.NettyServer;
+import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
+import com.ctrip.hermes.consumer.BaseConsumer;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -30,12 +32,40 @@ public class OneBoxTest extends ComponentTestCase {
 	}
 
 	@Test
+	public void testProduce() throws Exception {
+		startBroker();
+		Producer p = Producer.getInstance();
+
+		p.message("order_new", 1233213423L).withKey("key").withPartition("0").withPriority().send();
+
+		System.in.read();
+	}
+
+	@Test
+	public void testConsumer() throws Exception {
+		startBroker();
+		
+		Thread.sleep(2000);
+		Engine engine = lookup(Engine.class);
+
+		Subscriber s = new Subscriber("order_new", "sdf", new BaseConsumer<Long>() {
+
+			@Override
+			protected void consume(ConsumerMessage<Long> msg) {
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>Received: " + msg.getBody());
+			}
+		});
+		engine.start(Arrays.asList(s));
+
+		System.in.read();
+	}
+
+	@Test
 	public void test() throws Exception {
 		startBroker();
 
 		String topic = "order_new";
 
-		// lookup(MessageQueueMonitor.class);
 		Engine engine = lookup(Engine.class);
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
@@ -138,11 +168,20 @@ public class OneBoxTest extends ComponentTestCase {
 		}
 	}
 
-	private void startBroker() {
+	private void startBroker() throws Exception {
 		new Thread() {
 			public void run() {
-				lookup(NettyServer.class).start();
-			}
+
+				try {
+					lookup(BrokerBootstrap.class).start();
+				} catch (LookupException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			};
 		}.start();
 	}
 }

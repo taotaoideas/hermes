@@ -94,7 +94,7 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 					// TODO
 					e.printStackTrace();
 				} finally {
-					endpointPos = m_endpoints.size() == 0 ? 0 : endpointPos++ % m_endpoints.size();
+					endpointPos = m_endpoints.size() == 0 ? 0 : ++endpointPos % m_endpoints.size();
 				}
 			}
 

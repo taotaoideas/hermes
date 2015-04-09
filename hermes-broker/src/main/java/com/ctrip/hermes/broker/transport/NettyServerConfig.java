@@ -1,5 +1,8 @@
 package com.ctrip.hermes.broker.transport;
 
+import org.unidal.lookup.annotation.Named;
+
+@Named(type = NettyServerConfig.class)
 public class NettyServerConfig {
 	private int listenPort = 4376;
 

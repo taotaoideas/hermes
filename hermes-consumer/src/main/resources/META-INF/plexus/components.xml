@@ -41,13 +41,18 @@
 			<implementation>com.ctrip.hermes.consumer.engine.bootstrap.BrokerConsumerBootstrap</implementation>
 			<requirements>
 				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+					<field-name>m_metaService</field-name>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+					<field-name>m_metaService</field-name>
+				</requirement>
+				<requirement>
 					<role>com.ctrip.hermes.core.transport.endpoint.EndpointChannelManager</role>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.core.transport.endpoint.EndpointManager</role>
-				</requirement>
-				<requirement>
-					<role>com.ctrip.hermes.core.meta.MetaService</role>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.consumer.engine.notifier.ConsumerNotifier</role>
