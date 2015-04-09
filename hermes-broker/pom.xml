@@ -106,6 +106,8 @@
 						<configuration>
 							<manifest><![CDATA[,
                         ${basedir}/src/main/resources/META-INF/dal/jdbc/hermes-manifest.xml,
+                     ,]]><![CDATA[,
+                        ${basedir}/src/main/resources/META-INF/dal/jdbc/hermes-manifest.xml,
                      ,]]></manifest>
 						</configuration>
 					</execution>

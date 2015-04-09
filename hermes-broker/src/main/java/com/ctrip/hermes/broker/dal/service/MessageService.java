@@ -7,6 +7,8 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.broker.dal.hermes.DeadLetter;
+import com.ctrip.hermes.broker.dal.hermes.DeadLetterDao;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriorityEntity;
@@ -24,6 +26,9 @@ public class MessageService {
 
 	@Inject
 	private OffsetMessageDao m_offsetDao;
+	
+	@Inject
+	private DeadLetterDao m_deadLetterDao;
 
 	public void write(List<MessagePriority> msgs) throws DalException {
 		m_msgDao.insert(msgs.toArray(new MessagePriority[msgs.size()]));
@@ -68,5 +73,9 @@ public class MessageService {
 	public void updateOffset(OffsetMessage offset, long newOffset) throws DalException {
 		offset.setOffset(newOffset);
 		m_offsetDao.updateByPK(offset, OffsetMessageEntity.UPDATESET_OFFSET);
+	}
+	
+	public void deadLetter(DeadLetter dl) throws DalException {
+		m_deadLetterDao.insert(dl);
 	}
 }

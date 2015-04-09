@@ -116,6 +116,11 @@
 		</query-defs>
 	</entity>
 
+	<entity name="dead-letter">
+		<var name="topic" value-type="String" />
+		<var name="partition" value-type="int" />
+	</entity>
+
 
 </entities>
 

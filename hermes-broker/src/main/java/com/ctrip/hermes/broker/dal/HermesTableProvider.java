@@ -11,6 +11,7 @@ import org.unidal.dal.jdbc.QueryType;
 import org.unidal.dal.jdbc.mapping.TableProvider;
 import org.unidal.lookup.annotation.Inject;
 
+import com.ctrip.hermes.broker.dal.hermes.DeadLetter;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessage;
 import com.ctrip.hermes.broker.dal.hermes.OffsetResend;
@@ -131,6 +132,21 @@ public class HermesTableProvider implements TableProvider, Initializable {
 			@Override
 			public String getPhysicalTableName(OffsetResend dataObject) {
 				String fmt = "%s.offset_resend";
+				String db = toDbName(dataObject.getTopic(), dataObject.getPartition());
+				return String.format(fmt, db);
+			}
+		});
+
+		m_providers.put(DeadLetter.class, new InnerTableProvider<DeadLetter>() {
+
+			@Override
+			public String getDataSourceName(QueryDef def, DeadLetter dataObject) {
+				return findDataSourceName(def, dataObject.getTopic(), dataObject.getPartition());
+			}
+
+			@Override
+			public String getPhysicalTableName(DeadLetter dataObject) {
+				String fmt = "%s.dead_letter";
 				String db = toDbName(dataObject.getTopic(), dataObject.getPartition());
 				return String.format(fmt, db);
 			}
