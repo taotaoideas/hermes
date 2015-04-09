@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wizard package="com.ctrip.hermes.meta">
+   <jdbc package="com.ctrip.hermes.meta.dal" name="meta">
+      <datasource>
+         <driver>com.mysql.jdbc.Driver</driver>
+         <url>jdbc:mysql://10.3.6.237:3306/meta</url>
+         <user>root</user>
+         <password>~{f4f5d3b59647f3f1d2e4f870d168f0f0f4e4787dca3e7}</password>
+         <properties>useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</properties>
+      </datasource>
+      <group name="meta" package="com.ctrip.hermes.meta.dal.meta">
+         <table name="meta"/>
+         <table name="schema"/>
+      </group>
+   </jdbc>
+</wizard>
