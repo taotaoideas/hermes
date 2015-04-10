@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.BeforeClass;
@@ -74,6 +73,7 @@ public class OneBoxTest extends ComponentTestCase {
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
 		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
 		subscribers.put("group2", Arrays.asList("2-a", "2-b"));
+		subscribers.put("group3", Arrays.asList("3-a", "3-b", "3-c"));
 
 		for (Map.Entry<String, List<String>> entry : subscribers.entrySet()) {
 			String groupId = entry.getKey();
@@ -134,9 +134,8 @@ public class OneBoxTest extends ComponentTestCase {
 		System.out.println(">>> " + msg);
 		Future<SendResult> future = Producer.getInstance().message(topic, msg).withKey(uuid).send();
 
-		SendResult sendResult = future.get();
+		future.get();
 
-		System.out.println(sendResult.getCatMessageId());
 	}
 
 	static class MyConsumer implements Consumer<String> {

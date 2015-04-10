@@ -43,6 +43,9 @@
 				<requirement>
 					<role>com.ctrip.hermes.broker.queue.MessageQueuePullerManager</role>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.broker.transport.transmitter.MessageTransmitter</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
@@ -79,6 +82,10 @@
 					<role>com.ctrip.hermes.broker.dal.hermes.OffsetResendDao</role>
 				</requirement>
 			</requirements>
+		</component>
+		<component>
+			<role>com.ctrip.hermes.broker.transport.transmitter.MessageTransmitter</role>
+			<implementation>com.ctrip.hermes.broker.transport.transmitter.DefaultMessageTransmitter</implementation>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>

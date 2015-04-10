@@ -1,16 +1,11 @@
 package com.ctrip.hermes.broker.queue;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.unidal.tuple.Pair;
-
+import com.ctrip.hermes.broker.transport.transmitter.TpgRelay;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.message.ConsumerMessageBatch;
-import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
-import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
 /**
@@ -21,16 +16,21 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 
 	private Tpg m_tpg;
 
+	private ShutdownListener m_listener;
+
 	private Thread m_workerThread;
 
 	private AtomicBoolean m_started = new AtomicBoolean(false);
 
-	private List<Pair<Long, EndpointChannel>> m_endpoints = new CopyOnWriteArrayList<>();
+	private TpgRelay m_relay;
 
 	private MessageQueueCursor m_queueCursor;
 
-	public DefaultMessageQueuePuller(Tpg tpg) {
+	public DefaultMessageQueuePuller(Tpg tpg, TpgRelay relay, ShutdownListener listener) {
 		m_tpg = tpg;
+		m_relay = relay;
+		m_listener = listener;
+
 		m_workerThread = new Thread(new PullerTask());
 		m_workerThread.setDaemon(true);
 		m_workerThread.setName(String.format("PullerThread-%s-%d-%s", m_tpg.getTopic(), m_tpg.getPartition(),
@@ -44,10 +44,6 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 		}
 	}
 
-	public void addEndpoint(long correlationId, EndpointChannel channel) {
-		m_endpoints.add(new Pair<>(correlationId, channel));
-	}
-
 	protected ConsumerMessageBatch pullMessages(int batchSize) {
 		return m_queueCursor.next(batchSize);
 	}
@@ -56,49 +52,44 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 
 		@Override
 		public void run() {
-			int endpointPos = 0;
-
 			ConsumerMessageBatch batch = null;
+
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
-					if (m_endpoints.isEmpty()) {
-						// TODO recycle this thread
+					if (m_relay == null) {
 						TimeUnit.SECONDS.sleep(1);
 						continue;
 					}
 
-					if (batch == null) {
-						// TODO recycle this thread
-						// TODO get batch size
-						batch = pullMessages(100);
+					if (m_relay.isClosed()) {
+						// TODO log
+						return;
 					}
 
-					boolean sent = false;
-					if (batch != null) {
-						Pair<Long, EndpointChannel> selectedEndpoint = m_endpoints.get(endpointPos);
+					int availableSize = m_relay.availableSize();
+					if (availableSize > 0) {
+						if (batch == null) {
+							batch = pullMessages(availableSize);
+						}
 
-						ConsumeMessageCommand cmd = new ConsumeMessageCommand();
-						cmd.addMessage(selectedEndpoint.getKey(), batch);
-						selectedEndpoint.getValue().writeCommand(cmd);
-						batch = null;
-						sent = true;
+						if (m_relay.transmit(batch)) {
+							batch = null;
+						}
+					} else {
+						TimeUnit.MILLISECONDS.sleep(50);
 					}
 
-					if (!sent) {
-						// TODO consumer处理太慢，要考虑
-						TimeUnit.MILLISECONDS.sleep(5);
-					}
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				} catch (Exception e) {
 					// TODO
 					e.printStackTrace();
 				} finally {
-					endpointPos = m_endpoints.size() == 0 ? 0 : ++endpointPos % m_endpoints.size();
+					m_listener.onShutdown();
 				}
 			}
 
 		}
-
 	}
+
 }

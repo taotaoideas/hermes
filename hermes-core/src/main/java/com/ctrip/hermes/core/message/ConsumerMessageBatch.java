@@ -59,4 +59,29 @@ public class ConsumerMessageBatch {
 		m_transferCallback = transferCallback;
 	}
 
+	public int size() {
+		return m_msgSeqs.size();
+	}
+
+	public void mergeBatch(final ConsumerMessageBatch batch) {
+		if (batch == null) {
+			return;
+		} else {
+			m_msgSeqs.addAll(batch.getMsgSeqs());
+			final TransferCallback originalTransferCallback = m_transferCallback;
+
+			m_transferCallback = new TransferCallback() {
+
+				@Override
+				public void transfer(ByteBuf out) {
+					if (originalTransferCallback != null) {
+						originalTransferCallback.transfer(out);
+					}
+					if (batch.getTransferCallback() != null) {
+						batch.getTransferCallback().transfer(out);
+					}
+				}
+			};
+		}
+	}
 }

@@ -30,7 +30,7 @@ public class DefaultMessageQueueManager extends ContainerHolder implements Messa
 	private MessageQueue getMessageQueue(String topic, int partition) {
 		Pair<String, Integer> key = new Pair<>(topic, partition);
 		if (!m_messageQueues.containsKey(key)) {
-			synchronized (this) {
+			synchronized (m_messageQueues) {
 				if (!m_messageQueues.containsKey(key)) {
 					MessageQueue mq = MessageQueueFactory.createMessageQueue(topic, partition);
 					m_messageQueues.put(key, mq);
