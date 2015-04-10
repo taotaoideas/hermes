@@ -7,6 +7,8 @@ import com.ctrip.hermes.meta.server.MetaRestServer;
 
 public class StandaloneRestServer extends ComponentTestCase {
 
+	public static final String HOST ="http://0.0.0.0:8080/";
+	
 	@Test
 	public void startServer() throws InterruptedException {
 		MetaRestServer server = lookup(MetaRestServer.class);

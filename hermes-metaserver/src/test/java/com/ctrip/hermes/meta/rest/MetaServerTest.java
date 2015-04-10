@@ -9,6 +9,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -40,11 +41,11 @@ public class MetaServerTest extends ComponentTestCase {
 	@Test
 	public void testGetMeta() {
 		Client client = ClientBuilder.newClient();
-		WebTarget webTarget = client.target("http://0.0.0.0:8080/");
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 		Builder request = webTarget.path("meta/").request();
-		String actual = request.get(String.class);
-		Assert.assertNotNull(actual);
+		Meta actual = request.get(Meta.class);
 		System.out.println(actual);
+		Assert.assertTrue(actual.getTopics().size() > 0);
 	}
 
 	@Test
@@ -53,10 +54,12 @@ public class MetaServerTest extends ComponentTestCase {
 		Meta meta = JSON.parseObject(jsonString, Meta.class);
 
 		Client client = ClientBuilder.newClient();
-		WebTarget webTarget = client.target("http://0.0.0.0:8080/");
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 		Builder request = webTarget.path("meta/").request();
 		Response response = request.post(Entity.json(meta));
-		System.out.println(response.readEntity(Meta.class));
+		if (response.getStatus() != Status.NOT_MODIFIED.getStatusCode()) {
+			System.out.println(response.readEntity(Meta.class));
+		}
 	}
 
 	@Test
@@ -64,9 +67,11 @@ public class MetaServerTest extends ComponentTestCase {
 		String jsonString = Files.toString(new File("src/test/resources/meta-sample.json"), Charsets.UTF_8);
 
 		Client client = ClientBuilder.newClient();
-		WebTarget webTarget = client.target("http://0.0.0.0:8080/");
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 		Builder request = webTarget.path("meta/").request();
 		Response response = request.post(Entity.text(jsonString));
-		System.out.println(response.readEntity(Meta.class));
+		if (response.getStatus() != Status.NOT_MODIFIED.getStatusCode()) {
+			System.out.println(response.readEntity(Meta.class));
+		}
 	}
 }

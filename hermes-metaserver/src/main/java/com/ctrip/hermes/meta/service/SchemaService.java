@@ -1,17 +1,28 @@
 package com.ctrip.hermes.meta.service;
 
+//import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+//import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
+//import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+//import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.avro.Schema;
+import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.dal.meta.SchemaDao;
+import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
+import com.ctrip.hermes.meta.pojo.SchemaView;
 
 @Named
 public class SchemaService {
@@ -21,31 +32,52 @@ public class SchemaService {
 	@Inject
 	private SchemaDao schemaDao;
 
-	public void registerAvro(String topic, Schema schema) throws IOException, RestClientException {
-		this.avroSchemaRegistry.register(topic, schema);
+	public void createAvroSchema(String schemaName, org.apache.avro.Schema avroSchema) throws IOException,
+	      RestClientException, DalException {
+		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
+		int avroid = this.avroSchemaRegistry.register(schemaName, avroSchema);
+		schema.setAvroid(avroid);
+		schemaDao.updateByPK(schema, SchemaEntity.UPDATESET_FULL);
 	}
 
-	public Schema getAvroSchema(int id) {
-		Schema schema = null;
-		try {
-			schema = this.avroSchemaRegistry.getByID(id);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (RestClientException e) {
-			e.printStackTrace();
-		}
-		return schema;
+	public SchemaView createSchema(SchemaView schemaView) throws DalException {
+		Schema schema = schemaView.toMetaSchema();
+		schema.setCreateTime(new Date(System.currentTimeMillis()));
+		schema.setVersion(1);
+		schemaDao.insert(schema);
+		return new SchemaView(schema);
 	}
 
-	public SchemaMetadata getLatestAvroSchemaMetadata(String topic) {
-		SchemaMetadata schemaMetadata = null;
-		try {
-			schemaMetadata = this.avroSchemaRegistry.getLatestSchemaMetadata(topic);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (RestClientException e) {
-			e.printStackTrace();
+	public org.apache.avro.Schema getAvroSchema(String schemaName) throws IOException, RestClientException, DalException {
+		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
+		if (schema.getAvroid() > 0) {
+			org.apache.avro.Schema avroSchema = this.avroSchemaRegistry.getByID(schema.getAvroid());
+			return avroSchema;
 		}
-		return schemaMetadata;
+		return null;
+	}
+
+	public SchemaView getSchema(String schemaName) throws DalException, IOException, RestClientException {
+		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
+		SchemaView schemaView = new SchemaView(schema);
+		if (schema.getAvroid() > 0) {
+			SchemaMetadata avroSchemaMeta = this.avroSchemaRegistry.getLatestSchemaMetadata(schema.getName());
+			Map<String, Object> config = new HashMap<>();
+			config.put("avro.schema", avroSchemaMeta.getSchema());
+			config.put("avro.id", avroSchemaMeta.getId());
+			config.put("avro.version", avroSchemaMeta.getVersion());
+			schemaView.setConfig(config);
+		}
+		return schemaView;
+	}
+
+	public SchemaView updateSchema(SchemaView schemaView) throws DalException {
+		Schema schema = schemaView.toMetaSchema();
+		Schema oldSchema = schemaDao.findLatestByName(schema.getName(), SchemaEntity.READSET_FULL);
+		schema.setVersion(oldSchema.getVersion() + 1);
+		schema.setCreateTime(new Date(System.currentTimeMillis()));
+		schema.setId(0);
+		schemaDao.insert(schema);
+		return new SchemaView(schema);
 	}
 }

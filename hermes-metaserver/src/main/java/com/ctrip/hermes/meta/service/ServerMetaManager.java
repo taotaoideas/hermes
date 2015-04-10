@@ -30,6 +30,7 @@ public class ServerMetaManager implements MetaManager {
 			try {
 				com.ctrip.hermes.meta.dal.meta.Meta dalMeta = m_metaDao.findLatest(MetaEntity.READSET_FULL);
 				m_cachedMeta = JSON.parseObject(dalMeta.getValue(), Meta.class);
+				lastUpdatedHashCode = m_cachedMeta.hashCode();
 			} catch (DalException e) {
 				throw new RuntimeException("Get meta failed.", e);
 			}
@@ -39,12 +40,17 @@ public class ServerMetaManager implements MetaManager {
 
 	@Override
 	public boolean updateMeta(Meta meta) {
-		if (m_cachedMeta != null && meta.hashCode() == lastUpdatedHashCode) {
-			return false;
+		if (m_cachedMeta == null) {
+			getMeta();
+		}
+
+		if (meta.getVersion() != m_cachedMeta.getVersion()) {
+			throw new RuntimeException("Not the latest version. Latest Version: " + m_cachedMeta.getVersion());
 		}
 
 		com.ctrip.hermes.meta.dal.meta.Meta dalMeta = new com.ctrip.hermes.meta.dal.meta.Meta();
 		try {
+			meta.setVersion(meta.getVersion() + 1);
 			dalMeta.setValue(JSON.toJSONString(meta));
 			dalMeta.setLastModifiedTime(new Date(System.currentTimeMillis()));
 			m_metaDao.insert(dalMeta);

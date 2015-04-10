@@ -1,13 +1,16 @@
 package com.ctrip.hermes.meta.pojo;
 
-import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
-
 import java.util.Date;
+import java.util.Map;
+
+import com.ctrip.hermes.meta.dal.meta.Schema;
 
 public class SchemaView {
 	private int id;
 
 	private String name;
+
+	private String type;
 
 	private int version;
 
@@ -15,18 +18,26 @@ public class SchemaView {
 
 	private Date createTime;
 
+	private Map<String, Object> config;
+
 	public SchemaView() {
 
 	}
 
-	public SchemaView(SchemaMetadata avroSchemaMeta) {
-		this.id = avroSchemaMeta.getId();
-		this.schema = avroSchemaMeta.getSchema();
-		this.version = avroSchemaMeta.getVersion();
+	public SchemaView(Schema schema) {
+		this.id = schema.getId();
+		this.name = schema.getName();
+		this.type = schema.getType();
+		this.version = schema.getVersion();
+		this.createTime = schema.getCreateTime();
 	}
 
 	public Date getCreateTime() {
 		return createTime;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public String getName() {
@@ -37,12 +48,20 @@ public class SchemaView {
 		return schema;
 	}
 
+	public String getType() {
+		return type;
+	}
+
 	public Integer getVersion() {
 		return version;
 	}
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public void setName(String name) {
@@ -53,15 +72,29 @@ public class SchemaView {
 		this.schema = schema;
 	}
 
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	public void setVersion(Integer version) {
 		this.version = version;
 	}
 
-	public int getId() {
-		return id;
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setConfig(Map<String, Object> config) {
+		this.config = config;
+	}
+
+	public Schema toMetaSchema() {
+		Schema schema = new Schema();
+		schema.setId(this.id);
+		schema.setName(this.name);
+		schema.setType(this.type);
+		schema.setVersion(this.version);
+		schema.setCreateTime(this.createTime);
+		return schema;
 	}
 }

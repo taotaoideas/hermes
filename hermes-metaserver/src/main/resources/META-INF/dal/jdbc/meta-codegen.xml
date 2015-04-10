@@ -41,6 +41,7 @@
     <member name="name" field="name" value-type="String" length="500" nullable="false" />
     <member name="type" field="type" value-type="String" length="500" nullable="false" />
     <member name="version" field="version" value-type="int" length="10" nullable="false" />
+    <member name="create-time" field="createTime" value-type="Date" nullable="false" />
     <member name="value" field="value" value-type="byte[]" length="65535" />
     <member name="avroid" field="avroid" value-type="int" length="10" />
     <var name="key-id" value-type="int" key-member="id" />

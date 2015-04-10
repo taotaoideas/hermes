@@ -7,6 +7,7 @@ import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
 import com.ctrip.hermes.meta.server.MetaRestServer;
+import com.ctrip.hermes.meta.service.CodecService;
 import com.ctrip.hermes.meta.service.SchemaService;
 import com.ctrip.hermes.meta.service.ServerMetaManager;
 import com.ctrip.hermes.meta.service.ServerMetaService;
@@ -21,6 +22,7 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(MetaRestServer.class));
 		all.add(A(TopicService.class));
 		all.add(A(SchemaService.class));
+		all.add(A(CodecService.class));
 		
 		all.add(A(ServerMetaManager.class));
 		all.add(A(ServerMetaService.class));

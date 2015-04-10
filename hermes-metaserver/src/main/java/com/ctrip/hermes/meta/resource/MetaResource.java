@@ -48,7 +48,7 @@ public class MetaResource {
 
 		Meta meta = null;
 		try {
-			JSON.parseObject(content, Meta.class);
+			meta = JSON.parseObject(content, Meta.class);
 		} catch (Exception e) {
 			throw new RestException(e, Status.BAD_REQUEST);
 		}
