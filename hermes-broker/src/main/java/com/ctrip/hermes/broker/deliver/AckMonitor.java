@@ -1,28 +1,11 @@
 package com.ctrip.hermes.broker.deliver;
 
-import java.util.List;
 
 public interface AckMonitor<T> {
 
-	/**
-    * @author Leo Liang(jhliang@ctrip.com)
-    *
-    */
-   public interface Ack {
+	void delivered(EnumRange<?> range, T ctx);
 
-   }
-
-	/**
-    * @author Leo Liang(jhliang@ctrip.com)
-    *
-    */
-   public interface Locatable {
-
-   }
-
-	void delivered(List<Locatable> locatables, T ctx);
-
-	void acked(Locatable locatable, Ack ack);
+	void acked(Locatable locatable, boolean success);
 
 	void addListener(AckStatusListener<T> listener);
 

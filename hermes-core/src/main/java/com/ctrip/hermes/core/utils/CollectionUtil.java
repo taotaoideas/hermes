@@ -9,6 +9,10 @@ public class CollectionUtil {
 		return isNullOrEmpty(list) ? null : list.get(list.size() - 1);
 	}
 
+	public static <T> T first(List<T> list) {
+		return isNullOrEmpty(list) ? null : list.get(0);
+	}
+
 	public static boolean isNullOrEmpty(Collection<?> collection) {
 		return collection == null || collection.isEmpty();
 	}
