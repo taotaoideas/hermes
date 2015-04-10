@@ -11,7 +11,7 @@ import com.ctrip.hermes.core.message.ConsumerMessageBatch;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class DefaultTpgRelay implements TpgRelay {
+public class DefaultTpgRelayer implements TpgRelayer {
 
 	private int m_pos = 0;
 
@@ -46,7 +46,7 @@ public class DefaultTpgRelay implements TpgRelay {
 	}
 
 	@Override
-	public boolean transmit(ConsumerMessageBatch batch) {
+	public boolean relay(ConsumerMessageBatch batch) {
 		if(m_currentChannel != null && !m_currentChannel.isClosed()){
 			m_currentChannel.transmit(batch);
 			return true;

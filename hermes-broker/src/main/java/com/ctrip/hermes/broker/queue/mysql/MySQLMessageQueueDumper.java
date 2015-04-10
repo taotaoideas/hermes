@@ -57,6 +57,8 @@ public class MySQLMessageQueueDumper extends AbstractMessageQueueDumper {
 			addResults(result, false);
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			batch.release();
 		}
 
 	}

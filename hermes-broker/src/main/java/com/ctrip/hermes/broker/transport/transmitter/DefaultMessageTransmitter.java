@@ -22,14 +22,14 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 @Named(type = MessageTransmitter.class)
 public class DefaultMessageTransmitter implements MessageTransmitter {
 	// one physical channel mapping to one woker
-	// one tpg mapping to one relay
+	// one tpg mapping to one relayer
 	// one physical channel mapping to multiple tpg, but each <physcal channel, tpg> only mapping to one <tpgchannel, correlationId>
 	private Map<EndpointChannel, TransmitterWorker> m_channel2Worker = new HashMap<>();
 
-	private Map<Tpg, TpgRelay> m_tpg2Relay = new HashMap<>();
+	private Map<Tpg, TpgRelayer> m_tpg2Relayer = new HashMap<>();
 
 	@Override
-	public synchronized TpgRelay registerDestination(Tpg tpg, long correlationId, EndpointChannel channel, int window) {
+	public synchronized TpgRelayer registerDestination(Tpg tpg, long correlationId, EndpointChannel channel, int window) {
 		if (!m_channel2Worker.containsKey(channel)) {
 			TransmitterWorker worker = new TransmitterWorker(channel);
 			worker.start();
@@ -38,23 +38,23 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 			m_channel2Worker.put(channel, worker);
 		}
 
-		if (!m_tpg2Relay.containsKey(tpg)) {
-			m_tpg2Relay.put(tpg, new DefaultTpgRelay());
+		if (!m_tpg2Relayer.containsKey(tpg)) {
+			m_tpg2Relayer.put(tpg, new DefaultTpgRelayer());
 		}
 
-		TpgRelay relay = m_tpg2Relay.get(tpg);
+		TpgRelayer relayer = m_tpg2Relayer.get(tpg);
 		TransmitterWorker worker = m_channel2Worker.get(channel);
 		TpgChannel tpgChannel = new TpgChannel(tpg, correlationId, channel, window);
 
-		if (!relay.containsChannel(tpgChannel)) {
-			relay.addChannel(tpgChannel);
+		if (!relayer.containsChannel(tpgChannel)) {
+			relayer.addChannel(tpgChannel);
 		}
 
 		if (!worker.containsTpgChannel(tpgChannel)) {
 			worker.addTpgChannel(tpgChannel);
 		}
 
-		return m_tpg2Relay.get(tpg);
+		return m_tpg2Relayer.get(tpg);
 
 	}
 

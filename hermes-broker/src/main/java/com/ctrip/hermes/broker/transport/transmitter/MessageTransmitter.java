@@ -9,6 +9,6 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
  */
 public interface MessageTransmitter {
 
-	TpgRelay registerDestination(Tpg tpg, long correlationId, EndpointChannel channel, int window);
+	TpgRelayer registerDestination(Tpg tpg, long correlationId, EndpointChannel channel, int window);
 
 }

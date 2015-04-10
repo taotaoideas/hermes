@@ -67,9 +67,9 @@ public class BatchableMessageSender extends AbstractMessageSender implements Mes
 
 		private Endpoint m_endpoint;
 
-		private static final int BATCH_SIZE = 10;
+		private static final int BATCH_SIZE = 2000;
 
-		private static final int INTERVAL_MILLISECONDS = 50;
+		private static final int INTERVAL_MILLISECONDS = 100;
 
 		public EndpointWritingWorkerThread(Endpoint endpoint, EndpointChannelManager endpointChannelManager) {
 			m_endpointChannelManager = endpointChannelManager;

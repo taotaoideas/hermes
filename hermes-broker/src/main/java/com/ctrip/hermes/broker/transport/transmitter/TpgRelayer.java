@@ -8,14 +8,14 @@ import com.ctrip.hermes.core.message.ConsumerMessageBatch;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public interface TpgRelay {
+public interface TpgRelayer {
 	void close();
 
 	boolean isClosed();
 
 	int availableSize();
 
-	boolean transmit(ConsumerMessageBatch batch);
+	boolean relay(ConsumerMessageBatch batch);
 
 	void addChannel(TpgChannel channel);
 
