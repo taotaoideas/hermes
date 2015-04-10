@@ -14,7 +14,7 @@ public class SchemaView {
 
 	private int version;
 
-	private Object schema;
+	private String downloadPath;
 
 	private Date createTime;
 
@@ -44,10 +44,6 @@ public class SchemaView {
 		return name;
 	}
 
-	public Object getSchema() {
-		return schema;
-	}
-
 	public String getType() {
 		return type;
 	}
@@ -66,10 +62,6 @@ public class SchemaView {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public void setSchema(Object schema) {
-		this.schema = schema;
 	}
 
 	public void setType(String type) {
@@ -97,4 +89,12 @@ public class SchemaView {
 		schema.setCreateTime(this.createTime);
 		return schema;
 	}
+
+	public String getDownloadPath() {
+	   return downloadPath;
+   }
+
+	public void setDownloadPath(String downloadPath) {
+	   this.downloadPath = downloadPath;
+   }
 }

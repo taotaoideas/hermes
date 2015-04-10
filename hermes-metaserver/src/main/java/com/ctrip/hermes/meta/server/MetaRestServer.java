@@ -18,6 +18,7 @@ import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.unidal.lookup.annotation.Named;
 
@@ -37,6 +38,7 @@ public class MetaRestServer implements LogEnabled {
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(CharsetResponseFilter.class);
 		rc.register(ObjectMapperProvider.class);
+		rc.register(MultiPartFeature.class);
 		rc.packages(TopicResource.class.getPackage().getName());
 		return rc;
 	}

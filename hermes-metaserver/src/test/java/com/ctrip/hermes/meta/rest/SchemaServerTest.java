@@ -9,9 +9,14 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.glassfish.jersey.server.ResourceConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -86,4 +91,23 @@ public class SchemaServerTest extends ComponentTestCase {
 		}
 	}
 
+	@Test
+	public void testUploadJsonFile() {
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+
+		String schema = "sample_json";
+		Builder request = webTarget.path("schemas/" + schema).request();
+		SchemaView actual = request.get(SchemaView.class);
+		actual.setType("avro");
+
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-json-sample.json");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + schema + "/upload").request();
+		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		System.out.println(response.getStatus());
+	}
 }

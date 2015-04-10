@@ -4,12 +4,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import com.ctrip.hermes.meta.rest.CodecServerTest;
+import com.ctrip.hermes.meta.rest.MetaServerTest;
+import com.ctrip.hermes.meta.rest.SchemaServerTest;
+import com.ctrip.hermes.meta.rest.TopicServerTest;
+import com.ctrip.hermes.meta.service.AvroSchemaTest;
+
 @RunWith(Suite.class)
-@SuiteClasses({
-
-// add test classes here
-
-})
+@SuiteClasses({ CodecServerTest.class, MetaServerTest.class, SchemaServerTest.class, TopicServerTest.class,
+      AvroSchemaTest.class })
 public class AllTests {
 
 }

@@ -11,18 +11,22 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.dal.meta.SchemaDao;
 import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
 import com.ctrip.hermes.meta.pojo.SchemaView;
+import com.google.common.io.ByteStreams;
 
 @Named
 public class SchemaService {
@@ -80,4 +84,19 @@ public class SchemaService {
 		schemaDao.insert(schema);
 		return new SchemaView(schema);
 	}
+
+	public void uploadJson(SchemaView schemaView, InputStream is, FormDataContentDisposition header) throws IOException,
+	      DalException {
+		byte[] fileBytes = ByteStreams.toByteArray(is);
+		Schema metaSchema = schemaView.toMetaSchema();
+		metaSchema.setFileContent(fileBytes);
+		metaSchema.setFileProperties(JSON.toJSONString(header));
+		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+	}
+
+	public void uploadAvro(SchemaView schemaView, InputStream is, FormDataContentDisposition header) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
