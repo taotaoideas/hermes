@@ -20,6 +20,8 @@ import com.ctrip.hermes.broker.transport.NettyServer;
 import com.ctrip.hermes.broker.transport.NettyServerConfig;
 import com.ctrip.hermes.broker.transport.command.processor.SendMessageCommandProcessor;
 import com.ctrip.hermes.broker.transport.command.processor.SubscribeCommandProcessor;
+import com.ctrip.hermes.broker.transport.transmitter.DefaultMessageTransmitter;
+import com.ctrip.hermes.broker.transport.transmitter.MessageTransmitter;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
@@ -40,12 +42,14 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		      .req(MessageQueueManager.class));
 		all.add(C(CommandProcessor.class, CommandType.SUBSCRIBE.toString(), SubscribeCommandProcessor.class)//
 		      .req(MessageQueueManager.class)//
-		      .req(MessageQueuePullerManager.class));
+		      .req(MessageQueuePullerManager.class)//
+		      .req(MessageTransmitter.class));
 
 		all.add(A(DefaultMessageQueueManager.class));
 		all.add(A(DefaultMessageQueuePullerManager.class));
 		all.add(A(MessageService.class));
 		all.add(A(ResendService.class));
+		all.add(A(DefaultMessageTransmitter.class));
 
 		all.add(C(TableProvider.class, "message-priority", HermesTableProvider.class) //
 		      .req(MetaService.class) //
@@ -59,7 +63,6 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(TableProvider.class, "dead-letter", HermesTableProvider.class) //
 				.req(MetaService.class) //
 				.config(E("m_table").value("dead-letter")));
-
 
 		all.add(A(HermesJdbcDataSourceDescriptorManager.class));
 

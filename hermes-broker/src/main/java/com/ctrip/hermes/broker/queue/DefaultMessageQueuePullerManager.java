@@ -5,8 +5,9 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.broker.queue.MessageQueuePuller.ShutdownListener;
+import com.ctrip.hermes.broker.transport.transmitter.TpgRelay;
 import com.ctrip.hermes.core.bo.Tpg;
-import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -18,9 +19,14 @@ public class DefaultMessageQueuePullerManager implements MessageQueuePullerManag
 	private ConcurrentMap<Tpg, MessageQueuePuller> m_pullers = new ConcurrentHashMap<>();
 
 	@Override
-	public void startPuller(Tpg tpg, long correlationId, EndpointChannel channel) {
-		m_pullers.putIfAbsent(tpg, new DefaultMessageQueuePuller(tpg));
-		m_pullers.get(tpg).addEndpoint(correlationId, channel);
+	public void startPuller(final Tpg tpg, TpgRelay relay) {
+		m_pullers.putIfAbsent(tpg, new DefaultMessageQueuePuller(tpg, relay, new ShutdownListener() {
+
+			@Override
+			public void onShutdown() {
+				m_pullers.remove(tpg);
+			}
+		}));
 		m_pullers.get(tpg).start();
 	}
 

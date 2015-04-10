@@ -16,8 +16,18 @@ public class SubscribeCommand extends AbstractCommand implements AckAware<Subscr
 
 	private int m_partition;
 
+	private int m_window = 50;
+
 	public SubscribeCommand() {
 		super(CommandType.SUBSCRIBE);
+	}
+
+	public int getWindow() {
+		return m_window;
+	}
+
+	public void setWindow(int window) {
+		this.m_window = window;
 	}
 
 	public String getGroupId() {
@@ -56,6 +66,7 @@ public class SubscribeCommand extends AbstractCommand implements AckAware<Subscr
 		m_topic = codec.readString();
 		m_partition = codec.readInt();
 		m_groupId = codec.readString();
+		m_window = codec.readInt();
 	}
 
 	@Override
@@ -65,6 +76,7 @@ public class SubscribeCommand extends AbstractCommand implements AckAware<Subscr
 		codec.writeString(m_topic);
 		codec.writeInt(m_partition);
 		codec.writeString(m_groupId);
+		codec.writeInt(m_window);
 	}
 
 }

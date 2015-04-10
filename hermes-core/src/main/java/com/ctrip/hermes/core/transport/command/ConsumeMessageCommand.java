@@ -144,7 +144,7 @@ public class ConsumeMessageCommand extends AbstractCommand {
 	private void writeBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
 		codec.writeInt(batches.size());
 		for (ConsumerMessageBatch batch : batches) {
-			codec.writeInt(batch.getMsgSeqs().size());
+			codec.writeInt(batch.size());
 			codec.writeString(batch.getTopic());
 			for (Long seq : batch.getMsgSeqs()) {
 				codec.writeLong(seq);

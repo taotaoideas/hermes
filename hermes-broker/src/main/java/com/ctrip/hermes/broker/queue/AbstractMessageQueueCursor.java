@@ -2,13 +2,10 @@ package com.ctrip.hermes.broker.queue;
 
 import java.util.concurrent.TimeUnit;
 
-import io.netty.buffer.ByteBuf;
-
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.message.ConsumerMessageBatch;
 import com.ctrip.hermes.core.meta.MetaService;
-import com.ctrip.hermes.core.transport.TransferCallback;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
 /**
@@ -63,24 +60,24 @@ public abstract class AbstractMessageQueueCursor implements MessageQueueCursor {
 				ConsumerMessageBatch priorityMessageBatch = fetchPriortyMessages(batchSize);
 
 				if (priorityMessageBatch != null) {
-					mergeBatch(priorityMessageBatch, result);
+					result.mergeBatch(priorityMessageBatch);
 				}
 
-				if (result.getMsgSeqs().size() < batchSize) {
-					int remainingBatchSize = batchSize - result.getMsgSeqs().size();
+				if (result.size() < batchSize) {
+					int remainingBatchSize = batchSize - result.size();
 					ConsumerMessageBatch nonPriorityMessageBatch = fetchNonPriortyMessages(remainingBatchSize);
 
 					if (nonPriorityMessageBatch != null) {
-						mergeBatch(nonPriorityMessageBatch, result);
+						result.mergeBatch(nonPriorityMessageBatch);
 					}
 				}
 
-				if (!result.getMsgSeqs().isEmpty()) {
+				if (result.size() > 0) {
 					return result;
-				}else{
+				} else {
 					TimeUnit.MILLISECONDS.sleep(10);
 				}
-			}catch(InterruptedException e){
+			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			} catch (Exception e) {
 				// TODO
@@ -89,28 +86,6 @@ public abstract class AbstractMessageQueueCursor implements MessageQueueCursor {
 
 		return null;
 
-	}
-
-	protected void mergeBatch(final ConsumerMessageBatch src, ConsumerMessageBatch target) {
-		if (src == null) {
-			return;
-		} else {
-			target.addMsgSeqs(src.getMsgSeqs());
-			final TransferCallback originalTransferCallback = target.getTransferCallback();
-
-			target.setTransferCallback(new TransferCallback() {
-
-				@Override
-				public void transfer(ByteBuf out) {
-					if (originalTransferCallback != null) {
-						originalTransferCallback.transfer(out);
-					}
-					if (src.getTransferCallback() != null) {
-						src.getTransferCallback().transfer(out);
-					}
-				}
-			});
-		}
 	}
 
 }
