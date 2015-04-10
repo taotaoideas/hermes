@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.broker.queue.MessageQueuePuller.ShutdownListener;
-import com.ctrip.hermes.broker.transport.transmitter.TpgRelay;
+import com.ctrip.hermes.broker.transport.transmitter.TpgRelayer;
 import com.ctrip.hermes.core.bo.Tpg;
 
 /**
@@ -19,8 +19,8 @@ public class DefaultMessageQueuePullerManager implements MessageQueuePullerManag
 	private ConcurrentMap<Tpg, MessageQueuePuller> m_pullers = new ConcurrentHashMap<>();
 
 	@Override
-	public void startPuller(final Tpg tpg, TpgRelay relay) {
-		m_pullers.putIfAbsent(tpg, new DefaultMessageQueuePuller(tpg, relay, new ShutdownListener() {
+	public void startPuller(final Tpg tpg, TpgRelayer relayer) {
+		m_pullers.putIfAbsent(tpg, new DefaultMessageQueuePuller(tpg, relayer, new ShutdownListener() {
 
 			@Override
 			public void onShutdown() {

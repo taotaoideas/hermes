@@ -258,6 +258,10 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 			return m_msgs;
 		}
+
+		public void release() {
+			m_rawData.release();
+		}
 	}
 
 }

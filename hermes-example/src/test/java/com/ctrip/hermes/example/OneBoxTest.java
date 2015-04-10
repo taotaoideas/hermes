@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
 import org.junit.BeforeClass;
@@ -23,6 +24,8 @@ import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class OneBoxTest extends ComponentTestCase {
 
@@ -58,6 +61,41 @@ public class OneBoxTest extends ComponentTestCase {
 			}
 		});
 		engine.start(Arrays.asList(s));
+
+		System.in.read();
+	}
+
+	@Test
+	public void testProducePerformance() throws Exception {
+		startBroker();
+
+		int times = 20000;
+		final CountDownLatch latch = new CountDownLatch(times);
+		Thread.sleep(2000);
+		Producer p = Producer.getInstance();
+
+		p.message("order_new", 1233213423L).withKey("key").withPartition("0").withPriority().send();
+		p.message("order_new", 1233213423L).withKey("key").withPartition("0").withPriority().send();
+		Thread.sleep(1000);
+
+		long start = System.currentTimeMillis();
+
+		for (int i = 0; i < times; i++) {
+			SettableFuture<SendResult> future = (SettableFuture<SendResult>) p.message("order_new", 1233213423L)
+			      .withKey("key").withPartition("0").withPriority().send();
+
+			future.addListener(new Runnable() {
+
+				@Override
+				public void run() {
+					latch.countDown();
+				}
+			}, MoreExecutors.sameThreadExecutor());
+		}
+
+		latch.await();
+
+		System.out.println(String.format("Produce %d msgs spends %d ms", times, (System.currentTimeMillis() - start)));
 
 		System.in.read();
 	}
