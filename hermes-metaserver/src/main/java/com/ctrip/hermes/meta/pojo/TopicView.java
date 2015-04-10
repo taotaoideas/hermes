@@ -17,7 +17,7 @@ public class TopicView {
 
 	private String description;
 
-	private Map<String, String> config;
+	private Map<String, Object> config;
 
 	private String status;
 
@@ -49,7 +49,7 @@ public class TopicView {
 		this.codec = new CodecView(topic.getCodec());
 	}
 
-	public Map<String, String> getConfig() {
+	public Map<String, Object> getConfig() {
 		return config;
 	}
 
@@ -81,7 +81,7 @@ public class TopicView {
 		return storageType;
 	}
 
-	public void setConfig(Map<String, String> config) {
+	public void setConfig(Map<String, Object> config) {
 		this.config = config;
 	}
 
@@ -135,10 +135,10 @@ public class TopicView {
 		topic.setName(this.name);
 		topic.setStorageType(this.storageType);
 		topic.setDescription(this.description);
-		for (Map.Entry<String, String> entry : this.config.entrySet()) {
+		for (Map.Entry<String, Object> entry : this.config.entrySet()) {
 			Property prop = new Property();
 			prop.setName(entry.getKey());
-			prop.setValue(entry.getValue());
+			prop.setValue(String.valueOf(entry.getValue()));
 			topic.addProperty(prop);
 		}
 		topic.setStatus(this.status);

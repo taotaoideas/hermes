@@ -10,7 +10,6 @@ import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.entity.Topic;
-import com.ctrip.hermes.meta.pojo.TopicView;
 
 @Named
 public class TopicService {
@@ -29,12 +28,21 @@ public class TopicService {
 		return m_metaService.findTopicsByPattern(pattern);
 	}
 
-	public void createTopic(TopicView topicView) {
+	public Topic createTopic(Topic topic) {
 		Meta meta = m_metaManager.getMeta();
-		Topic topic = topicView.toMetaTopic();
 		topic.setCreateTime(new Date(System.currentTimeMillis()));
 		// TODO topic ID, schema ID
 		meta.addTopic(topic);
 		m_metaManager.updateMeta(meta);
+		return topic;
+	}
+
+	public Topic updateTopic(Topic topic) {
+		Meta meta = m_metaManager.getMeta();
+		meta.removeTopic(topic.getName());
+		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
+		meta.addTopic(topic);
+		m_metaManager.updateMeta(meta);
+		return topic;
 	}
 }

@@ -28,6 +28,16 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.meta.service.CodecService</role>
+			<implementation>com.ctrip.hermes.meta.service.CodecService</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+					<role-hint>server-meta</role-hint>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.core.meta.MetaManager</role>
 			<role-hint>meta-server</role-hint>
 			<implementation>com.ctrip.hermes.meta.service.ServerMetaManager</implementation>

@@ -36,11 +36,6 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.meta.MetaService#getPartitions(java.lang.String)
-	 */
 	@Override
 	public List<Partition> getPartitions(String topicName) {
 		Topic topic = m_meta.findTopic(topicName);
@@ -50,11 +45,6 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.meta.MetaService#findEndpoint(java.lang.String)
-	 */
 	@Override
 	public Endpoint findEndpoint(String endpointId) {
 		return m_meta.findEndpoint(endpointId);
@@ -66,11 +56,6 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 		return m_meta.findStorage(storageType);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.meta.MetaService#getCodecType(java.lang.String)
-	 */
 	@Override
 	public Codec getCodec(String topicName) {
 		Topic topic = m_meta.findTopic(topicName);

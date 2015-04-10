@@ -9,5 +9,16 @@
 			</query>
 		</query-defs>
 	</entity>
+	<entity name="schema">
+		<query-defs>
+			<query name="findLatestByName" type="SELECT">
+				<param name="name" />
+				<statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='name'/> = ${name}
+        ORDER BY <FIELD name='id'/> DESC LIMIT 1]]></statement>
+			</query>
+		</query-defs>
+	</entity>
 </entities>
 
