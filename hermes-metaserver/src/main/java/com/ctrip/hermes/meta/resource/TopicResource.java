@@ -36,7 +36,12 @@ public class TopicResource {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
-		TopicView topic = JSON.parseObject(content, TopicView.class);
+		TopicView topic = null;
+		try {
+			topic = JSON.parseObject(content, TopicView.class);
+		} catch (Exception e) {
+			throw new RestException(e, Status.BAD_REQUEST);
+		}
 		try {
 			topicService.createTopic(topic);
 		} catch (Exception e) {
@@ -58,10 +63,10 @@ public class TopicResource {
 	@GET
 	@Path("")
 	public List<TopicView> findTopics(@QueryParam("pattern") String pattern) {
-		if(StringUtils.isEmpty(pattern)){
+		if (StringUtils.isEmpty(pattern)) {
 			pattern = ".*";
 		}
-		
+
 		List<Topic> topics = topicService.findTopics(pattern);
 		List<TopicView> returnResult = new ArrayList<TopicView>();
 		for (Topic topic : topics) {

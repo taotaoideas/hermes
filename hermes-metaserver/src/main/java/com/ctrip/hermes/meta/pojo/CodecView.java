@@ -38,4 +38,16 @@ public class CodecView {
 	public void setConfig(Map<String, String> config) {
 		this.config = config;
 	}
+
+	public Codec toMetaCodec() {
+		Codec codec = new Codec();
+		codec.setType(this.type);
+		for (Map.Entry<String, String> entry : this.config.entrySet()) {
+			Property prop = new Property();
+			prop.setName(entry.getKey());
+			prop.setValue(entry.getValue());
+			codec.addProperty(prop);
+		}
+		return codec;
+	}
 }

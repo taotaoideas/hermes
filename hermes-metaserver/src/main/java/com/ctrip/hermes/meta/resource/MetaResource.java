@@ -45,8 +45,13 @@ public class MetaResource {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
-		
-		Meta meta = JSON.parseObject(content, Meta.class);
+
+		Meta meta = null;
+		try {
+			JSON.parseObject(content, Meta.class);
+		} catch (Exception e) {
+			throw new RestException(e, Status.BAD_REQUEST);
+		}
 		try {
 			boolean result = metaManager.updateMeta(meta);
 			if (result == false) {
