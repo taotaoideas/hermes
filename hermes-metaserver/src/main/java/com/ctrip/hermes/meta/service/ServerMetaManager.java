@@ -22,15 +22,12 @@ public class ServerMetaManager implements MetaManager {
 
 	private Meta m_cachedMeta;
 
-	private long lastUpdatedHashCode;
-
 	@Override
 	public Meta getMeta() {
 		if (m_cachedMeta == null) {
 			try {
 				com.ctrip.hermes.meta.dal.meta.Meta dalMeta = m_metaDao.findLatest(MetaEntity.READSET_FULL);
 				m_cachedMeta = JSON.parseObject(dalMeta.getValue(), Meta.class);
-				lastUpdatedHashCode = m_cachedMeta.hashCode();
 			} catch (DalException e) {
 				throw new RuntimeException("Get meta failed.", e);
 			}
@@ -58,7 +55,6 @@ public class ServerMetaManager implements MetaManager {
 			throw new RuntimeException("Update meta failed.", e);
 		}
 		m_cachedMeta = meta;
-		lastUpdatedHashCode = meta.hashCode();
 		return true;
 	}
 

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Singleton;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -28,7 +27,6 @@ import com.ctrip.hermes.meta.service.TopicService;
 @Path("/topics/")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class TopicResource {
 
 	private static TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);

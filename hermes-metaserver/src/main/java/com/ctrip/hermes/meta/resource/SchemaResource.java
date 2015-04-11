@@ -1,5 +1,7 @@
 package com.ctrip.hermes.meta.resource;
 
+import java.io.InputStream;
+
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,6 +15,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.plexus.util.StringUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.alibaba.fastjson.JSON;
@@ -24,7 +28,6 @@ import com.ctrip.hermes.meta.service.SchemaService;
 @Path("/schemas/")
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class SchemaResource {
 
 	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
@@ -63,9 +66,6 @@ public class SchemaResource {
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
-		if (schema == null) {
-			throw new RestException("schema not found: " + name, Status.NOT_FOUND);
-		}
 		return schema;
 	}
 
@@ -89,5 +89,23 @@ public class SchemaResource {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return Response.status(Status.CREATED).entity(schema).build();
+	}
+
+	@POST
+	@Path("{name}/upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadFile(@PathParam("name") String name, @FormDataParam("file") InputStream is,
+	      @FormDataParam("file") FormDataContentDisposition header) {
+		SchemaView schemaView = getSchema(name);
+		try {
+			if (schemaView.getType().equals("json")) {
+				schemaService.uploadJson(schemaView, is, header);
+			} else if (schemaView.getType().equals("avro")) {
+				schemaService.uploadAvro(schemaView, is, header);
+			}
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.CREATED).build();
 	}
 }
