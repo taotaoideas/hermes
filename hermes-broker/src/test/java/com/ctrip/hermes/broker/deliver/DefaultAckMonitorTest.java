@@ -1,8 +1,6 @@
 package com.ctrip.hermes.broker.deliver;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,10 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,107 +18,87 @@ public class DefaultAckMonitorTest {
 
 	@Before
 	public void before() {
-		m = new DefaultAckMonitor<String>(5000, 1000);
+		m = new DefaultAckMonitor<String>(5000);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSingleSuccess() throws Exception {
 		String expId = uuid();
-		CountDownLatch latch = new CountDownLatch(1);
-		AtomicBoolean shouldTimeout = new AtomicBoolean(false);
-		check(m, latch, shouldTimeout, expId, 1, Arrays.asList(0), Collections.EMPTY_LIST, new int[] { 0, 0 }, new int[0]);
-		assertTrue(latch.await(200, TimeUnit.MILLISECONDS));
+		check(m, expId, 1, Arrays.asList(0), Collections.EMPTY_LIST, new int[] { 0, 0 }, new int[0]);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSingleFail() throws Exception {
 		String expId = uuid();
-		CountDownLatch latch = new CountDownLatch(2);
-		AtomicBoolean shouldTimeout = new AtomicBoolean(false);
-		check(m, latch, shouldTimeout, expId, 1, Collections.EMPTY_LIST, Arrays.asList(0), new int[] { 0, 0 },
-		      new int[] { 0 });
-		assertTrue(latch.await(200, TimeUnit.MILLISECONDS));
+		check(m, expId, 1, Collections.EMPTY_LIST, Arrays.asList(0), new int[] { 0, 0 }, new int[] { 0 });
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSingleTimeout() throws Exception {
-		final AtomicBoolean shouldTimeout = new AtomicBoolean(false);
-		m = new DefaultAckMonitor<String>(10, 10) {
+		m = new DefaultAckMonitor<String>(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
-				return shouldTimeout.get();
+				return true;
 			}
 
 		};
 		String expId = uuid();
-		CountDownLatch latch = new CountDownLatch(2);
-		check(m, latch, shouldTimeout, expId, 1, Collections.EMPTY_LIST, Collections.EMPTY_LIST, new int[] { 0, 0 },
-		      new int[] { 0 });
-		assertTrue(latch.await(100, TimeUnit.MILLISECONDS));
+		check(m, expId, 1, Collections.EMPTY_LIST, Collections.EMPTY_LIST, new int[] { 0, 0 }, new int[] { 0 });
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testMixed1() throws Exception {
-		final AtomicBoolean shouldTimeout = new AtomicBoolean(false);
-		m = new DefaultAckMonitor<String>(10, 10) {
+		m = new DefaultAckMonitor<String>(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
-				return shouldTimeout.get();
+				return true;
 			}
 
 		};
 		String expId = uuid();
-		CountDownLatch latch = new CountDownLatch(2);
-		check(m, latch, shouldTimeout, expId, 10, Arrays.asList(0, 1, 2, 9), Collections.EMPTY_LIST, //
+		check(m, expId, 10, Arrays.asList(0, 1, 2, 9), Collections.EMPTY_LIST, //
 		      new int[] { 0, 9 }, new int[] { 3, 4, 5, 6, 7, 8 });
-		assertTrue(latch.await(100, TimeUnit.MILLISECONDS));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testMixed2() throws Exception {
-		final AtomicBoolean shouldTimeout = new AtomicBoolean(false);
-		m = new DefaultAckMonitor<String>(10, 10) {
+		m = new DefaultAckMonitor<String>(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
-				return shouldTimeout.get();
+				return true;
 			}
 
 		};
 		String expId = uuid();
-		CountDownLatch latch = new CountDownLatch(2);
-		check(m, latch, shouldTimeout, expId, 10, Arrays.asList(1, 5, 8), Collections.EMPTY_LIST, //
+		check(m, expId, 10, Arrays.asList(1, 5, 8), Collections.EMPTY_LIST, //
 		      new int[] { 0, 9 }, new int[] { 0, 2, 3, 4, 6, 7, 9 });
-		assertTrue(latch.await(100, TimeUnit.MILLISECONDS));
 	}
 
 	@Test
 	public void testMixed3() throws Exception {
-		final AtomicBoolean shouldTimeout = new AtomicBoolean(false);
-		m = new DefaultAckMonitor<String>(10, 10) {
+		m = new DefaultAckMonitor<String>(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
-				return shouldTimeout.get();
+				return true;
 			}
 
 		};
 		String expId = uuid();
-		CountDownLatch latch = new CountDownLatch(2);
-		check(m, latch, shouldTimeout, expId, 10, Arrays.asList(1, 5, 8), Arrays.asList(2, 6, 9), //
+		check(m, expId, 10, Arrays.asList(1, 5, 8), Arrays.asList(2, 6, 9), //
 		      new int[] { 0, 9 }, new int[] { 0, 2, 3, 4, 6, 7, 9 });
-		assertTrue(latch.await(100, TimeUnit.MILLISECONDS));
 	}
 
-	private void check(DefaultAckMonitor<String> m, final CountDownLatch latch, //
-	      AtomicBoolean timeout, final String expId, int totalOffsets, //
+	private void check(DefaultAckMonitor<String> m, //
+	      final String expId, int totalOffsets, //
 	      List<Integer> successes, List<Integer> fails, //
 	      final int[] successIdxes, final int[] failIdxes) throws Exception {
 		// offsets
@@ -137,64 +111,40 @@ public class DefaultAckMonitorTest {
 		Collections.sort(offsets);
 
 		// locatables
-		final EnumRange<?> locatables = new EnumRange<>(expId);
-		final String expCtx = uuid();
+		final EnumRange<String> locatables = new EnumRange<>(expId);
 		for (Integer offset : offsets) {
 			locatables.addOffset(offset);
+
+			// test merge
+			EnumRange<String> subRange = new EnumRange<String>(expId);
+			subRange.addOffset(offset);
+			m.delivered(subRange);
 		}
-
-		final AtomicReference<Boolean> onSuccessCalled = new AtomicReference<Boolean>(false);
-		m.addListener(new AckStatusListener<String>() {
-
-			@Override
-			public void onSuccess(ContinuousRange<?> range, String ctx) {
-				System.out.println("onSuccess " + range);
-				onSuccessCalled.set(true);
-
-				assertEquals(expCtx, ctx);
-				assertEquals(new ContinuousRange<>(expId, offsets.get(successIdxes[0]), offsets.get(successIdxes[1])),
-				      range);
-
-				System.out.println("onSuccess done");
-				latch.countDown();
-			}
-
-			@Override
-			public void onFail(EnumRange<?> range, String ctx) {
-				if (failIdxes.length <= 0) {
-					return;
-				}
-				System.out.println("onFail " + range);
-
-				// onFail should be called before onSuccess
-				assertFalse(onSuccessCalled.get());
-
-				onSuccessCalled.set(true);
-				assertEquals(expCtx, ctx);
-				EnumRange<String> expRange = new EnumRange<>(expId);
-				for (Integer failIdx : failIdxes) {
-					expRange.addOffset(offsets.get(failIdx));
-				}
-				assertEquals(expRange, range);
-				System.out.println("onFail done");
-
-				latch.countDown();
-			}
-
-		});
-
-		m.delivered(locatables, expCtx);
 
 		// ack
 		for (Integer success : successes) {
-			m.acked(new Locatable(expId, locatables.getOffsets().get(success)), true);
+			m.acked(new Locatable<>(expId, locatables.getOffsets().get(success)), true);
 		}
 		for (Integer fail : fails) {
-			m.acked(new Locatable(expId, locatables.getOffsets().get(fail)), false);
+			m.acked(new Locatable<>(expId, locatables.getOffsets().get(fail)), false);
 		}
 
-		Thread.sleep(50);
-		timeout.set(true);
+		BatchResult batchResult = m.scan();
+		ContinuousRange<?> doneRange = batchResult.getDoneRange();
+		EnumRange<?> failRange = batchResult.getFailRange();
+
+		System.out.println("Range done: " + doneRange);
+		assertEquals(new ContinuousRange<>(expId, offsets.get(successIdxes[0]), offsets.get(successIdxes[1])), doneRange);
+
+		if (failIdxes.length > 0) {
+			System.out.println("Range fail: " + failRange);
+
+			EnumRange<String> expRange = new EnumRange<>(expId);
+			for (Integer failIdx : failIdxes) {
+				expRange.addOffset(offsets.get(failIdx));
+			}
+			assertEquals(expRange, failRange);
+		}
 
 	}
 
