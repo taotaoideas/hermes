@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.ctrip.hermes.core.ManualRelease;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
@@ -21,6 +22,7 @@ import com.google.common.util.concurrent.SettableFuture;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@ManualRelease
 public class SendMessageCommand extends AbstractCommand implements AckAware<SendMessageAckCommand> {
 
 	/**
@@ -76,6 +78,8 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 	@Override
 	public void parse0(ByteBuf buf) {
+		m_rawBuf = buf;
+
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		m_msgCounter.set(codec.readInt());

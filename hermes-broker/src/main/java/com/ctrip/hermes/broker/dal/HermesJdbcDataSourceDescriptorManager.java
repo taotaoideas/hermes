@@ -40,7 +40,7 @@ public class HermesJdbcDataSourceDescriptorManager extends JdbcDataSourceDescrip
 				props.setPassword(dsProps.get("password").getValue());
 			}
 			// TODO set other properties
-			props.setConnectionProperties("useUnicode=true&autoReconnect=true");
+			props.setConnectionProperties("useUnicode=true&autoReconnect=true&rewriteBatchedStatements=true");
 			dsDef.setProperties(props);
 
 			def.addDataSource(dsDef);

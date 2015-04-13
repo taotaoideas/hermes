@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -52,16 +54,19 @@ public class OneBoxTest extends ComponentTestCase {
 
 		Thread.sleep(2000);
 		Engine engine = lookup(Engine.class);
+		final AtomicLong counter = new AtomicLong(0);
 
 		Subscriber s = new Subscriber("order_new", "sdf", new BaseConsumer<Long>() {
 
 			@Override
 			protected void consume(ConsumerMessage<Long> msg) {
-				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>Received: " + msg.getBody());
+				counter.incrementAndGet();
+//				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>Received: " + msg.getBody());
 			}
 		});
 		engine.start(Arrays.asList(s));
 
+		
 		System.in.read();
 	}
 
@@ -70,19 +75,31 @@ public class OneBoxTest extends ComponentTestCase {
 		startBroker();
 
 		int times = 20000;
+		String topic = "order_new";
 		final CountDownLatch latch = new CountDownLatch(times);
 		Thread.sleep(2000);
 		Producer p = Producer.getInstance();
 
-		p.message("order_new", 1233213423L).withKey("key").withPartition("0").withPriority().send();
-		p.message("order_new", 1233213423L).withKey("key").withPartition("0").withPriority().send();
+		p.message(topic, 1233213423L).withKey("key").withPartition("0").withPriority().send();
+		p.message(topic, 1233213423L).withKey("key").withPartition("0").withPriority().send();
 		Thread.sleep(1000);
 
 		long start = System.currentTimeMillis();
+		Random random = new Random();
 
 		for (int i = 0; i < times; i++) {
-			SettableFuture<SendResult> future = (SettableFuture<SendResult>) p.message("order_new", 1233213423L)
-			      .withKey("key").withPartition("0").withPriority().send();
+			String uuid = UUID.randomUUID().toString();
+			String msg = uuid;
+
+			boolean priority = random.nextBoolean();
+			SettableFuture<SendResult> future;
+			if (priority) {
+				future = (SettableFuture<SendResult>) Producer.getInstance().message(topic, msg + " priority")
+				      .withKey(uuid).withPriority().send();
+			} else {
+				future = (SettableFuture<SendResult>) Producer.getInstance().message(topic, msg + " non-priority")
+				      .withKey(uuid).send();
+			}
 
 			future.addListener(new Runnable() {
 
@@ -170,7 +187,15 @@ public class OneBoxTest extends ComponentTestCase {
 		String uuid = UUID.randomUUID().toString();
 		String msg = prefix + uuid;
 		System.out.println(">>> " + msg);
-		Future<SendResult> future = Producer.getInstance().message(topic, msg).withKey(uuid).send();
+		Random random = new Random();
+
+		boolean priority = random.nextBoolean();
+		Future<SendResult> future;
+		if (priority) {
+			future = Producer.getInstance().message(topic, msg + " priority").withKey(uuid).withPriority().send();
+		} else {
+			future = Producer.getInstance().message(topic, msg + " non-priority").withKey(uuid).send();
+		}
 
 		future.get();
 

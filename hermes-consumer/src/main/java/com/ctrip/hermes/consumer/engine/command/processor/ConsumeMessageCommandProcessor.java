@@ -13,7 +13,7 @@ import com.ctrip.hermes.consumer.engine.notifier.ConsumerNotifier;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.BrokerConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.transport.command.Command;
@@ -47,24 +47,28 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 		if (cmd instanceof ConsumeMessageCommand) {
 			ConsumeMessageCommand consumeMessageCommand = (ConsumeMessageCommand) cmd;
 
-			for (Map.Entry<Long, List<ConsumerMessageBatch>> entry : consumeMessageCommand.getMsgs().entrySet()) {
-				long correlationId = entry.getKey();
-				List<ConsumerMessageBatch> batches = entry.getValue();
+			try {
+				for (Map.Entry<Long, List<TppConsumerMessageBatch>> entry : consumeMessageCommand.getMsgs().entrySet()) {
+					long correlationId = entry.getKey();
+					List<TppConsumerMessageBatch> batches = entry.getValue();
 
-				Class<?> bodyClazz = m_consumerNotifier.find(correlationId).getMessageClazz();
+					Class<?> bodyClazz = m_consumerNotifier.find(correlationId).getMessageClazz();
 
-				List<ConsumerMessage<?>> msgs = decodeBatches(batches, bodyClazz);
+					List<ConsumerMessage<?>> msgs = decodeBatches(batches, bodyClazz);
 
-				m_consumerNotifier.messageReceived(correlationId, msgs);
+					m_consumerNotifier.messageReceived(correlationId, msgs);
+				}
+			} finally {
+				consumeMessageCommand.release();
 			}
 		}
 
 	}
 
 	@SuppressWarnings("rawtypes")
-   private List<ConsumerMessage<?>> decodeBatches(List<ConsumerMessageBatch> batches, Class bodyClazz) {
+	private List<ConsumerMessage<?>> decodeBatches(List<TppConsumerMessageBatch> batches, Class bodyClazz) {
 		List<ConsumerMessage<?>> msgs = new ArrayList<>();
-		for (ConsumerMessageBatch batch : batches) {
+		for (TppConsumerMessageBatch batch : batches) {
 			List<Long> msgSeqs = batch.getMsgSeqs();
 			ByteBuf batchData = batch.getData();
 

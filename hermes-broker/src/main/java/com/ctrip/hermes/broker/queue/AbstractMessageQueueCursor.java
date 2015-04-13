@@ -1,10 +1,12 @@
 package com.ctrip.hermes.broker.queue;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
@@ -47,28 +49,29 @@ public abstract class AbstractMessageQueueCursor implements MessageQueueCursor {
 
 	protected abstract long loadNonPriorityOffset();
 
-	protected abstract ConsumerMessageBatch fetchPriortyMessages(int batchSize);
+	protected abstract TppConsumerMessageBatch fetchPriortyMessages(int batchSize);
 
-	protected abstract ConsumerMessageBatch fetchNonPriortyMessages(int batchSize);
+	protected abstract TppConsumerMessageBatch fetchNonPriortyMessages(int batchSize);
 
 	@Override
-	public ConsumerMessageBatch next(int batchSize) {
+	public List<TppConsumerMessageBatch> next(int batchSize) {
 		while (!Thread.currentThread().isInterrupted()) {
 			try {
-				ConsumerMessageBatch result = new ConsumerMessageBatch();
-				result.setTopic(m_tpg.getTopic());
-				ConsumerMessageBatch priorityMessageBatch = fetchPriortyMessages(batchSize);
+				List<TppConsumerMessageBatch> result = new LinkedList<>();
+				int remainingSize = batchSize;
+				TppConsumerMessageBatch priorityMessageBatch = fetchPriortyMessages(batchSize);
 
 				if (priorityMessageBatch != null) {
-					result.mergeBatch(priorityMessageBatch);
+					result.add(priorityMessageBatch);
+					remainingSize -= priorityMessageBatch.size();
 				}
 
 				if (result.size() < batchSize) {
-					int remainingBatchSize = batchSize - result.size();
-					ConsumerMessageBatch nonPriorityMessageBatch = fetchNonPriortyMessages(remainingBatchSize);
+					TppConsumerMessageBatch nonPriorityMessageBatch = fetchNonPriortyMessages(remainingSize);
 
 					if (nonPriorityMessageBatch != null) {
-						result.mergeBatch(nonPriorityMessageBatch);
+						result.add(nonPriorityMessageBatch);
+						remainingSize -= nonPriorityMessageBatch.size();
 					}
 				}
 
