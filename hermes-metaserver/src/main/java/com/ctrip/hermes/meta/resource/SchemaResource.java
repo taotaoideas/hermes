@@ -21,6 +21,7 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
+import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.SchemaService;
@@ -60,7 +61,7 @@ public class SchemaResource {
 		}
 		SchemaView schema = null;
 		try {
-			schema = schemaService.getSchema(name);
+			schema = schemaService.getSchemaView(name);
 		} catch (DalNotFoundException e) {
 			throw new RestException("Schema not found: " + name, Status.NOT_FOUND);
 		} catch (Exception e) {
@@ -84,7 +85,7 @@ public class SchemaResource {
 			throw new RestException(e, Status.BAD_REQUEST);
 		}
 		try {
-			schema = schemaService.updateSchema(schema);
+			schema = schemaService.updateSchemaView(schema);
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
@@ -109,12 +110,28 @@ public class SchemaResource {
 		return Response.status(Status.CREATED).build();
 	}
 
-//	@GET
-//	@Path("{name}/download")
-//	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-//	public Response downloadFile(@PathParam("name") String name) {
-//		SchemaView schemaView = getSchema(name);
-//		
-//		
-//	}
+	@GET
+	@Path("{name}/download")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadFile(@PathParam("name") String name) {
+		if (StringUtils.isEmpty(name)) {
+			throw new RestException("HTTP path {name} is empty", Status.BAD_REQUEST);
+		}
+		Schema schema = null;
+		try {
+			schema = schemaService.getSchemaMeta(name);
+		} catch (DalNotFoundException e) {
+			throw new RestException("Schema not found: " + name, Status.NOT_FOUND);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		
+		String fileProperties = schema.getFileProperties();
+		if (StringUtils.isEmpty(fileProperties)) {
+			throw new RestException("Schema file not found: " + name, Status.NOT_FOUND);
+		}
+
+		return Response.status(Status.OK).header("content-disposition", fileProperties)
+		      .entity(schema.getFileContent()).build();
+	}
 }

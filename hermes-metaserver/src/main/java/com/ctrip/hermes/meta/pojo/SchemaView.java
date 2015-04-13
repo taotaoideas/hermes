@@ -14,12 +14,10 @@ public class SchemaView {
 
 	private int version;
 
-	private String downloadPath;
-
 	private Date createTime;
 
 	private Map<String, Object> config;
-
+	
 	public SchemaView() {
 
 	}
@@ -90,11 +88,4 @@ public class SchemaView {
 		return schema;
 	}
 
-	public String getDownloadPath() {
-	   return downloadPath;
-   }
-
-	public void setDownloadPath(String downloadPath) {
-	   this.downloadPath = downloadPath;
-   }
 }

@@ -18,6 +18,11 @@
 			<role>com.ctrip.hermes.core.meta.internal.MetaLoader</role>
 			<role-hint>remote-meta-loader</role-hint>
 			<implementation>com.ctrip.hermes.core.meta.internal.RemoteMetaLoader</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.env.ClientEnvironment</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.meta.MetaManager</role>

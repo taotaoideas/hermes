@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.ws.rs.DELETE;
@@ -26,13 +27,19 @@ import com.ctrip.hermes.meta.resource.TopicResource;
 
 @Named
 public class MetaRestServer implements LogEnabled {
-	public static final int DEFAULT_PORT = 8080;
+	public static final String DEFAULT_PORT = "1248";
 
 	public static final String DEFAULT_HOST = "0.0.0.0";
+
+	public static final String META_HOST = "meta-host";
+
+	public static final String META_PORT = "meta-port";
 
 	private Logger m_logger;
 
 	private HttpServer m_server;
+
+	private Properties m_properties = MetaPropertiesLoader.load();
 
 	private ResourceConfig configResource() {
 		ResourceConfig rc = new ResourceConfig();
@@ -50,8 +57,8 @@ public class MetaRestServer implements LogEnabled {
 	}
 
 	private URI getBaseURI() {
-		int port = DEFAULT_PORT;
-		String host = DEFAULT_HOST;
+		int port = Integer.valueOf(m_properties.getProperty(META_PORT, DEFAULT_PORT));
+		String host = m_properties.getProperty(META_HOST, DEFAULT_HOST);
 		URI result = UriBuilder.fromUri("http://" + host).port(port).build();
 		return result;
 	}
