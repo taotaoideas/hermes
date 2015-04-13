@@ -1,10 +1,11 @@
 package com.ctrip.hermes.meta.pojo;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Property;
+import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
 
 public class TopicView {
@@ -17,8 +18,6 @@ public class TopicView {
 
 	private String description;
 
-	private Map<String, Object> config;
-
 	private String status;
 
 	private Date createTime;
@@ -27,7 +26,15 @@ public class TopicView {
 
 	private String schemaName;
 
-	private CodecView codec;
+	private List<Partition> partitions;
+
+	private List<Property> properties;
+
+	private Storage storage;
+
+	private SchemaView schemaView;
+
+	private CodecView codecView;
 
 	public TopicView() {
 
@@ -38,19 +45,14 @@ public class TopicView {
 		this.name = topic.getName();
 		this.storageType = topic.getStorageType();
 		this.description = topic.getDescription();
-		this.config = new HashMap<>();
-		for (Property property : topic.getProperties()) {
-			config.put(property.getName(), property.getValue());
-		}
 		this.status = topic.getStatus();
 		this.createTime = topic.getCreateTime();
 		this.lastModifiedTime = topic.getLastModifiedTime();
-		this.schemaName = topic.getSchemaName();
-		this.codec = new CodecView(topic.getCodec());
-	}
+		this.partitions = topic.getPartitions();
+		this.properties = topic.getProperties();
 
-	public Map<String, Object> getConfig() {
-		return config;
+		this.codecView = new CodecView(topic.getCodec());
+		this.schemaName = topic.getSchemaName();
 	}
 
 	public Date getCreateTime() {
@@ -69,8 +71,8 @@ public class TopicView {
 		return name;
 	}
 
-	public String getSchemaName() {
-		return schemaName;
+	public SchemaView getSchema() {
+		return schemaView;
 	}
 
 	public String getStatus() {
@@ -79,10 +81,6 @@ public class TopicView {
 
 	public String getStorageType() {
 		return storageType;
-	}
-
-	public void setConfig(Map<String, Object> config) {
-		this.config = config;
 	}
 
 	public void setCreateTime(Date createTime) {
@@ -101,8 +99,8 @@ public class TopicView {
 		this.name = name;
 	}
 
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
+	public void setSchema(SchemaView schemaView) {
+		this.schemaView = schemaView;
 	}
 
 	public void setStatus(String status) {
@@ -122,11 +120,11 @@ public class TopicView {
 	}
 
 	public CodecView getCodec() {
-		return codec;
+		return codecView;
 	}
 
 	public void setCodec(CodecView codec) {
-		this.codec = codec;
+		this.codecView = codec;
 	}
 
 	public Topic toMetaTopic() {
@@ -135,17 +133,38 @@ public class TopicView {
 		topic.setName(this.name);
 		topic.setStorageType(this.storageType);
 		topic.setDescription(this.description);
-		for (Map.Entry<String, Object> entry : this.config.entrySet()) {
-			Property prop = new Property();
-			prop.setName(entry.getKey());
-			prop.setValue(String.valueOf(entry.getValue()));
+		for (Property prop : this.properties) {
 			topic.addProperty(prop);
 		}
 		topic.setStatus(this.status);
 		topic.setCreateTime(this.createTime);
 		topic.setLastModifiedTime(this.lastModifiedTime);
+		topic.setCodec(this.codecView.toMetaCodec());
 		topic.setSchemaName(this.schemaName);
-		topic.setCodec(this.codec.toMetaCodec());
 		return topic;
+	}
+
+	public List<Partition> getPartitions() {
+		return partitions;
+	}
+
+	public void setPartitions(List<Partition> partitions) {
+		this.partitions = partitions;
+	}
+
+	public List<Property> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(List<Property> properties) {
+		this.properties = properties;
+	}
+
+	public Storage getStorage() {
+		return storage;
+	}
+
+	public void setStorage(Storage storage) {
+		this.storage = storage;
 	}
 }

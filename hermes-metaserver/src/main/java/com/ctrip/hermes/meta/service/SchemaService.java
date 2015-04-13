@@ -47,6 +47,11 @@ public class SchemaService {
 		return new SchemaView(schema);
 	}
 
+	public void deleteSchema(String name) throws DalException {
+		Schema schema = getSchemaMeta(name);
+		schemaDao.deleteByPK(schema);
+	}
+
 	public org.apache.avro.Schema getAvroSchema(String schemaName) throws IOException, RestClientException, DalException {
 		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
 		if (schema.getAvroid() > 0) {
