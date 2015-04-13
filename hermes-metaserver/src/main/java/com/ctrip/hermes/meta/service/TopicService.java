@@ -9,6 +9,7 @@ import org.unidal.lookup.annotation.Named;
 import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Meta;
+import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
 
 @Named
@@ -28,10 +29,13 @@ public class TopicService {
 		return m_metaService.findTopicsByPattern(pattern);
 	}
 
+	public Storage findStorage(String topic) {
+		return m_metaService.findStorage(topic);
+	}
+
 	public Topic createTopic(Topic topic) {
 		Meta meta = m_metaManager.getMeta();
 		topic.setCreateTime(new Date(System.currentTimeMillis()));
-		// TODO topic ID, schema ID
 		meta.addTopic(topic);
 		m_metaManager.updateMeta(meta);
 		return topic;
@@ -44,5 +48,11 @@ public class TopicService {
 		meta.addTopic(topic);
 		m_metaManager.updateMeta(meta);
 		return topic;
+	}
+
+	public void deleteTopic(String name) {
+		Meta meta = m_metaManager.getMeta();
+		meta.removeTopic(name);
+		m_metaManager.updateMeta(meta);
 	}
 }

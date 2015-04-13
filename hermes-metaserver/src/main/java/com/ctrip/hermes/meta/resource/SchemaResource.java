@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.Response.Status;
 import org.codehaus.plexus.util.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.alibaba.fastjson.JSON;
@@ -92,6 +94,17 @@ public class SchemaResource {
 		return Response.status(Status.CREATED).entity(schema).build();
 	}
 
+	@DELETE
+	@Path("{name}")
+	public Response deleteSchema(@PathParam("name") String name) {
+		try {
+			schemaService.deleteSchema(name);
+		} catch (DalException e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.OK).build();
+	}
+
 	@POST
 	@Path("{name}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -125,13 +138,13 @@ public class SchemaResource {
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		String fileProperties = schema.getFileProperties();
 		if (StringUtils.isEmpty(fileProperties)) {
 			throw new RestException("Schema file not found: " + name, Status.NOT_FOUND);
 		}
 
-		return Response.status(Status.OK).header("content-disposition", fileProperties)
-		      .entity(schema.getFileContent()).build();
+		return Response.status(Status.OK).header("content-disposition", fileProperties).entity(schema.getFileContent())
+		      .build();
 	}
 }

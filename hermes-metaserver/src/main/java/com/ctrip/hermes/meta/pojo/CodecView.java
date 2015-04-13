@@ -1,7 +1,6 @@
 package com.ctrip.hermes.meta.pojo;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import com.ctrip.hermes.meta.entity.Codec;
 import com.ctrip.hermes.meta.entity.Property;
@@ -9,7 +8,7 @@ import com.ctrip.hermes.meta.entity.Property;
 public class CodecView {
 	private String type;
 
-	private Map<String, Object> config;
+	private List<Property> properties;
 
 	public CodecView() {
 
@@ -17,35 +16,29 @@ public class CodecView {
 
 	public CodecView(Codec codec) {
 		this.type = codec.getType();
-		config = new HashMap<>();
-		for (Property property : codec.getProperties()) {
-			config.put(property.getName(), property.getValue());
-		}
+		this.properties = codec.getProperties();
+	}
+
+	public List<Property> getProperties() {
+		return properties;
 	}
 
 	public String getType() {
 		return type;
 	}
 
+	public void setProperties(List<Property> properties) {
+		this.properties = properties;
+	}
+
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public Map<String, Object> getConfig() {
-		return config;
-	}
-
-	public void setConfig(Map<String, Object> config) {
-		this.config = config;
 	}
 
 	public Codec toMetaCodec() {
 		Codec codec = new Codec();
 		codec.setType(this.type);
-		for (Map.Entry<String, Object> entry : this.config.entrySet()) {
-			Property prop = new Property();
-			prop.setName(entry.getKey());
-			prop.setValue(String.valueOf(entry.getValue()));
+		for (Property prop : this.properties) {
 			codec.addProperty(prop);
 		}
 		return codec;
