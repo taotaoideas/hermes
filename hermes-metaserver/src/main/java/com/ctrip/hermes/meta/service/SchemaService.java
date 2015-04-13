@@ -1,10 +1,5 @@
 package com.ctrip.hermes.meta.service;
 
-//import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-//import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
-//import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-//import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
@@ -16,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.avro.Schema.Parser;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
@@ -94,9 +90,18 @@ public class SchemaService {
 		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
 	}
 
-	public void uploadAvro(SchemaView schemaView, InputStream is, FormDataContentDisposition header) {
-		// TODO Auto-generated method stub
+	public void uploadAvro(SchemaView schemaView, InputStream is, FormDataContentDisposition header) throws IOException,
+	      DalException, RestClientException {
+		byte[] fileBytes = ByteStreams.toByteArray(is);
+		Schema metaSchema = schemaView.toMetaSchema();
+		metaSchema.setFileContent(fileBytes);
+		metaSchema.setFileProperties(JSON.toJSONString(header));
 
+		Parser parser = new Parser();
+		org.apache.avro.Schema avroSchema = parser.parse(new String(fileBytes));
+		int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
+		metaSchema.setAvroid(avroid);
+		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
 	}
 
 }

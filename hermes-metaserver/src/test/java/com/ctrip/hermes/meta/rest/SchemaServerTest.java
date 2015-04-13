@@ -101,10 +101,30 @@ public class SchemaServerTest extends ComponentTestCase {
 		String schema = "sample_json";
 		Builder request = webTarget.path("schemas/" + schema).request();
 		SchemaView actual = request.get(SchemaView.class);
-		actual.setType("avro");
+		actual.setType("json");
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-json-sample.json");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + schema + "/upload").request();
+		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		System.out.println(response.getStatus());
+	}
+	
+	@Test
+	public void testUploadAvroFile() {
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+
+		String schema = "sample_avro";
+		Builder request = webTarget.path("schemas/" + schema).request();
+		SchemaView actual = request.get(SchemaView.class);
+		actual.setType("avro");
+
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-avro-sample.avsc");
 		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
 		request = webTarget.path("schemas/" + schema + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));

@@ -108,4 +108,13 @@ public class SchemaResource {
 		}
 		return Response.status(Status.CREATED).build();
 	}
+
+//	@GET
+//	@Path("{name}/download")
+//	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+//	public Response downloadFile(@PathParam("name") String name) {
+//		SchemaView schemaView = getSchema(name);
+//		
+//		
+//	}
 }
