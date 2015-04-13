@@ -17,7 +17,6 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
-import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.dal.meta.SchemaDao;
 import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
@@ -57,8 +56,13 @@ public class SchemaService {
 		return null;
 	}
 
-	public SchemaView getSchema(String schemaName) throws DalException, IOException, RestClientException {
+	public Schema getSchemaMeta(String schemaName) throws DalException {
 		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
+		return schema;
+	}
+
+	public SchemaView getSchemaView(String schemaName) throws DalException, IOException, RestClientException {
+		Schema schema = getSchemaMeta(schemaName);
 		SchemaView schemaView = new SchemaView(schema);
 		if (schema.getAvroid() > 0) {
 			SchemaMetadata avroSchemaMeta = this.avroSchemaRegistry.getLatestSchemaMetadata(schema.getName());
@@ -71,7 +75,7 @@ public class SchemaService {
 		return schemaView;
 	}
 
-	public SchemaView updateSchema(SchemaView schemaView) throws DalException {
+	public SchemaView updateSchemaView(SchemaView schemaView) throws DalException {
 		Schema schema = schemaView.toMetaSchema();
 		Schema oldSchema = schemaDao.findLatestByName(schema.getName(), SchemaEntity.READSET_FULL);
 		schema.setVersion(oldSchema.getVersion() + 1);
@@ -81,26 +85,26 @@ public class SchemaService {
 		return new SchemaView(schema);
 	}
 
-	public void uploadJson(SchemaView schemaView, InputStream is, FormDataContentDisposition header) throws IOException,
-	      DalException {
-		byte[] fileBytes = ByteStreams.toByteArray(is);
-		Schema metaSchema = schemaView.toMetaSchema();
-		metaSchema.setFileContent(fileBytes);
-		metaSchema.setFileProperties(JSON.toJSONString(header));
-		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
-	}
-
 	public void uploadAvro(SchemaView schemaView, InputStream is, FormDataContentDisposition header) throws IOException,
 	      DalException, RestClientException {
 		byte[] fileBytes = ByteStreams.toByteArray(is);
 		Schema metaSchema = schemaView.toMetaSchema();
 		metaSchema.setFileContent(fileBytes);
-		metaSchema.setFileProperties(JSON.toJSONString(header));
+		metaSchema.setFileProperties(header.toString());
 
 		Parser parser = new Parser();
 		org.apache.avro.Schema avroSchema = parser.parse(new String(fileBytes));
 		int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
 		metaSchema.setAvroid(avroid);
+		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+	}
+
+	public void uploadJson(SchemaView schemaView, InputStream is, FormDataContentDisposition header) throws IOException,
+	      DalException {
+		byte[] fileBytes = ByteStreams.toByteArray(is);
+		Schema metaSchema = schemaView.toMetaSchema();
+		metaSchema.setFileContent(fileBytes);
+		metaSchema.setFileProperties(header.toString());
 		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
 	}
 

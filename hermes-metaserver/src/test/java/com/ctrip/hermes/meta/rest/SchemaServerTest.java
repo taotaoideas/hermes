@@ -110,7 +110,7 @@ public class SchemaServerTest extends ComponentTestCase {
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
 	}
-	
+
 	@Test
 	public void testUploadAvroFile() {
 		ResourceConfig rc = new ResourceConfig();
@@ -129,5 +129,35 @@ public class SchemaServerTest extends ComponentTestCase {
 		request = webTarget.path("schemas/" + schema + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
+	}
+
+	@Test
+	public void testDownloadJsonFile() {
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+
+		String schema = "sample_json";
+		Builder request = webTarget.path("schemas/" + schema + "/download").request();
+		Response response = request.get();
+		System.out.println(response.getStatus());
+		File downloadFile = response.readEntity(File.class);
+		Assert.assertTrue(downloadFile.length() > 0);
+	}
+	
+	@Test
+	public void testDownloadAvroFile() {
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+
+		String schema = "sample_avro";
+		Builder request = webTarget.path("schemas/" + schema + "/download").request();
+		Response response = request.get();
+		System.out.println(response.getStatus());
+		File downloadFile = response.readEntity(File.class);
+		Assert.assertTrue(downloadFile.length() > 0);
 	}
 }
