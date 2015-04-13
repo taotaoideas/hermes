@@ -37,6 +37,7 @@ public class MetaRestServer implements LogEnabled {
 	private ResourceConfig configResource() {
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(CharsetResponseFilter.class);
+		rc.register(CORSResponseFilter.class);
 		rc.register(ObjectMapperProvider.class);
 		rc.register(MultiPartFeature.class);
 		rc.packages(TopicResource.class.getPackage().getName());
