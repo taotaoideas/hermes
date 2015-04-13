@@ -16,7 +16,7 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.BrokerConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
@@ -61,9 +61,9 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 		ConsumeMessageCommand cmd = new ConsumeMessageCommand();
 
-		cmd.addMessage(1, createBatch("topic1", msgs1_1, Arrays.asList(1L, 2L, 3L)));
-		cmd.addMessage(2, createBatch("topic2", msgs2, Arrays.asList(1L, 2L, 3L)));
-		cmd.addMessage(1, createBatch("topic1", msgs1_2, Arrays.asList(1L, 2L, 3L)));
+		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L, 2L, 3L))));
+		cmd.addMessage(2, Arrays.asList(createBatch("topic2", msgs2, Arrays.asList(1L, 2L, 3L))));
+		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_2, Arrays.asList(1L, 2L, 3L))));
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -74,9 +74,9 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 		decodedCmd.parse(buf, header);
 
 		Map<Long, List<ConsumerMessage<?>>> result = new HashMap<>();
-		for (Map.Entry<Long, List<ConsumerMessageBatch>> entry : decodedCmd.getMsgs().entrySet()) {
+		for (Map.Entry<Long, List<TppConsumerMessageBatch>> entry : decodedCmd.getMsgs().entrySet()) {
 			long correlationId = entry.getKey();
-			List<ConsumerMessageBatch> batches = entry.getValue();
+			List<TppConsumerMessageBatch> batches = entry.getValue();
 
 			List<ConsumerMessage<?>> msgs = decodeBatches(batches, String.class);
 			result.put(correlationId, msgs);
@@ -110,9 +110,9 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private List<ConsumerMessage<?>> decodeBatches(List<ConsumerMessageBatch> batches, Class<?> bodyClazz) {
+	private List<ConsumerMessage<?>> decodeBatches(List<TppConsumerMessageBatch> batches, Class<?> bodyClazz) {
 		List<ConsumerMessage<?>> msgs = new ArrayList<>();
-		for (ConsumerMessageBatch batch : batches) {
+		for (TppConsumerMessageBatch batch : batches) {
 			List<Long> msgSeqs = batch.getMsgSeqs();
 			ByteBuf batchData = batch.getData();
 
@@ -144,8 +144,8 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 		return msg;
 	}
 
-	private ConsumerMessageBatch createBatch(String topic, List<ProducerMessage<String>> msgs, List<Long> msgSeqs) {
-		ConsumerMessageBatch batch = new ConsumerMessageBatch();
+	private TppConsumerMessageBatch createBatch(String topic, List<ProducerMessage<String>> msgs, List<Long> msgSeqs) {
+		TppConsumerMessageBatch batch = new TppConsumerMessageBatch();
 
 		batch.setTopic(topic);
 		batch.addMsgSeqs(msgSeqs);

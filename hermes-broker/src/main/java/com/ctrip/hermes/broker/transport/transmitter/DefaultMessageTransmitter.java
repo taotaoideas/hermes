@@ -9,8 +9,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.broker.transport.transmitter.TpgChannel.TpgChannelFetchResult;
 import com.ctrip.hermes.core.bo.Tpg;
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
@@ -117,11 +117,11 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 
 									TpgChannel tpgChannel = m_tpgChannels.get((startPos + i) % m_tpgChannels.size());
 
-									ConsumerMessageBatch batch = tpgChannel.fetch(batchSize);
+									TpgChannelFetchResult result = tpgChannel.fetch(batchSize);
 
-									if (batch != null && batch.size() > 0) {
-										cmd.addMessage(tpgChannel.getCorrelationId(), batch);
-										batchSize -= batch.size();
+									if (result != null && result.getBatchs() != null && !result.getBatchs().isEmpty()) {
+										cmd.addMessage(tpgChannel.getCorrelationId(), result.getBatchs());
+										batchSize -= result.getSize();
 									}
 								}
 								startPos = (startPos + 1) % m_tpgChannels.size();

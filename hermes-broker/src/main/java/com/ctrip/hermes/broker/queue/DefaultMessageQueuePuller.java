@@ -1,11 +1,13 @@
 package com.ctrip.hermes.broker.queue;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.ctrip.hermes.broker.transport.transmitter.TpgRelayer;
 import com.ctrip.hermes.core.bo.Tpg;
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 
 /**
@@ -44,7 +46,7 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 		}
 	}
 
-	protected ConsumerMessageBatch pullMessages(int batchSize) {
+	protected List<TppConsumerMessageBatch> pullMessages(int batchSize) {
 		return m_queueCursor.next(batchSize);
 	}
 
@@ -52,7 +54,7 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 
 		@Override
 		public void run() {
-			ConsumerMessageBatch batch = null;
+			List<TppConsumerMessageBatch> batch = new LinkedList<>();
 
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
@@ -68,12 +70,12 @@ public class DefaultMessageQueuePuller implements MessageQueuePuller {
 
 					int availableSize = m_relayer.availableSize();
 					if (availableSize > 0) {
-						if (batch == null) {
+						if (batch.isEmpty()) {
 							batch = pullMessages(availableSize);
 						}
 
 						if (m_relayer.relay(batch)) {
-							batch = null;
+							batch.clear();
 						}
 					} else {
 						TimeUnit.MILLISECONDS.sleep(50);

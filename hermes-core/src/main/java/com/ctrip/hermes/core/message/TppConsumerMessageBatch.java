@@ -8,11 +8,17 @@ import java.util.List;
 import com.ctrip.hermes.core.transport.TransferCallback;
 
 /**
+ * mapping to one <topic, partition, priority>
+ * 
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class ConsumerMessageBatch {
+public class TppConsumerMessageBatch {
 	private String m_topic;
+
+	private int m_partition;
+
+	private boolean m_priority;
 
 	private List<Long> m_msgSeqs = new ArrayList<>();
 
@@ -20,7 +26,23 @@ public class ConsumerMessageBatch {
 
 	private ByteBuf data;
 
-	public ConsumerMessageBatch() {
+	public TppConsumerMessageBatch() {
+	}
+
+	public int getPartition() {
+		return m_partition;
+	}
+
+	public void setPartition(int partition) {
+		m_partition = partition;
+	}
+
+	public boolean isPriority() {
+		return m_priority;
+	}
+
+	public void setPriority(boolean priority) {
+		m_priority = priority;
 	}
 
 	public ByteBuf getData() {
@@ -63,25 +85,4 @@ public class ConsumerMessageBatch {
 		return m_msgSeqs.size();
 	}
 
-	public void mergeBatch(final ConsumerMessageBatch batch) {
-		if (batch == null) {
-			return;
-		} else {
-			m_msgSeqs.addAll(batch.getMsgSeqs());
-			final TransferCallback originalTransferCallback = m_transferCallback;
-
-			m_transferCallback = new TransferCallback() {
-
-				@Override
-				public void transfer(ByteBuf out) {
-					if (originalTransferCallback != null) {
-						originalTransferCallback.transfer(out);
-					}
-					if (batch.getTransferCallback() != null) {
-						batch.getTransferCallback().transfer(out);
-					}
-				}
-			};
-		}
-	}
 }

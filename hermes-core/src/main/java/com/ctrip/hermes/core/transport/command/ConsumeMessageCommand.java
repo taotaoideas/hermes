@@ -7,16 +7,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.ManualRelease;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@ManualRelease
 public class ConsumeMessageCommand extends AbstractCommand {
 
-	private Map<Long, List<ConsumerMessageBatch>> m_msgs = new HashMap<>();
+	private Map<Long, List<TppConsumerMessageBatch>> m_msgs = new HashMap<>();
 
 	/**
 	 * @param commandType
@@ -46,10 +48,10 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		// body
 		List<Long> correlationIds = new ArrayList<>();
 
-		for (Map.Entry<Long, List<ConsumerMessageBatch>> entry : m_msgs.entrySet()) {
+		for (Map.Entry<Long, List<TppConsumerMessageBatch>> entry : m_msgs.entrySet()) {
 			Long correlationId = entry.getKey();
-			List<ConsumerMessageBatch> batches = entry.getValue();
-			
+			List<TppConsumerMessageBatch> batches = entry.getValue();
+
 			writeBatchMetas(codec, batches);
 			writeBatchDatas(buf, codec, batches);
 
@@ -79,11 +81,11 @@ public class ConsumeMessageCommand extends AbstractCommand {
 
 		List<Long> correlationIds = readCorrelationIds(codec, correlationIdCount);
 
-		Map<Long, List<ConsumerMessageBatch>> msgs = new HashMap<>();
+		Map<Long, List<TppConsumerMessageBatch>> msgs = new HashMap<>();
 
 		for (int i = 0; i < correlationIdCount; i++) {
 			long correlationId = correlationIds.get(i);
-			List<ConsumerMessageBatch> batches = new ArrayList<>();
+			List<TppConsumerMessageBatch> batches = new ArrayList<>();
 
 			readBatchMetas(codec, batches);
 
@@ -103,8 +105,8 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		return correlationIds;
 	}
 
-	private void writeBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
-		for (ConsumerMessageBatch batch : batches) {
+	private void writeBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<TppConsumerMessageBatch> batches) {
+		for (TppConsumerMessageBatch batch : batches) {
 			// placeholder for len
 			int start = buf.writerIndex();
 			codec.writeInt(-1);
@@ -119,18 +121,18 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		}
 	}
 
-	private void readBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
-		for (ConsumerMessageBatch batch : batches) {
+	private void readBatchDatas(ByteBuf buf, HermesPrimitiveCodec codec, List<TppConsumerMessageBatch> batches) {
+		for (TppConsumerMessageBatch batch : batches) {
 			int len = codec.readInt();
 			batch.setData(buf.readSlice(len));
 		}
 
 	}
 
-	private void readBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
+	private void readBatchMetas(HermesPrimitiveCodec codec, List<TppConsumerMessageBatch> batches) {
 		int batchSize = codec.readInt();
 		for (int i = 0; i < batchSize; i++) {
-			ConsumerMessageBatch batch = new ConsumerMessageBatch();
+			TppConsumerMessageBatch batch = new TppConsumerMessageBatch();
 			int seqSize = codec.readInt();
 			batch.setTopic(codec.readString());
 
@@ -141,9 +143,9 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		}
 	}
 
-	private void writeBatchMetas(HermesPrimitiveCodec codec, List<ConsumerMessageBatch> batches) {
+	private void writeBatchMetas(HermesPrimitiveCodec codec, List<TppConsumerMessageBatch> batches) {
 		codec.writeInt(batches.size());
-		for (ConsumerMessageBatch batch : batches) {
+		for (TppConsumerMessageBatch batch : batches) {
 			codec.writeInt(batch.size());
 			codec.writeString(batch.getTopic());
 			for (Long seq : batch.getMsgSeqs()) {
@@ -152,15 +154,15 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		}
 	}
 
-	public void addMessage(long correlationId, ConsumerMessageBatch batch) {
+	public void addMessage(long correlationId, List<TppConsumerMessageBatch> batchs) {
 		if (!m_msgs.containsKey(correlationId)) {
-			m_msgs.put(correlationId, new ArrayList<ConsumerMessageBatch>());
+			m_msgs.put(correlationId, new ArrayList<TppConsumerMessageBatch>());
 		}
 
-		m_msgs.get(correlationId).add(batch);
+		m_msgs.get(correlationId).addAll(batchs);
 	}
 
-	public Map<Long, List<ConsumerMessageBatch>> getMsgs() {
+	public Map<Long, List<TppConsumerMessageBatch>> getMsgs() {
 		return m_msgs;
 	}
 

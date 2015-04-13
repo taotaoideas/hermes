@@ -73,8 +73,12 @@ public class SendMessageCommandProcessor implements CommandProcessor {
 			m_ack.addResults(results);
 
 			if (m_ack.isAllResultsSet()) {
-				if (m_written.compareAndSet(false, true)) {
-					m_ctx.write(m_ack);
+				try {
+					if (m_written.compareAndSet(false, true)) {
+						m_ctx.write(m_ack);
+					}
+				} finally {
+					m_ctx.getCommand().release();
 				}
 			}
 

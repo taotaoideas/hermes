@@ -4,6 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
+import com.ctrip.hermes.core.ManualRelease;
+import com.ctrip.hermes.core.transport.command.Command;
 import com.ctrip.hermes.core.transport.command.parser.CommandParser;
 import com.ctrip.hermes.core.transport.command.parser.DefaultCommandParser;
 
@@ -18,20 +20,24 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
 		ByteBuf frame = null;
+		Command cmd = null;
 		try {
 			frame = (ByteBuf) super.decode(ctx, in);
 			if (frame == null) {
 				return null;
 			}
 
-			return m_commandParser.parse(frame);
+			cmd = m_commandParser.parse(frame);
+			return cmd;
 		} catch (Exception e) {
 			// TODO close channel
 			e.printStackTrace();
 		} finally {
 			if (null != frame) {
 				// TODO
-//				frame.release();
+				if (cmd != null && cmd.getClass().getAnnotation(ManualRelease.class) == null) {
+					frame.release();
+				}
 			}
 		}
 

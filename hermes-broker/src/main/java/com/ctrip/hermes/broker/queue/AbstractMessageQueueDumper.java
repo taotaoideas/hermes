@@ -1,15 +1,21 @@
 package com.ctrip.hermes.broker.queue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.unidal.tuple.Triple;
+import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
@@ -17,7 +23,9 @@ import com.google.common.util.concurrent.SettableFuture;
  *
  */
 public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
-	private BlockingQueue<Triple<SettableFuture<Map<Integer, Boolean>>, MessageRawDataBatch, Boolean>> m_queue = new LinkedBlockingQueue<>();
+	private static final int DEFAULT_BATCH_SIZE = 10;
+
+	private BlockingQueue<FutureBatchPriorityWrapper> m_queue = new LinkedBlockingQueue<>();
 
 	private Thread m_workerThread;
 
@@ -26,6 +34,8 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 	protected String m_topic;
 
 	protected int m_partition;
+
+	private int batchSize = DEFAULT_BATCH_SIZE;
 
 	public AbstractMessageQueueDumper(String topic, int partition) {
 		m_topic = topic;
@@ -37,9 +47,14 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 			public void run() {
 				while (!Thread.currentThread().isInterrupted()) {
 					try {
-						Triple<SettableFuture<Map<Integer, Boolean>>, MessageRawDataBatch, Boolean> data = m_queue.take();
+						List<FutureBatchPriorityWrapper> todos = new ArrayList<>();
+						int todoCount = m_queue.drainTo(todos, batchSize);
 
-						appendMessageSync(data.getFirst(), data.getMiddle(), data.getLast());
+						if (todoCount != 0) {
+							appendMessageSync(todos);
+						} else {
+							TimeUnit.MILLISECONDS.sleep(50);
+						}
 
 						// TODO
 						// TimeUnit.MILLISECONDS.sleep(1);
@@ -60,7 +75,7 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 	}
 
 	public void submit(SettableFuture<Map<Integer, Boolean>> future, MessageRawDataBatch batch, boolean isPriority) {
-		m_queue.add(new Triple<>(future, batch, isPriority));
+		m_queue.add(new FutureBatchPriorityWrapper(future, batch, isPriority));
 	}
 
 	public void startIfNecessary() {
@@ -69,15 +84,42 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 		}
 	}
 
-	protected void appendMessageSync(SettableFuture<Map<Integer, Boolean>> future, MessageRawDataBatch batch,
-	      boolean isPriority) {
+	protected void appendMessageSync(List<FutureBatchPriorityWrapper> todos) {
 
-		Map<Integer, Boolean> result = new HashMap<>();
-		addResults(result, batch.getMsgSeqs(), false);
+		List<FutureBatchResultWrapper> priorityTodos = new ArrayList<>();
+		List<FutureBatchResultWrapper> nonPriorityTodos = new ArrayList<>();
 
-		doAppendMessageSync(batch, isPriority, result);
+		for (FutureBatchPriorityWrapper todo : todos) {
+			Map<Integer, Boolean> result = new HashMap<>();
+			addResults(result, todo.getBatch().getMsgSeqs(), false);
 
-		future.set(result);
+			if (todo.isPriority()) {
+				priorityTodos.add(new FutureBatchResultWrapper(todo.getFuture(), todo.getBatch(), result));
+			} else {
+				nonPriorityTodos.add(new FutureBatchResultWrapper(todo.getFuture(), todo.getBatch(), result));
+			}
+		}
+
+		Function<FutureBatchResultWrapper, Pair<MessageRawDataBatch, Map<Integer, Boolean>>> transformFucntion = new Function<FutureBatchResultWrapper, Pair<MessageRawDataBatch, Map<Integer, Boolean>>>() {
+
+			@Override
+			public Pair<MessageRawDataBatch, Map<Integer, Boolean>> apply(FutureBatchResultWrapper input) {
+				return new Pair<MessageRawDataBatch, Map<Integer, Boolean>>(input.getBatch(), input.getResult());
+			}
+		};
+
+		doAppendMessageSync(Collections2.transform(priorityTodos, transformFucntion), true);
+
+		doAppendMessageSync(Collections2.transform(nonPriorityTodos, transformFucntion), false);
+
+		for (List<FutureBatchResultWrapper> todo : Arrays.asList(priorityTodos, nonPriorityTodos)) {
+			for (FutureBatchResultWrapper fbw : todo) {
+				SettableFuture<Map<Integer, Boolean>> future = fbw.getFuture();
+				Map<Integer, Boolean> result = fbw.getResult();
+				future.set(result);
+			}
+		}
+
 	}
 
 	protected void addResults(Map<Integer, Boolean> result, List<Integer> seqs, boolean success) {
@@ -92,7 +134,62 @@ public abstract class AbstractMessageQueueDumper implements MessageQueueDumper {
 		}
 	}
 
-	protected abstract void doAppendMessageSync(MessageRawDataBatch batch, boolean isPriority,
-	      Map<Integer, Boolean> result);
+	protected abstract void doAppendMessageSync(Collection<Pair<MessageRawDataBatch, Map<Integer, Boolean>>> todos,
+	      boolean isPriority);
 
+	private static class FutureBatchResultWrapper {
+		private SettableFuture<Map<Integer, Boolean>> m_future;
+
+		private MessageRawDataBatch m_batch;
+
+		private Map<Integer, Boolean> m_result;
+
+		public FutureBatchResultWrapper(SettableFuture<Map<Integer, Boolean>> future, MessageRawDataBatch batch,
+		      Map<Integer, Boolean> result) {
+			m_future = future;
+			m_batch = batch;
+			m_result = result;
+		}
+
+		public SettableFuture<Map<Integer, Boolean>> getFuture() {
+			return m_future;
+		}
+
+		public MessageRawDataBatch getBatch() {
+			return m_batch;
+		}
+
+		public Map<Integer, Boolean> getResult() {
+			return m_result;
+		}
+
+	}
+
+	private static class FutureBatchPriorityWrapper {
+		private SettableFuture<Map<Integer, Boolean>> m_future;
+
+		private MessageRawDataBatch m_batch;
+
+		private boolean m_isPriority;
+
+		public FutureBatchPriorityWrapper(SettableFuture<Map<Integer, Boolean>> future, MessageRawDataBatch batch,
+		      boolean isPriority) {
+			m_future = future;
+			m_batch = batch;
+			m_isPriority = isPriority;
+		}
+
+		public SettableFuture<Map<Integer, Boolean>> getFuture() {
+			return m_future;
+		}
+
+		public MessageRawDataBatch getBatch() {
+			return m_batch;
+		}
+
+		public boolean isPriority() {
+			return m_isPriority;
+		}
+
+	}
 }
