@@ -1,17 +1,17 @@
 package com.ctrip.hermes.broker.deliver;
 
-public class Locatable {
+public class Locatable<T> {
 
-	private Object m_id;
+	private T m_id;
 
 	private long offset;
 
-	public Locatable(Object id, long offset) {
+	public Locatable(T id, long offset) {
 		m_id = id;
 		this.offset = offset;
 	}
 
-	public Object getId() {
+	public T getId() {
 		return m_id;
 	}
 
