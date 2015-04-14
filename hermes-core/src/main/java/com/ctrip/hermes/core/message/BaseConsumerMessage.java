@@ -2,6 +2,9 @@ package com.ctrip.hermes.core.message;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.ctrip.hermes.core.message.ConsumerMessage.MessageStatus;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -14,13 +17,13 @@ public class BaseConsumerMessage<T> {
 
 	protected String m_topic;
 
-	protected int m_partition;
-
 	protected T m_body;
 
 	protected Map<String, Object> m_appProperties = new HashMap<String, Object>();
 
 	protected Map<String, Object> m_sysProperties = new HashMap<String, Object>();
+
+	protected AtomicReference<MessageStatus> m_status = new AtomicReference<>(MessageStatus.NOT_SET);
 
 	public long getBornTime() {
 		return m_bornTime;
@@ -44,14 +47,6 @@ public class BaseConsumerMessage<T> {
 
 	public void setTopic(String topic) {
 		m_topic = topic;
-	}
-
-	public int getPartition() {
-		return m_partition;
-	}
-
-	public void setPartition(int partition) {
-		m_partition = partition;
 	}
 
 	public T getBody() {
@@ -78,4 +73,15 @@ public class BaseConsumerMessage<T> {
 		m_sysProperties = sysProperties;
 	}
 
+	public MessageStatus getStatus() {
+		return m_status.get();
+	}
+
+	public boolean ack() {
+		return m_status.compareAndSet(MessageStatus.NOT_SET, MessageStatus.SUCCESS);
+	}
+
+	public boolean nack() {
+		return m_status.compareAndSet(MessageStatus.NOT_SET, MessageStatus.FAIL);
+	}
 }

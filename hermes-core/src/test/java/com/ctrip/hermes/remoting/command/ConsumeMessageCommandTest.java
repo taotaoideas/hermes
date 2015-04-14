@@ -16,8 +16,8 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.BrokerConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
-import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.ProducerMessage;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.transport.TransferCallback;
@@ -43,27 +43,27 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 		      sysProperties));
 		msgs1_1.add(createProducerMessage("topic1", "t1_body2_1", "t1_key2_1", "t1_p2_1", 1, true, appProperties,
 		      sysProperties));
-		msgs1_1.add(createProducerMessage("topic1", "t1_body3_1", "t1_key3_1", "t1_p1_1", 1, false, appProperties,
+		msgs1_1.add(createProducerMessage("topic1", "t1_body3_1", "t1_key3_1", "t1_p1_1", 1, true, appProperties,
 		      sysProperties));
 
 		List<ProducerMessage<String>> msgs1_2 = new ArrayList<>();
-		msgs1_2.add(createProducerMessage("topic1", "t1_body1_2", "t1_key1_2", "t1_p1_2", 2, true, appProperties,
+		msgs1_2.add(createProducerMessage("topic1", "t1_body1_2", "t1_key1_2", "t1_p1_2", 2, false, appProperties,
 		      sysProperties));
-		msgs1_2.add(createProducerMessage("topic1", "t1_body2_2", "t1_key2_2", "t1_p2_2", 2, true, appProperties,
+		msgs1_2.add(createProducerMessage("topic1", "t1_body2_2", "t1_key2_2", "t1_p2_2", 2, false, appProperties,
 		      sysProperties));
 		msgs1_2.add(createProducerMessage("topic1", "t1_body3_2", "t1_key3_2", "t1_p1_2", 2, false, appProperties,
 		      sysProperties));
 
 		List<ProducerMessage<String>> msgs2 = new ArrayList<>();
 		msgs2.add(createProducerMessage("topic2", "t2_body1", "t2_key1", "t2_p1", 1, true, appProperties, sysProperties));
-		msgs2.add(createProducerMessage("topic2", "t2_body2", "t2_key2", "t2_p2", 2, true, appProperties, sysProperties));
-		msgs2.add(createProducerMessage("topic2", "t2_body3", "t2_key3", "t2_p1", 1, false, appProperties, sysProperties));
+		msgs2.add(createProducerMessage("topic2", "t2_body2", "t2_key2", "t2_p2", 1, true, appProperties, sysProperties));
+		msgs2.add(createProducerMessage("topic2", "t2_body3", "t2_key3", "t2_p3", 1, true, appProperties, sysProperties));
 
 		ConsumeMessageCommand cmd = new ConsumeMessageCommand();
 
-		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L, 2L, 3L))));
-		cmd.addMessage(2, Arrays.asList(createBatch("topic2", msgs2, Arrays.asList(1L, 2L, 3L))));
-		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_2, Arrays.asList(1L, 2L, 3L))));
+		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L, 2L, 3L), 1, true)));
+		cmd.addMessage(2, Arrays.asList(createBatch("topic2", msgs2, Arrays.asList(1L, 2L, 3L), 1, true)));
+		cmd.addMessage(3, Arrays.asList(createBatch("topic1", msgs1_2, Arrays.asList(1L, 2L, 3L), 2, false)));
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -82,28 +82,57 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			result.put(correlationId, msgs);
 		}
 
-		Assert.assertEquals(2, result.size());
+		Assert.assertEquals(3, result.size());
 		Assert.assertTrue(result.containsKey(1L));
 		Assert.assertTrue(result.containsKey(2L));
+		Assert.assertTrue(result.containsKey(3L));
 
 		// batch 1
 		List<ConsumerMessage<?>> cmsgList1 = result.get(1L);
 
-		Assert.assertEquals(6, cmsgList1.size());
+		Assert.assertEquals(3, cmsgList1.size());
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 3; i++) {
 			ConsumerMessage<?> cmsg = cmsgList1.get(i);
 			Assert.assertEquals("topic1", cmsg.getTopic());
+			Assert.assertEquals(1, ((BrokerConsumerMessage<?>) cmsg).getPartition());
+			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isPriority());
 			Assert.assertNotNull(cmsg.getBornTime());
-			if (i < 3) {
-				Assert.assertTrue(String.format("t1_body%d_1", (i + 1)).equals((String) cmsg.getBody()));
-				Assert.assertTrue(String.format("t1_key%d_1", (i + 1)).equals(cmsg.getKey()));
-				Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
-			} else {
-				Assert.assertTrue(String.format("t1_body%d_2", (i - 2)).equals((String) cmsg.getBody()));
-				Assert.assertTrue(String.format("t1_key%d_2", (i - 2)).equals(cmsg.getKey()));
-				Assert.assertEquals(Long.valueOf(i - 2).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
-			}
+			Assert.assertTrue(String.format("t1_body%d_1", (i + 1)).equals((String) cmsg.getBody()));
+			Assert.assertTrue(String.format("t1_key%d_1", (i + 1)).equals(cmsg.getKey()));
+			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
+
+			Assert.assertEquals(Integer.valueOf(123), cmsg.getProperty("app_key"));
+		}
+
+		// batch 2
+		List<ConsumerMessage<?>> cmsgList2 = result.get(2L);
+		Assert.assertEquals(3, cmsgList2.size());
+		for (int i = 0; i < 3; i++) {
+			ConsumerMessage<?> cmsg = cmsgList2.get(i);
+			Assert.assertEquals("topic2", cmsg.getTopic());
+			Assert.assertEquals(1, ((BrokerConsumerMessage<?>) cmsg).getPartition());
+			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isPriority());
+			Assert.assertNotNull(cmsg.getBornTime());
+			Assert.assertTrue(String.format("t2_body%d", (i + 1)).equals((String) cmsg.getBody()));
+			Assert.assertTrue(String.format("t2_key%d", (i + 1)).equals(cmsg.getKey()));
+			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
+
+			Assert.assertEquals(Integer.valueOf(123), cmsg.getProperty("app_key"));
+		}
+
+		// batch 3
+		List<ConsumerMessage<?>> cmsgList3 = result.get(3L);
+		Assert.assertEquals(3, cmsgList3.size());
+		for (int i = 0; i < 3; i++) {
+			ConsumerMessage<?> cmsg = cmsgList3.get(i);
+			Assert.assertEquals("topic1", cmsg.getTopic());
+			Assert.assertEquals(2, ((BrokerConsumerMessage<?>) cmsg).getPartition());
+			Assert.assertEquals(false, ((BrokerConsumerMessage<?>) cmsg).isPriority());
+			Assert.assertNotNull(cmsg.getBornTime());
+			Assert.assertTrue(String.format("t1_body%d_2", (i + 1)).equals((String) cmsg.getBody()));
+			Assert.assertTrue(String.format("t1_key%d_2", (i + 1)).equals(cmsg.getKey()));
+			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
 
 			Assert.assertEquals(Integer.valueOf(123), cmsg.getProperty("app_key"));
 		}
@@ -121,6 +150,8 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			for (int j = 0; j < msgSeqs.size(); j++) {
 				BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
+				brokerMsg.setPartition(batch.getPartition());
+				brokerMsg.setPriority(batch.isPriority());
 				brokerMsg.setMsgSeq(msgSeqs.get(j));
 
 				msgs.add(brokerMsg);
@@ -144,10 +175,13 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 		return msg;
 	}
 
-	private TppConsumerMessageBatch createBatch(String topic, List<ProducerMessage<String>> msgs, List<Long> msgSeqs) {
+	private TppConsumerMessageBatch createBatch(String topic, List<ProducerMessage<String>> msgs, List<Long> msgSeqs,
+	      int partition, boolean priority) {
 		TppConsumerMessageBatch batch = new TppConsumerMessageBatch();
 
 		batch.setTopic(topic);
+		batch.setPartition(partition);
+		batch.setPriority(priority);
 		batch.addMsgSeqs(msgSeqs);
 
 		final ByteBuf buf = Unpooled.buffer();

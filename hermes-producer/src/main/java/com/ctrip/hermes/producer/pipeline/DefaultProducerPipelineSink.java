@@ -10,7 +10,7 @@ import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.sender.MessageSender;
 
-public class DefaultMessageSink implements PipelineSink<Future<SendResult>> {
+public class DefaultProducerPipelineSink implements PipelineSink<Future<SendResult>> {
 	@Inject
 	private MessageSender messageSender;
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ctrip.hermes.core.constants.CatConstants;
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.core.message.ConsumerMessage.MessageStatus;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Event;
@@ -35,12 +36,14 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 					t.addData("appId", "demo-app");
 
 					consume(msg);
+					// by design, if nacked, no effect
+					msg.ack();
 
 					String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 					Cat.logEvent("Consumer:" + ip, msg.getTopic() + ":" + getGroupId(), Event.SUCCESS, "key=" + msg.getKey());
 					Cat.logEvent("Message:" + topic, "Consumed:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 					Cat.logMetricForCount(msg.getTopic());
-					t.setStatus(msg.isSuccess() ? Transaction.SUCCESS : "FAILED-WILL-RETRY");
+					t.setStatus(MessageStatus.SUCCESS.equals(msg.getStatus()) ? Transaction.SUCCESS : "FAILED-WILL-RETRY");
 				} catch (RuntimeException | Error e) {
 					Cat.logError(e);
 					t.setStatus(e);

@@ -135,6 +135,8 @@ public class ConsumeMessageCommand extends AbstractCommand {
 			TppConsumerMessageBatch batch = new TppConsumerMessageBatch();
 			int seqSize = codec.readInt();
 			batch.setTopic(codec.readString());
+			batch.setPartition(codec.readInt());
+			batch.setPriority(codec.readInt() == 0 ? true : false);
 
 			for (int j = 0; j < seqSize; j++) {
 				batch.addMsgSeq(codec.readLong());
@@ -148,6 +150,8 @@ public class ConsumeMessageCommand extends AbstractCommand {
 		for (TppConsumerMessageBatch batch : batches) {
 			codec.writeInt(batch.size());
 			codec.writeString(batch.getTopic());
+			codec.writeInt(batch.getPartition());
+			codec.writeInt(batch.isPriority() ? 0 : 1);
 			for (Long seq : batch.getMsgSeqs()) {
 				codec.writeLong(seq);
 			}

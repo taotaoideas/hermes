@@ -2,6 +2,9 @@ package com.ctrip.hermes.core.message;
 
 import java.util.Map;
 
+import com.ctrip.hermes.core.transport.command.MessageAckCommand;
+import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
+
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
@@ -11,19 +14,36 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	private BaseConsumerMessage<T> m_baseMsg;
 
 	private long m_msgSeq;
-	
-	private boolean m_success = true;
 
-	/**
-	 * @param baseMsg
-	 */
+	private int m_partition;
+
+	private boolean m_priority;
+
+	private EndpointChannel m_channel;
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public BrokerConsumerMessage(BaseConsumerMessage baseMsg) {
 		m_baseMsg = baseMsg;
 	}
 
-	public BaseConsumerMessage<T> getBaseMsg() {
-		return m_baseMsg;
+	public void setChannel(EndpointChannel channel) {
+		m_channel = channel;
+	}
+
+	public boolean isPriority() {
+		return m_priority;
+	}
+
+	public void setPriority(boolean priority) {
+		m_priority = priority;
+	}
+
+	public int getPartition() {
+		return m_partition;
+	}
+
+	public void setPartition(int partition) {
+		m_partition = partition;
 	}
 
 	public long getMsgSeq() {
@@ -36,11 +56,15 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 
 	@Override
 	public void nack() {
-		m_success = false;
+		if (m_baseMsg.nack()) {
+			MessageAckCommand cmd = new MessageAckCommand();
+			cmd.addNackMsg(getTopic(), getPartition(), m_priority, m_msgSeq);
+			m_channel.writeCommand(cmd);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
-   @Override
+	@Override
 	public <V> V getProperty(String name) {
 		return (V) m_baseMsg.getAppProperties().get(name);
 	}
@@ -71,8 +95,17 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	}
 
 	@Override
-	public boolean isSuccess() {
-		return m_success;
+	public void ack() {
+		if (m_baseMsg.ack()) {
+			MessageAckCommand cmd = new MessageAckCommand();
+			cmd.addAckMsg(getTopic(), getPartition(), m_priority, m_msgSeq);
+			m_channel.writeCommand(cmd);
+		}
+	}
+
+	@Override
+	public MessageStatus getStatus() {
+		return m_baseMsg.getStatus();
 	}
 
 }

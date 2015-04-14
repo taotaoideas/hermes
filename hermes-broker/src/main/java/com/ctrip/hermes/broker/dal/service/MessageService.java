@@ -26,7 +26,7 @@ public class MessageService {
 
 	@Inject
 	private OffsetMessageDao m_offsetDao;
-	
+
 	@Inject
 	private DeadLetterDao m_deadLetterDao;
 
@@ -75,7 +75,7 @@ public class MessageService {
 		offset.setOffset(newOffset);
 		m_offsetDao.updateByPK(offset, OffsetMessageEntity.UPDATESET_OFFSET);
 	}
-	
+
 	public void deadLetter(DeadLetter dl) throws DalException {
 		m_deadLetterDao.insert(dl);
 	}

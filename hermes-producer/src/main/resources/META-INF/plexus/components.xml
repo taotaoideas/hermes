@@ -25,7 +25,7 @@
 					<role-hint>producer</role-hint>
 				</requirement>
 				<requirement>
-					<role>com.ctrip.hermes.producer.pipeline.ProducerSinkManager</role>
+					<role>com.ctrip.hermes.producer.pipeline.ProducerPipelineSinkManager</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -40,8 +40,8 @@
 			<implementation>com.ctrip.hermes.producer.pipeline.TracingMessageValve</implementation>
 		</component>
 		<component>
-			<role>com.ctrip.hermes.producer.pipeline.ProducerSinkManager</role>
-			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerSinkManager</implementation>
+			<role>com.ctrip.hermes.producer.pipeline.ProducerPipelineSinkManager</role>
+			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSinkManager</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
@@ -51,7 +51,7 @@
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>broker</role-hint>
-			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
+			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSink</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.producer.sender.MessageSender</role>
@@ -62,7 +62,7 @@
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>local</role-hint>
-			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
+			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSink</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.producer.sender.MessageSender</role>
@@ -73,7 +73,7 @@
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>transaction</role-hint>
-			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
+			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSink</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.producer.sender.MessageSender</role>

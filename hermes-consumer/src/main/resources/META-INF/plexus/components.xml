@@ -60,6 +60,11 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
+			<role-hint>consumer</role-hint>
+			<implementation>com.ctrip.hermes.consumer.engine.pipeline.DefaultConsumerPipelineSink</implementation>
+		</component>
+		<component>
 			<role>com.ctrip.hermes.consumer.engine.notifier.ConsumerNotifier</role>
 			<implementation>com.ctrip.hermes.consumer.engine.notifier.DefaultConsumerNotifier</implementation>
 			<requirements>
@@ -84,6 +89,10 @@
 			<role-hint>consumer</role-hint>
 			<implementation>com.ctrip.hermes.consumer.engine.pipeline.ConsumerPipeline</implementation>
 			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
+					<role-hint>consumer</role-hint>
+				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.core.pipeline.ValveRegistry</role>
 					<role-hint>consumer</role-hint>

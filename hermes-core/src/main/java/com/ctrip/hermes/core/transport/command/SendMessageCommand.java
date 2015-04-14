@@ -141,7 +141,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			Tpp tpp = entry.getKey();
 			codec.writeString(tpp.getTopic());
 			codec.writeInt(tpp.getPartition());
-			codec.writeBoolean(tpp.isPriority());
+			codec.writeInt(tpp.isPriority() ? 0 : 1);
 		}
 	}
 
@@ -152,7 +152,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		List<Tpp> tppNames = new ArrayList<>();
 
 		for (int i = 0; i < size; i++) {
-			tppNames.add(new Tpp(codec.readString(), codec.readInt(), codec.readBoolean()));
+			tppNames.add(new Tpp(codec.readString(), codec.readInt(), codec.readInt() == 0 ? true : false));
 		}
 
 		return tppNames;
