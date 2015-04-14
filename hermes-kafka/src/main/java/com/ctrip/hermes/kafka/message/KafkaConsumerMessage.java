@@ -33,6 +33,7 @@ public class KafkaConsumerMessage<T> implements ConsumerMessage<T> {
 
 	@Override
 	public void nack() {
+		m_baseMsg.nack();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,7 +68,12 @@ public class KafkaConsumerMessage<T> implements ConsumerMessage<T> {
 	}
 
 	@Override
-	public boolean isSuccess() {
-		return true;
+	public void ack() {
+		m_baseMsg.ack();
+	}
+
+	@Override
+	public MessageStatus getStatus() {
+		return m_baseMsg.getStatus();
 	}
 }

@@ -3,7 +3,7 @@
 		<component>
 			<role>com.ctrip.hermes.core.pipeline.PipelineSink</role>
 			<role-hint>kafka</role-hint>
-			<implementation>com.ctrip.hermes.producer.pipeline.DefaultMessageSink</implementation>
+			<implementation>com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSink</implementation>
 			<requirements>
 				<requirement>
 					<role>com.ctrip.hermes.producer.sender.MessageSender</role>

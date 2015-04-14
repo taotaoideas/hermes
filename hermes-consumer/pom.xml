@@ -20,5 +20,26 @@
 			<artifactId>cat-client</artifactId>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.unidal.maven.plugins</groupId>
+				<artifactId>plexus-maven-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<id>generate plexus component descriptor</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>plexus</goal>
+						</goals>
+						<configuration>
+							<className>com.ctrip.hermes.consumer.build.ComponentsConfigurator</className>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
 

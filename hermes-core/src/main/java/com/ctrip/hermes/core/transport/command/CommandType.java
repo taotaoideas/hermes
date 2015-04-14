@@ -10,11 +10,12 @@ import java.util.Map;
 public enum CommandType {
 	SUBSCRIBE(1, SubscribeCommand.class), //
 
-	MESSAGE_SEND(51, SendMessageCommand.class), //
-	MESSAGE_CONSUME(52, ConsumeMessageCommand.class), //
+	MESSAGE_SEND(101, SendMessageCommand.class), //
+	MESSAGE_CONSUME(102, ConsumeMessageCommand.class), //
+	MESSAGE_ACK(103, MessageAckCommand.class), //
 
-	ACK_MESSAGE_SEND(101, SendMessageAckCommand.class), //
-	ACK_SUBSCRIBE(102, SubscribeAckCommand.class), //
+	ACK_MESSAGE_SEND(201, SendMessageAckCommand.class), //
+	ACK_SUBSCRIBE(202, SubscribeAckCommand.class), //
 	;
 
 	private static Map<Integer, CommandType> m_types = new HashMap<Integer, CommandType>();

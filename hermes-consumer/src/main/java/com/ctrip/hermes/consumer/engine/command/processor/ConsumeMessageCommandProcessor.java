@@ -21,6 +21,7 @@ import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
+import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -54,7 +55,7 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 
 					Class<?> bodyClazz = m_consumerNotifier.find(correlationId).getMessageClazz();
 
-					List<ConsumerMessage<?>> msgs = decodeBatches(batches, bodyClazz);
+					List<ConsumerMessage<?>> msgs = decodeBatches(batches, bodyClazz, ctx.getChannel());
 
 					m_consumerNotifier.messageReceived(correlationId, msgs);
 				}
@@ -66,17 +67,24 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private List<ConsumerMessage<?>> decodeBatches(List<TppConsumerMessageBatch> batches, Class bodyClazz) {
+	private List<ConsumerMessage<?>> decodeBatches(List<TppConsumerMessageBatch> batches, Class bodyClazz,
+	      EndpointChannel channel) {
 		List<ConsumerMessage<?>> msgs = new ArrayList<>();
 		for (TppConsumerMessageBatch batch : batches) {
 			List<Long> msgSeqs = batch.getMsgSeqs();
 			ByteBuf batchData = batch.getData();
 
-			MessageCodec codec = MessageCodecFactory.getCodec(batch.getTopic());
+			String topic = batch.getTopic();
+			int partition = batch.getPartition();
+			boolean priority = batch.isPriority();
+			MessageCodec codec = MessageCodecFactory.getCodec(topic);
 
 			for (int j = 0; j < msgSeqs.size(); j++) {
 				BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
+				brokerMsg.setPartition(partition);
+				brokerMsg.setPriority(priority);
+				brokerMsg.setChannel(channel);
 				brokerMsg.setMsgSeq(msgSeqs.get(j));
 
 				msgs.add(brokerMsg);

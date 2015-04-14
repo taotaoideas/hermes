@@ -20,7 +20,7 @@ public class ProducerPipeline implements Pipeline<Future<SendResult>> {
 	private ValveRegistry m_valveRegistry;
 
 	@Inject
-	private ProducerSinkManager m_sinkManager;
+	private ProducerPipelineSinkManager m_sinkManager;
 
 	@Override
 	public Future<SendResult> put(Object payload) {

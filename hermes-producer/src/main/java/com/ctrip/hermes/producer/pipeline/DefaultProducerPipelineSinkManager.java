@@ -15,8 +15,8 @@ import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.pipeline.PipelineSink;
 import com.ctrip.hermes.core.result.SendResult;
 
-@Named(type = ProducerSinkManager.class)
-public class DefaultProducerSinkManager extends ContainerHolder implements Initializable, ProducerSinkManager {
+@Named(type = ProducerPipelineSinkManager.class)
+public class DefaultProducerPipelineSinkManager extends ContainerHolder implements Initializable, ProducerPipelineSinkManager {
 
 	@Inject
 	private MetaService m_meta;

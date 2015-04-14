@@ -4,6 +4,10 @@ import java.util.Map;
 
 public interface ConsumerMessage<T> {
 
+	public static enum MessageStatus {
+		SUCCESS, FAIL, NOT_SET;
+	}
+
 	public void nack();
 
 	public <V> V getProperty(String name);
@@ -18,6 +22,8 @@ public interface ConsumerMessage<T> {
 
 	public T getBody();
 
-	public boolean isSuccess();
+	public MessageStatus getStatus();
+
+	public void ack();
 
 }

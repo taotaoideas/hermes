@@ -14,8 +14,8 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointManager;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.producer.DefaultProducer;
 import com.ctrip.hermes.producer.HermesProducerModule;
-import com.ctrip.hermes.producer.pipeline.DefaultMessageSink;
-import com.ctrip.hermes.producer.pipeline.DefaultProducerSinkManager;
+import com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSink;
+import com.ctrip.hermes.producer.pipeline.DefaultProducerPipelineSinkManager;
 import com.ctrip.hermes.producer.pipeline.ProducerPipeline;
 import com.ctrip.hermes.producer.pipeline.ProducerValveRegistry;
 import com.ctrip.hermes.producer.pipeline.TracingMessageValve;
@@ -39,14 +39,14 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(TracingMessageValve.class));
 
 		// sinks
-		all.add(A(DefaultProducerSinkManager.class)); 
-		all.add(C(PipelineSink.class, Endpoint.BROKER, DefaultMessageSink.class) //
+		all.add(A(DefaultProducerPipelineSinkManager.class)); 
+		all.add(C(PipelineSink.class, Endpoint.BROKER, DefaultProducerPipelineSink.class) //
 		      .req(MessageSender.class, Endpoint.BROKER)//
 		);
-		all.add(C(PipelineSink.class, Endpoint.LOCAL, DefaultMessageSink.class) //
+		all.add(C(PipelineSink.class, Endpoint.LOCAL, DefaultProducerPipelineSink.class) //
 		      .req(MessageSender.class, Endpoint.LOCAL)//
 		);
-		all.add(C(PipelineSink.class, Endpoint.TRANSACTION, DefaultMessageSink.class) //
+		all.add(C(PipelineSink.class, Endpoint.TRANSACTION, DefaultProducerPipelineSink.class) //
 		      .req(MessageSender.class, Endpoint.TRANSACTION)//
 		);
 
