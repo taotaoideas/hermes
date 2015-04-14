@@ -2,7 +2,9 @@ package com.ctrip.hermes.core.meta.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -20,6 +22,8 @@ import com.ctrip.hermes.meta.transform.BaseVisitor2;
 public abstract class AbstractMetaService implements MetaService, Initializable {
 
 	protected Meta m_meta;
+
+	protected Map<Long, Topic> m_topics;
 
 	@Override
 	public String getEndpointType(String topic) {
@@ -128,4 +132,27 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 
 		return dataSources;
 	}
+
+	// TODO add lock
+	protected void refreshMeta(Meta meta) {
+		m_meta = meta;
+		m_topics = new HashMap<>();
+
+		m_meta.accept(new BaseVisitor2() {
+
+			@Override
+			protected void visitTopicChildren(Topic topic) {
+				m_topics.put(topic.getId(), topic);
+
+				super.visitTopicChildren(topic);
+			}
+
+		});
+	}
+
+	@Override
+	public Topic findTopic(long topicId) {
+		return m_topics.get(topicId);
+	}
+
 }

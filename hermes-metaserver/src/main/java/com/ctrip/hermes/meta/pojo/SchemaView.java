@@ -6,7 +6,7 @@ import java.util.Map;
 import com.ctrip.hermes.meta.dal.meta.Schema;
 
 public class SchemaView {
-	private int id;
+	private long id;
 
 	private String name;
 
@@ -17,7 +17,9 @@ public class SchemaView {
 	private Date createTime;
 
 	private Map<String, Object> config;
-	
+
+	private long topicId;
+
 	public SchemaView() {
 
 	}
@@ -34,7 +36,7 @@ public class SchemaView {
 		return createTime;
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -76,6 +78,14 @@ public class SchemaView {
 
 	public void setConfig(Map<String, Object> config) {
 		this.config = config;
+	}
+
+	public long getTopicId() {
+		return topicId;
+	}
+
+	public void setTopicId(long topicId) {
+		this.topicId = topicId;
 	}
 
 	public Schema toMetaSchema() {

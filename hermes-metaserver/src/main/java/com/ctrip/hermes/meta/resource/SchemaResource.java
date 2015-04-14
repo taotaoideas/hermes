@@ -35,7 +35,9 @@ public class SchemaResource {
 
 	@POST
 	@Path("")
-	public Response createSchema(String content) {
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response createSchema(@FormDataParam("file") InputStream is,
+	      @FormDataParam("file") FormDataContentDisposition header, @FormDataParam("schema") String content) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
@@ -125,13 +127,13 @@ public class SchemaResource {
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		String fileProperties = schema.getFileProperties();
 		if (StringUtils.isEmpty(fileProperties)) {
 			throw new RestException("Schema file not found: " + name, Status.NOT_FOUND);
 		}
 
-		return Response.status(Status.OK).header("content-disposition", fileProperties)
-		      .entity(schema.getFileContent()).build();
+		return Response.status(Status.OK).header("content-disposition", fileProperties).entity(schema.getFileContent())
+		      .build();
 	}
 }

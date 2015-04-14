@@ -61,12 +61,19 @@ public class SchemaServerTest extends ComponentTestCase {
 		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
 		schemaView.setName(schemaView.getName() + "_" + UUID.randomUUID());
 
-		Client client = ClientBuilder.newClient();
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 		Builder request = webTarget.path("schemas/").request();
-		Response response = request.post(Entity.json(schemaView));
+
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-json-sample.json");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.field("schema", JSON.toJSONString(schemaView));
+		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
-		System.out.println(response.readEntity(SchemaView.class));
+		System.out.println(response.getStatus());
 	}
 
 	@Test
@@ -92,7 +99,7 @@ public class SchemaServerTest extends ComponentTestCase {
 	}
 
 	@Test
-	public void testUploadJsonFile() {
+	public void testUploadJsonFile() throws IOException {
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(MultiPartFeature.class);
 		Client client = ClientBuilder.newClient(rc);
@@ -106,6 +113,8 @@ public class SchemaServerTest extends ComponentTestCase {
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-json-sample.json");
 		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		String schemaJson = Files.toString(new File("src/test/resources/schema-json-sample.json"), Charsets.UTF_8);
+		form.field("schema", schemaJson);
 		request = webTarget.path("schemas/" + schema + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
@@ -145,7 +154,7 @@ public class SchemaServerTest extends ComponentTestCase {
 		File downloadFile = response.readEntity(File.class);
 		Assert.assertTrue(downloadFile.length() > 0);
 	}
-	
+
 	@Test
 	public void testDownloadAvroFile() {
 		ResourceConfig rc = new ResourceConfig();

@@ -74,4 +74,6 @@ public interface MetaService {
 
 	List<Datasource> listMysqlDataSources();
 
+	Topic findTopic(long topicId);
+
 }

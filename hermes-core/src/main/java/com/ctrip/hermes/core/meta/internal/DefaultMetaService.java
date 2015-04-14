@@ -12,7 +12,7 @@ import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
 
 @Named(type = MetaService.class)
-public class DefaultMetaService extends AbstractMetaService  {
+public class DefaultMetaService extends AbstractMetaService {
 
 	@Inject(ClientMetaManager.ID)
 	private MetaManager m_manager;
@@ -23,13 +23,13 @@ public class DefaultMetaService extends AbstractMetaService  {
 
 	@Override
 	public void initialize() throws InitializationException {
-		m_meta = m_manager.getMeta();
+		refreshMeta(m_manager.getMeta());
 		executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
-				m_meta = m_manager.getMeta();
+				refreshMeta(m_manager.getMeta());
 			}
 
 		}, REFRESH_PERIOD_MINUTES, REFRESH_PERIOD_MINUTES, TimeUnit.MINUTES);

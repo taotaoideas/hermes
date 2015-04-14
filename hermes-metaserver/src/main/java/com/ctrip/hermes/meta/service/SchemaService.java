@@ -17,9 +17,12 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.core.meta.MetaManager;
+import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.dal.meta.SchemaDao;
 import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
+import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.google.common.io.ByteStreams;
 
@@ -30,7 +33,16 @@ public class SchemaService {
 
 	@Inject
 	private SchemaDao schemaDao;
-
+	
+	@Inject(ServerMetaManager.ID)
+	private MetaManager m_metaManager;
+	
+	@Inject
+	private MetaService m_metaService;
+	
+	@Inject
+	private TopicService m_topicService;
+	
 	public void createAvroSchema(String schemaName, org.apache.avro.Schema avroSchema) throws IOException,
 	      RestClientException, DalException {
 		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
@@ -44,6 +56,11 @@ public class SchemaService {
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
 		schema.setVersion(1);
 		schemaDao.insert(schema);
+		
+		Topic topic = m_metaService.findTopic(schemaView.getTopicId());
+		topic.setSchemaId(schema.getId());
+		m_topicService.updateTopic(topic);
+		
 		return new SchemaView(schema);
 	}
 
