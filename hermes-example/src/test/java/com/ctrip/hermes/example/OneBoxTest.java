@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.BeforeClass;
@@ -110,9 +111,11 @@ public class OneBoxTest extends ComponentTestCase {
 			}, MoreExecutors.sameThreadExecutor());
 		}
 
-		latch.await();
+		latch.await(30, TimeUnit.SECONDS);
 
-		System.out.println(String.format("Produce %d msgs spends %d ms", times, (System.currentTimeMillis() - start)));
+		long progressTime = System.currentTimeMillis() - start;
+		System.out.println(String.format("Produce %d msgs spends %d ms, QPS: %.2f msg/s",
+				  times, progressTime, (float) times / (progressTime/1000f)));
 
 		System.in.read();
 	}

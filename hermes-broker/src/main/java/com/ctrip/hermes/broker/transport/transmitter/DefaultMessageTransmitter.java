@@ -104,7 +104,7 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 							}
 
 							// TODO traffic control(batchSize must larger than windowSize of tpgChannel)
-							int batchSize = 100;
+							int batchSize = Integer.MAX_VALUE;
 							ConsumeMessageCommand cmd = new ConsumeMessageCommand();
 
 							m_rwLock.readLock().lock();

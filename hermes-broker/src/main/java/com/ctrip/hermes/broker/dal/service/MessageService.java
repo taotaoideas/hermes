@@ -31,6 +31,7 @@ public class MessageService {
 	private DeadLetterDao m_deadLetterDao;
 
 	public void write(List<MessagePriority> msgs) throws DalException {
+
 		m_msgDao.insert(msgs.toArray(new MessagePriority[msgs.size()]));
 	}
 

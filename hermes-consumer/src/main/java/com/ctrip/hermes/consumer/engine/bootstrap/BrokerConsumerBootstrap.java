@@ -37,7 +37,7 @@ public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 			subscribeCommand.setTopic(consumerContext.getTopic().getName());
 			subscribeCommand.setPartition(partition.getId());
 			// TODO
-			subscribeCommand.setWindow(100);
+			subscribeCommand.setWindow(10000);
 
 			m_consumerNotifier.register(subscribeCommand.getHeader().getCorrelationId(), consumerContext);
 
