@@ -1,9 +1,13 @@
 package com.ctrip.hermes.meta.resource;
 
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Singleton;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -16,12 +20,17 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.plexus.util.StringUtils;
+import org.unidal.dal.jdbc.DalException;
+import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
+import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
+import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.pojo.TopicView;
 import com.ctrip.hermes.meta.server.RestException;
+import com.ctrip.hermes.meta.service.SchemaService;
 import com.ctrip.hermes.meta.service.TopicService;
 
 @Path("/topics/")
@@ -30,6 +39,8 @@ import com.ctrip.hermes.meta.service.TopicService;
 public class TopicResource {
 
 	private static TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
+
+	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
 
 	@POST
 	@Path("")
@@ -67,8 +78,22 @@ public class TopicResource {
 
 		List<Topic> topics = topicService.findTopics(pattern);
 		List<TopicView> returnResult = new ArrayList<TopicView>();
-		for (Topic topic : topics) {
-			returnResult.add(new TopicView(topic));
+		try {
+			for (Topic topic : topics) {
+				TopicView topicView = new TopicView(topic);
+				Storage storage = topicService.findStorage(topic.getName());
+				topicView.setStorage(storage);
+				if (topic.getSchemaId() > 0) {
+					try {
+						SchemaView schemaView = schemaService.getSchemaView(topic.getSchemaId());
+						topicView.setSchema(schemaView);
+					} catch (DalNotFoundException e) {
+					}
+				}
+				returnResult.add(topicView);
+			}
+		} catch (DalException | IOException | RestClientException e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return returnResult;
 	}
@@ -80,7 +105,19 @@ public class TopicResource {
 		if (topic == null) {
 			throw new RestException("Topic not found: " + name, Status.NOT_FOUND);
 		}
-		return new TopicView(topic);
+
+		TopicView topicView = new TopicView(topic);
+		if (topic.getSchemaId() > 0) {
+			SchemaView schemaView;
+			try {
+				schemaView = schemaService.getSchemaView(topic.getSchemaId());
+			} catch (DalException | IOException | RestClientException e) {
+				throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+			}
+			topicView.setSchema(schemaView);
+		}
+
+		return topicView;
 	}
 
 	@PUT
@@ -111,4 +148,14 @@ public class TopicResource {
 		return Response.status(Status.CREATED).entity(topicView).build();
 	}
 
+	@DELETE
+	@Path("{name}")
+	public Response deleteTopic(@PathParam("name") String name) {
+		try {
+			topicService.deleteTopic(name);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.OK).build();
+	}
 }

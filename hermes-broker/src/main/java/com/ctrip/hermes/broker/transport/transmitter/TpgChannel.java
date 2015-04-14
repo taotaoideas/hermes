@@ -1,12 +1,14 @@
 package com.ctrip.hermes.broker.transport.transmitter;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.ctrip.hermes.core.bo.Tpg;
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
 /**
@@ -29,7 +31,7 @@ public class TpgChannel {
 
 	private EndpointChannel m_channel;
 
-	private LinkedList<ConsumerMessageBatch> m_queue;
+	private LinkedList<TppConsumerMessageBatch> m_queue;
 
 	private AtomicInteger m_window = new AtomicInteger(0);
 
@@ -69,11 +71,13 @@ public class TpgChannel {
 		}
 	}
 
-	public void transmit(ConsumerMessageBatch batch) {
+	public void transmit(List<TppConsumerMessageBatch> batchs) {
 		m_rwLock.writeLock().lock();
 		try {
-			m_queue.addLast(batch);
-			m_pendingSize += batch.size();
+			for (TppConsumerMessageBatch batch : batchs) {
+				m_queue.addLast(batch);
+				m_pendingSize += batch.size();
+			}
 		} finally {
 			m_rwLock.writeLock().unlock();
 		}
@@ -87,11 +91,10 @@ public class TpgChannel {
 		return m_correlationId;
 	}
 
-	public ConsumerMessageBatch fetch(int batchSize) {
+	public TpgChannelFetchResult fetch(int batchSize) {
 		m_rwLock.writeLock().lock();
 		try {
-			ConsumerMessageBatch batch = new ConsumerMessageBatch();
-			batch.setTopic(m_tpg.getTopic());
+			List<TppConsumerMessageBatch> batchs = new ArrayList<>();
 			int remainingSize = batchSize;
 			while (remainingSize > 0) {
 				if (m_queue.isEmpty()) {
@@ -99,17 +102,17 @@ public class TpgChannel {
 				}
 
 				if (m_queue.peek().size() <= remainingSize) {
-					ConsumerMessageBatch tmp = m_queue.poll();
-					batch.mergeBatch(tmp);
-					m_pendingSize -= batch.size();
-					remainingSize -= batch.size();
+					TppConsumerMessageBatch tmp = m_queue.poll();
+					batchs.add(tmp);
+					m_pendingSize -= tmp.size();
+					remainingSize -= tmp.size();
 				} else {
 					break;
 				}
 			}
 
-			if (batch.size() != 0) {
-				return batch;
+			if (!batchs.isEmpty()) {
+				return new TpgChannelFetchResult(batchSize - remainingSize, batchs);
 			} else {
 				return null;
 			}
@@ -151,6 +154,26 @@ public class TpgChannel {
 		} else if (!m_tpg.equals(other.m_tpg))
 			return false;
 		return true;
+	}
+
+	public static class TpgChannelFetchResult {
+		private int size;
+
+		private List<TppConsumerMessageBatch> batchs;
+
+		public TpgChannelFetchResult(int size, List<TppConsumerMessageBatch> batchs) {
+			this.size = size;
+			this.batchs = batchs;
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		public List<TppConsumerMessageBatch> getBatchs() {
+			return batchs;
+		}
+
 	}
 
 }

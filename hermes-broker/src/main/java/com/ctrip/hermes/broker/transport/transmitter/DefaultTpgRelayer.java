@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -46,9 +46,9 @@ public class DefaultTpgRelayer implements TpgRelayer {
 	}
 
 	@Override
-	public boolean relay(ConsumerMessageBatch batch) {
-		if(m_currentChannel != null && !m_currentChannel.isClosed()){
-			m_currentChannel.transmit(batch);
+	public boolean relay(List<TppConsumerMessageBatch> batchs) {
+		if (m_currentChannel != null && !m_currentChannel.isClosed()) {
+			m_currentChannel.transmit(batchs);
 			return true;
 		}
 		return false;

@@ -1,10 +1,12 @@
 package com.ctrip.hermes.broker.queue;
 
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import java.util.List;
+
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 
 public interface MessageQueueCursor {
 
-	ConsumerMessageBatch next(int batchSize);
+	List<TppConsumerMessageBatch> next(int batchSize);
 
 	void init();
 

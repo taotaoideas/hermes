@@ -29,13 +29,19 @@ public class ProduceAndConsume extends ComponentTestCase {
 
 	final static long timeInterval = 3000;
 
+	final static String TOPIC = "order_new";
+
 	private void printAndClean() {
 		int secondInTimeInterval = (int) timeInterval / 1000;
 
 		totalSend.addAndGet(sendCount.get());
 		totalReceive.addAndGet(receiveCount.get());
-		System.out.println(String.format("Throughput:Send:%8d items, Receive: %8d items in %d second. "
-		      + "Total Send: %8d, Total Receive: %8d, Delta: %8d.", sendCount.get(), receiveCount.get(),
+		System.out.println(String.format("Throughput:Send:%8d items (QPS: %.2f msg/s), Receive: %8d items (QPS: %.2f msg/s) " +
+							 "in %d " +
+							 "second. "
+		      + "Total Send: %8d, Total Receive: %8d, Delta: %8d.",
+				  sendCount.get(), sendCount.get()/(float)secondInTimeInterval,
+				  receiveCount.get(), receiveCount.get()/(float)secondInTimeInterval,
 		      secondInTimeInterval, totalSend.get(), totalReceive.get(), Math.abs(totalSend.get() - totalReceive.get())));
 
 		sendCount.set(0);
@@ -71,19 +77,23 @@ public class ProduceAndConsume extends ComponentTestCase {
 	}
 
 	private void startProduceThread() {
+			runProducer();
+	}
+
+	private void runProducer() {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				Producer p = lookup(Producer.class);
 
 				for (;;) {
-					p.message("order.new", sendCount.get()).send();
+					p.message(TOPIC, sendCount.get()).send();
 					sendCount.addAndGet(1);
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+//					try {
+//						Thread.sleep(1);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
 				}
 			}
 		}).start();
@@ -93,13 +103,13 @@ public class ProduceAndConsume extends ComponentTestCase {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String topic = "order.new";
+				String topic = TOPIC;
 				Engine engine = lookup(Engine.class);
 
 				Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
 					@Override
 					public void consume(List<ConsumerMessage<String>> msgs) {
-						receiveCount.addAndGet(1);
+						receiveCount.addAndGet(msgs.size());
 					}
 				});
 

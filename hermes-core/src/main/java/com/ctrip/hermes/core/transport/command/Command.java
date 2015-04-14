@@ -13,4 +13,6 @@ public interface Command {
 
 	public void toBytes(ByteBuf buf);
 
+	public void release();
+
 }

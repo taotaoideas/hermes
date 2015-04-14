@@ -1,6 +1,8 @@
 package com.ctrip.hermes.broker.transport.transmitter;
 
-import com.ctrip.hermes.core.message.ConsumerMessageBatch;
+import java.util.List;
+
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 
 /**
  * mapping to one tpg, manage multiple {@linkplain TpgChannel TpgChannel}s
@@ -15,7 +17,7 @@ public interface TpgRelayer {
 
 	int availableSize();
 
-	boolean relay(ConsumerMessageBatch batch);
+	boolean relay(List<TppConsumerMessageBatch> batchs);
 
 	void addChannel(TpgChannel channel);
 

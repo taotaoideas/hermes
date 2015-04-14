@@ -33,16 +33,16 @@ public class SchemaService {
 
 	@Inject
 	private SchemaDao schemaDao;
-	
+
 	@Inject(ServerMetaManager.ID)
 	private MetaManager m_metaManager;
-	
+
 	@Inject
 	private MetaService m_metaService;
-	
+
 	@Inject
 	private TopicService m_topicService;
-	
+
 	public void createAvroSchema(String schemaName, org.apache.avro.Schema avroSchema) throws IOException,
 	      RestClientException, DalException {
 		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
@@ -56,12 +56,17 @@ public class SchemaService {
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
 		schema.setVersion(1);
 		schemaDao.insert(schema);
-		
+
 		Topic topic = m_metaService.findTopic(schemaView.getTopicId());
 		topic.setSchemaId(schema.getId());
 		m_topicService.updateTopic(topic);
-		
+
 		return new SchemaView(schema);
+	}
+
+	public void deleteSchema(String name) throws DalException {
+		Schema schema = getSchemaMeta(name);
+		schemaDao.deleteByPK(schema);
 	}
 
 	public org.apache.avro.Schema getAvroSchema(String schemaName) throws IOException, RestClientException, DalException {
@@ -78,8 +83,27 @@ public class SchemaService {
 		return schema;
 	}
 
+	public Schema getSchemaMeta(long schemaId) throws DalException {
+		Schema schema = schemaDao.findByPK(schemaId, SchemaEntity.READSET_FULL);
+		return schema;
+	}
+
 	public SchemaView getSchemaView(String schemaName) throws DalException, IOException, RestClientException {
 		Schema schema = getSchemaMeta(schemaName);
+		SchemaView schemaView = new SchemaView(schema);
+		if (schema.getAvroid() > 0) {
+			SchemaMetadata avroSchemaMeta = this.avroSchemaRegistry.getLatestSchemaMetadata(schema.getName());
+			Map<String, Object> config = new HashMap<>();
+			config.put("avro.schema", avroSchemaMeta.getSchema());
+			config.put("avro.id", avroSchemaMeta.getId());
+			config.put("avro.version", avroSchemaMeta.getVersion());
+			schemaView.setConfig(config);
+		}
+		return schemaView;
+	}
+
+	public SchemaView getSchemaView(long schemaId) throws DalException, IOException, RestClientException {
+		Schema schema = getSchemaMeta(schemaId);
 		SchemaView schemaView = new SchemaView(schema);
 		if (schema.getAvroid() > 0) {
 			SchemaMetadata avroSchemaMeta = this.avroSchemaRegistry.getLatestSchemaMetadata(schema.getName());

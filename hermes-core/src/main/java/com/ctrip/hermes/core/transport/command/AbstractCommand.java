@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
  */
 public abstract class AbstractCommand implements Command {
 	protected Header m_header = new Header();
+	protected ByteBuf m_rawBuf;
 
 	public AbstractCommand(CommandType commandType) {
 		m_header.setType(commandType);
@@ -30,7 +31,14 @@ public abstract class AbstractCommand implements Command {
 	@Override
 	public void parse(ByteBuf buf, Header header) {
 		m_header = header;
+		m_rawBuf = buf;
 		parse0(buf);
+	}
+	
+	public void release() {
+		if(m_rawBuf != null){
+			m_rawBuf.release();
+		}
 	}
 
 	public void toBytes(ByteBuf buf) {
