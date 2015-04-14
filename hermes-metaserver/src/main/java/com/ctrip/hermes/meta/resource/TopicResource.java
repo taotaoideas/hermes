@@ -83,7 +83,7 @@ public class TopicResource {
 				TopicView topicView = new TopicView(topic);
 				Storage storage = topicService.findStorage(topic.getName());
 				topicView.setStorage(storage);
-				if (topic.getSchemaId() > 0) {
+				if (topic.getSchemaId() != null && topic.getSchemaId() > 0) {
 					try {
 						SchemaView schemaView = schemaService.getSchemaView(topic.getSchemaId());
 						topicView.setSchema(schemaView);

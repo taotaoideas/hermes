@@ -24,7 +24,7 @@ public class TopicView {
 
 	private Date lastModifiedTime;
 
-	private long schemaId;
+	private Long schemaId;
 
 	private List<Partition> partitions;
 
@@ -71,7 +71,7 @@ public class TopicView {
 		return name;
 	}
 
-	public long getSchemaId() {
+	public Long getSchemaId() {
 		return schemaId;
 	}
 
@@ -103,7 +103,7 @@ public class TopicView {
 		this.name = name;
 	}
 
-	public void setSchemaId(int schemaId) {
+	public void setSchemaId(Long schemaId) {
 		this.schemaId = schemaId;
 	}
 
