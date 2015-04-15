@@ -107,8 +107,8 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 
 	@Override
 	public int getGroupIdInt(String groupId) {
-		// TODO Auto-generated method stub
-		return 111;
+		// TODO
+		return groupId.hashCode();
 	}
 
 	@Override
@@ -155,4 +155,9 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 		return m_topics.get(topicId);
 	}
 
+	@Override
+	public int getAckTimeoutSeconds(String topic) {
+		// TODO
+		return 2000;
+	}
 }

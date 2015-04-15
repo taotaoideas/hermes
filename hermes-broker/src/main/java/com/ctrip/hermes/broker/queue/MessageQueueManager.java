@@ -1,7 +1,9 @@
 package com.ctrip.hermes.broker.queue;
 
+import java.util.List;
 import java.util.Map;
 
+import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionCursor;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
@@ -11,6 +13,9 @@ public interface MessageQueueManager {
 
 	public ListenableFuture<Map<Integer, Boolean>> appendMessageAsync(Tpp tpp, MessageRawDataBatch data);
 
-	public MessageQueueCursor createCursor(Tpg tpg);
+	public MessageQueuePartitionCursor createCursor(Tpg tpg);
 
+	public void nack(Tpp tpp, String groupId, boolean resend, List<Long> msgSeqs);
+
+	public void ack(Tpp tpp, String groupId, boolean resend, long msgSeq);
 }

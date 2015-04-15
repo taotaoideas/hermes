@@ -20,6 +20,8 @@ public class TppConsumerMessageBatch {
 
 	private boolean m_priority;
 
+	private boolean m_resend = false;
+
 	private List<Long> m_msgSeqs = new ArrayList<>();
 
 	private TransferCallback m_transferCallback;
@@ -27,6 +29,14 @@ public class TppConsumerMessageBatch {
 	private ByteBuf data;
 
 	public TppConsumerMessageBatch() {
+	}
+
+	public boolean isResend() {
+		return m_resend;
+	}
+
+	public void setResend(boolean resend) {
+		m_resend = resend;
 	}
 
 	public int getPartition() {

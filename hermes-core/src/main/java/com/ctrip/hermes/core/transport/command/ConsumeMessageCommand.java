@@ -137,6 +137,7 @@ public class ConsumeMessageCommand extends AbstractCommand {
 			batch.setTopic(codec.readString());
 			batch.setPartition(codec.readInt());
 			batch.setPriority(codec.readInt() == 0 ? true : false);
+			batch.setResend(codec.readBoolean());
 
 			for (int j = 0; j < seqSize; j++) {
 				batch.addMsgSeq(codec.readLong());
@@ -152,18 +153,19 @@ public class ConsumeMessageCommand extends AbstractCommand {
 			codec.writeString(batch.getTopic());
 			codec.writeInt(batch.getPartition());
 			codec.writeInt(batch.isPriority() ? 0 : 1);
+			codec.writeBoolean(batch.isResend());
 			for (Long seq : batch.getMsgSeqs()) {
 				codec.writeLong(seq);
 			}
 		}
 	}
 
-	public void addMessage(long correlationId, List<TppConsumerMessageBatch> batchs) {
+	public void addMessage(long correlationId, List<TppConsumerMessageBatch> batches) {
 		if (!m_msgs.containsKey(correlationId)) {
 			m_msgs.put(correlationId, new ArrayList<TppConsumerMessageBatch>());
 		}
 
-		m_msgs.get(correlationId).addAll(batchs);
+		m_msgs.get(correlationId).addAll(batches);
 	}
 
 	public Map<Long, List<TppConsumerMessageBatch>> getMsgs() {

@@ -2,7 +2,7 @@ package com.ctrip.hermes.core.message;
 
 import java.util.Iterator;
 
-import com.ctrip.hermes.core.transport.command.MessageAckCommand;
+import com.ctrip.hermes.core.transport.command.AckMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
 /**
@@ -19,11 +19,33 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 
 	private boolean m_priority;
 
+	private boolean m_resend = false;
+
+	private String m_groupId;
+
+	private long m_correlationId;
+
 	private EndpointChannel m_channel;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public BrokerConsumerMessage(BaseConsumerMessage baseMsg) {
 		m_baseMsg = baseMsg;
+	}
+
+	public String getGroupId() {
+		return m_groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		m_groupId = groupId;
+	}
+
+	public long getCorrelationId() {
+		return m_correlationId;
+	}
+
+	public void setCorrelationId(long correlationId) {
+		m_correlationId = correlationId;
 	}
 
 	public void setChannel(EndpointChannel channel) {
@@ -57,8 +79,9 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	@Override
 	public void nack() {
 		if (m_baseMsg.nack()) {
-			MessageAckCommand cmd = new MessageAckCommand();
-			cmd.addNackMsg(getTopic(), getPartition(), m_priority, m_msgSeq);
+			AckMessageCommand cmd = new AckMessageCommand();
+			cmd.getHeader().setCorrelationId(m_correlationId);
+			cmd.addNackMsg(getTopic(), getPartition(), m_priority, m_groupId, m_resend, m_msgSeq);
 			m_channel.writeCommand(cmd);
 		}
 	}
@@ -96,8 +119,9 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	@Override
 	public void ack() {
 		if (m_baseMsg.ack()) {
-			MessageAckCommand cmd = new MessageAckCommand();
-			cmd.addAckMsg(getTopic(), getPartition(), m_priority, m_msgSeq);
+			AckMessageCommand cmd = new AckMessageCommand();
+			cmd.getHeader().setCorrelationId(m_correlationId);
+			cmd.addAckMsg(getTopic(), getPartition(), m_priority, m_groupId, m_resend, m_msgSeq);
 			m_channel.writeCommand(cmd);
 		}
 	}
@@ -105,6 +129,14 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	@Override
 	public MessageStatus getStatus() {
 		return m_baseMsg.getStatus();
+	}
+
+	public void setResend(boolean resend) {
+		m_resend = resend;
+	}
+
+	public boolean isResend() {
+		return m_resend;
 	}
 
 }

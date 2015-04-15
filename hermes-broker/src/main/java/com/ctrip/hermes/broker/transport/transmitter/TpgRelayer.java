@@ -17,7 +17,7 @@ public interface TpgRelayer {
 
 	int availableSize();
 
-	boolean relay(List<TppConsumerMessageBatch> batchs);
+	boolean relay(List<TppConsumerMessageBatch> batches);
 
 	void addChannel(TpgChannel channel);
 

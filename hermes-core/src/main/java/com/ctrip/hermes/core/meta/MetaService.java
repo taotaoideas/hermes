@@ -64,16 +64,18 @@ public interface MetaService {
 	 * @param groupId
 	 * @return
 	 */
-   List<Partition> getPartitions(String topic, String groupId);
+	List<Partition> getPartitions(String topic, String groupId);
 
 	/**
 	 * @param groupId
 	 * @return
 	 */
-   int getGroupIdInt(String groupId);
+	int getGroupIdInt(String groupId);
 
 	List<Datasource> listMysqlDataSources();
 
 	Topic findTopic(long topicId);
+
+	int getAckTimeoutSeconds(String topic);
 
 }

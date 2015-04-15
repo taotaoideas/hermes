@@ -7,17 +7,19 @@ import org.unidal.dal.jdbc.configuration.AbstractJdbcResourceConfigurator;
 import org.unidal.dal.jdbc.mapping.TableProvider;
 import org.unidal.lookup.configuration.Component;
 
+import com.ctrip.hermes.broker.ack.AckManager;
+import com.ctrip.hermes.broker.ack.DefaultAckManager;
 import com.ctrip.hermes.broker.bootstrap.DefaultBrokerBootstrap;
-import com.ctrip.hermes.broker.dal.HermesJdbcDataSourceDescriptorManager;
-import com.ctrip.hermes.broker.dal.HermesTableProvider;
-import com.ctrip.hermes.broker.dal.service.MessageService;
-import com.ctrip.hermes.broker.dal.service.ResendService;
 import com.ctrip.hermes.broker.queue.DefaultMessageQueueManager;
-import com.ctrip.hermes.broker.queue.DefaultMessageQueuePullerManager;
 import com.ctrip.hermes.broker.queue.MessageQueueManager;
-import com.ctrip.hermes.broker.queue.MessageQueuePullerManager;
+import com.ctrip.hermes.broker.queue.partition.DefaultMessageQueuePullerManager;
+import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionFactory;
+import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionPullerManager;
+import com.ctrip.hermes.broker.queue.storage.mysql.dal.HermesJdbcDataSourceDescriptorManager;
+import com.ctrip.hermes.broker.queue.storage.mysql.dal.HermesTableProvider;
 import com.ctrip.hermes.broker.transport.NettyServer;
 import com.ctrip.hermes.broker.transport.NettyServerConfig;
+import com.ctrip.hermes.broker.transport.command.processor.AckMessageCommandProcessor;
 import com.ctrip.hermes.broker.transport.command.processor.SendMessageCommandProcessor;
 import com.ctrip.hermes.broker.transport.command.processor.SubscribeCommandProcessor;
 import com.ctrip.hermes.broker.transport.transmitter.DefaultMessageTransmitter;
@@ -41,15 +43,16 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(C(CommandProcessor.class, CommandType.MESSAGE_SEND.toString(), SendMessageCommandProcessor.class)//
 		      .req(MessageQueueManager.class));
 		all.add(C(CommandProcessor.class, CommandType.SUBSCRIBE.toString(), SubscribeCommandProcessor.class)//
-		      .req(MessageQueueManager.class)//
-		      .req(MessageQueuePullerManager.class)//
+		      .req(MessageQueuePartitionPullerManager.class)//
 		      .req(MessageTransmitter.class));
+		all.add(C(CommandProcessor.class, CommandType.MESSAGE_ACK.toString(), AckMessageCommandProcessor.class)//
+		      .req(AckManager.class));
 
+		all.add(A(MessageQueuePartitionFactory.class));
 		all.add(A(DefaultMessageQueueManager.class));
 		all.add(A(DefaultMessageQueuePullerManager.class));
-		all.add(A(MessageService.class));
-		all.add(A(ResendService.class));
 		all.add(A(DefaultMessageTransmitter.class));
+		all.add(A(DefaultAckManager.class));
 
 		all.add(C(TableProvider.class, "message-priority", HermesTableProvider.class) //
 		      .req(MetaService.class) //
@@ -61,8 +64,8 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		      .req(MetaService.class) //
 		      .config(E("m_table").value("offset-message")));
 		all.add(C(TableProvider.class, "dead-letter", HermesTableProvider.class) //
-				.req(MetaService.class) //
-				.config(E("m_table").value("dead-letter")));
+		      .req(MetaService.class) //
+		      .config(E("m_table").value("dead-letter")));
 
 		all.add(A(HermesJdbcDataSourceDescriptorManager.class));
 

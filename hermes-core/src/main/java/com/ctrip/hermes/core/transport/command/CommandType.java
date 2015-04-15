@@ -12,7 +12,7 @@ public enum CommandType {
 
 	MESSAGE_SEND(101, SendMessageCommand.class), //
 	MESSAGE_CONSUME(102, ConsumeMessageCommand.class), //
-	MESSAGE_ACK(103, MessageAckCommand.class), //
+	MESSAGE_ACK(103, AckMessageCommand.class), //
 
 	ACK_MESSAGE_SEND(201, SendMessageAckCommand.class), //
 	ACK_SUBSCRIBE(202, SubscribeAckCommand.class), //
