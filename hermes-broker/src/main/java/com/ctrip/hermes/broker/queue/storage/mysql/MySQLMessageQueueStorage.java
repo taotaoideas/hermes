@@ -10,7 +10,6 @@ import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
-import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.google.common.base.Charsets;
 
@@ -48,13 +47,13 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 	}
 
 	@Override
-	public long findLastOffset(Tpp tpp, int groupId) throws Exception {
+	public Object findLastOffset(Tpp tpp, int groupId) throws Exception {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public TppConsumerMessageBatch fetchMessages(Tpp tpp, long startOffset, int batchSize) {
+	public FetchResult fetchMessages(Tpp tpp, Object startOffset, int batchSize) {
 		// try {
 		// final List<MessagePriority> dataObjs = isPriority ? m_messageService.read(m_priorityTpp, m_priorityOffset,
 		// batchSize) : m_messageService.read(m_nonPriorityTpp, m_nonPriorityOffset, batchSize);
@@ -114,13 +113,13 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 	}
 
 	@Override
-	public long findLastResendOffset(Tpg tpg) throws Exception {
+	public Object findLastResendOffset(Tpg tpg) throws Exception {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public TppConsumerMessageBatch fetchResendMessages(Tpg tpg, long startOffset, int batchSize) {
+	public FetchResult fetchResendMessages(Tpg tpg, Object startOffset, int batchSize) {
 		// TODO Auto-generated method stub
 		return null;
 	}

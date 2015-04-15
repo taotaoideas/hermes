@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage.FetchResult;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
@@ -20,11 +21,11 @@ public abstract class AbstractMessageQueuePartitionCursor implements MessageQueu
 
 	protected Tpp m_nonPriorityTpp;
 
-	protected long m_priorityOffset;
+	protected Object m_priorityOffset;
 
-	protected long m_nonPriorityOffset;
+	protected Object m_nonPriorityOffset;
 
-	protected long m_resendOffset;
+	protected Object m_resendOffset;
 
 	protected MetaService m_metaService;
 
@@ -47,17 +48,17 @@ public abstract class AbstractMessageQueuePartitionCursor implements MessageQueu
 		m_resendOffset = loadLastResendOffset();
 	}
 
-	protected abstract long loadLastPriorityOffset();
+	protected abstract Object loadLastPriorityOffset();
 
-	protected abstract long loadLastNonPriorityOffset();
+	protected abstract Object loadLastNonPriorityOffset();
 
-	protected abstract long loadLastResendOffset();
+	protected abstract Object loadLastResendOffset();
 
-	protected abstract TppConsumerMessageBatch fetchPriortyMessages(int batchSize);
+	protected abstract FetchResult fetchPriortyMessages(int batchSize);
 
-	protected abstract TppConsumerMessageBatch fetchNonPriortyMessages(int batchSize);
+	protected abstract FetchResult fetchNonPriortyMessages(int batchSize);
 
-	protected abstract TppConsumerMessageBatch fetchResendMessages(int batchSize);
+	protected abstract FetchResult fetchResendMessages(int batchSize);
 
 	@Override
 	public List<TppConsumerMessageBatch> next(int batchSize) {
@@ -65,28 +66,40 @@ public abstract class AbstractMessageQueuePartitionCursor implements MessageQueu
 			try {
 				List<TppConsumerMessageBatch> result = new LinkedList<>();
 				int remainingSize = batchSize;
-				TppConsumerMessageBatch priorityMessageBatch = fetchPriortyMessages(batchSize);
+				FetchResult pFetchResult = fetchPriortyMessages(batchSize);
 
-				if (priorityMessageBatch != null) {
-					result.add(priorityMessageBatch);
-					remainingSize -= priorityMessageBatch.size();
-				}
-
-				if (remainingSize > 0) {
-					TppConsumerMessageBatch resendMessageBatch = fetchResendMessages(remainingSize);
-
-					if (resendMessageBatch != null) {
-						result.add(resendMessageBatch);
-						remainingSize -= resendMessageBatch.size();
+				if (pFetchResult != null) {
+					TppConsumerMessageBatch priorityMessageBatch = pFetchResult.getBatch();
+					if (priorityMessageBatch != null && priorityMessageBatch.size() > 0) {
+						result.add(priorityMessageBatch);
+						remainingSize -= priorityMessageBatch.size();
+						m_priorityOffset = pFetchResult.getOffset();
 					}
 				}
 
 				if (remainingSize > 0) {
-					TppConsumerMessageBatch nonPriorityMessageBatch = fetchNonPriortyMessages(remainingSize);
+					FetchResult rFetchResult = fetchResendMessages(remainingSize);
 
-					if (nonPriorityMessageBatch != null) {
-						result.add(nonPriorityMessageBatch);
-						remainingSize -= nonPriorityMessageBatch.size();
+					if (rFetchResult != null) {
+						TppConsumerMessageBatch resendMessageBatch = rFetchResult.getBatch();
+						if (resendMessageBatch != null && resendMessageBatch.size() > 0) {
+							result.add(resendMessageBatch);
+							remainingSize -= resendMessageBatch.size();
+							m_resendOffset = rFetchResult.getOffset();
+						}
+					}
+				}
+
+				if (remainingSize > 0) {
+					FetchResult npFetchResult = fetchNonPriortyMessages(remainingSize);
+
+					if (npFetchResult != null) {
+						TppConsumerMessageBatch nonPriorityMessageBatch = npFetchResult.getBatch();
+						if (nonPriorityMessageBatch != null && nonPriorityMessageBatch.size() > 0) {
+							result.add(nonPriorityMessageBatch);
+							remainingSize -= nonPriorityMessageBatch.size();
+							m_nonPriorityOffset = npFetchResult.getOffset();
+						}
 					}
 				}
 
