@@ -1,6 +1,5 @@
 package com.ctrip.hermes.meta.rest;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.ws.rs.client.Client;
@@ -20,8 +19,6 @@ import org.unidal.lookup.ComponentTestCase;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.server.MetaRestServer;
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 
 public class MetaServerTest extends ComponentTestCase {
 
@@ -44,32 +41,24 @@ public class MetaServerTest extends ComponentTestCase {
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 		Builder request = webTarget.path("meta/").request();
 		Meta actual = request.get(Meta.class);
-		System.out.println(actual);
+		String json = JSON.toJSONString(actual);
+		System.out.println(json);
 		Assert.assertTrue(actual.getTopics().size() > 0);
 	}
 
 	@Test
-	public void testPostMetaWithEntity() throws IOException {
-		String jsonString = Files.toString(new File("src/test/resources/meta-sample.json"), Charsets.UTF_8);
-		Meta meta = JSON.parseObject(jsonString, Meta.class);
-
+	public void testUpdateMeta() throws IOException {
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 		Builder request = webTarget.path("meta/").request();
-		Response response = request.post(Entity.json(meta));
-		if (response.getStatus() != Status.NOT_MODIFIED.getStatusCode()) {
-			System.out.println(response.readEntity(Meta.class));
-		}
-	}
 
-	@Test
-	public void testPostMetaWithText() throws IOException {
-		String jsonString = Files.toString(new File("src/test/resources/meta-sample.json"), Charsets.UTF_8);
+		Meta actual = request.get(Meta.class);
+		actual.setDevMode(!actual.getDevMode());
+		String json = JSON.toJSONString(actual);
+		System.out.println(json);
+		Assert.assertTrue(actual.getTopics().size() > 0);
 
-		Client client = ClientBuilder.newClient();
-		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
-		Builder request = webTarget.path("meta/").request();
-		Response response = request.post(Entity.text(jsonString));
+		Response response = request.post(Entity.text(json));
 		if (response.getStatus() != Status.NOT_MODIFIED.getStatusCode()) {
 			System.out.println(response.readEntity(Meta.class));
 		}

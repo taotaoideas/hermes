@@ -38,8 +38,10 @@ public class CodecView {
 	public Codec toMetaCodec() {
 		Codec codec = new Codec();
 		codec.setType(this.type);
-		for (Property prop : this.properties) {
-			codec.addProperty(prop);
+		if (this.properties != null) {
+			for (Property prop : this.properties) {
+				codec.addProperty(prop);
+			}
 		}
 		return codec;
 	}

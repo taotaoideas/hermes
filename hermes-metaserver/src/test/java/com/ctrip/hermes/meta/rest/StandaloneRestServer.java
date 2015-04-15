@@ -2,13 +2,11 @@ package com.ctrip.hermes.meta.rest;
 
 import java.util.Properties;
 
-import org.junit.Test;
-import org.unidal.lookup.ComponentTestCase;
-
+import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
 import com.ctrip.hermes.meta.server.MetaRestServer;
 
-public class StandaloneRestServer extends ComponentTestCase {
+public class StandaloneRestServer {
 
 	public static String HOST = null;
 
@@ -19,9 +17,8 @@ public class StandaloneRestServer extends ComponentTestCase {
 		HOST = "http://" + host + ":" + port + "/";
 	}
 
-	@Test
-	public void startServer() throws InterruptedException {
-		MetaRestServer server = lookup(MetaRestServer.class);
+	public static void main(String[] args) throws InterruptedException {
+		MetaRestServer server = PlexusComponentLocator.lookup(MetaRestServer.class);
 		server.start();
 		Thread.currentThread().join();
 	}

@@ -141,8 +141,10 @@ public class TopicView {
 		topic.setName(this.name);
 		topic.setStorageType(this.storageType);
 		topic.setDescription(this.description);
-		for (Property prop : this.properties) {
-			topic.addProperty(prop);
+		if (this.properties != null) {
+			for (Property prop : this.properties) {
+				topic.addProperty(prop);
+			}
 		}
 		topic.setStatus(this.status);
 		topic.setCreateTime(this.createTime);
