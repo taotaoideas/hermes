@@ -31,6 +31,19 @@
 		<attribute name="name" key='true' />
 		<attribute name="id" value-type="long" />
 		<attribute name="schema-id" value-type="long" />
+
+		<snippet lang="java">
+			private com.ctrip.hermes.core.message.RetryPolicy m_retryPolicy;;
+			private java.util.concurrent.atomic.AtomicBoolean m_retryPolicyParsed = new java.util.concurrent.atomic.AtomicBoolean(false);
+			
+			public com.ctrip.hermes.core.message.RetryPolicy getRetryPolicy() {
+				if(m_retryPolicyParsed.compareAndSet(false, true)) {
+					// TODO retry policy should be per consumer?
+					m_retryPolicy = new com.ctrip.hermes.core.message.RetryPolicy();
+				}
+				return m_retryPolicy;
+			}
+		</snippet>		
 	</entity>
 	<entity name="codec">
 		<attribute name="type" value-type="String" />
