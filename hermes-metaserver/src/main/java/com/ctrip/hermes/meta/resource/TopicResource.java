@@ -83,9 +83,9 @@ public class TopicResource {
 				TopicView topicView = new TopicView(topic);
 				Storage storage = topicService.findStorage(topic.getName());
 				topicView.setStorage(storage);
-				if (!StringUtils.isEmpty(topic.getSchemaName())) {
+				if (topic.getSchemaId() != null && topic.getSchemaId() > 0) {
 					try {
-						SchemaView schemaView = schemaService.getSchemaView(topic.getSchemaName());
+						SchemaView schemaView = schemaService.getSchemaView(topic.getSchemaId());
 						topicView.setSchema(schemaView);
 					} catch (DalNotFoundException e) {
 					}
@@ -107,10 +107,10 @@ public class TopicResource {
 		}
 
 		TopicView topicView = new TopicView(topic);
-		if (!StringUtils.isEmpty(topic.getSchemaName())) {
+		if (topic.getSchemaId() > 0) {
 			SchemaView schemaView;
 			try {
-				schemaView = schemaService.getSchemaView(topic.getSchemaName());
+				schemaView = schemaService.getSchemaView(topic.getSchemaId());
 			} catch (DalException | IOException | RestClientException e) {
 				throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 			}

@@ -18,6 +18,6 @@ public class ServerMetaService extends AbstractMetaService {
 
 	@Override
 	public void initialize() throws InitializationException {
-		m_meta = m_manager.getMeta();
+		refreshMeta(m_manager.getMeta());
 	}
 }

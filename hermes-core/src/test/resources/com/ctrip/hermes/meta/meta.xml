@@ -1,10 +1,13 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <meta dev-mode='true' version='1'>
 
-	<topic name='topic.5' id='100' partition-count='2' storage-type='mysql'>
+	<topic name='topic.5' id='100' partition-count='2' storage-type='mysql' description='desc'
+		status='status' create-time='2012-12-12 00:00:00' last-modified-time='2012-12-12 00:00:00'
+		schema-id='100'>
 		<partition id='0' read-datasource='ds0' write-datasource='ds0' endpoint='br0' />
 		<partition id='1' read-datasource='ds1' write-datasource='ds1' endpoint='br0' />
 		<property name='retry-policy' value='interval:60,300,900' />
+		<property name='another' value='value' />
 	</topic>
 	<topic name='topic.6' />
 	<topic name='kafka.SimpleTopic' partition-count='1'>

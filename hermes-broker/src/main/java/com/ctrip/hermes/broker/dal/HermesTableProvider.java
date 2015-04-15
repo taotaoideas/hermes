@@ -65,7 +65,7 @@ public class HermesTableProvider implements TableProvider, Initializable {
 		}
 	}
 
-	private int findTopicId(String topic) {
+	private long findTopicId(String topic) {
 		return m_metaService.findTopic(topic).getId();
 	}
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entities>
   <entity name="meta" table="meta" alias="m">
-    <member name="id" field="id" value-type="int" length="10" nullable="false" key="true" auto-increment="true" />
+    <member name="id" field="id" value-type="long" length="10" nullable="false" key="true" auto-increment="true" />
     <member name="value" field="value" value-type="String" length="65535" nullable="false" />
     <member name="last-modified-time" field="lastModifiedTime" value-type="Date" nullable="false" />
-    <var name="key-id" value-type="int" key-member="id" />
+    <var name="key-id" value-type="long" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
     <readsets>
       <readset name="FULL" all="true" />
@@ -37,7 +37,7 @@
     </query-defs>
   </entity>
   <entity name="schema" table="schema" alias="s">
-    <member name="id" field="id" value-type="int" length="10" nullable="false" key="true" auto-increment="true" />
+    <member name="id" field="id" value-type="long" length="10" nullable="false" key="true" auto-increment="true" />
     <member name="name" field="name" value-type="String" length="500" nullable="false" />
     <member name="type" field="type" value-type="String" length="500" nullable="false" />
     <member name="version" field="version" value-type="int" length="10" nullable="false" />
@@ -45,7 +45,7 @@
     <member name="file-content" field="fileContent" value-type="byte[]" length="65535" />
     <member name="file-properties" field="fileProperties" value-type="String" length="65535" />
     <member name="avroid" field="avroid" value-type="int" length="10" />
-    <var name="key-id" value-type="int" key-member="id" />
+    <var name="key-id" value-type="long" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
     <readsets>
       <readset name="FULL" all="true" />

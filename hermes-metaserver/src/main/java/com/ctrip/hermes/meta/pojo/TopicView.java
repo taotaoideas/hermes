@@ -10,7 +10,7 @@ import com.ctrip.hermes.meta.entity.Topic;
 
 public class TopicView {
 
-	private Integer id;
+	private Long id;
 
 	private String name;
 
@@ -24,7 +24,7 @@ public class TopicView {
 
 	private Date lastModifiedTime;
 
-	private String schemaName;
+	private Long schemaId;
 
 	private List<Partition> partitions;
 
@@ -48,11 +48,11 @@ public class TopicView {
 		this.status = topic.getStatus();
 		this.createTime = topic.getCreateTime();
 		this.lastModifiedTime = topic.getLastModifiedTime();
+		this.schemaId = topic.getSchemaId();
 		this.partitions = topic.getPartitions();
 		this.properties = topic.getProperties();
 
 		this.codecView = new CodecView(topic.getCodec());
-		this.schemaName = topic.getSchemaName();
 	}
 
 	public Date getCreateTime() {
@@ -69,6 +69,10 @@ public class TopicView {
 
 	public String getName() {
 		return name;
+	}
+
+	public Long getSchemaId() {
+		return schemaId;
 	}
 
 	public SchemaView getSchema() {
@@ -99,6 +103,10 @@ public class TopicView {
 		this.name = name;
 	}
 
+	public void setSchemaId(Long schemaId) {
+		this.schemaId = schemaId;
+	}
+
 	public void setSchema(SchemaView schemaView) {
 		this.schemaView = schemaView;
 	}
@@ -111,11 +119,11 @@ public class TopicView {
 		this.storageType = type;
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -139,8 +147,8 @@ public class TopicView {
 		topic.setStatus(this.status);
 		topic.setCreateTime(this.createTime);
 		topic.setLastModifiedTime(this.lastModifiedTime);
+		topic.setSchemaId(this.schemaId);
 		topic.setCodec(this.codecView.toMetaCodec());
-		topic.setSchemaName(this.schemaName);
 		return topic;
 	}
 

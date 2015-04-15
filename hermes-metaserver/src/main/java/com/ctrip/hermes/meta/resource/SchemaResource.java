@@ -37,7 +37,9 @@ public class SchemaResource {
 
 	@POST
 	@Path("")
-	public Response createSchema(String content) {
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response createSchema(@FormDataParam("file") InputStream is,
+	      @FormDataParam("file") FormDataContentDisposition header, @FormDataParam("schema") String content) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}

@@ -25,6 +25,16 @@
 				<requirement>
 					<role>com.ctrip.hermes.meta.dal.meta.SchemaDao</role>
 				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaManager</role>
+					<role-hint>meta-server</role-hint>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.core.meta.MetaService</role>
+				</requirement>
+				<requirement>
+					<role>com.ctrip.hermes.meta.service.TopicService</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>

@@ -29,6 +29,8 @@
 	</entity>
 	<entity name="topic">
 		<attribute name="name" key='true' />
+		<attribute name="id" value-type="long" />
+		<attribute name="schema-id" value-type="long" />
 	</entity>
 	<entity name="codec">
 		<attribute name="type" value-type="String" />
