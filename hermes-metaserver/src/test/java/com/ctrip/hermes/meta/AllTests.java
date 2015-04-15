@@ -8,11 +8,9 @@ import com.ctrip.hermes.meta.rest.CodecServerTest;
 import com.ctrip.hermes.meta.rest.MetaServerTest;
 import com.ctrip.hermes.meta.rest.SchemaServerTest;
 import com.ctrip.hermes.meta.rest.TopicServerTest;
-import com.ctrip.hermes.meta.service.AvroSchemaTest;
 
 @RunWith(Suite.class)
-@SuiteClasses({ CodecServerTest.class, MetaServerTest.class, SchemaServerTest.class, TopicServerTest.class,
-      AvroSchemaTest.class })
+@SuiteClasses({ CodecServerTest.class, MetaServerTest.class, SchemaServerTest.class, TopicServerTest.class })
 public class AllTests {
 
 }

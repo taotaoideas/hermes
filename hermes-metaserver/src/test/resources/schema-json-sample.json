@@ -2,5 +2,5 @@
   "name" : "sample_json",
   "type" : "json",
   "createTime" : 1420045200000,
-  "topicId" : 101 
+  "description" : "sample json description" 
 }

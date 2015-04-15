@@ -48,11 +48,11 @@ public class SchemaServerTest extends ComponentTestCase {
 	public void testGetSchema() {
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
-		String schema = "sample_json";
-		Builder request = webTarget.path("schemas/" + schema).request();
+		long schemaId = 21;
+		Builder request = webTarget.path("schemas/" + schemaId).request();
 		SchemaView actual = request.get(SchemaView.class);
 		System.out.println(actual);
-		Assert.assertEquals(schema, actual.getName());
+		Assert.assertEquals(schemaId, actual.getId());
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class SchemaServerTest extends ComponentTestCase {
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-json-sample.json");
-		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.bodyPart(new FileDataBodyPart("schema-content", file, MediaType.MULTIPART_FORM_DATA_TYPE));
 		form.field("schema", JSON.toJSONString(schemaView));
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
@@ -81,8 +81,8 @@ public class SchemaServerTest extends ComponentTestCase {
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		String schema = "sample_json";
-		Builder request = webTarget.path("schemas/" + schema).request();
+		long schemaId = 23;
+		Builder request = webTarget.path("schemas/" + schemaId).request();
 		SchemaView actual = request.get(SchemaView.class);
 		if (actual.getType().equals("json")) {
 			actual.setType("avro");
@@ -90,7 +90,7 @@ public class SchemaServerTest extends ComponentTestCase {
 			actual.setType("json");
 		}
 
-		request = webTarget.path("schemas/" + schema).request();
+		request = webTarget.path("schemas/" + schemaId).request();
 		Response response = request.put(Entity.json(actual));
 		Assert.assertNotNull(response);
 		if (response.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) {
@@ -105,21 +105,19 @@ public class SchemaServerTest extends ComponentTestCase {
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		String schema = "sample_json";
-		Builder request = webTarget.path("schemas/" + schema).request();
+		long schemaId = 21;
+		Builder request = webTarget.path("schemas/" + schemaId).request();
 		SchemaView actual = request.get(SchemaView.class);
 		actual.setType("json");
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-json-sample.json");
-		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
-		String schemaJson = Files.toString(new File("src/test/resources/schema-json-sample.json"), Charsets.UTF_8);
-		form.field("schema", schemaJson);
-		request = webTarget.path("schemas/" + schema + "/upload").request();
+		form.bodyPart(new FileDataBodyPart("schema-content", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + schemaId + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
 	}
-
+	
 	@Test
 	public void testUploadAvroFile() {
 		ResourceConfig rc = new ResourceConfig();
@@ -127,28 +125,28 @@ public class SchemaServerTest extends ComponentTestCase {
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		String schema = "sample_avro";
-		Builder request = webTarget.path("schemas/" + schema).request();
+		long schemaId = 19;
+		Builder request = webTarget.path("schemas/" + schemaId).request();
 		SchemaView actual = request.get(SchemaView.class);
 		actual.setType("avro");
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-avro-sample.avsc");
-		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
-		request = webTarget.path("schemas/" + schema + "/upload").request();
+		form.bodyPart(new FileDataBodyPart("schema-content", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + schemaId + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
 	}
 
 	@Test
-	public void testDownloadJsonFile() {
+	public void testDownloadJsonSchemaFile() {
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(MultiPartFeature.class);
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		String schema = "sample_json";
-		Builder request = webTarget.path("schemas/" + schema + "/download").request();
+		long schemaId = 23;
+		Builder request = webTarget.path("schemas/" + schemaId + "/schema").request();
 		Response response = request.get();
 		System.out.println(response.getStatus());
 		File downloadFile = response.readEntity(File.class);
@@ -156,14 +154,14 @@ public class SchemaServerTest extends ComponentTestCase {
 	}
 
 	@Test
-	public void testDownloadAvroFile() {
+	public void testDownloadAvroSchemaFile() {
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(MultiPartFeature.class);
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		String schema = "sample_avro";
-		Builder request = webTarget.path("schemas/" + schema + "/download").request();
+		long schemaId = 23;
+		Builder request = webTarget.path("schemas/" + schemaId + "/schema").request();
 		Response response = request.get();
 		System.out.println(response.getStatus());
 		File downloadFile = response.readEntity(File.class);
