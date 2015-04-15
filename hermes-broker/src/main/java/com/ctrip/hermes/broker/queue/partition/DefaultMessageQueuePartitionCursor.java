@@ -1,8 +1,8 @@
 package com.ctrip.hermes.broker.queue.partition;
 
 import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage;
+import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage.FetchResult;
 import com.ctrip.hermes.core.bo.Tpg;
-import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.meta.MetaService;
 
 /**
@@ -18,7 +18,7 @@ public class DefaultMessageQueuePartitionCursor extends AbstractMessageQueuePart
 	}
 
 	@Override
-	protected long loadLastPriorityOffset() {
+	protected Object loadLastPriorityOffset() {
 		try {
 			return m_storage.findLastOffset(m_priorityTpp, m_groupIdInt);
 		} catch (Exception e) {
@@ -30,7 +30,7 @@ public class DefaultMessageQueuePartitionCursor extends AbstractMessageQueuePart
 	}
 
 	@Override
-	protected long loadLastNonPriorityOffset() {
+	protected Object loadLastNonPriorityOffset() {
 		try {
 			return m_storage.findLastOffset(m_nonPriorityTpp, m_groupIdInt);
 		} catch (Exception e) {
@@ -42,7 +42,7 @@ public class DefaultMessageQueuePartitionCursor extends AbstractMessageQueuePart
 	}
 
 	@Override
-	protected long loadLastResendOffset() {
+	protected Object loadLastResendOffset() {
 		try {
 			return m_storage.findLastResendOffset(m_tpg);
 		} catch (Exception e) {
@@ -54,20 +54,22 @@ public class DefaultMessageQueuePartitionCursor extends AbstractMessageQueuePart
 	}
 
 	@Override
-	protected TppConsumerMessageBatch fetchPriortyMessages(int batchSize) {
+	protected FetchResult fetchPriortyMessages(int batchSize) {
 		return m_storage.fetchMessages(m_priorityTpp, m_priorityOffset, batchSize);
 	}
 
 	@Override
-	protected TppConsumerMessageBatch fetchNonPriortyMessages(int batchSize) {
+	protected FetchResult fetchNonPriortyMessages(int batchSize) {
 		return m_storage.fetchMessages(m_nonPriorityTpp, m_nonPriorityOffset, batchSize);
 	}
 
 	@Override
-	protected TppConsumerMessageBatch fetchResendMessages(int batchSize) {
-		TppConsumerMessageBatch batch = m_storage.fetchResendMessages(m_tpg, m_resendOffset, batchSize);
-		batch.setResend(true);
-		return batch;
+	protected FetchResult fetchResendMessages(int batchSize) {
+		FetchResult result = m_storage.fetchResendMessages(m_tpg, m_resendOffset, batchSize);
+		if (result != null && result.getBatch() != null) {
+			result.getBatch().setResend(true);
+		}
+		return result;
 	}
 
 }

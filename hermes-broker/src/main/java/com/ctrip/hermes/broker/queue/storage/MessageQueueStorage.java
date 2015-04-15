@@ -16,16 +16,38 @@ public interface MessageQueueStorage {
 
 	void appendMessages(Tpp tpp, Collection<MessageRawDataBatch> batches) throws Exception;
 
-	long findLastOffset(Tpp tpp, int groupId) throws Exception;
+	Object findLastOffset(Tpp tpp, int groupId) throws Exception;
 
-	long findLastResendOffset(Tpg tpg) throws Exception;
+	Object findLastResendOffset(Tpg tpg) throws Exception;
 
-	TppConsumerMessageBatch fetchMessages(Tpp tpp, long startOffset, int batchSize);
+	FetchResult fetchMessages(Tpp tpp, Object startOffset, int batchSize);
 
-	TppConsumerMessageBatch fetchResendMessages(Tpg tpg, long startOffset, int batchSize);
+	FetchResult fetchResendMessages(Tpg tpg, Object startOffset, int batchSize);
 
 	void nack(Tpp tpp, String groupId, boolean resend, List<Long> msgSeqs);
 
 	void ack(Tpp tpp, String groupId, boolean resend, long msgSeq);
 
+	public static class FetchResult {
+		private TppConsumerMessageBatch batch;
+
+		private Object offset;
+
+		public TppConsumerMessageBatch getBatch() {
+			return batch;
+		}
+
+		public void setBatch(TppConsumerMessageBatch batch) {
+			this.batch = batch;
+		}
+
+		public Object getOffset() {
+			return offset;
+		}
+
+		public void setOffset(Object offset) {
+			this.offset = offset;
+		}
+
+	}
 }
