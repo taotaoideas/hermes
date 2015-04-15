@@ -5,6 +5,7 @@ import java.io.InputStream;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -35,11 +36,23 @@ public class SchemaResource {
 
 	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
 
+	/**
+	 * 
+	 * @param schemaInputStream
+	 * @param schemaHeader
+	 * @param jarInputStream
+	 * @param jarHeader
+	 * @param content
+	 * @param topicId
+	 * @return
+	 */
 	@POST
-	@Path("")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response createSchema(@FormDataParam("file") InputStream is,
-	      @FormDataParam("file") FormDataContentDisposition header, @FormDataParam("schema") String content) {
+	public Response createSchema(@FormDataParam("schema-content") InputStream schemaInputStream,
+	      @FormDataParam("schema-content") FormDataContentDisposition schemaHeader,
+	      @FormDataParam("jar-content") InputStream jarInputStream,
+	      @FormDataParam("jar-content") FormDataContentDisposition jarHeader, @FormDataParam("schema") String content,
+	      @FormDataParam("topicId") @DefaultValue("0") long topicId) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
@@ -50,41 +63,119 @@ public class SchemaResource {
 			throw new RestException(e, Status.BAD_REQUEST);
 		}
 		try {
-			schema = schemaService.createSchema(schema);
+			schema = schemaService.createSchema(schema, topicId);
+			if (schema.getType().equals("json")) {
+				schemaService.uploadJsonSchema(schema, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
+			} else if (schema.getType().equals("avro")) {
+				schemaService.uploadAvroSchema(schema, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
+			}
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return Response.status(Status.CREATED).entity(schema).build();
 	}
 
-	@GET
-	@Path("{name}")
-	public SchemaView getSchema(@PathParam("name") String name) {
-		if (StringUtils.isEmpty(name)) {
-			throw new RestException("HTTP path {name} is empty", Status.BAD_REQUEST);
+	/**
+	 * 
+	 * @param schemaId
+	 * @return
+	 */
+	@DELETE
+	@Path("{id}")
+	public Response deleteSchema(@PathParam("id") long schemaId) {
+		try {
+			schemaService.deleteSchema(schemaId);
+		} catch (DalException e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
+		return Response.status(Status.OK).build();
+	}
+
+	/**
+	 * 
+	 * @param schemaId
+	 * @return
+	 */
+	@GET
+	@Path("{id}/schema")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadSchema(@PathParam("id") long schemaId) {
+		Schema schema = null;
+		try {
+			schema = schemaService.getSchemaMeta(schemaId);
+		} catch (DalNotFoundException e) {
+			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+
+		String fileProperties = schema.getSchemaProperties();
+		if (StringUtils.isEmpty(fileProperties)) {
+			throw new RestException("Schema file not found: " + schemaId, Status.NOT_FOUND);
+		}
+
+		return Response.status(Status.OK).header("content-disposition", fileProperties).entity(schema.getSchemaContent())
+		      .build();
+	}
+
+	/**
+	 * 
+	 * @param schemaId
+	 * @return
+	 */
+	@GET
+	@Path("{id}/jar")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response downloadJar(@PathParam("id") long schemaId) {
+		Schema schema = null;
+		try {
+			schema = schemaService.getSchemaMeta(schemaId);
+		} catch (DalNotFoundException e) {
+			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+
+		String fileProperties = schema.getJarProperties();
+		if (StringUtils.isEmpty(fileProperties)) {
+			throw new RestException("Schema file not found: " + schemaId, Status.NOT_FOUND);
+		}
+
+		return Response.status(Status.OK).header("content-disposition", fileProperties).entity(schema.getJarContent())
+		      .build();
+	}
+
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 */
+	@GET
+	@Path("{id}")
+	public SchemaView getSchema(@PathParam("id") long schemaId) {
 		SchemaView schema = null;
 		try {
-			schema = schemaService.getSchemaView(name);
+			schema = schemaService.getSchemaView(schemaId);
 		} catch (DalNotFoundException e) {
-			throw new RestException("Schema not found: " + name, Status.NOT_FOUND);
+			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return schema;
 	}
 
+	/**
+	 * 
+	 * @param schemaId
+	 * @param content
+	 * @return
+	 */
 	@PUT
-	@Path("{name}")
-	public Response updateSchema(@PathParam("name") String name, String content) {
-		if (StringUtils.isEmpty(content)) {
-			throw new RestException("HTTP PUT body is empty", Status.BAD_REQUEST);
-		}
-
+	@Path("{id}")
+	public Response updateSchema(@PathParam("id") long schemaId, String content) {
 		SchemaView schema = null;
 		try {
 			schema = JSON.parseObject(content, SchemaView.class);
-			schema.setName(name);
 		} catch (Exception e) {
 			throw new RestException(e, Status.BAD_REQUEST);
 		}
@@ -96,57 +187,33 @@ public class SchemaResource {
 		return Response.status(Status.CREATED).entity(schema).build();
 	}
 
-	@DELETE
-	@Path("{name}")
-	public Response deleteSchema(@PathParam("name") String name) {
-		try {
-			schemaService.deleteSchema(name);
-		} catch (DalException e) {
-			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
-		}
-		return Response.status(Status.OK).build();
-	}
-
+	/**
+	 * 
+	 * @param schemaId
+	 * @param schemaInputStream
+	 * @param schemaHeader
+	 * @param jarInputStream
+	 * @param jarHeader
+	 * @return
+	 */
 	@POST
-	@Path("{name}/upload")
+	@Path("{id}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@PathParam("name") String name, @FormDataParam("file") InputStream is,
-	      @FormDataParam("file") FormDataContentDisposition header) {
-		SchemaView schemaView = getSchema(name);
+	public Response uploadFile(@PathParam("id") long schemaId,
+	      @FormDataParam("schema-content") InputStream schemaInputStream,
+	      @FormDataParam("schema-content") FormDataContentDisposition schemaHeader,
+	      @FormDataParam("jar-content") InputStream jarInputStream,
+	      @FormDataParam("jar-content") FormDataContentDisposition jarHeader) {
+		SchemaView schemaView = getSchema(schemaId);
 		try {
 			if (schemaView.getType().equals("json")) {
-				schemaService.uploadJson(schemaView, is, header);
+				schemaService.uploadJsonSchema(schemaView, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
 			} else if (schemaView.getType().equals("avro")) {
-				schemaService.uploadAvro(schemaView, is, header);
+				schemaService.uploadAvroSchema(schemaView, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
 			}
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return Response.status(Status.CREATED).build();
-	}
-
-	@GET
-	@Path("{name}/download")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public Response downloadFile(@PathParam("name") String name) {
-		if (StringUtils.isEmpty(name)) {
-			throw new RestException("HTTP path {name} is empty", Status.BAD_REQUEST);
-		}
-		Schema schema = null;
-		try {
-			schema = schemaService.getSchemaMeta(name);
-		} catch (DalNotFoundException e) {
-			throw new RestException("Schema not found: " + name, Status.NOT_FOUND);
-		} catch (Exception e) {
-			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
-		}
-
-		String fileProperties = schema.getFileProperties();
-		if (StringUtils.isEmpty(fileProperties)) {
-			throw new RestException("Schema file not found: " + name, Status.NOT_FOUND);
-		}
-
-		return Response.status(Status.OK).header("content-disposition", fileProperties).entity(schema.getFileContent())
-		      .build();
 	}
 }

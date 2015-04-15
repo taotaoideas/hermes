@@ -36,7 +36,6 @@ public class CodecResource {
 	}
 
 	@GET
-	@Path("")
 	public List<CodecView> listCodecs() {
 		// FIXME hard code two codecs
 		List<CodecView> result = new ArrayList<>();

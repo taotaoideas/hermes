@@ -27,7 +27,6 @@ public class MetaResource {
 	private static MetaManager metaManager = PlexusComponentLocator.lookup(MetaManager.class, ServerMetaManager.ID);
 
 	@GET
-	@Path("")
 	public Response getMeta(@QueryParam("hashCode") long hashCode) {
 		Meta meta = metaManager.getMeta();
 		if (meta == null) {
@@ -40,7 +39,6 @@ public class MetaResource {
 	}
 
 	@POST
-	@Path("")
 	public Response updateMeta(String content) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);

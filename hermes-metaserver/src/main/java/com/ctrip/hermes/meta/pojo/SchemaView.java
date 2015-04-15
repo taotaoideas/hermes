@@ -18,8 +18,6 @@ public class SchemaView {
 
 	private Map<String, Object> config;
 
-	private long topicId;
-
 	public SchemaView() {
 
 	}
@@ -78,14 +76,6 @@ public class SchemaView {
 
 	public void setConfig(Map<String, Object> config) {
 		this.config = config;
-	}
-
-	public long getTopicId() {
-		return topicId;
-	}
-
-	public void setTopicId(long topicId) {
-		this.topicId = topicId;
 	}
 
 	public Schema toMetaSchema() {

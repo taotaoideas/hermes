@@ -43,7 +43,6 @@ public class TopicResource {
 	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
 
 	@POST
-	@Path("")
 	public Response createTopic(String content) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
@@ -70,7 +69,6 @@ public class TopicResource {
 	}
 
 	@GET
-	@Path("")
 	public List<TopicView> findTopics(@QueryParam("pattern") String pattern) {
 		if (StringUtils.isEmpty(pattern)) {
 			pattern = ".*";
