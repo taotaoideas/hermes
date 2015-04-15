@@ -15,6 +15,7 @@ import com.ctrip.hermes.broker.queue.MessageQueueManager;
 import com.ctrip.hermes.broker.queue.partition.DefaultMessageQueuePullerManager;
 import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionFactory;
 import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionPullerManager;
+import com.ctrip.hermes.broker.queue.storage.mysql.MySQLMessageQueueStorage;
 import com.ctrip.hermes.broker.queue.storage.mysql.dal.HermesJdbcDataSourceDescriptorManager;
 import com.ctrip.hermes.broker.queue.storage.mysql.dal.HermesTableProvider;
 import com.ctrip.hermes.broker.transport.NettyServer;
@@ -53,19 +54,18 @@ public class ComponentsConfigurator extends AbstractJdbcResourceConfigurator {
 		all.add(A(DefaultMessageQueuePullerManager.class));
 		all.add(A(DefaultMessageTransmitter.class));
 		all.add(A(DefaultAckManager.class));
+		all.add(A(MySQLMessageQueueStorage.class));
 
 		all.add(C(TableProvider.class, "message-priority", HermesTableProvider.class) //
-		      .req(MetaService.class) //
-		      .config(E("m_table").value("message-priority")));
+		      .req(MetaService.class));
 		all.add(C(TableProvider.class, "resend-group-id", HermesTableProvider.class) //
-		      .req(MetaService.class) //
-		      .config(E("m_table").value("resend-group-id")));
+		      .req(MetaService.class));
 		all.add(C(TableProvider.class, "offset-message", HermesTableProvider.class) //
-		      .req(MetaService.class) //
-		      .config(E("m_table").value("offset-message")));
+		      .req(MetaService.class));
+		all.add(C(TableProvider.class, "offset-resend", HermesTableProvider.class) //
+		      .req(MetaService.class));
 		all.add(C(TableProvider.class, "dead-letter", HermesTableProvider.class) //
-		      .req(MetaService.class) //
-		      .config(E("m_table").value("dead-letter")));
+		      .req(MetaService.class));
 
 		all.add(A(HermesJdbcDataSourceDescriptorManager.class));
 

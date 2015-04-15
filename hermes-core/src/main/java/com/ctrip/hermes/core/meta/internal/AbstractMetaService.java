@@ -108,7 +108,8 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 	@Override
 	public int getGroupIdInt(String groupId) {
 		// TODO
-		return groupId.hashCode();
+//		return groupId.hashCode();
+		return 100;
 	}
 
 	@Override

@@ -7,10 +7,13 @@ import java.sql.PreparedStatement;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao;
+import com.ctrip.hermes.broker.dal.hermes.ResendGroupId;
+import com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -83,6 +86,21 @@ public class MessageDaoTest extends ComponentTestCase {
 		long start = System.currentTimeMillis();
 		dao.insert(msgs);
 		System.out.println(System.currentTimeMillis() - start);
+	}
+
+	@Test
+	public void test() throws DalException {
+		ResendGroupIdDao resendDao = lookup(ResendGroupIdDao.class);
+		ResendGroupId proto = new ResendGroupId();
+		proto.setTopic("order_new");
+		proto.setPartition(0);
+		proto.setPriority(0);
+		proto.setGroupId(100);
+		proto.setScheduleDate(new Date(System.currentTimeMillis()));
+		proto.setRemainingRetries(5);
+		proto.setMessageIds(new Long[] { 1L, 2L });
+
+		resendDao.copyFromMessageTable(proto);
 	}
 
 }
