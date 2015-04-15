@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,8 +15,10 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.codec.JsonCodec;
+import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
+import com.ctrip.hermes.core.message.PropertiesHolder;
 import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.core.transport.command.Header;
@@ -33,31 +35,35 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 	@Test
 	public void testEncodePartialDecodecMessage() {
-		Map<String, Object> appProperties = new HashMap<String, Object>();
-		appProperties.put("1", 1);
-		Map<String, Object> sysProperties = new HashMap<String, Object>();
-		sysProperties.put("2", 2);
-		ProducerMessage<String> msg = createProducerMessage("topic1", "body", "key", "partition", 100, true, null, null);
+		Map<String, String> durableProps = new HashMap<>();
+		String dkey = UUID.randomUUID().toString();
+		String dvalue = UUID.randomUUID().toString();
+		durableProps.put(dkey, dvalue);
+
+		Map<String, String> volatileProps = new HashMap<>();
+		volatileProps.put(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+		ProducerMessage<String> msg = createProducerMessage("topic1", "body", "key", "partition", 100, true,
+		      durableProps, volatileProps);
 
 		DefaultMessageCodec codec = new DefaultMessageCodec("topic1");
 
 		ByteBuf buf = Unpooled.buffer();
 		codec.encode(msg, buf);
-		ByteBuf exp = buf.duplicate();
 
 		PartialDecodedMessage pdMsg = codec.partialDecode(buf);
-		pdMsg.setSysProperties(null);
+		pdMsg.setVolatileProperties(null);
 
 		ByteBuf buf2 = Unpooled.buffer();
 		codec.encode(pdMsg, buf2);
 
-		assertEquals(Arrays.toString(readByteBuf(exp)), Arrays.toString(readByteBuf(buf2)));
-	}
+		BaseConsumerMessage<?> cmsg = codec.decode(buf2, String.class);
 
-	private byte[] readByteBuf(ByteBuf buf) {
-		byte[] dst = new byte[buf.readableBytes()];
-		buf.readBytes(dst);
-		return dst;
+		assertEquals(msg.getBody(), cmsg.getBody());
+		assertEquals(msg.getTopic(), cmsg.getTopic());
+		assertEquals(msg.getKey(), cmsg.getKey());
+		assertEquals(dvalue, cmsg.getDurableAppProperty(dkey));
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -66,10 +72,10 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		JsonCodec jsonCodec = new JsonCodec();
 		SendMessageCommand cmd = new SendMessageCommand();
 
-		Map<String, Object> appProperties = new HashMap<String, Object>();
-		appProperties.put("1", 1);
-		Map<String, Object> sysProperties = new HashMap<String, Object>();
-		sysProperties.put("2", 2);
+		Map<String, String> appProperties = new HashMap<String, String>();
+		appProperties.put("1", "1");
+		Map<String, String> sysProperties = new HashMap<String, String>();
+		sysProperties.put("2", "2");
 
 		SettableFuture<SendResult> future = SettableFuture.create();
 		cmd.addMessage(
@@ -82,7 +88,7 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		Header header = new Header();
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
-		
+
 		Assert.assertEquals(1, decodedCmd.getMessageCount());
 
 		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decodedCmd.getMessageRawDataBatches();
@@ -109,13 +115,13 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key", msg.getKey());
 
-		Map<String, Object> decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		Map<String, Object> decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		Map<String, String> decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		Map<String, String> decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 
 	}
 
@@ -125,10 +131,10 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		JsonCodec jsonCodec = new JsonCodec();
 		SendMessageCommand cmd = new SendMessageCommand();
 
-		Map<String, Object> appProperties = new HashMap<String, Object>();
-		appProperties.put("1", 1);
-		Map<String, Object> sysProperties = new HashMap<String, Object>();
-		sysProperties.put("2", 2);
+		Map<String, String> appProperties = new HashMap<String, String>();
+		appProperties.put("1", "1");
+		Map<String, String> sysProperties = new HashMap<String, String>();
+		sysProperties.put("2", "2");
 
 		SettableFuture<SendResult> future = SettableFuture.create();
 		cmd.addMessage(
@@ -145,7 +151,7 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		Header header = new Header();
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
-		
+
 		Assert.assertEquals(2, decodedCmd.getMessageCount());
 
 		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decodedCmd.getMessageRawDataBatches();
@@ -174,13 +180,13 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key1", msg.getKey());
 
-		Map<String, Object> decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		Map<String, Object> decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		Map<String, String> decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		Map<String, String> decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 		// msg1 end
 
 		// msg2 start
@@ -194,13 +200,13 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key2", msg.getKey());
 
-		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 		// msg1 end
 
 	}
@@ -211,10 +217,10 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		JsonCodec jsonCodec = new JsonCodec();
 		SendMessageCommand cmd = new SendMessageCommand();
 
-		Map<String, Object> appProperties = new HashMap<String, Object>();
-		appProperties.put("1", 1);
-		Map<String, Object> sysProperties = new HashMap<String, Object>();
-		sysProperties.put("2", 2);
+		Map<String, String> appProperties = new HashMap<String, String>();
+		appProperties.put("1", "1");
+		Map<String, String> sysProperties = new HashMap<String, String>();
+		sysProperties.put("2", "2");
 
 		SettableFuture<SendResult> future = SettableFuture.create();
 		// tpp1
@@ -239,7 +245,7 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		Header header = new Header();
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
-		
+
 		Assert.assertEquals(4, decodedCmd.getMessageCount());
 
 		Map<Tpp, MessageRawDataBatch> messageRawDataBatches = decodedCmd.getMessageRawDataBatches();
@@ -269,13 +275,13 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key1", msg.getKey());
 
-		Map<String, Object> decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		Map<String, Object> decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		Map<String, String> decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		Map<String, String> decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 		// msg1 end
 
 		// msg2 start
@@ -289,13 +295,13 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key2", msg.getKey());
 
-		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 		// msg1 end
 		// tpp1 end
 
@@ -323,13 +329,13 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key3", msg.getKey());
 
-		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 		// msg1 end
 
 		// msg2 start
@@ -343,27 +349,35 @@ public class SendMessageCommandTest extends ComponentTestCase {
 
 		Assert.assertEquals("key4", msg.getKey());
 
-		decodedAppProperties = new HermesPrimitiveCodec(msg.getAppProperties()).readMap();
-		decodedSysProperties = new HermesPrimitiveCodec(msg.getSysProperties()).readMap();
+		decodedAppProperties = new HermesPrimitiveCodec(msg.getDurableProperties()).readMap();
+		decodedSysProperties = new HermesPrimitiveCodec(msg.getVolatileProperties()).readMap();
 
 		Assert.assertEquals(1, decodedAppProperties.size());
-		Assert.assertEquals(Integer.valueOf(1), decodedAppProperties.get("1"));
+		Assert.assertEquals("1", decodedAppProperties.get(PropertiesHolder.APP + "1"));
 		Assert.assertEquals(1, decodedSysProperties.size());
-		Assert.assertEquals(Integer.valueOf(2), decodedSysProperties.get("2"));
+		Assert.assertEquals("2", decodedSysProperties.get("2"));
 		// msg1 end
 		// tpp2 end
 	}
 
 	public <T> ProducerMessage<T> createProducerMessage(String topic, T body, String key, String partition,
-	      int partitionNo, boolean priority, Map<String, Object> appProperties, Map<String, Object> sysProperties) {
+	      int partitionNo, boolean priority, Map<String, String> durableProperties,
+	      Map<String, String> volatileProperties) {
 		ProducerMessage<T> msg = new ProducerMessage<T>(topic, body);
 		msg.setBornTime(System.currentTimeMillis());
 		msg.setKey(key);
 		msg.setPartition(partition);
 		msg.setPartitionNo(partitionNo);
 		msg.setPriority(priority);
-		msg.setAppProperties(appProperties);
-		msg.setSysProperties(sysProperties);
+		PropertiesHolder propertiesHolder = new PropertiesHolder();
+		for (Map.Entry<String, String> entry : durableProperties.entrySet()) {
+			propertiesHolder.addDurableAppProperty(entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<String, String> entry : volatileProperties.entrySet()) {
+			propertiesHolder.addVolatileProperty(entry.getKey(), entry.getValue());
+		}
+
+		msg.setPropertiesHolder(propertiesHolder);
 
 		return msg;
 	}

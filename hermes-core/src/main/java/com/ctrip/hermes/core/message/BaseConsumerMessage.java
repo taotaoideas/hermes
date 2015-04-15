@@ -1,7 +1,6 @@
 package com.ctrip.hermes.core.message;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.hermes.core.message.ConsumerMessage.MessageStatus;
@@ -19,9 +18,7 @@ public class BaseConsumerMessage<T> {
 
 	protected T m_body;
 
-	protected Map<String, Object> m_appProperties = new HashMap<String, Object>();
-
-	protected Map<String, Object> m_sysProperties = new HashMap<String, Object>();
+	protected PropertiesHolder m_propertiesHolder = new PropertiesHolder();
 
 	protected AtomicReference<MessageStatus> m_status = new AtomicReference<>(MessageStatus.NOT_SET);
 
@@ -57,22 +54,6 @@ public class BaseConsumerMessage<T> {
 		m_body = body;
 	}
 
-	public Map<String, Object> getAppProperties() {
-		return m_appProperties;
-	}
-
-	public void setAppProperties(Map<String, Object> appProperties) {
-		m_appProperties = appProperties;
-	}
-
-	public Map<String, Object> getSysProperties() {
-		return m_sysProperties;
-	}
-
-	public void setSysProperties(Map<String, Object> sysProperties) {
-		m_sysProperties = sysProperties;
-	}
-
 	public MessageStatus getStatus() {
 		return m_status.get();
 	}
@@ -84,4 +65,37 @@ public class BaseConsumerMessage<T> {
 	public boolean nack() {
 		return m_status.compareAndSet(MessageStatus.NOT_SET, MessageStatus.FAIL);
 	}
+
+	public void setPropertiesHolder(PropertiesHolder propertiesHolder) {
+		m_propertiesHolder = propertiesHolder;
+	}
+
+	public void addDurableAppProperty(String name, String value) {
+		m_propertiesHolder.addDurableAppProperty(name, value);
+	}
+
+	public void addDurableSysProperty(String name, String value) {
+		m_propertiesHolder.addDurableSysProperty(name, value);
+	}
+
+	public String getDurableAppProperty(String name) {
+		return m_propertiesHolder.getDurableAppProperty(name);
+	}
+
+	public String getDurableSysProperty(String name) {
+		return m_propertiesHolder.getDurableSysProperty(name);
+	}
+
+	public void addVolatileProperty(String name, String value) {
+		m_propertiesHolder.addVolatileProperty(name, value);
+	}
+
+	public String getVolatileProperty(String name) {
+		return m_propertiesHolder.getVolatileProperty(name);
+	}
+
+	public Iterator<String> getRawDurableAppPropertyNames() {
+		return m_propertiesHolder.getRawDurableAppPropertyNames().iterator();
+	}
+
 }

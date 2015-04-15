@@ -35,15 +35,14 @@ public class TracingMessageValve implements Valve {
 			Cat.logEvent("Message:" + topic, "Produced:" + ip, Event.SUCCESS, "key=" + msg.getKey());
 			Cat.logEvent("Producer:" + ip, topic, Event.SUCCESS, "key=" + msg.getKey());
 
-			msg.addSysProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
-			msg.addSysProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
-			msg.addSysProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
+			msg.addDurableSysProperty(CatConstants.CURRENT_MESSAGE_ID, msgId);
+			msg.addDurableSysProperty(CatConstants.SERVER_MESSAGE_ID, childMsgId);
+			msg.addDurableSysProperty(CatConstants.ROOT_MESSAGE_ID, rootMsgId);
 			Cat.logEvent(CatConstants.TYPE_REMOTE_CALL, "", Event.SUCCESS, childMsgId);
 
 			ctx.next(payload);
 
-			// TODO
-			t.setStatus(System.currentTimeMillis() + "");
+			t.setStatus(Transaction.SUCCESS);
 		} catch (RuntimeException | Error e) {
 			Cat.logError(e);
 			t.setStatus(e);

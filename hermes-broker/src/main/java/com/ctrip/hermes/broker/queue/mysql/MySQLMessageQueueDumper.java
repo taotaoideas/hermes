@@ -37,7 +37,7 @@ public class MySQLMessageQueueDumper extends AbstractMessageQueueDumper {
 			List<PartialDecodedMessage> pdmsgs = todo.getKey().getMessages();
 			for (PartialDecodedMessage pdmsg : pdmsgs) {
 				MessagePriority msg = new MessagePriority();
-				msg.setAttributes(new String(pdmsg.readAppProperties(), Charsets.UTF_8));
+				msg.setAttributes(new String(pdmsg.readDurableProperties(), Charsets.UTF_8));
 				msg.setCreationDate(new Date(pdmsg.getBornTime()));
 				msg.setPartition(m_partition);
 				msg.setPayload(pdmsg.readBody());

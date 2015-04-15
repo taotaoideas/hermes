@@ -1,6 +1,6 @@
 package com.ctrip.hermes.core.message;
 
-import java.util.Map;
+import java.util.Iterator;
 
 import com.ctrip.hermes.core.transport.command.MessageAckCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
@@ -63,15 +63,14 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <V> V getProperty(String name) {
-		return (V) m_baseMsg.getAppProperties().get(name);
+	public String getProperty(String name) {
+		return m_baseMsg.getDurableAppProperty(name);
 	}
 
 	@Override
-	public Map<String, Object> getProperties() {
-		return m_baseMsg.getAppProperties();
+	public Iterator<String> getPropertyNames() {
+		return m_baseMsg.getRawDurableAppPropertyNames();
 	}
 
 	@Override

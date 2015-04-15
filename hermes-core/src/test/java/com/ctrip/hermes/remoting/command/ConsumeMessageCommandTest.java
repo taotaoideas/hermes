@@ -17,6 +17,7 @@ import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.BrokerConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
+import com.ctrip.hermes.core.message.PropertiesHolder;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
@@ -32,10 +33,10 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 	@Test
 	public void testEncodeAndDecode() {
-		Map<String, Object> appProperties = new HashMap<>();
-		appProperties.put("app_key", 123);
+		Map<String, String> appProperties = new HashMap<>();
+		appProperties.put("app_key", "123");
 
-		Map<String, Object> sysProperties = new HashMap<>();
+		Map<String, String> sysProperties = new HashMap<>();
 		sysProperties.put("sys_key", "abc");
 
 		List<ProducerMessage<String>> msgs1_1 = new ArrayList<>();
@@ -102,7 +103,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			Assert.assertTrue(String.format("t1_key%d_1", (i + 1)).equals(cmsg.getKey()));
 			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
 
-			Assert.assertEquals(Integer.valueOf(123), cmsg.getProperty("app_key"));
+			Assert.assertEquals("123", cmsg.getProperty("app_key"));
 		}
 
 		// batch 2
@@ -118,7 +119,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			Assert.assertTrue(String.format("t2_key%d", (i + 1)).equals(cmsg.getKey()));
 			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
 
-			Assert.assertEquals(Integer.valueOf(123), cmsg.getProperty("app_key"));
+			Assert.assertEquals("123", cmsg.getProperty("app_key"));
 		}
 
 		// batch 3
@@ -134,7 +135,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			Assert.assertTrue(String.format("t1_key%d_2", (i + 1)).equals(cmsg.getKey()));
 			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
 
-			Assert.assertEquals(Integer.valueOf(123), cmsg.getProperty("app_key"));
+			Assert.assertEquals("123", cmsg.getProperty("app_key"));
 		}
 	}
 
@@ -162,15 +163,22 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 	}
 
 	public <T> ProducerMessage<T> createProducerMessage(String topic, T body, String key, String partition,
-	      int partitionNo, boolean priority, Map<String, Object> appProperties, Map<String, Object> sysProperties) {
+	      int partitionNo, boolean priority, Map<String, String> durableProperties,
+	      Map<String, String> volatileProperties) {
 		ProducerMessage<T> msg = new ProducerMessage<T>(topic, body);
 		msg.setBornTime(System.currentTimeMillis());
 		msg.setKey(key);
 		msg.setPartition(partition);
 		msg.setPartitionNo(partitionNo);
 		msg.setPriority(priority);
-		msg.setAppProperties(appProperties);
-		msg.setSysProperties(sysProperties);
+		PropertiesHolder propertiesHolder = new PropertiesHolder();
+		for (Map.Entry<String, String> entry : durableProperties.entrySet()) {
+			propertiesHolder.addDurableAppProperty(entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<String, String> entry : volatileProperties.entrySet()) {
+			propertiesHolder.addVolatileProperty(entry.getKey(), entry.getValue());
+		}
+		msg.setPropertiesHolder(propertiesHolder);
 
 		return msg;
 	}
