@@ -1,6 +1,11 @@
 package com.ctrip.hermes.meta.resource;
 
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
+
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -12,6 +17,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -25,7 +31,10 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.dal.meta.Schema;
+import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
+import com.ctrip.hermes.meta.pojo.TopicView;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.SchemaService;
 
@@ -162,6 +171,26 @@ public class SchemaResource {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return schema;
+	}
+
+	/**
+	 * 
+	 * @param schemaName
+	 * @return
+	 */
+	@GET
+	public List<SchemaView> findTopics(@QueryParam("name") String schemaName) {
+		List<SchemaView> returnResult = new ArrayList<SchemaView>();
+		try {
+			List<Schema> schemaMetas = schemaService.findSchemaMeta(schemaName);
+			for (Schema schema : schemaMetas) {
+				SchemaView schemaView = new SchemaView(schema);
+				returnResult.add(schemaView);
+			}
+		} catch (DalException e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return returnResult;
 	}
 
 	/**

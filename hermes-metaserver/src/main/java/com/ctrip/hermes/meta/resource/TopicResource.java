@@ -25,6 +25,7 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
+import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
@@ -118,6 +119,25 @@ public class TopicResource {
 		}
 
 		return topicView;
+	}
+
+	@GET
+	@Path("{name}/schemas")
+	public List<SchemaView> getSchemas(@PathParam("name") String name) {
+		List<SchemaView> returnResult = new ArrayList<SchemaView>();
+		TopicView topic = getTopic(name);
+		if (topic.getSchema() != null) {
+			try {
+				List<Schema> schemaMetas = schemaService.findSchemaMeta(topic.getSchema().getName());
+				for (Schema schema : schemaMetas) {
+					SchemaView schemaView = new SchemaView(schema);
+					returnResult.add(schemaView);
+				}
+			} catch (DalException e) {
+				throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+			}
+		}
+		return returnResult;
 	}
 
 	@PUT

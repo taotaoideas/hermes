@@ -18,6 +18,12 @@
         WHERE <FIELD name='name'/> = ${name}
         ORDER BY <FIELD name='id'/> DESC LIMIT 1]]></statement>
 			</query>
+			<query name="findByName" type="SELECT" multiple="true">
+				<param name="name" />
+				<statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='name'/> = ${name}]]></statement>
+			</query>
 		</query-defs>
 	</entity>
 </entities>
