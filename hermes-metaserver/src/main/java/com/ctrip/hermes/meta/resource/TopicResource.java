@@ -81,7 +81,7 @@ public class TopicResource {
 				TopicView topicView = new TopicView(topic);
 				Storage storage = topicService.findStorage(topic.getName());
 				topicView.setStorage(storage);
-				if (topic.getSchemaId() != null && topic.getSchemaId() > 0) {
+				if (topic.getSchemaId() != null) {
 					try {
 						SchemaView schemaView = schemaService.getSchemaView(topic.getSchemaId());
 						topicView.setSchema(schemaView);
@@ -105,14 +105,16 @@ public class TopicResource {
 		}
 
 		TopicView topicView = new TopicView(topic);
-		if (topic.getSchemaId() > 0) {
+		Storage storage = topicService.findStorage(topic.getName());
+		topicView.setStorage(storage);
+		if (topic.getSchemaId() != null) {
 			SchemaView schemaView;
 			try {
 				schemaView = schemaService.getSchemaView(topic.getSchemaId());
+				topicView.setSchema(schemaView);
 			} catch (DalException | IOException | RestClientException e) {
 				throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 			}
-			topicView.setSchema(schemaView);
 		}
 
 		return topicView;
