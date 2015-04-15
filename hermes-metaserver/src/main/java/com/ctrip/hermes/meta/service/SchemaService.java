@@ -4,12 +4,23 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.apache.avro.Schema.Parser;
+import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
@@ -22,15 +33,18 @@ import com.ctrip.hermes.meta.dal.meta.SchemaDao;
 import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
+import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
 import com.google.common.io.ByteStreams;
 
 @Named
 public class SchemaService {
 
-	private SchemaRegistryClient avroSchemaRegistry = new CachedSchemaRegistryClient("http://10.3.8.63:8081", 1000);
+	private SchemaRegistryClient avroSchemaRegistry;
+
+	private Properties m_properties = MetaPropertiesLoader.load();
 
 	@Inject
-	private SchemaDao schemaDao;
+	private SchemaDao m_schemaDao;
 
 	@Inject(ServerMetaManager.ID)
 	private MetaManager m_metaManager;
@@ -40,6 +54,12 @@ public class SchemaService {
 
 	@Inject
 	private TopicService m_topicService;
+
+	public SchemaService() {
+		String schemaServerHost = m_properties.getProperty("schema-server-host");
+		String schemaServerPort = m_properties.getProperty("schema-server-port");
+		avroSchemaRegistry = new CachedSchemaRegistryClient("http://" + schemaServerHost + ":" + schemaServerPort, 1000);
+	}
 
 	/**
 	 * 
@@ -62,7 +82,7 @@ public class SchemaService {
 		Schema schema = schemaView.toMetaSchema();
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
 		schema.setVersion(1);
-		schemaDao.insert(schema);
+		m_schemaDao.insert(schema);
 
 		if (topicId > 0) {
 			Topic topic = m_metaService.findTopic(topicId);
@@ -78,8 +98,8 @@ public class SchemaService {
 	 * @throws DalException
 	 */
 	public void deleteSchema(long id) throws DalException {
-		Schema schema = schemaDao.findByPK(id, SchemaEntity.READSET_FULL);
-		schemaDao.deleteByPK(schema);
+		Schema schema = m_schemaDao.findByPK(id, SchemaEntity.READSET_FULL);
+		m_schemaDao.deleteByPK(schema);
 	}
 
 	/**
@@ -89,7 +109,7 @@ public class SchemaService {
 	 * @throws DalException
 	 */
 	public Schema findLatestSchemaMeta(String schemaName) throws DalException {
-		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
+		Schema schema = m_schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
 		return schema;
 	}
 
@@ -100,7 +120,7 @@ public class SchemaService {
 	 * @throws DalException
 	 */
 	public List<Schema> findSchemaMeta(String schemaName) throws DalException {
-		List<Schema> schemas = schemaDao.findByName(schemaName, SchemaEntity.READSET_FULL);
+		List<Schema> schemas = m_schemaDao.findByName(schemaName, SchemaEntity.READSET_FULL);
 		return schemas;
 	}
 
@@ -113,7 +133,7 @@ public class SchemaService {
 	 * @throws DalException
 	 */
 	public org.apache.avro.Schema getAvroSchema(String schemaName) throws IOException, RestClientException, DalException {
-		Schema schema = schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
+		Schema schema = m_schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
 		if (schema.getAvroid() > 0) {
 			org.apache.avro.Schema avroSchema = this.avroSchemaRegistry.getByID(schema.getAvroid());
 			return avroSchema;
@@ -128,7 +148,7 @@ public class SchemaService {
 	 * @throws DalException
 	 */
 	public Schema getSchemaMeta(long schemaId) throws DalException {
-		Schema schema = schemaDao.findByPK(schemaId, SchemaEntity.READSET_FULL);
+		Schema schema = m_schemaDao.findByPK(schemaId, SchemaEntity.READSET_FULL);
 		return schema;
 	}
 
@@ -154,11 +174,11 @@ public class SchemaService {
 	 */
 	public SchemaView updateSchemaView(SchemaView schemaView) throws DalException {
 		Schema schema = schemaView.toMetaSchema();
-		Schema oldSchema = schemaDao.findLatestByName(schema.getName(), SchemaEntity.READSET_FULL);
+		Schema oldSchema = m_schemaDao.findLatestByName(schema.getName(), SchemaEntity.READSET_FULL);
 		schema.setVersion(oldSchema.getVersion() + 1);
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
 		schema.setId(0);
-		schemaDao.insert(schema);
+		m_schemaDao.insert(schema);
 		return new SchemaView(schema);
 	}
 
@@ -186,13 +206,37 @@ public class SchemaService {
 			org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
 			int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
 			metaSchema.setAvroid(avroid);
+
+//			compileAvro(metaSchema, avroSchema);
 		}
-		if (jarInputStream != null) {
+		if (jarInputStream != null) { // will be replaced by automatic compile
 			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
 			metaSchema.setJarContent(jarContent);
 			metaSchema.setJarProperties(jarHeader.toString());
 		}
-		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+	}
+
+	public void compileAvro(Schema metaSchema, org.apache.avro.Schema avroSchema) throws IOException {
+//		File dest = Files.createTempDirectory("avroschema",
+//		      PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx"))).toFile();
+		File dest = Files.createTempDirectory("avroschema").toFile();
+		SpecificCompiler compiler = new SpecificCompiler(avroSchema);
+		compiler.compileToDestination(null, dest);
+		Manifest manifest = new Manifest();
+		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+		Path jarFile = Files.createTempFile(dest.toPath(), metaSchema.getName(), ".jar");
+		JarOutputStream target = new JarOutputStream(new FileOutputStream(jarFile.toFile()), manifest);
+		for (File file : dest.listFiles()) {
+			JarEntry entry = new JarEntry(file.getPath().replace("\\", "/"));
+			entry.setTime(file.lastModified());
+			target.putNextEntry(entry);
+			byte[] readAllBytes = Files.readAllBytes(file.toPath());
+			target.write(readAllBytes);
+			target.closeEntry();
+		}
+		target.close();
+		System.out.println(target);
 	}
 
 	/**
@@ -220,7 +264,7 @@ public class SchemaService {
 			metaSchema.setJarContent(jarContent);
 			metaSchema.setJarProperties(jarHeader.toString());
 		}
-		schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
 	}
 
 }

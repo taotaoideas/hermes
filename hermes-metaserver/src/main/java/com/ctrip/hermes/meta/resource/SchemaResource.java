@@ -1,8 +1,5 @@
 package com.ctrip.hermes.meta.resource;
 
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +28,7 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.dal.meta.Schema;
-import com.ctrip.hermes.meta.entity.Storage;
-import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
-import com.ctrip.hermes.meta.pojo.TopicView;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.SchemaService;
 
@@ -179,7 +173,7 @@ public class SchemaResource {
 	 * @return
 	 */
 	@GET
-	public List<SchemaView> findTopics(@QueryParam("name") String schemaName) {
+	public List<SchemaView> findSchemas(@QueryParam("name") String schemaName) {
 		List<SchemaView> returnResult = new ArrayList<SchemaView>();
 		try {
 			List<Schema> schemaMetas = schemaService.findSchemaMeta(schemaName);

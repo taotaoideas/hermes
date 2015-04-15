@@ -36,6 +36,13 @@ public class TopicService {
 	public Topic createTopic(Topic topic) {
 		Meta meta = m_metaManager.getMeta();
 		topic.setCreateTime(new Date(System.currentTimeMillis()));
+		long maxTopicId = 0;
+		for (Topic topic2 : meta.getTopics().values()) {
+			if (topic2.getId() != null && topic2.getId() > maxTopicId) {
+				maxTopicId = topic2.getId();
+			}
+		}
+		topic.setId(maxTopicId);
 		meta.addTopic(topic);
 		m_metaManager.updateMeta(meta);
 		return topic;

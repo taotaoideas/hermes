@@ -48,7 +48,7 @@ public class SchemaServerTest extends ComponentTestCase {
 	public void testGetSchema() {
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
-		long schemaId = 21;
+		long schemaId = 1;
 		Builder request = webTarget.path("schemas/" + schemaId).request();
 		SchemaView actual = request.get(SchemaView.class);
 		System.out.println(actual);
