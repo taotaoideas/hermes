@@ -90,7 +90,7 @@ public class MySQLMessageQueueCursor extends AbstractMessageQueueCursor {
 						for (MessagePriority dataObj : dataObjs) {
 							MessageCodec codec = MessageCodecFactory.getCodec(m_tpg.getTopic());
 							PartialDecodedMessage partialMsg = new PartialDecodedMessage();
-							partialMsg.setAppProperties(stringToByteBuf(dataObj.getAttributes()));
+							partialMsg.setDurableProperties(stringToByteBuf(dataObj.getAttributes()));
 							partialMsg.setBody(Unpooled.wrappedBuffer(dataObj.getPayload()));
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());

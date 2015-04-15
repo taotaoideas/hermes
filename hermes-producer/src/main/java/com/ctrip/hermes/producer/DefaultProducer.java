@@ -53,8 +53,8 @@ public class DefaultProducer extends Producer {
 		}
 
 		@Override
-		public MessageHolder addProperty(String key, Object value) {
-			m_msg.addAppProperty(key, value);
+		public MessageHolder addProperty(String key, String value) {
+			m_msg.addDurableAppProperty(key, value);
 			return this;
 		}
 	}

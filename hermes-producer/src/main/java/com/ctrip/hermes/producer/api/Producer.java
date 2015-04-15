@@ -21,6 +21,6 @@ public abstract class Producer {
 
 		public MessageHolder withPartition(String partition);
 
-		public MessageHolder addProperty(String key, Object value);
+		public MessageHolder addProperty(String key, String value);
 	}
 }
