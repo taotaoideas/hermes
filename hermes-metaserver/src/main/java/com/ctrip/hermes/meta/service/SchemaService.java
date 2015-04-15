@@ -7,6 +7,7 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.avro.Schema.Parser;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -96,6 +97,17 @@ public class SchemaService {
 	 * 
 	 * @param schemaName
 	 * @return
+	 * @throws DalException
+	 */
+	public List<Schema> findSchemaMeta(String schemaName) throws DalException {
+		List<Schema> schemas = schemaDao.findByName(schemaName, SchemaEntity.READSET_FULL);
+		return schemas;
+	}
+
+	/**
+	 * 
+	 * @param schemaName
+	 * @return
 	 * @throws IOException
 	 * @throws RestClientException
 	 * @throws DalException
@@ -130,20 +142,6 @@ public class SchemaService {
 	 */
 	public SchemaView getSchemaView(long schemaId) throws DalException, IOException, RestClientException {
 		Schema schema = getSchemaMeta(schemaId);
-		SchemaView schemaView = new SchemaView(schema);
-		return schemaView;
-	}
-
-	/**
-	 * 
-	 * @param schemaName
-	 * @return
-	 * @throws DalException
-	 * @throws IOException
-	 * @throws RestClientException
-	 */
-	public SchemaView findLatestSchemaView(String schemaName) throws DalException, IOException, RestClientException {
-		Schema schema = findLatestSchemaMeta(schemaName);
 		SchemaView schemaView = new SchemaView(schema);
 		return schemaView;
 	}
