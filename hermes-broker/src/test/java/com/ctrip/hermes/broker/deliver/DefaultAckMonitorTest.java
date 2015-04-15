@@ -12,13 +12,18 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.ctrip.hermes.broker.ack.BatchResult;
+import com.ctrip.hermes.broker.ack.ContinuousRange;
+import com.ctrip.hermes.broker.ack.DefaultAckHolder;
+import com.ctrip.hermes.broker.ack.EnumRange;
+
 public class DefaultAckMonitorTest {
 
-	private DefaultAckMonitor<String> m;
+	private DefaultAckHolder m;
 
 	@Before
 	public void before() {
-		m = new DefaultAckMonitor<String>(5000);
+		m = new DefaultAckHolder(5000);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -38,7 +43,7 @@ public class DefaultAckMonitorTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSingleTimeout() throws Exception {
-		m = new DefaultAckMonitor<String>(10) {
+		m = new DefaultAckHolder(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
@@ -53,7 +58,7 @@ public class DefaultAckMonitorTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testMixed1() throws Exception {
-		m = new DefaultAckMonitor<String>(10) {
+		m = new DefaultAckHolder(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
@@ -69,7 +74,7 @@ public class DefaultAckMonitorTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testMixed2() throws Exception {
-		m = new DefaultAckMonitor<String>(10) {
+		m = new DefaultAckHolder(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
@@ -84,7 +89,7 @@ public class DefaultAckMonitorTest {
 
 	@Test
 	public void testMixed3() throws Exception {
-		m = new DefaultAckMonitor<String>(10) {
+		m = new DefaultAckHolder(10) {
 
 			@Override
 			protected boolean isTimeout(long start, int timeout) {
@@ -97,7 +102,7 @@ public class DefaultAckMonitorTest {
 		      new int[] { 0, 9 }, new int[] { 0, 2, 3, 4, 6, 7, 9 });
 	}
 
-	private void check(DefaultAckMonitor<String> m, //
+	private void check(DefaultAckHolder m, //
 	      final String expId, int totalOffsets, //
 	      List<Integer> successes, List<Integer> fails, //
 	      final int[] successIdxes, final int[] failIdxes) throws Exception {
@@ -111,35 +116,35 @@ public class DefaultAckMonitorTest {
 		Collections.sort(offsets);
 
 		// locatables
-		final EnumRange<String> locatables = new EnumRange<>(expId);
+		final EnumRange locatables = new EnumRange();
 		for (Integer offset : offsets) {
 			locatables.addOffset(offset);
 
 			// test merge
-			EnumRange<String> subRange = new EnumRange<String>(expId);
+			EnumRange subRange = new EnumRange();
 			subRange.addOffset(offset);
 			m.delivered(subRange);
 		}
 
 		// ack
 		for (Integer success : successes) {
-			m.acked(new Locatable<>(expId, locatables.getOffsets().get(success)), true);
+			m.acked(locatables.getOffsets().get(success), true);
 		}
 		for (Integer fail : fails) {
-			m.acked(new Locatable<>(expId, locatables.getOffsets().get(fail)), false);
+			m.acked(locatables.getOffsets().get(fail), false);
 		}
 
 		BatchResult batchResult = m.scan();
-		ContinuousRange<?> doneRange = batchResult.getDoneRange();
-		EnumRange<?> failRange = batchResult.getFailRange();
+		ContinuousRange doneRange = batchResult.getDoneRange();
+		EnumRange failRange = batchResult.getFailRange();
 
 		System.out.println("Range done: " + doneRange);
-		assertEquals(new ContinuousRange<>(expId, offsets.get(successIdxes[0]), offsets.get(successIdxes[1])), doneRange);
+		assertEquals(new ContinuousRange(offsets.get(successIdxes[0]), offsets.get(successIdxes[1])), doneRange);
 
 		if (failIdxes.length > 0) {
 			System.out.println("Range fail: " + failRange);
 
-			EnumRange<String> expRange = new EnumRange<>(expId);
+			EnumRange expRange = new EnumRange();
 			for (Integer failIdx : failIdxes) {
 				expRange.addOffset(offsets.get(failIdx));
 			}

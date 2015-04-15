@@ -10,7 +10,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.broker.dal.hermes.DeadLetter;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
-import com.ctrip.hermes.broker.dal.service.MessageService;
+import com.ctrip.hermes.broker.queue.mysql.service.MessageService;
 import com.ctrip.hermes.core.bo.Tpp;
 
 /**

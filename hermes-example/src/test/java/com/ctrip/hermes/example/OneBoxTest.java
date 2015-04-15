@@ -62,12 +62,11 @@ public class OneBoxTest extends ComponentTestCase {
 			@Override
 			protected void consume(ConsumerMessage<Long> msg) {
 				counter.incrementAndGet();
-//				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>Received: " + msg.getBody());
+				// System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>Received: " + msg.getBody());
 			}
 		});
 		engine.start(Arrays.asList(s));
 
-		
 		System.in.read();
 	}
 
@@ -114,8 +113,8 @@ public class OneBoxTest extends ComponentTestCase {
 		latch.await(30, TimeUnit.SECONDS);
 
 		long progressTime = System.currentTimeMillis() - start;
-		System.out.println(String.format("Produce %d msgs spends %d ms, QPS: %.2f msg/s",
-				  times, progressTime, (float) times / (progressTime/1000f)));
+		System.out.println(String.format("Produce %d msgs spends %d ms, QPS: %.2f msg/s", times, progressTime,
+		      (float) times / (progressTime / 1000f)));
 
 		System.in.read();
 	}
@@ -145,7 +144,7 @@ public class OneBoxTest extends ComponentTestCase {
 		}
 
 		System.out.println("Starting producer...");
-		send(topic, "ACK-");
+		// send(topic, "ACK-");
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		while (true) {
@@ -220,6 +219,9 @@ public class OneBoxTest extends ComponentTestCase {
 			for (ConsumerMessage<String> msg : msgs) {
 				String body = msg.getBody();
 				System.out.println(m_id + "<<< " + body);
+
+				msg.ack();
+				// TODO
 				if (body.startsWith("NACK-")) {
 					int totalNackCnt = Integer.parseInt(body.substring(5, body.indexOf("-", 5)));
 

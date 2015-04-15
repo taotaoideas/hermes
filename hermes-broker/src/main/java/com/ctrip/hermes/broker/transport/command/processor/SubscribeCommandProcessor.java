@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.broker.queue.MessageQueueManager;
-import com.ctrip.hermes.broker.queue.MessageQueuePullerManager;
+import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionPullerManager;
 import com.ctrip.hermes.broker.transport.transmitter.MessageTransmitter;
 import com.ctrip.hermes.broker.transport.transmitter.TpgRelayer;
 import com.ctrip.hermes.core.bo.Tpg;
@@ -18,10 +17,7 @@ import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext
 public class SubscribeCommandProcessor implements CommandProcessor {
 
 	@Inject
-	private MessageQueueManager m_queueManager;
-
-	@Inject
-	private MessageQueuePullerManager m_queuePullerManager;
+	private MessageQueuePartitionPullerManager m_queuePartitionPullerManager;
 
 	@Inject
 	private MessageTransmitter m_transmitter;
@@ -39,7 +35,7 @@ public class SubscribeCommandProcessor implements CommandProcessor {
 		long correlationId = reqCmd.getHeader().getCorrelationId();
 		Tpg tpg = new Tpg(reqCmd.getTopic(), reqCmd.getPartition(), reqCmd.getGroupId());
 		TpgRelayer relayer = m_transmitter.registerDestination(tpg, correlationId, ctx.getChannel(), reqCmd.getWindow());
-		m_queuePullerManager.startPuller(tpg, relayer);
+		m_queuePartitionPullerManager.startPuller(tpg, relayer);
 	}
 
 }

@@ -62,9 +62,9 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 		ConsumeMessageCommand cmd = new ConsumeMessageCommand();
 
-		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L, 2L, 3L), 1, true)));
-		cmd.addMessage(2, Arrays.asList(createBatch("topic2", msgs2, Arrays.asList(1L, 2L, 3L), 1, true)));
-		cmd.addMessage(3, Arrays.asList(createBatch("topic1", msgs1_2, Arrays.asList(1L, 2L, 3L), 2, false)));
+		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L, 2L, 3L), 1, true, true)));
+		cmd.addMessage(2, Arrays.asList(createBatch("topic2", msgs2, Arrays.asList(1L, 2L, 3L), 1, true, false)));
+		cmd.addMessage(3, Arrays.asList(createBatch("topic1", msgs1_2, Arrays.asList(1L, 2L, 3L), 2, false, false)));
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -95,6 +95,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 		for (int i = 0; i < 3; i++) {
 			ConsumerMessage<?> cmsg = cmsgList1.get(i);
+			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isResend());
 			Assert.assertEquals("topic1", cmsg.getTopic());
 			Assert.assertEquals(1, ((BrokerConsumerMessage<?>) cmsg).getPartition());
 			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isPriority());
@@ -111,6 +112,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 		Assert.assertEquals(3, cmsgList2.size());
 		for (int i = 0; i < 3; i++) {
 			ConsumerMessage<?> cmsg = cmsgList2.get(i);
+			Assert.assertEquals(false, ((BrokerConsumerMessage<?>) cmsg).isResend());
 			Assert.assertEquals("topic2", cmsg.getTopic());
 			Assert.assertEquals(1, ((BrokerConsumerMessage<?>) cmsg).getPartition());
 			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isPriority());
@@ -127,6 +129,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 		Assert.assertEquals(3, cmsgList3.size());
 		for (int i = 0; i < 3; i++) {
 			ConsumerMessage<?> cmsg = cmsgList3.get(i);
+			Assert.assertEquals(false, ((BrokerConsumerMessage<?>) cmsg).isResend());
 			Assert.assertEquals("topic1", cmsg.getTopic());
 			Assert.assertEquals(2, ((BrokerConsumerMessage<?>) cmsg).getPartition());
 			Assert.assertEquals(false, ((BrokerConsumerMessage<?>) cmsg).isPriority());
@@ -153,6 +156,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
 				brokerMsg.setPartition(batch.getPartition());
 				brokerMsg.setPriority(batch.isPriority());
+				brokerMsg.setResend(batch.isResend());
 				brokerMsg.setMsgSeq(msgSeqs.get(j));
 
 				msgs.add(brokerMsg);
@@ -184,12 +188,13 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 	}
 
 	private TppConsumerMessageBatch createBatch(String topic, List<ProducerMessage<String>> msgs, List<Long> msgSeqs,
-	      int partition, boolean priority) {
+	      int partition, boolean priority, boolean resend) {
 		TppConsumerMessageBatch batch = new TppConsumerMessageBatch();
 
 		batch.setTopic(topic);
 		batch.setPartition(partition);
 		batch.setPriority(priority);
+		batch.setResend(resend);
 		batch.addMsgSeqs(msgSeqs);
 
 		final ByteBuf buf = Unpooled.buffer();

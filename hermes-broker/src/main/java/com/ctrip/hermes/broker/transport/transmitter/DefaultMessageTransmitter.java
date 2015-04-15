@@ -7,10 +7,14 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.broker.ack.AckManager;
 import com.ctrip.hermes.broker.transport.transmitter.TpgChannel.TpgChannelFetchResult;
 import com.ctrip.hermes.core.bo.Tpg;
+import com.ctrip.hermes.core.bo.Tpp;
+import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
@@ -27,6 +31,9 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 	private Map<EndpointChannel, TransmitterWorker> m_channel2Worker = new HashMap<>();
 
 	private Map<Tpg, TpgRelayer> m_tpg2Relayer = new HashMap<>();
+
+	@Inject
+	private AckManager m_ackManager;
 
 	@Override
 	public synchronized TpgRelayer registerDestination(Tpg tpg, long correlationId, EndpointChannel channel, int window) {
@@ -58,7 +65,7 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 
 	}
 
-	private static class TransmitterWorker {
+	private class TransmitterWorker {
 		private List<TpgChannel> m_tpgChannels = new ArrayList<>();
 
 		private Thread m_workerThread;
@@ -119,9 +126,16 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 
 									TpgChannelFetchResult result = tpgChannel.fetch(batchSize);
 
-									if (result != null && result.getBatchs() != null && !result.getBatchs().isEmpty()) {
-										cmd.addMessage(tpgChannel.getCorrelationId(), result.getBatchs());
+									if (result != null && result.getBatches() != null && !result.getBatches().isEmpty()) {
+										cmd.addMessage(tpgChannel.getCorrelationId(), result.getBatches());
 										batchSize -= result.getSize();
+
+										// notify ack manager
+										for (TppConsumerMessageBatch batch : result.getBatches()) {
+											m_ackManager.delivered(
+											      new Tpp(batch.getTopic(), batch.getPartition(), batch.isPriority()), tpgChannel
+											            .getTpg().getGroupId(), batch.isResend(), batch.getMsgSeqs());
+										}
 									}
 								}
 								startPos = (startPos + 1) % m_tpgChannels.size();
@@ -132,6 +146,7 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 
 							if (!cmd.getMsgs().isEmpty()) {
 								m_channel.writeCommand(cmd);
+
 							}
 
 							TimeUnit.MILLISECONDS.sleep(10);
@@ -149,6 +164,5 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 			m_workerThread.setName(String.format("TransmitterWorker-%s", m_channel));
 			m_workerThread.start();
 		}
-
 	}
 }

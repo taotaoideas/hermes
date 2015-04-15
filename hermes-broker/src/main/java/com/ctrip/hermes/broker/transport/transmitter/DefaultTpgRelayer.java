@@ -46,9 +46,9 @@ public class DefaultTpgRelayer implements TpgRelayer {
 	}
 
 	@Override
-	public boolean relay(List<TppConsumerMessageBatch> batchs) {
+	public boolean relay(List<TppConsumerMessageBatch> batches) {
 		if (m_currentChannel != null && !m_currentChannel.isClosed()) {
-			m_currentChannel.transmit(batchs);
+			m_currentChannel.transmit(batches);
 			return true;
 		}
 		return false;

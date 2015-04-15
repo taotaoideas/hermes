@@ -84,6 +84,7 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
 				brokerMsg.setPartition(partition);
 				brokerMsg.setPriority(priority);
+				brokerMsg.setResend(batch.isResend());
 				brokerMsg.setChannel(channel);
 				brokerMsg.setMsgSeq(msgSeqs.get(j));
 

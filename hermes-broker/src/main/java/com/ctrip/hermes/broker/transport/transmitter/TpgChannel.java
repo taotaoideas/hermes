@@ -49,6 +49,10 @@ public class TpgChannel {
 		m_queue = new LinkedList<>();
 	}
 
+	public Tpg getTpg() {
+		return m_tpg;
+	}
+
 	public boolean isClosed() {
 		return m_closed.get();
 	}
@@ -71,10 +75,10 @@ public class TpgChannel {
 		}
 	}
 
-	public void transmit(List<TppConsumerMessageBatch> batchs) {
+	public void transmit(List<TppConsumerMessageBatch> batches) {
 		m_rwLock.writeLock().lock();
 		try {
-			for (TppConsumerMessageBatch batch : batchs) {
+			for (TppConsumerMessageBatch batch : batches) {
 				m_queue.addLast(batch);
 				m_pendingSize += batch.size();
 			}
@@ -94,7 +98,7 @@ public class TpgChannel {
 	public TpgChannelFetchResult fetch(int batchSize) {
 		m_rwLock.writeLock().lock();
 		try {
-			List<TppConsumerMessageBatch> batchs = new ArrayList<>();
+			List<TppConsumerMessageBatch> batches = new ArrayList<>();
 			int remainingSize = batchSize;
 			while (remainingSize > 0) {
 				if (m_queue.isEmpty()) {
@@ -103,7 +107,7 @@ public class TpgChannel {
 
 				if (m_queue.peek().size() <= remainingSize) {
 					TppConsumerMessageBatch tmp = m_queue.poll();
-					batchs.add(tmp);
+					batches.add(tmp);
 					m_pendingSize -= tmp.size();
 					remainingSize -= tmp.size();
 				} else {
@@ -111,8 +115,8 @@ public class TpgChannel {
 				}
 			}
 
-			if (!batchs.isEmpty()) {
-				return new TpgChannelFetchResult(batchSize - remainingSize, batchs);
+			if (!batches.isEmpty()) {
+				return new TpgChannelFetchResult(batchSize - remainingSize, batches);
 			} else {
 				return null;
 			}
@@ -157,21 +161,21 @@ public class TpgChannel {
 	}
 
 	public static class TpgChannelFetchResult {
-		private int size;
+		private int m_size;
 
-		private List<TppConsumerMessageBatch> batchs;
+		private List<TppConsumerMessageBatch> m_batches;
 
-		public TpgChannelFetchResult(int size, List<TppConsumerMessageBatch> batchs) {
-			this.size = size;
-			this.batchs = batchs;
+		public TpgChannelFetchResult(int size, List<TppConsumerMessageBatch> batches) {
+			m_size = size;
+			m_batches = batches;
 		}
 
 		public int getSize() {
-			return size;
+			return m_size;
 		}
 
-		public List<TppConsumerMessageBatch> getBatchs() {
-			return batchs;
+		public List<TppConsumerMessageBatch> getBatches() {
+			return m_batches;
 		}
 
 	}

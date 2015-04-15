@@ -12,6 +12,7 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.broker.dal.MessageUtil;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.broker.dal.hermes.OffsetMessage;
+import com.ctrip.hermes.broker.queue.mysql.service.MessageService;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.utils.CollectionUtil;
 
