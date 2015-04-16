@@ -51,10 +51,8 @@ public class SchemaResource {
 	 */
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response createSchema(@FormDataParam("schema-content") InputStream schemaInputStream,
-	      @FormDataParam("schema-content") FormDataContentDisposition schemaHeader,
-	      @FormDataParam("jar-content") InputStream jarInputStream,
-	      @FormDataParam("jar-content") FormDataContentDisposition jarHeader, @FormDataParam("schema") String content,
+	public Response createSchema(@FormDataParam("file") InputStream schemaInputStream,
+	      @FormDataParam("file") FormDataContentDisposition schemaHeader, @FormDataParam("schema") String content,
 	      @FormDataParam("topicId") @DefaultValue("0") long topicId) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
@@ -68,9 +66,9 @@ public class SchemaResource {
 		try {
 			schema = schemaService.createSchema(schema, topicId);
 			if (schema.getType().equals("json")) {
-				schemaService.uploadJsonSchema(schema, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
+				schemaService.uploadJsonSchema(schema, null, null, schemaInputStream, schemaHeader);
 			} else if (schema.getType().equals("avro")) {
-				schemaService.uploadAvroSchema(schema, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
+				schemaService.uploadAvroSchema(schema, schemaInputStream, schemaHeader, null, null);
 			}
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);

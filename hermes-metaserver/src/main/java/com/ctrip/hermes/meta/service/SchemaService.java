@@ -4,23 +4,13 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
 
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.compiler.specific.SpecificCompiler;
@@ -58,6 +48,9 @@ public class SchemaService {
 	@Inject
 	private TopicService m_topicService;
 
+	@Inject
+	private CompileService m_compileService;
+	
 	public SchemaService() {
 		String schemaServerHost = m_properties.getProperty("schema-server-host");
 		String schemaServerPort = m_properties.getProperty("schema-server-port");
@@ -224,28 +217,11 @@ public class SchemaService {
 		final Path destDir = Files.createTempDirectory("avroschema");
 		SpecificCompiler compiler = new SpecificCompiler(avroSchema);
 		compiler.compileToDestination(null, destDir.toFile());
-		Manifest manifest = new Manifest();
-		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+
+		m_compileService.compile(destDir);
 		Path jarFile = Files.createTempFile(metaSchema.getName(), ".jar");
-		final JarOutputStream target = new JarOutputStream(new FileOutputStream(jarFile.toFile()), manifest);
-		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
-
-			@Override
-			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-				File file = path.toFile();
-				Path pathRelative = destDir.relativize(path);
-				JarEntry entry = new JarEntry(pathRelative.toString());
-				entry.setTime(file.lastModified());
-				target.putNextEntry(entry);
-				byte[] readAllBytes = Files.readAllBytes(file.toPath());
-				target.write(readAllBytes);
-				target.closeEntry();
-				return FileVisitResult.CONTINUE;
-			}
-
-		});
-		target.close();
-
+		m_compileService.jar(destDir, jarFile);
+		
 		byte[] jarContent = Files.readAllBytes(jarFile);
 		metaSchema.setJarContent(jarContent);
 		FormDataContentDisposition disposition = FormDataContentDisposition.name(metaSchema.getName())
@@ -255,22 +231,7 @@ public class SchemaService {
 		metaSchema.setJarProperties(disposition.toString());
 		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
 		Files.delete(jarFile);
-		
-		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
-
-			@Override
-			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-				Files.delete(path);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-				Files.delete(dir);
-	         return super.postVisitDirectory(dir, exc);
-         }
-
-		});
+		m_compileService.delete(destDir);
 	}
 
 	/**
