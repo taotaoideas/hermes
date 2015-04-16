@@ -30,7 +30,7 @@ public class StorageTest extends ComponentTestCase {
 
 	private ResendGroupIdDao resendDao;
 
-//	private OffsetResendDao resendOffsetDao;
+	// private OffsetResendDao resendOffsetDao;
 
 	private String topic = "order_new";
 
@@ -43,7 +43,7 @@ public class StorageTest extends ComponentTestCase {
 		msgDao = lookup(MessagePriorityDao.class);
 		msgOffsetDao = lookup(OffsetMessageDao.class);
 		resendDao = lookup(ResendGroupIdDao.class);
-//		resendOffsetDao = lookup(OffsetResendDao.class);
+		// resendOffsetDao = lookup(OffsetResendDao.class);
 	}
 
 	@Test
@@ -79,7 +79,8 @@ public class StorageTest extends ComponentTestCase {
 	}
 
 	private List<ResendGroupId> readResendMessage() throws DalException {
-		return resendDao.find(topic, partition, groupId, new Date(), 10, ResendGroupIdEntity.READSET_FULL);
+		return resendDao
+		      .find(topic, partition, groupId, new Date(), 10, 1L, new Date(), ResendGroupIdEntity.READSET_FULL);
 	}
 
 	private void updateMessageOffset(MessagePriority msg) throws DalException {

@@ -128,9 +128,10 @@ public class OneBoxTest extends ComponentTestCase {
 		Engine engine = lookup(Engine.class);
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
-		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
-		subscribers.put("group2", Arrays.asList("2-a", "2-b"));
-		subscribers.put("group3", Arrays.asList("3-a", "3-b", "3-c"));
+		subscribers.put("group1", Arrays.asList("1-a"));
+//		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
+//		subscribers.put("group2", Arrays.asList("2-a", "2-b"));
+//		subscribers.put("group3", Arrays.asList("3-a", "3-b", "3-c"));
 
 		for (Map.Entry<String, List<String>> entry : subscribers.entrySet()) {
 			String groupId = entry.getKey();
@@ -220,7 +221,7 @@ public class OneBoxTest extends ComponentTestCase {
 				String body = msg.getBody();
 				System.out.println(m_id + "<<< " + body);
 
-				msg.ack();
+				
 				// TODO
 				if (body.startsWith("NACK-")) {
 					int totalNackCnt = Integer.parseInt(body.substring(5, body.indexOf("-", 5)));
@@ -235,8 +236,11 @@ public class OneBoxTest extends ComponentTestCase {
 							msg.nack();
 						} else {
 							m_nacks.remove(body);
+							msg.ack();
 						}
 					}
+				}else{
+					msg.ack();
 				}
 			}
 		}

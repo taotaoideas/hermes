@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker.ack;
+package com.ctrip.hermes.broker.ack.internal;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.unidal.tuple.Pair;
+
 import com.ctrip.hermes.core.utils.CollectionUtil;
 
-public class DefaultAckHolder implements AckHolder {
+public class DefaultAckHolder<T> implements AckHolder<T> {
 
 	private List<Batch> m_batches = new LinkedList<>();
 
@@ -19,8 +21,8 @@ public class DefaultAckHolder implements AckHolder {
 	}
 
 	@Override
-	public BatchResult scan() {
-		BatchResult result = null;
+	public BatchResult<T> scan() {
+		BatchResult<T> result = null;
 
 		Iterator<Batch> it = m_batches.iterator();
 		while (it.hasNext()) {
@@ -41,8 +43,10 @@ public class DefaultAckHolder implements AckHolder {
 	}
 
 	@Override
-	public void delivered(EnumRange range) {
-		m_batches.add(new Batch(range, System.currentTimeMillis()));
+	public void delivered(List<Pair<Long, T>> offsets, long develiveredTime) {
+		EnumRange<T> range = new EnumRange<>(offsets);
+
+		m_batches.add(new Batch(range, develiveredTime));
 	}
 
 	@Override
@@ -50,8 +54,9 @@ public class DefaultAckHolder implements AckHolder {
 		Batch batch = findBatch(offset);
 
 		if (batch == null) {
-			// TODO
-			System.out.println(String.format("batch for %s not found", offset));
+			// TODO 
+			// maybe do nothing, since DefaultAckManager can guarantee ack/nack happen after deliver. 
+			// If reach here, that must be the batch has been timeout in the last scan. 
 		} else {
 			batch.updateState(offset, success);
 		}
@@ -80,36 +85,42 @@ public class DefaultAckHolder implements AckHolder {
 
 		private TreeMap<Long, State> m_map;
 
+		private TreeMap<Long, T> m_ctxMap;
+
 		private long m_ts;
 
 		private int m_doneCount = 0;
 
-		public Batch(EnumRange range, long ts) {
-			List<Long> rangeOffsets = range.getOffsets();
-			m_continuousRange = new ContinuousRange(CollectionUtil.first(rangeOffsets), CollectionUtil.last(rangeOffsets));
+		public Batch(EnumRange<T> range, long ts) {
+			List<Pair<Long, T>> rangeOffsets = range.getOffsets();
+			m_continuousRange = new ContinuousRange(CollectionUtil.first(rangeOffsets).getKey(), CollectionUtil.last(
+			      rangeOffsets).getKey());
 
 			m_ts = ts;
 
 			m_map = new TreeMap<>();
-			for (long offset : rangeOffsets) {
-				m_map.put(offset, State.INIT);
+			m_ctxMap = new TreeMap<>();
+			for (Pair<Long, T> pair : rangeOffsets) {
+				m_map.put(pair.getKey(), State.INIT);
+				m_ctxMap.put(pair.getKey(), pair.getValue());
 			}
 		}
 
-		public BatchResult getResult() {
-			return new BatchResult(getFailRange(), getDoneRange());
+		public BatchResult<T> getResult() {
+			return new BatchResult<>(getFailRange(), getDoneRange());
 		}
 
 		public ContinuousRange getDoneRange() {
 			return m_continuousRange;
 		}
 
-		public EnumRange getFailRange() {
-			EnumRange failRange = new EnumRange();
+		public EnumRange<T> getFailRange() {
+			EnumRange<T> failRange = new EnumRange<>();
 
 			for (Map.Entry<Long, State> entry : m_map.entrySet()) {
 				if (entry.getValue() != State.SUCCESS) {
-					failRange.addOffset(entry.getKey());
+					long offset = entry.getKey();
+					failRange.addOffset(offset, m_ctxMap.get(offset));
 				}
 			}
 

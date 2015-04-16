@@ -2,6 +2,8 @@ package com.ctrip.hermes.broker.queue.partition;
 
 import java.util.List;
 
+import org.unidal.tuple.Pair;
+
 import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
@@ -31,7 +33,7 @@ public class DefaultMessageQueuePartition extends AbstractMessageQueuePartition 
 	}
 
 	@Override
-	protected void doNack(boolean resend, boolean isPriority, String groupId, List<Long> msgSeqs) {
+	protected void doNack(boolean resend, boolean isPriority, String groupId, List<Pair<Long, Integer>> msgSeqs) {
 		m_storage.nack(new Tpp(m_topic, m_partition, isPriority), groupId, resend, msgSeqs);
 	}
 

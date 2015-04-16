@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.unidal.tuple.Pair;
+
 import com.ctrip.hermes.core.ManualRelease;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
@@ -140,7 +142,9 @@ public class ConsumeMessageCommand extends AbstractCommand {
 			batch.setResend(codec.readBoolean());
 
 			for (int j = 0; j < seqSize; j++) {
-				batch.addMsgSeq(codec.readLong());
+				long msgSeq = codec.readLong();
+				int remainingRetries = codec.readInt();
+				batch.addMsgSeq(msgSeq, remainingRetries);
 			}
 			batches.add(batch);
 		}
@@ -154,8 +158,9 @@ public class ConsumeMessageCommand extends AbstractCommand {
 			codec.writeInt(batch.getPartition());
 			codec.writeInt(batch.isPriority() ? 0 : 1);
 			codec.writeBoolean(batch.isResend());
-			for (Long seq : batch.getMsgSeqs()) {
-				codec.writeLong(seq);
+			for (Pair<Long, Integer> pair : batch.getMsgSeqs()) {
+				codec.writeLong(pair.getKey());
+				codec.writeInt(pair.getValue());
 			}
 		}
 	}

@@ -1,25 +1,31 @@
-package com.ctrip.hermes.broker.ack;
+package com.ctrip.hermes.broker.ack.internal;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnumRange {
+import org.unidal.tuple.Pair;
 
-	private List<Long> m_offsets;
+public class EnumRange<T> {
+
+	private List<Pair<Long, T>> m_offsets;
 
 	public EnumRange() {
 		m_offsets = new ArrayList<>();
 	}
 
-	public EnumRange(List<Long> offsets) {
+	public EnumRange(List<Pair<Long, T>> offsets) {
 		m_offsets = offsets;
 	}
 
-	public void addOffset(long offset) {
+	public void addOffset(Long offset, T ctx) {
+		m_offsets.add(new Pair<>(offset, ctx));
+	}
+
+	public void addOffset(Pair<Long, T> offset) {
 		m_offsets.add(offset);
 	}
 
-	public List<Long> getOffsets() {
+	public List<Pair<Long, T>> getOffsets() {
 		return m_offsets;
 	}
 
@@ -31,6 +37,7 @@ public class EnumRange {
 		return result;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

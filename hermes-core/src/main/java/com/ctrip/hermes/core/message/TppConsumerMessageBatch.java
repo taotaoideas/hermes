@@ -5,10 +5,12 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.unidal.tuple.Pair;
+
 import com.ctrip.hermes.core.transport.TransferCallback;
 
 /**
- * mapping to one <topic, partition, priority>
+ * mapping to one <topic, partition, priority, isResend>
  * 
  * @author Leo Liang(jhliang@ctrip.com)
  *
@@ -22,7 +24,7 @@ public class TppConsumerMessageBatch {
 
 	private boolean m_resend = false;
 
-	private List<Long> m_msgSeqs = new ArrayList<>();
+	private List<Pair<Long, Integer>> m_msgSeqs = new ArrayList<>();
 
 	private TransferCallback m_transferCallback;
 
@@ -71,15 +73,15 @@ public class TppConsumerMessageBatch {
 		m_topic = topic;
 	}
 
-	public List<Long> getMsgSeqs() {
+	public List<Pair<Long, Integer>> getMsgSeqs() {
 		return m_msgSeqs;
 	}
 
-	public void addMsgSeq(long msgSeq) {
-		m_msgSeqs.add(msgSeq);
+	public void addMsgSeq(long msgSeq, int remainingRetries) {
+		m_msgSeqs.add(new Pair<Long, Integer>(msgSeq, remainingRetries));
 	}
 
-	public void addMsgSeqs(List<Long> msgSeqs) {
+	public void addMsgSeqs(List<Pair<Long, Integer>> msgSeqs) {
 		m_msgSeqs.addAll(msgSeqs);
 	}
 

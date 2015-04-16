@@ -2,6 +2,7 @@ package com.ctrip.hermes.core.message;
 
 import java.util.Iterator;
 
+import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.transport.command.AckMessageCommand;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
@@ -81,7 +82,8 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 		if (m_baseMsg.nack()) {
 			AckMessageCommand cmd = new AckMessageCommand();
 			cmd.getHeader().setCorrelationId(m_correlationId);
-			cmd.addNackMsg(getTopic(), getPartition(), m_priority, m_groupId, m_resend, m_msgSeq);
+			Tpp tpp = new Tpp(getTopic(), getPartition(), m_priority);
+			cmd.addNackMsg(tpp, m_groupId, m_resend, m_msgSeq, m_baseMsg.getRemainingRetries());
 			m_channel.writeCommand(cmd);
 		}
 	}
@@ -121,7 +123,8 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 		if (m_baseMsg.ack()) {
 			AckMessageCommand cmd = new AckMessageCommand();
 			cmd.getHeader().setCorrelationId(m_correlationId);
-			cmd.addAckMsg(getTopic(), getPartition(), m_priority, m_groupId, m_resend, m_msgSeq);
+			Tpp tpp = new Tpp(getTopic(), getPartition(), m_priority);
+			cmd.addAckMsg(tpp, m_groupId, m_resend, m_msgSeq, m_baseMsg.getRemainingRetries());
 			m_channel.writeCommand(cmd);
 		}
 	}
@@ -139,4 +142,7 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 		return m_resend;
 	}
 
+	public int getRemainingRetries() {
+		return m_baseMsg.getRemainingRetries();
+	}
 }

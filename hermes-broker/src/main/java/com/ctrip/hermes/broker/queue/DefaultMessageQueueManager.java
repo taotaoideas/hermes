@@ -51,7 +51,7 @@ public class DefaultMessageQueueManager extends ContainerHolder implements Messa
 	}
 
 	@Override
-	public void nack(Tpp tpp, String groupId, boolean resend, List<Long> msgSeqs) {
+	public void nack(Tpp tpp, String groupId, boolean resend, List<Pair<Long, Integer>> msgSeqs) {
 		getMessageQueuePartition(tpp.getTopic(), tpp.getPartition()).nack(resend, tpp.isPriority(), groupId, msgSeqs);
 	}
 

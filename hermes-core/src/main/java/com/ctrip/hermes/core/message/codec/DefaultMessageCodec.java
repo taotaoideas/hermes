@@ -45,6 +45,8 @@ public class DefaultMessageCodec implements MessageCodec {
 
 		codec.writeString(msg.getKey());
 		codec.writeLong(msg.getBornTime());
+		// remaining retries
+		codec.writeInt(0);
 
 		PropertiesHolder propertiesHolder = msg.getPropertiesHolder();
 		writeProperties(propertiesHolder.getDurableProperties(), buf, codec);
@@ -75,6 +77,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		PartialDecodedMessage decodedMessage = partialDecode(buf);
 		msg.setKey(decodedMessage.getKey());
 		msg.setBornTime(decodedMessage.getBornTime());
+		msg.setRemainingRetries(decodedMessage.getRemainingRetries());
 		Map<String, String> durableProperties = readProperties(decodedMessage.getDurableProperties());
 		Map<String, String> volatileProperties = readProperties(decodedMessage.getVolatileProperties());
 		msg.setPropertiesHolder(new PropertiesHolder(durableProperties, volatileProperties));
@@ -92,6 +95,7 @@ public class DefaultMessageCodec implements MessageCodec {
 		PartialDecodedMessage msg = new PartialDecodedMessage();
 		msg.setKey(codec.readString());
 		msg.setBornTime(codec.readLong());
+		msg.setRemainingRetries(codec.readInt());
 
 		int len = codec.readInt();
 		msg.setDurableProperties(buf.readSlice(len));
@@ -116,6 +120,7 @@ public class DefaultMessageCodec implements MessageCodec {
 
 		codec.writeString(msg.getKey());
 		codec.writeLong(msg.getBornTime());
+		codec.writeInt(msg.getRemainingRetries());
 
 		writeProperties(msg.getDurableProperties(), buf, codec);
 		writeProperties(msg.getVolatileProperties(), buf, codec);
