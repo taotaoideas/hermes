@@ -1,4 +1,4 @@
-package com.ctrip.hermes.broker.ack;
+package com.ctrip.hermes.broker.ack.internal;
 
 public class ContinuousRange {
 

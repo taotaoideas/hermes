@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.unidal.lookup.annotation.Inject;
+import org.unidal.tuple.Pair;
 
 import com.ctrip.hermes.consumer.engine.notifier.ConsumerNotifier;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
@@ -71,7 +72,7 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 	      EndpointChannel channel) {
 		List<ConsumerMessage<?>> msgs = new ArrayList<>();
 		for (TppConsumerMessageBatch batch : batches) {
-			List<Long> msgSeqs = batch.getMsgSeqs();
+			List<Pair<Long, Integer>> msgSeqs = batch.getMsgSeqs();
 			ByteBuf batchData = batch.getData();
 
 			String topic = batch.getTopic();
@@ -86,7 +87,7 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 				brokerMsg.setPriority(priority);
 				brokerMsg.setResend(batch.isResend());
 				brokerMsg.setChannel(channel);
-				brokerMsg.setMsgSeq(msgSeqs.get(j));
+				brokerMsg.setMsgSeq(msgSeqs.get(j).getKey());
 
 				msgs.add(brokerMsg);
 			}

@@ -1,17 +1,19 @@
-package com.ctrip.hermes.broker.ack;
+package com.ctrip.hermes.broker.ack.internal;
 
-public class BatchResult {
+import org.unidal.tuple.Pair;
 
-	private EnumRange m_failRange;
+public class BatchResult<T> {
+
+	private EnumRange<T> m_failRange;
 
 	private ContinuousRange m_doneRange;
 
-	public BatchResult(EnumRange failRange, ContinuousRange doneRange) {
+	public BatchResult(EnumRange<T> failRange, ContinuousRange doneRange) {
 		m_failRange = failRange;
 		m_doneRange = doneRange;
 	}
 
-	public EnumRange getFailRange() {
+	public EnumRange<T> getFailRange() {
 		return m_failRange;
 	}
 
@@ -19,13 +21,13 @@ public class BatchResult {
 		return m_doneRange;
 	}
 
-	public void merge(BatchResult resultToMerge) {
-		EnumRange failRangeToMerge = resultToMerge.getFailRange();
+	public void merge(BatchResult<T> resultToMerge) {
+		EnumRange<T> failRangeToMerge = resultToMerge.getFailRange();
 		if (m_failRange == null) {
 			m_failRange = failRangeToMerge;
 		} else {
 			if (failRangeToMerge != null) {
-				for (Long newOffset : failRangeToMerge.getOffsets()) {
+				for (Pair<Long, T> newOffset : failRangeToMerge.getOffsets()) {
 					m_failRange.addOffset(newOffset);
 				}
 			}

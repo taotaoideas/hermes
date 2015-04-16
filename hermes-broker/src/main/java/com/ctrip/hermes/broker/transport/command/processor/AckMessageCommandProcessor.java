@@ -3,7 +3,6 @@ package com.ctrip.hermes.broker.transport.command.processor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.tuple.Triple;
@@ -33,19 +32,19 @@ public class AckMessageCommandProcessor implements CommandProcessor {
 	public void process(CommandProcessorContext ctx) {
 		AckMessageCommand cmd = (AckMessageCommand) ctx.getCommand();
 
-		for (Map.Entry<Triple<Tpp, String, Boolean>, Set<Long>> entry : cmd.getAckMsgs().entrySet()) {
+		for (Map.Entry<Triple<Tpp, String, Boolean>, Map<Long, Integer>> entry : cmd.getAckMsgs().entrySet()) {
 			Tpp tpp = entry.getKey().getFirst();
 			String groupId = entry.getKey().getMiddle();
 			boolean resend = entry.getKey().getLast();
-			Set<Long> msgSeqs = entry.getValue();
+			Map<Long, Integer> msgSeqs = entry.getValue();
 			m_ackManager.acked(tpp, groupId, resend, msgSeqs);
 		}
 
-		for (Map.Entry<Triple<Tpp, String, Boolean>, Set<Long>> entry : cmd.getNackMsgs().entrySet()) {
+		for (Map.Entry<Triple<Tpp, String, Boolean>, Map<Long, Integer>> entry : cmd.getNackMsgs().entrySet()) {
 			Tpp tpp = entry.getKey().getFirst();
 			String groupId = entry.getKey().getMiddle();
 			boolean resend = entry.getKey().getLast();
-			Set<Long> msgSeqs = entry.getValue();
+			Map<Long, Integer> msgSeqs = entry.getValue();
 			m_ackManager.nacked(tpp, groupId, resend, msgSeqs);
 		}
 	}

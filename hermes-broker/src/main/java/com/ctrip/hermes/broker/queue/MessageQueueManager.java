@@ -3,6 +3,8 @@ package com.ctrip.hermes.broker.queue;
 import java.util.List;
 import java.util.Map;
 
+import org.unidal.tuple.Pair;
+
 import com.ctrip.hermes.broker.queue.partition.MessageQueuePartitionCursor;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
@@ -15,7 +17,7 @@ public interface MessageQueueManager {
 
 	public MessageQueuePartitionCursor createCursor(Tpg tpg);
 
-	public void nack(Tpp tpp, String groupId, boolean resend, List<Long> msgSeqs);
+	public void nack(Tpp tpp, String groupId, boolean resend, List<Pair<Long, Integer>> msgSeqs);
 
 	public void ack(Tpp tpp, String groupId, boolean resend, long msgSeq);
 }

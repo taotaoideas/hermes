@@ -8,7 +8,6 @@ import org.unidal.dal.jdbc.QueryType;
 import org.unidal.dal.jdbc.mapping.TableProvider;
 import org.unidal.lookup.annotation.Inject;
 
-import com.ctrip.hermes.broker.dal.hermes.ResendGroupId;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Partition;
 
@@ -39,8 +38,8 @@ public class HermesTableProvider implements TableProvider {
 
 		case "resend-group-id":
 			fmt = "%s.resend_%s";
-			ResendGroupId dataObject = (ResendGroupId) tpAware;
-			return String.format(fmt, db, dataObject.getGroupId());
+			TopicPartitionPriorityGroupAware tpgAware = (TopicPartitionPriorityGroupAware) tpAware;
+			return String.format(fmt, db, tpgAware.getGroupId());
 
 		case "offset-message":
 			fmt = "%s.offset_message";

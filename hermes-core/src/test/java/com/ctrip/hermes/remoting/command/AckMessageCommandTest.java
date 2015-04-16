@@ -4,7 +4,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import org.junit.Assert;
@@ -25,58 +27,58 @@ public class AckMessageCommandTest {
 		AckMessageCommand cmd = new AckMessageCommand();
 		// ack start
 		// t1
-		cmd.addAckMsg("t1", 1, true, "g1", false, 1);
-		cmd.addAckMsg("t1", 1, true, "g1", false, 2);
+		cmd.addAckMsg(new Tpp("t1", 1, true), "g1", false, 1, 0);
+		cmd.addAckMsg(new Tpp("t1", 1, true), "g1", false, 2, 0);
 
-		cmd.addAckMsg("t1", 1, false, "g1", false, 1);
-		cmd.addAckMsg("t1", 1, false, "g1", false, 2);
-		cmd.addAckMsg("t1", 1, false, "g1", false, 3);
+		cmd.addAckMsg(new Tpp("t1", 1, false), "g1", false, 1, 0);
+		cmd.addAckMsg(new Tpp("t1", 1, false), "g1", false, 2, 0);
+		cmd.addAckMsg(new Tpp("t1", 1, false), "g1", false, 3, 0);
 
-		cmd.addAckMsg("t1", 2, true, "g1", false, 1);
-		cmd.addAckMsg("t1", 2, true, "g1", false, 2);
-		cmd.addAckMsg("t1", 2, true, "g1", false, 3);
-		cmd.addAckMsg("t1", 2, true, "g1", false, 4);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 1, 0);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 2, 0);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 3, 0);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 4, 0);
 
 		// t2
-		cmd.addAckMsg("t2", 1, true, "g2", true, 1);
-		cmd.addAckMsg("t2", 1, true, "g2", true, 2);
+		cmd.addAckMsg(new Tpp("t2", 1, true), "g2", true, 1, 1);
+		cmd.addAckMsg(new Tpp("t2", 1, true), "g2", true, 2, 2);
 
-		cmd.addAckMsg("t2", 1, false, "g2", true, 1);
-		cmd.addAckMsg("t2", 1, false, "g2", true, 2);
-		cmd.addAckMsg("t2", 1, false, "g2", true, 3);
+		cmd.addAckMsg(new Tpp("t2", 1, false), "g2", true, 1, 1);
+		cmd.addAckMsg(new Tpp("t2", 1, false), "g2", true, 2, 2);
+		cmd.addAckMsg(new Tpp("t2", 1, false), "g2", true, 3, 3);
 
-		cmd.addAckMsg("t2", 2, false, "g2", true, 1);
-		cmd.addAckMsg("t2", 2, false, "g2", true, 2);
-		cmd.addAckMsg("t2", 2, false, "g2", true, 3);
-		cmd.addAckMsg("t2", 2, false, "g2", true, 4);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 1, 4);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 2, 3);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 3, 2);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 4, 1);
 		// ack end
 
 		// nack start
 		// t1
-		cmd.addNackMsg("t1", 1, true, "g1", false, 1);
-		cmd.addNackMsg("t1", 1, true, "g1", false, 2);
+		cmd.addNackMsg(new Tpp("t1", 1, true), "g1", false, 1, 0);
+		cmd.addNackMsg(new Tpp("t1", 1, true), "g1", false, 2, 0);
 
-		cmd.addNackMsg("t1", 1, false, "g1", false, 1);
-		cmd.addNackMsg("t1", 1, false, "g1", false, 2);
-		cmd.addNackMsg("t1", 1, false, "g1", false, 3);
+		cmd.addNackMsg(new Tpp("t1", 1, false), "g1", false, 1, 0);
+		cmd.addNackMsg(new Tpp("t1", 1, false), "g1", false, 2, 0);
+		cmd.addNackMsg(new Tpp("t1", 1, false), "g1", false, 3, 0);
 
-		cmd.addNackMsg("t1", 2, true, "g1", false, 1);
-		cmd.addNackMsg("t1", 2, true, "g1", false, 2);
-		cmd.addNackMsg("t1", 2, true, "g1", false, 3);
-		cmd.addNackMsg("t1", 2, true, "g1", false, 4);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 1, 0);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 2, 0);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 3, 0);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 4, 0);
 
 		// t2
-		cmd.addNackMsg("t2", 1, true, "g2", true, 1);
-		cmd.addNackMsg("t2", 1, true, "g2", true, 2);
+		cmd.addNackMsg(new Tpp("t2", 1, true), "g2", true, 1, 1);
+		cmd.addNackMsg(new Tpp("t2", 1, true), "g2", true, 2, 2);
 
-		cmd.addNackMsg("t2", 1, false, "g2", true, 1);
-		cmd.addNackMsg("t2", 1, false, "g2", true, 2);
-		cmd.addNackMsg("t2", 1, false, "g2", true, 3);
+		cmd.addNackMsg(new Tpp("t2", 1, false), "g2", true, 1, 1);
+		cmd.addNackMsg(new Tpp("t2", 1, false), "g2", true, 2, 2);
+		cmd.addNackMsg(new Tpp("t2", 1, false), "g2", true, 3, 3);
 
-		cmd.addNackMsg("t2", 2, false, "g2", true, 1);
-		cmd.addNackMsg("t2", 2, false, "g2", true, 2);
-		cmd.addNackMsg("t2", 2, false, "g2", true, 3);
-		cmd.addNackMsg("t2", 2, false, "g2", true, 4);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 1, 4);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 2, 3);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 3, 2);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 4, 1);
 		// nack end
 
 		ByteBuf buf = Unpooled.buffer();
@@ -87,25 +89,76 @@ public class AckMessageCommandTest {
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
 
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> ackMsgs = decodedCmd.getAckMsgs();
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> nackMsgs = decodedCmd.getNackMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> ackMsgs = decodedCmd.getAckMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> nackMsgs = decodedCmd.getNackMsgs();
 
+		// acks
 		Assert.assertEquals(6, ackMsgs.size());
 
-		ackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).containsAll(Arrays.asList(1L, 2L));
-		ackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L));
-		ackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
-		ackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).containsAll(Arrays.asList(1L, 2L));
-		ackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L));
-		ackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).values(), Arrays.asList(0, 0));
 
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).values(), Arrays.asList(0, 0, 0));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).values(), Arrays.asList(0, 0, 0, 0));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).values(), Arrays.asList(1, 2));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).values(), Arrays.asList(1, 2, 3));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).values(), Arrays.asList(4, 3, 2, 1));
+
+		// nacks
 		Assert.assertEquals(6, nackMsgs.size());
-		nackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).containsAll(Arrays.asList(1L, 2L));
-		nackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L));
-		nackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
-		nackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).containsAll(Arrays.asList(1L, 2L));
-		nackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L));
-		nackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).values(), Arrays.asList(0, 0));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).values(), Arrays.asList(0, 0, 0));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).values(), Arrays.asList(0, 0, 0, 0));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).values(), Arrays.asList(1, 2));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).values(), Arrays.asList(1, 2, 3));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).values(), Arrays.asList(4, 3, 2, 1));
+
+	}
+
+	private <T> void assertEquals(Collection<T> c1, Collection<T> c2) {
+		if (c1 == null && c2 != null) {
+			Assert.fail();
+		}
+
+		if (c1 != null && c2 == null) {
+			Assert.fail();
+		}
+
+		if (c1 != null && c2 != null) {
+			Assert.assertEquals(c1.size(), c2.size());
+			Iterator<T> it1 = c1.iterator();
+			Iterator<T> it2 = c2.iterator();
+			for (int i = 0; i < c1.size(); i++) {
+				Assert.assertEquals(it1.next(), it2.next());
+			}
+		} else {
+			Assert.fail();
+		}
 	}
 
 	@Test
@@ -120,8 +173,8 @@ public class AckMessageCommandTest {
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
 
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> ackMsgs = decodedCmd.getAckMsgs();
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> nackMsgs = decodedCmd.getNackMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> ackMsgs = decodedCmd.getAckMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> nackMsgs = decodedCmd.getNackMsgs();
 
 		Assert.assertEquals(0, ackMsgs.size());
 
@@ -134,30 +187,30 @@ public class AckMessageCommandTest {
 
 		// nack start
 		// t1
-		cmd.addNackMsg("t1", 1, true, "g1", false, 1);
-		cmd.addNackMsg("t1", 1, true, "g1", false, 2);
+		cmd.addNackMsg(new Tpp("t1", 1, true), "g1", false, 1, 0);
+		cmd.addNackMsg(new Tpp("t1", 1, true), "g1", false, 2, 0);
 
-		cmd.addNackMsg("t1", 1, false, "g1", false, 1);
-		cmd.addNackMsg("t1", 1, false, "g1", false, 2);
-		cmd.addNackMsg("t1", 1, false, "g1", false, 3);
+		cmd.addNackMsg(new Tpp("t1", 1, false), "g1", false, 1, 0);
+		cmd.addNackMsg(new Tpp("t1", 1, false), "g1", false, 2, 0);
+		cmd.addNackMsg(new Tpp("t1", 1, false), "g1", false, 3, 0);
 
-		cmd.addNackMsg("t1", 2, true, "g1", false, 1);
-		cmd.addNackMsg("t1", 2, true, "g1", false, 2);
-		cmd.addNackMsg("t1", 2, true, "g1", false, 3);
-		cmd.addNackMsg("t1", 2, true, "g1", false, 4);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 1, 0);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 2, 0);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 3, 0);
+		cmd.addNackMsg(new Tpp("t1", 2, true), "g1", false, 4, 0);
 
 		// t2
-		cmd.addNackMsg("t2", 1, true, "g2", true, 1);
-		cmd.addNackMsg("t2", 1, true, "g2", true, 2);
+		cmd.addNackMsg(new Tpp("t2", 1, true), "g2", true, 1, 1);
+		cmd.addNackMsg(new Tpp("t2", 1, true), "g2", true, 2, 2);
 
-		cmd.addNackMsg("t2", 1, false, "g2", true, 1);
-		cmd.addNackMsg("t2", 1, false, "g2", true, 2);
-		cmd.addNackMsg("t2", 1, false, "g2", true, 3);
+		cmd.addNackMsg(new Tpp("t2", 1, false), "g2", true, 1, 1);
+		cmd.addNackMsg(new Tpp("t2", 1, false), "g2", true, 2, 2);
+		cmd.addNackMsg(new Tpp("t2", 1, false), "g2", true, 3, 3);
 
-		cmd.addNackMsg("t2", 2, false, "g2", true, 1);
-		cmd.addNackMsg("t2", 2, false, "g2", true, 2);
-		cmd.addNackMsg("t2", 2, false, "g2", true, 3);
-		cmd.addNackMsg("t2", 2, false, "g2", true, 4);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 1, 4);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 2, 3);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 3, 2);
+		cmd.addNackMsg(new Tpp("t2", 2, false), "g2", true, 4, 1);
 		// nack end
 
 		ByteBuf buf = Unpooled.buffer();
@@ -168,18 +221,35 @@ public class AckMessageCommandTest {
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
 
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> ackMsgs = decodedCmd.getAckMsgs();
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> nackMsgs = decodedCmd.getNackMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> ackMsgs = decodedCmd.getAckMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> nackMsgs = decodedCmd.getNackMsgs();
 
+		// acks
 		Assert.assertEquals(0, ackMsgs.size());
 
+		// nacks
 		Assert.assertEquals(6, nackMsgs.size());
-		nackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).containsAll(Arrays.asList(1L, 2L));
-		nackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L));
-		nackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
-		nackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).containsAll(Arrays.asList(1L, 2L));
-		nackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L));
-		nackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).values(), Arrays.asList(0, 0));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).values(), Arrays.asList(0, 0, 0));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).values(), Arrays.asList(0, 0, 0, 0));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).values(), Arrays.asList(1, 2));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).values(), Arrays.asList(1, 2, 3));
+
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(nackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).values(), Arrays.asList(4, 3, 2, 1));
+
 	}
 
 	@Test
@@ -187,30 +257,30 @@ public class AckMessageCommandTest {
 		AckMessageCommand cmd = new AckMessageCommand();
 		// ack start
 		// t1
-		cmd.addAckMsg("t1", 1, true, "g1", false, 1);
-		cmd.addAckMsg("t1", 1, true, "g1", false, 2);
+		cmd.addAckMsg(new Tpp("t1", 1, true), "g1", false, 1, 0);
+		cmd.addAckMsg(new Tpp("t1", 1, true), "g1", false, 2, 0);
 
-		cmd.addAckMsg("t1", 1, false, "g1", false, 1);
-		cmd.addAckMsg("t1", 1, false, "g1", false, 2);
-		cmd.addAckMsg("t1", 1, false, "g1", false, 3);
+		cmd.addAckMsg(new Tpp("t1", 1, false), "g1", false, 1, 0);
+		cmd.addAckMsg(new Tpp("t1", 1, false), "g1", false, 2, 0);
+		cmd.addAckMsg(new Tpp("t1", 1, false), "g1", false, 3, 0);
 
-		cmd.addAckMsg("t1", 2, true, "g1", false, 1);
-		cmd.addAckMsg("t1", 2, true, "g1", false, 2);
-		cmd.addAckMsg("t1", 2, true, "g1", false, 3);
-		cmd.addAckMsg("t1", 2, true, "g1", false, 4);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 1, 0);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 2, 0);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 3, 0);
+		cmd.addAckMsg(new Tpp("t1", 2, true), "g1", false, 4, 0);
 
 		// t2
-		cmd.addAckMsg("t2", 1, true, "g2", true, 1);
-		cmd.addAckMsg("t2", 1, true, "g2", true, 2);
+		cmd.addAckMsg(new Tpp("t2", 1, true), "g2", true, 1, 1);
+		cmd.addAckMsg(new Tpp("t2", 1, true), "g2", true, 2, 2);
 
-		cmd.addAckMsg("t2", 1, false, "g2", true, 1);
-		cmd.addAckMsg("t2", 1, false, "g2", true, 2);
-		cmd.addAckMsg("t2", 1, false, "g2", true, 3);
+		cmd.addAckMsg(new Tpp("t2", 1, false), "g2", true, 1, 1);
+		cmd.addAckMsg(new Tpp("t2", 1, false), "g2", true, 2, 2);
+		cmd.addAckMsg(new Tpp("t2", 1, false), "g2", true, 3, 3);
 
-		cmd.addAckMsg("t2", 2, false, "g2", true, 1);
-		cmd.addAckMsg("t2", 2, false, "g2", true, 2);
-		cmd.addAckMsg("t2", 2, false, "g2", true, 3);
-		cmd.addAckMsg("t2", 2, false, "g2", true, 4);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 1, 4);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 2, 3);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 3, 2);
+		cmd.addAckMsg(new Tpp("t2", 2, false), "g2", true, 4, 1);
 		// ack end
 
 		ByteBuf buf = Unpooled.buffer();
@@ -221,18 +291,34 @@ public class AckMessageCommandTest {
 		header.parse(buf);
 		decodedCmd.parse(buf, header);
 
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> ackMsgs = decodedCmd.getAckMsgs();
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> nackMsgs = decodedCmd.getNackMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> ackMsgs = decodedCmd.getAckMsgs();
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> nackMsgs = decodedCmd.getNackMsgs();
 
+		// acks
 		Assert.assertEquals(6, ackMsgs.size());
 
-		ackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).containsAll(Arrays.asList(1L, 2L));
-		ackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L));
-		ackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
-		ackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).containsAll(Arrays.asList(1L, 2L));
-		ackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L));
-		ackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).containsAll(Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, true), "g1", false)).values(), Arrays.asList(0, 0));
 
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 1, false), "g1", false)).values(), Arrays.asList(0, 0, 0));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t1", 2, true), "g1", false)).values(), Arrays.asList(0, 0, 0, 0));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).keySet(), Arrays.asList(1L, 2L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, true), "g2", true)).values(), Arrays.asList(1, 2));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).keySet(), Arrays.asList(1L, 2L, 3L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 1, false), "g2", true)).values(), Arrays.asList(1, 2, 3));
+
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).keySet(),
+		      Arrays.asList(1L, 2L, 3L, 4L));
+		assertEquals(ackMsgs.get(new Triple<>(new Tpp("t2", 2, false), "g2", true)).values(), Arrays.asList(4, 3, 2, 1));
+
+		// nacks
 		Assert.assertEquals(0, nackMsgs.size());
+
 	}
 }

@@ -9,9 +9,19 @@ public class PartialDecodedMessage {
 
 	private long m_bornTime;
 
+	private int m_remainingRetries = 0;
+
 	private ByteBuf m_durableProperties;
 
 	private ByteBuf m_volatileProperties;
+
+	public int getRemainingRetries() {
+		return m_remainingRetries;
+	}
+
+	public void setRemainingRetries(int remainingRetries) {
+		m_remainingRetries = remainingRetries;
+	}
 
 	public void setBody(ByteBuf body) {
 		m_body = body;
@@ -69,7 +79,7 @@ public class PartialDecodedMessage {
 		if (buf == null) {
 			return null;
 		}
-		
+
 		byte[] bytes = new byte[buf.readableBytes()];
 		buf.readBytes(bytes);
 		return bytes;

@@ -36,13 +36,12 @@ public class ProduceAndConsume extends ComponentTestCase {
 
 		totalSend.addAndGet(sendCount.get());
 		totalReceive.addAndGet(receiveCount.get());
-		System.out.println(String.format("Throughput:Send:%8d items (QPS: %.2f msg/s), Receive: %8d items (QPS: %.2f msg/s) " +
-							 "in %d " +
-							 "second. "
-		      + "Total Send: %8d, Total Receive: %8d, Delta: %8d.",
-				  sendCount.get(), sendCount.get()/(float)secondInTimeInterval,
-				  receiveCount.get(), receiveCount.get()/(float)secondInTimeInterval,
-		      secondInTimeInterval, totalSend.get(), totalReceive.get(), Math.abs(totalSend.get() - totalReceive.get())));
+		System.out.println(String.format(
+		      "Throughput:Send:%8d items (QPS: %.2f msg/s), Receive: %8d items (QPS: %.2f msg/s) " + "in %d "
+		            + "second. " + "Total Send: %8d, Total Receive: %8d, Delta: %8d.", sendCount.get(), sendCount.get()
+		            / (float) secondInTimeInterval, receiveCount.get(),
+		      receiveCount.get() / (float) secondInTimeInterval, secondInTimeInterval, totalSend.get(),
+		      totalReceive.get(), Math.abs(totalSend.get() - totalReceive.get())));
 
 		sendCount.set(0);
 		receiveCount.set(0);
@@ -77,7 +76,7 @@ public class ProduceAndConsume extends ComponentTestCase {
 	}
 
 	private void startProduceThread() {
-			runProducer();
+		runProducer();
 	}
 
 	private void runProducer() {
@@ -89,11 +88,6 @@ public class ProduceAndConsume extends ComponentTestCase {
 				for (;;) {
 					p.message(TOPIC, sendCount.get()).send();
 					sendCount.addAndGet(1);
-//					try {
-//						Thread.sleep(1);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
 				}
 			}
 		}).start();
@@ -110,6 +104,10 @@ public class ProduceAndConsume extends ComponentTestCase {
 					@Override
 					public void consume(List<ConsumerMessage<String>> msgs) {
 						receiveCount.addAndGet(msgs.size());
+						for (ConsumerMessage<?> msg : msgs) {
+							// TODO
+							msg.ack();
+						}
 					}
 				});
 

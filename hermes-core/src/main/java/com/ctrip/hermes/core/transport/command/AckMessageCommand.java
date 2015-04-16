@@ -4,10 +4,9 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.unidal.tuple.Triple;
 
@@ -19,9 +18,13 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  *
  */
 public class AckMessageCommand extends AbstractCommand {
-	private ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> m_ackMsgSeqs = new ConcurrentHashMap<>();
+	// key: tpp, groupId, isResend
+	// value:msgSeq==>remainingRetries
+	private ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> m_ackMsgSeqs = new ConcurrentHashMap<>();
 
-	private ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> m_nackMsgSeqs = new ConcurrentHashMap<>();
+	// key: tpp, groupId, isResend
+	// value:msgSeq==>remainingRetries
+	private ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> m_nackMsgSeqs = new ConcurrentHashMap<>();
 
 	public AckMessageCommand() {
 		super(CommandType.MESSAGE_ACK);
@@ -43,7 +46,7 @@ public class AckMessageCommand extends AbstractCommand {
 	}
 
 	private void writeMsgSeqMap(HermesPrimitiveCodec codec,
-	      ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> msgSeqMap) {
+	      ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> msgSeqMap) {
 		if (msgSeqMap == null) {
 			codec.writeInt(0);
 		} else {
@@ -57,22 +60,16 @@ public class AckMessageCommand extends AbstractCommand {
 				codec.writeBoolean(tppgr.getLast());
 			}
 			for (Triple<Tpp, String, Boolean> tppgr : msgSeqMap.keySet()) {
-				Set<Long> msgSeqs = msgSeqMap.get(tppgr);
-				if (msgSeqs == null) {
-					codec.writeInt(0);
-				} else {
-					codec.writeInt(msgSeqs.size());
-					for (Long msgSeq : msgSeqs) {
-						codec.writeLong(msgSeq);
-					}
-				}
+				Map<Long, Integer> msgSeqs = msgSeqMap.get(tppgr);
+				codec.writeMap(msgSeqs);
 			}
 		}
 
 	}
 
-	private ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> readMsgSeqMap(HermesPrimitiveCodec codec) {
-		ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> msgSeqMap = new ConcurrentHashMap<>();
+	@SuppressWarnings("unchecked")
+	private ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> readMsgSeqMap(HermesPrimitiveCodec codec) {
+		ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> msgSeqMap = new ConcurrentHashMap<>();
 
 		int mapSize = codec.readInt();
 		if (mapSize != 0) {
@@ -81,45 +78,38 @@ public class AckMessageCommand extends AbstractCommand {
 				Tpp tpp = new Tpp(codec.readString(), codec.readInt(), codec.readInt() == 0 ? true : false);
 				String groupId = codec.readString();
 				boolean resend = codec.readBoolean();
-				Triple<Tpp, String, Boolean> key = new Triple<>(tpp, groupId, resend);
-				tppgrs.add(key);
-				msgSeqMap.put(key, new ConcurrentSkipListSet<Long>());
+				tppgrs.add(new Triple<>(tpp, groupId, resend));
 			}
 			for (int i = 0; i < mapSize; i++) {
-				int setSize = codec.readInt();
 				Triple<Tpp, String, Boolean> tppgr = tppgrs.get(i);
-				for (int j = 0; j < setSize; j++) {
-					msgSeqMap.get(tppgr).add(codec.readLong());
-				}
+				msgSeqMap.put(tppgr, codec.readMap());
 			}
 		}
 
 		return msgSeqMap;
 	}
 
-	public void addAckMsg(String topic, int partition, boolean priority, String groupId, boolean resend, long msgSeq) {
-		Tpp tpp = new Tpp(topic, partition, priority);
+	public void addAckMsg(Tpp tpp, String groupId, boolean resend, long msgSeq, int remainRetries) {
 		Triple<Tpp, String, Boolean> key = new Triple<>(tpp, groupId, resend);
 		if (!m_ackMsgSeqs.containsKey(key)) {
-			m_ackMsgSeqs.putIfAbsent(key, new ConcurrentSkipListSet<Long>());
+			m_ackMsgSeqs.putIfAbsent(key, new ConcurrentHashMap<Long, Integer>());
 		}
-		m_ackMsgSeqs.get(key).add(msgSeq);
+		m_ackMsgSeqs.get(key).put(msgSeq, remainRetries);
 	}
 
-	public void addNackMsg(String topic, int partition, boolean priority, String groupId, boolean resend, long msgSeq) {
-		Tpp tpp = new Tpp(topic, partition, priority);
+	public void addNackMsg(Tpp tpp, String groupId, boolean resend, long msgSeq, int remainRetries) {
 		Triple<Tpp, String, Boolean> key = new Triple<>(tpp, groupId, resend);
 		if (!m_nackMsgSeqs.containsKey(key)) {
-			m_nackMsgSeqs.putIfAbsent(key, new ConcurrentSkipListSet<Long>());
+			m_nackMsgSeqs.putIfAbsent(key, new ConcurrentHashMap<Long, Integer>());
 		}
-		m_nackMsgSeqs.get(key).add(msgSeq);
+		m_nackMsgSeqs.get(key).put(msgSeq, remainRetries);
 	}
 
-	public ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> getAckMsgs() {
+	public ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> getAckMsgs() {
 		return m_ackMsgSeqs;
 	}
 
-	public ConcurrentMap<Triple<Tpp, String, Boolean>, Set<Long>> getNackMsgs() {
+	public ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> getNackMsgs() {
 		return m_nackMsgSeqs;
 	}
 

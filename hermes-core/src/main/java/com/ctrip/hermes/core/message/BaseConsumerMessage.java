@@ -22,6 +22,16 @@ public class BaseConsumerMessage<T> {
 
 	protected AtomicReference<MessageStatus> m_status = new AtomicReference<>(MessageStatus.NOT_SET);
 
+	protected int m_remainingRetries = 0;
+
+	public int getRemainingRetries() {
+		return m_remainingRetries;
+	}
+
+	public void setRemainingRetries(int remainingRetries) {
+		m_remainingRetries = remainingRetries;
+	}
+
 	public long getBornTime() {
 		return m_bornTime;
 	}
