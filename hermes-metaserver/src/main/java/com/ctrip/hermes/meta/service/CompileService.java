@@ -49,7 +49,8 @@ public class CompileService {
 			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
 				File file = path.toFile();
 				Path pathRelative = destDir.relativize(path);
-				JarEntry entry = new JarEntry(pathRelative.toString());
+				String name = pathRelative.toString().replace("\\", "/");
+				JarEntry entry = new JarEntry(name);
 				entry.setTime(file.lastModified());
 				target.putNextEntry(entry);
 				byte[] readAllBytes = Files.readAllBytes(file.toPath());
@@ -62,13 +63,15 @@ public class CompileService {
 			public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
 				File file = path.toFile();
 				Path pathRelative = destDir.relativize(path);
-				if (pathRelative.toString().length() == 0) {
-					return super.preVisitDirectory(path, attrs);
+				String name = pathRelative.toString().replace("\\", "/");
+				if (!name.isEmpty()) {
+					if (!name.endsWith("/"))
+						name += "/";
+					JarEntry entry = new JarEntry(name);
+					entry.setTime(file.lastModified());
+					target.putNextEntry(entry);
+					target.closeEntry();
 				}
-				JarEntry entry = new JarEntry(pathRelative.toString());
-				entry.setTime(file.lastModified());
-				target.putNextEntry(entry);
-				target.closeEntry();
 				return super.preVisitDirectory(path, attrs);
 			}
 

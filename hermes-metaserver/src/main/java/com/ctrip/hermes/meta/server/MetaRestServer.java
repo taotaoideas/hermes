@@ -23,6 +23,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.resource.TopicResource;
 
 @Named
@@ -115,5 +116,12 @@ public class MetaRestServer implements LogEnabled {
 		if (m_server != null) {
 			m_server.shutdownNow();
 		}
+	}
+
+	public static void main(String[] args) throws InterruptedException {
+		MetaRestServer server = PlexusComponentLocator.lookup(MetaRestServer.class);
+		server.start();
+
+		Thread.currentThread().join();
 	}
 }

@@ -69,7 +69,7 @@ public class SchemaServerTest extends ComponentTestCase {
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-json-sample.json");
-		form.bodyPart(new FileDataBodyPart("schema-content", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
 		form.field("schema", JSON.toJSONString(schemaView));
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
@@ -112,7 +112,7 @@ public class SchemaServerTest extends ComponentTestCase {
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-json-sample.json");
-		form.bodyPart(new FileDataBodyPart("schema-content", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
 		request = webTarget.path("schemas/" + schemaId + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
@@ -132,7 +132,7 @@ public class SchemaServerTest extends ComponentTestCase {
 
 		FormDataMultiPart form = new FormDataMultiPart();
 		File file = new File("src/test/resources/schema-avro-sample.avsc");
-		form.bodyPart(new FileDataBodyPart("schema-content", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
 		request = webTarget.path("schemas/" + schemaId + "/upload").request();
 		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
 		System.out.println(response.getStatus());
