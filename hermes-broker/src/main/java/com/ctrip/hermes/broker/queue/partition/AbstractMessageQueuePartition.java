@@ -3,6 +3,7 @@ package com.ctrip.hermes.broker.queue.partition;
 import java.util.List;
 import java.util.Map;
 
+import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -19,9 +20,12 @@ public abstract class AbstractMessageQueuePartition implements MessageQueueParti
 
 	protected MessageQueuePartitionDumper m_dumper;
 
-	public AbstractMessageQueuePartition(String topic, int partition) {
+	protected MessageQueueStorage m_storage;
+
+	public AbstractMessageQueuePartition(String topic, int partition, MessageQueueStorage storage) {
 		m_topic = topic;
 		m_partition = partition;
+		m_storage = storage;
 		m_dumper = getMessageQueuePartitionDumper();
 	}
 

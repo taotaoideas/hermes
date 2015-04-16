@@ -13,14 +13,11 @@ import com.ctrip.hermes.core.meta.MetaService;
  */
 public class DefaultMessageQueuePartition extends AbstractMessageQueuePartition {
 
-	private MessageQueueStorage m_storage;
-
 	private MetaService m_metaService;
 
 	public DefaultMessageQueuePartition(String topic, int partition, MessageQueueStorage storage, MetaService metaService) {
-		super(topic, partition);
+		super(topic, partition, storage);
 		m_metaService = metaService;
-		m_storage = storage;
 	}
 
 	@Override
