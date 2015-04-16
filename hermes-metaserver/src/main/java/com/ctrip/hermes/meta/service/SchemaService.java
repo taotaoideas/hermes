@@ -8,9 +8,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -207,7 +210,7 @@ public class SchemaService {
 			int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
 			metaSchema.setAvroid(avroid);
 
-//			compileAvro(metaSchema, avroSchema);
+			compileAvro(metaSchema, avroSchema);
 		}
 		if (jarInputStream != null) { // will be replaced by automatic compile
 			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
@@ -217,26 +220,57 @@ public class SchemaService {
 		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
 	}
 
-	public void compileAvro(Schema metaSchema, org.apache.avro.Schema avroSchema) throws IOException {
-//		File dest = Files.createTempDirectory("avroschema",
-//		      PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx"))).toFile();
-		File dest = Files.createTempDirectory("avroschema").toFile();
+	public void compileAvro(Schema metaSchema, org.apache.avro.Schema avroSchema) throws IOException, DalException {
+		final Path destDir = Files.createTempDirectory("avroschema");
 		SpecificCompiler compiler = new SpecificCompiler(avroSchema);
-		compiler.compileToDestination(null, dest);
+		compiler.compileToDestination(null, destDir.toFile());
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		Path jarFile = Files.createTempFile(dest.toPath(), metaSchema.getName(), ".jar");
-		JarOutputStream target = new JarOutputStream(new FileOutputStream(jarFile.toFile()), manifest);
-		for (File file : dest.listFiles()) {
-			JarEntry entry = new JarEntry(file.getPath().replace("\\", "/"));
-			entry.setTime(file.lastModified());
-			target.putNextEntry(entry);
-			byte[] readAllBytes = Files.readAllBytes(file.toPath());
-			target.write(readAllBytes);
-			target.closeEntry();
-		}
+		Path jarFile = Files.createTempFile(metaSchema.getName(), ".jar");
+		final JarOutputStream target = new JarOutputStream(new FileOutputStream(jarFile.toFile()), manifest);
+		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+				File file = path.toFile();
+				Path pathRelative = destDir.relativize(path);
+				JarEntry entry = new JarEntry(pathRelative.toString());
+				entry.setTime(file.lastModified());
+				target.putNextEntry(entry);
+				byte[] readAllBytes = Files.readAllBytes(file.toPath());
+				target.write(readAllBytes);
+				target.closeEntry();
+				return FileVisitResult.CONTINUE;
+			}
+
+		});
 		target.close();
-		System.out.println(target);
+
+		byte[] jarContent = Files.readAllBytes(jarFile);
+		metaSchema.setJarContent(jarContent);
+		FormDataContentDisposition disposition = FormDataContentDisposition.name(metaSchema.getName())
+		      .creationDate(new Date(System.currentTimeMillis()))
+		      .fileName(metaSchema.getName() + "_" + metaSchema.getVersion() + ".jar").size(jarFile.toFile().length())
+		      .build();
+		metaSchema.setJarProperties(disposition.toString());
+		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		Files.delete(jarFile);
+		
+		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+				Files.delete(path);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				Files.delete(dir);
+	         return super.postVisitDirectory(dir, exc);
+         }
+
+		});
 	}
 
 	/**
