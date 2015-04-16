@@ -80,7 +80,6 @@
 			<role-hint>meta</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>meta</logical-table-name>
 				<physical-table-name>meta</physical-table-name>
 				<data-source-name>meta</data-source-name>
 			</configuration>
@@ -90,7 +89,6 @@
 			<role-hint>schema</role-hint>
 			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
 			<configuration>
-				<logical-table-name>schema</logical-table-name>
 				<physical-table-name>schema</physical-table-name>
 				<data-source-name>meta</data-source-name>
 			</configuration>
