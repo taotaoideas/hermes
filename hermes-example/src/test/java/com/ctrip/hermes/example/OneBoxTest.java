@@ -11,7 +11,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.BeforeClass;
@@ -74,9 +73,10 @@ public class OneBoxTest extends ComponentTestCase {
 	public void testProducePerformance() throws Exception {
 		startBroker();
 
-		int times = 20000;
-		String topic = "order_new";
-		final CountDownLatch latch = new CountDownLatch(times);
+		final int times = 20000;
+		int threadCount = 2;
+		final String topic = "order_new";
+		final CountDownLatch latch = new CountDownLatch(times * threadCount);
 		Thread.sleep(2000);
 		Producer p = Producer.getInstance();
 
@@ -85,6 +85,27 @@ public class OneBoxTest extends ComponentTestCase {
 		Thread.sleep(1000);
 
 		long start = System.currentTimeMillis();
+
+		for (int i = 0; i < threadCount; i++) {
+			Thread t = new Thread() {
+				public void run() {
+					producePerformance(times, topic, latch);
+				}
+			};
+			t.start();
+		}
+
+//		latch.await(30, TimeUnit.SECONDS);
+		latch.await();
+
+		long progressTime = System.currentTimeMillis() - start;
+		System.out.println(String.format("%d Threads produce %d msgs spends %d ms, QPS: %.2f msg/s", threadCount, times
+		      * threadCount, progressTime, (float) (times * threadCount) / (progressTime / 1000f)));
+
+		System.in.read();
+	}
+
+	private void producePerformance(int times, String topic, final CountDownLatch latch) {
 		Random random = new Random();
 
 		for (int i = 0; i < times; i++) {
@@ -109,14 +130,6 @@ public class OneBoxTest extends ComponentTestCase {
 				}
 			}, MoreExecutors.sameThreadExecutor());
 		}
-
-		latch.await(30, TimeUnit.SECONDS);
-
-		long progressTime = System.currentTimeMillis() - start;
-		System.out.println(String.format("Produce %d msgs spends %d ms, QPS: %.2f msg/s", times, progressTime,
-		      (float) times / (progressTime / 1000f)));
-
-		System.in.read();
 	}
 
 	@Test
@@ -129,9 +142,9 @@ public class OneBoxTest extends ComponentTestCase {
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
 		subscribers.put("group1", Arrays.asList("1-a"));
-//		subscribers.put("group1", Arrays.asList("1-a", "1-b"));
-//		subscribers.put("group2", Arrays.asList("2-a", "2-b"));
-//		subscribers.put("group3", Arrays.asList("3-a", "3-b", "3-c"));
+		// subscribers.put("group1", Arrays.asList("1-a", "1-b"));
+		// subscribers.put("group2", Arrays.asList("2-a", "2-b"));
+		// subscribers.put("group3", Arrays.asList("3-a", "3-b", "3-c"));
 
 		for (Map.Entry<String, List<String>> entry : subscribers.entrySet()) {
 			String groupId = entry.getKey();
@@ -221,7 +234,6 @@ public class OneBoxTest extends ComponentTestCase {
 				String body = msg.getBody();
 				System.out.println(m_id + "<<< " + body);
 
-				
 				// TODO
 				if (body.startsWith("NACK-")) {
 					int totalNackCnt = Integer.parseInt(body.substring(5, body.indexOf("-", 5)));
@@ -239,7 +251,7 @@ public class OneBoxTest extends ComponentTestCase {
 							msg.ack();
 						}
 					}
-				}else{
+				} else {
 					msg.ack();
 				}
 			}
