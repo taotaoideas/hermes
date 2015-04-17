@@ -34,7 +34,7 @@ public class TopicView {
 
 	private SchemaView schemaView;
 
-	private CodecView codecView;
+	private String codecType;
 
 	public TopicView() {
 
@@ -51,8 +51,7 @@ public class TopicView {
 		this.schemaId = topic.getSchemaId();
 		this.partitions = topic.getPartitions();
 		this.properties = topic.getProperties();
-
-		this.codecView = new CodecView(topic.getCodec());
+		this.codecType = topic.getCodecType();
 	}
 
 	public Date getCreateTime() {
@@ -127,14 +126,6 @@ public class TopicView {
 		this.id = id;
 	}
 
-	public CodecView getCodec() {
-		return codecView;
-	}
-
-	public void setCodec(CodecView codec) {
-		this.codecView = codec;
-	}
-
 	public Topic toMetaTopic() {
 		Topic topic = new Topic();
 		topic.setId(this.id);
@@ -150,7 +141,7 @@ public class TopicView {
 		topic.setCreateTime(this.createTime);
 		topic.setLastModifiedTime(this.lastModifiedTime);
 		topic.setSchemaId(this.schemaId);
-		topic.setCodec(this.codecView.toMetaCodec());
+		topic.setCodecType(this.codecType);
 		return topic;
 	}
 

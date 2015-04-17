@@ -6,6 +6,7 @@
     <member name="producer-id" field="producer_id" value-type="int" length="10" nullable="false" />
     <member name="ref-key" field="ref_key" value-type="String" length="100" />
     <member name="attributes" field="attributes" value-type="String" length="4000" />
+    <member name="codec-type" field="codec_type" value-type="String" length="20" nullable="false" />
     <member name="creation-date" field="creation_date" value-type="Date" nullable="false" insert-expr="NOW()" />
     <member name="payload" field="payload" value-type="byte[]" length="16777215" nullable="false" />
     <member name="dead-date" field="dead_date" value-type="Date" nullable="false" />
@@ -49,6 +50,7 @@
     <member name="producer-id" field="producer_id" value-type="int" length="10" nullable="false" />
     <member name="ref-key" field="ref_key" value-type="String" length="100" />
     <member name="attributes" field="attributes" value-type="String" length="4000" />
+    <member name="codec-type" field="codec_type" value-type="String" length="20" nullable="false" />
     <member name="creation-date" field="creation_date" value-type="Date" nullable="false" insert-expr="NOW()" />
     <member name="payload" field="payload" value-type="byte[]" length="16777215" nullable="false" />
     <var name="key-id" value-type="long" key-member="id" />
@@ -172,6 +174,7 @@
     <member name="payload" field="payload" value-type="byte[]" length="16777215" nullable="false" />
     <member name="schedule-date" field="schedule_date" value-type="Date" nullable="false" />
     <member name="remaining-retries" field="remaining_retries" value-type="int" length="3" nullable="false" />
+    <member name="codec-type" field="codec_type" value-type="String" length="20" nullable="false" />
     <var name="key-id" value-type="long" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
     <index name="key" members="ref_key ASC" />

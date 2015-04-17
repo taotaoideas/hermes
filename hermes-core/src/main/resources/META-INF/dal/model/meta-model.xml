@@ -5,6 +5,11 @@
 		<entity-ref name="topic" type="map" names="topics" />
 		<entity-ref name="endpoint" type="map" names="endpoints" />
 		<entity-ref name="storage" type="map" names="storages" />
+		<entity-ref name="codec" type="map" names="codecs" />
+	</entity>
+
+	<entity name="codec">
+		<attribute name="type" value-type="String" key='true' />
 	</entity>
 
 	<entity name="endpoint">
@@ -33,21 +38,28 @@
 		<attribute name="schema-id" value-type="long" />
 
 		<snippet lang="java">
-			private com.ctrip.hermes.core.message.RetryPolicy m_retryPolicy;;
-			private java.util.concurrent.atomic.AtomicBoolean m_retryPolicyParsed = new java.util.concurrent.atomic.AtomicBoolean(false);
-			
-			public com.ctrip.hermes.core.message.RetryPolicy getRetryPolicy() {
-				if(m_retryPolicyParsed.compareAndSet(false, true)) {
-					// TODO retry policy should be per consumer?
-					m_retryPolicy = new com.ctrip.hermes.core.message.RetryPolicy();
-				}
-				return m_retryPolicy;
+			private
+			com.ctrip.hermes.core.message.RetryPolicy m_retryPolicy;;
+			private
+			java.util.concurrent.atomic.AtomicBoolean m_retryPolicyParsed = new
+			java.util.concurrent.atomic.AtomicBoolean(false);
+
+			public
+			com.ctrip.hermes.core.message.RetryPolicy getRetryPolicy() {
+			if(m_retryPolicyParsed.compareAndSet(false, true)) {
+			// TODO retry
+			// policy should be per consumer?
+			m_retryPolicy = new
+			com.ctrip.hermes.core.message.RetryPolicy();
 			}
-			
-			public void setRetryPolicy(com.ctrip.hermes.core.message.RetryPolicy retryPolicy){
-				m_retryPolicy = retryPolicy;
+			return m_retryPolicy;
 			}
-		</snippet>		
+
+			public void setRetryPolicy(com.ctrip.hermes.core.message.RetryPolicy
+			retryPolicy){
+			m_retryPolicy = retryPolicy;
+			}
+		</snippet>
 	</entity>
 	<entity name="codec">
 		<attribute name="type" value-type="String" />
@@ -55,6 +67,7 @@
 		<snippet lang='java'><![CDATA[
 			public final static String JSON = "json";
 			public final static String AVRO = "avro";
+			public final static String CMESSAGING = "cmessaging";
 			]]>
 		</snippet>
 	</entity>

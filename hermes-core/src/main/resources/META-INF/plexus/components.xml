@@ -84,7 +84,7 @@
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.message.codec.MessageCodec</role>
-			<implementation>com.ctrip.hermes.core.message.codec.DefaultMessageCodec</implementation>
+			<implementation>com.ctrip.hermes.core.message.codec.VersioningMessageCodec</implementation>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.core.codec.Codec</role>

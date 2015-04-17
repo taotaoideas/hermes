@@ -109,6 +109,9 @@
 			<implementation>com.ctrip.hermes.broker.queue.storage.mysql.MySQLMessageQueueStorage</implementation>
 			<requirements>
 				<requirement>
+					<role>com.ctrip.hermes.core.message.codec.MessageCodec</role>
+				</requirement>
+				<requirement>
 					<role>com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao</role>
 				</requirement>
 				<requirement>

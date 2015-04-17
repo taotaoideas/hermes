@@ -20,4 +20,5 @@ public class ServerMetaService extends AbstractMetaService {
 	public void initialize() throws InitializationException {
 		refreshMeta(m_manager.getMeta());
 	}
+
 }

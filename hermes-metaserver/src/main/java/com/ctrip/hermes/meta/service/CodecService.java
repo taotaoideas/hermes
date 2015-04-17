@@ -13,7 +13,7 @@ public class CodecService {
 	private MetaService m_metaService;
 
 	public Codec getCodec(String topicName) {
-		return m_metaService.getCodec(topicName);
+		return m_metaService.getCodecByTopic(topicName);
 	}
 
 }

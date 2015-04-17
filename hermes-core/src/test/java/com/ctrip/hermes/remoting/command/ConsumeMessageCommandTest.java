@@ -21,7 +21,6 @@ import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.PropertiesHolder;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
-import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.transport.TransferCallback;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.command.Header;
@@ -158,7 +157,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			List<Pair<Long, Integer>> msgSeqs = batch.getMsgSeqs();
 			ByteBuf batchData = batch.getData();
 
-			MessageCodec codec = MessageCodecFactory.getCodec(batch.getTopic());
+			MessageCodec codec = lookup(MessageCodec.class);
 
 			for (int j = 0; j < msgSeqs.size(); j++) {
 				BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
@@ -208,7 +207,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 		final ByteBuf buf = Unpooled.buffer();
 
-		MessageCodec codec = MessageCodecFactory.getCodec(topic);
+		MessageCodec codec = lookup(MessageCodec.class);
 
 		for (ProducerMessage<String> msg : msgs) {
 			codec.encode(msg, buf);

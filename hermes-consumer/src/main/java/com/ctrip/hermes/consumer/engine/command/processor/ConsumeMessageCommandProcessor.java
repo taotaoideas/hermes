@@ -16,7 +16,6 @@ import com.ctrip.hermes.core.message.BrokerConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
-import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.transport.command.Command;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
@@ -29,6 +28,9 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
  *
  */
 public class ConsumeMessageCommandProcessor implements CommandProcessor {
+
+	@Inject
+	private MessageCodec m_messageCodec;
 
 	@Inject
 	private ConsumerNotifier m_consumerNotifier;
@@ -75,13 +77,11 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 			List<Pair<Long, Integer>> msgSeqs = batch.getMsgSeqs();
 			ByteBuf batchData = batch.getData();
 
-			String topic = batch.getTopic();
 			int partition = batch.getPartition();
 			boolean priority = batch.isPriority();
-			MessageCodec codec = MessageCodecFactory.getCodec(topic);
 
 			for (int j = 0; j < msgSeqs.size(); j++) {
-				BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
+				BaseConsumerMessage baseMsg = m_messageCodec.decode(batchData, bodyClazz);
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
 				brokerMsg.setPartition(partition);
 				brokerMsg.setPriority(priority);

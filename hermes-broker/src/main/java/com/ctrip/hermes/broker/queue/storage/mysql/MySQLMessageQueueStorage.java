@@ -34,7 +34,6 @@ import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.RetryPolicy;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
-import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.transport.TransferCallback;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
@@ -48,6 +47,9 @@ import com.google.common.base.Charsets;
  */
 @Named(type = MessageQueueStorage.class, value = Storage.MYSQL)
 public class MySQLMessageQueueStorage implements MessageQueueStorage {
+
+	@Inject
+	private MessageCodec m_messageCodec;
 
 	@Inject
 	private MessagePriorityDao m_msgDao;
@@ -85,6 +87,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 				msg.setProducerIp("1.1.1.1");
 				msg.setRefKey(pdmsg.getKey());
 				msg.setTopic(tpp.getTopic());
+				msg.setCodecType(pdmsg.getBodyCodecType());
 
 				msgs.add(msg);
 			}
@@ -149,15 +152,16 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 					@Override
 					public void transfer(ByteBuf out) {
 						for (MessagePriority dataObj : dataObjs) {
-							MessageCodec codec = MessageCodecFactory.getCodec(topic);
 							PartialDecodedMessage partialMsg = new PartialDecodedMessage();
 							partialMsg.setRemainingRetries(0);
 							partialMsg.setDurableProperties(stringToByteBuf(dataObj.getAttributes()));
 							partialMsg.setBody(Unpooled.wrappedBuffer(dataObj.getPayload()));
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());
+							partialMsg.setBodyCodecType(dataObj.getCodecType());
+							partialMsg.setTopic(topic);
 
-							codec.encode(partialMsg, out);
+							m_messageCodec.encode(partialMsg, out);
 						}
 					}
 
@@ -360,15 +364,16 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 					@Override
 					public void transfer(ByteBuf out) {
 						for (ResendGroupId dataObj : dataObjs) {
-							MessageCodec codec = MessageCodecFactory.getCodec(topic);
 							PartialDecodedMessage partialMsg = new PartialDecodedMessage();
 							partialMsg.setRemainingRetries(dataObj.getRemainingRetries());
 							partialMsg.setDurableProperties(stringToByteBuf(dataObj.getAttributes()));
 							partialMsg.setBody(Unpooled.wrappedBuffer(dataObj.getPayload()));
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());
+							partialMsg.setBodyCodecType(dataObj.getCodecType());
+							partialMsg.setTopic(topic);
 
-							codec.encode(partialMsg, out);
+							m_messageCodec.encode(partialMsg, out);
 						}
 					}
 

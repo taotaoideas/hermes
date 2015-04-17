@@ -3,6 +3,11 @@ package com.ctrip.hermes.core.message;
 import io.netty.buffer.ByteBuf;
 
 public class PartialDecodedMessage {
+
+	private String m_topic;
+
+	private String m_bodyCodecType;
+
 	private ByteBuf m_body;
 
 	private String m_key;
@@ -14,6 +19,22 @@ public class PartialDecodedMessage {
 	private ByteBuf m_durableProperties;
 
 	private ByteBuf m_volatileProperties;
+
+	public String getTopic() {
+		return m_topic;
+	}
+
+	public void setTopic(String topic) {
+		m_topic = topic;
+	}
+
+	public String getBodyCodecType() {
+		return m_bodyCodecType;
+	}
+
+	public void setBodyCodecType(String bodyCodecType) {
+		m_bodyCodecType = bodyCodecType;
+	}
 
 	public int getRemainingRetries() {
 		return m_remainingRetries;

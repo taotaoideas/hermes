@@ -17,6 +17,7 @@ import com.ctrip.hermes.consumer.engine.notifier.DefaultConsumerNotifier;
 import com.ctrip.hermes.consumer.engine.pipeline.ConsumerPipeline;
 import com.ctrip.hermes.consumer.engine.pipeline.ConsumerValveRegistry;
 import com.ctrip.hermes.consumer.engine.pipeline.DefaultConsumerPipelineSink;
+import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 
@@ -31,7 +32,8 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		// bootstrap
 		all.add(C(CommandProcessor.class, CommandType.MESSAGE_CONSUME.toString(), ConsumeMessageCommandProcessor.class) //
-		      .req(ConsumerNotifier.class));
+		      .req(ConsumerNotifier.class)//
+		      .req(MessageCodec.class));
 
 		all.add(A(DefaultConsumerBootstrapManager.class));
 		all.add(A(DefaultConsumerBootstrapRegistry.class));

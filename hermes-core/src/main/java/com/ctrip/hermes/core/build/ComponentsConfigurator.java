@@ -10,7 +10,7 @@ import com.ctrip.hermes.HermesCoreModule;
 import com.ctrip.hermes.core.codec.CMessagingCodec;
 import com.ctrip.hermes.core.codec.JsonCodec;
 import com.ctrip.hermes.core.env.DefaultClientEnvironment;
-import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
+import com.ctrip.hermes.core.message.codec.VersioningMessageCodec;
 import com.ctrip.hermes.core.meta.internal.ClientMetaManager;
 import com.ctrip.hermes.core.meta.internal.DefaultMetaService;
 import com.ctrip.hermes.core.meta.internal.LocalMetaLoader;
@@ -36,7 +36,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(LocalMetaLoader.class));
 		all.add(A(RemoteMetaLoader.class));
 		all.add(A(ClientMetaManager.class));
-		all.add(A(DefaultMetaService.class)); 
+		all.add(A(DefaultMetaService.class));
 
 		// endpoint manager
 		all.add(A(DefaultEndpointManager.class));
@@ -49,13 +49,13 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(A(DefaultCommandProcessorRegistry.class));
 
 		// codec
-		all.add(A(DefaultMessageCodec.class));
+		all.add(A(VersioningMessageCodec.class));
 		all.add(A(JsonCodec.class));
 		all.add(A(CMessagingCodec.class));
-		
+
 		// env
 		all.add(A(DefaultClientEnvironment.class));
-		
+
 		return all;
 	}
 

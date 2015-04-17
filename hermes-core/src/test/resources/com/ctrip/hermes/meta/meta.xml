@@ -10,12 +10,14 @@
 		<property name='another' value='value' />
 	</topic>
 	<topic name='topic.6' />
-	<topic name='kafka.SimpleTopic' partition-count='1'>
-		<codec type="json"/>
+	<topic name='kafka.SimpleTopic' partition-count='1' codec-type="json">
 		<partition id='0' read-datasource='kafka-ds-read' write-datasource='kafka-ds-write' endpoint='kafka-endpoint1' />
 	</topic>
 	<topic name='kafka.SimpleTopic1' />
 	<topic name='kafka.SimpleTopic2' />
+	
+	<codec type="json"/>
+	<codec type="avro"/>
 
 	<endpoint id='br0' type="broker" host="1.1.1.1" port="4376" />
 	<endpoint id='br1' type="broker" host="1.1.1.1" port="4376" />

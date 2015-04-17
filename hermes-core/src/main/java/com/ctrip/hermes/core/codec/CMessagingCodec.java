@@ -6,7 +6,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.google.common.base.Charsets;
 
-@Named(type = Codec.class, value = "cmessaging")
+@Named(type = Codec.class, value = com.ctrip.hermes.meta.entity.Codec.CMESSAGING)
 public class CMessagingCodec implements Codec {
 
 	@Override
@@ -32,6 +32,11 @@ public class CMessagingCodec implements Codec {
 
 	@Override
 	public void configure(Map<String, ?> configs) {
+	}
+
+	@Override
+	public String getType() {
+		return com.ctrip.hermes.meta.entity.Codec.CMESSAGING;
 	}
 
 }

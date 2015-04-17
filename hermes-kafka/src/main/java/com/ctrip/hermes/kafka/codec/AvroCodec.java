@@ -42,4 +42,9 @@ public class AvroCodec implements Codec {
 		prop.setProperty("specific.avro.reader", Boolean.TRUE.toString());
 		avroDeserializer = new KafkaAvroDecoder(new VerifiableProperties(prop));
 	}
+
+	@Override
+	public String getType() {
+		return com.ctrip.hermes.meta.entity.Codec.AVRO;
+	}
 }
