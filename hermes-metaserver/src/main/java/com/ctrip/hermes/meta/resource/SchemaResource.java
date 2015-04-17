@@ -2,7 +2,9 @@ package com.ctrip.hermes.meta.resource;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -219,5 +221,21 @@ public class SchemaResource {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return Response.status(Status.CREATED).entity(schemaView).build();
+	}
+
+	@POST
+	@Path("{name}/compatibility")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response compatibility(@PathParam("name") String name, @FormDataParam("file") InputStream fileInputStream,
+	      @FormDataParam("file") FormDataContentDisposition fileHeader) {
+		boolean result = false;
+		try {
+			result = schemaService.verifyCompatible(name, fileInputStream);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		Map<String, Object> entity = new HashMap<>();
+		entity.put("is_compatible", result);
+		return Response.status(Status.OK).entity(entity).build();
 	}
 }

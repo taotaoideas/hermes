@@ -90,8 +90,10 @@ public class SchemaService {
 	 * @param schemaView
 	 * @return
 	 * @throws DalException
+	 * @throws RestClientException 
+	 * @throws IOException 
 	 */
-	public SchemaView createSchema(SchemaView schemaView) throws DalException {
+	public SchemaView createSchema(SchemaView schemaView) throws DalException, IOException, RestClientException {
 		return createSchema(schemaView, -1);
 	}
 
@@ -101,8 +103,10 @@ public class SchemaService {
 	 * @param topicId
 	 * @return
 	 * @throws DalException
+	 * @throws RestClientException 
+	 * @throws IOException 
 	 */
-	public SchemaView createSchema(SchemaView schemaView, long topicId) throws DalException {
+	public SchemaView createSchema(SchemaView schemaView, long topicId) throws DalException, IOException, RestClientException {
 		Schema schema = schemaView.toMetaSchema();
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
 
@@ -117,6 +121,11 @@ public class SchemaService {
 			topic.setSchemaId(schema.getId());
 			m_topicService.updateTopic(topic);
 		}
+		
+		if("avro".equals(schema.getType())){
+			this.avroSchemaRegistry.updateCompatibility(schema.getName(), schema.getCompatibility());
+		}
+		
 		return new SchemaView(schema);
 	}
 
@@ -278,6 +287,22 @@ public class SchemaService {
 		}
 		m_schemaDao.insert(updatedSchema);
 		return new SchemaView(updatedSchema);
+	}
+
+	/**
+	 * 
+	 * @param name
+	 * @param fileInputStream
+	 * @return
+	 * @throws IOException
+	 * @throws RestClientException
+	 */
+	public boolean verifyCompatible(String name, InputStream fileInputStream) throws IOException, RestClientException {
+		byte[] schemaContent = ByteStreams.toByteArray(fileInputStream);
+		Parser parser = new Parser();
+		org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
+		boolean result = avroSchemaRegistry.testCompatibility(name, avroSchema);
+		return result;
 	}
 
 }
