@@ -61,10 +61,10 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 	}
 
 	@Override
-	public Codec getCodec(String topicName) {
+	public Codec getCodecByTopic(String topicName) {
 		Topic topic = m_meta.findTopic(topicName);
 		if (topic != null)
-			return topic.getCodec();
+			return m_meta.findCodec(topic.getCodecType());
 		else
 			return null;
 	}
@@ -158,6 +158,11 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 	@Override
 	public int getAckTimeoutSeconds(String topic) {
 		// TODO
-		return 5;
+		return 2;
 	}
+	
+	@Override
+   public Codec getCodecByType(String codecType) {
+	   return m_meta.findCodec(codecType);
+   }
 }

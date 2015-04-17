@@ -24,4 +24,9 @@ public class JsonCodec implements Codec {
 
 	}
 
+	@Override
+	public String getType() {
+		return com.ctrip.hermes.meta.entity.Codec.JSON;
+	}
+
 }

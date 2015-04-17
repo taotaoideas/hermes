@@ -19,7 +19,7 @@ import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.PropertiesHolder;
-import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
+import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.core.transport.command.Header;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand;
@@ -46,7 +46,7 @@ public class SendMessageCommandTest extends ComponentTestCase {
 		ProducerMessage<String> msg = createProducerMessage("topic1", "body", "key", "partition", 100, true,
 		      durableProps, volatileProps);
 
-		DefaultMessageCodec codec = new DefaultMessageCodec("topic1");
+		MessageCodec codec = lookup(MessageCodec.class);
 
 		ByteBuf buf = Unpooled.buffer();
 		codec.encode(msg, buf);

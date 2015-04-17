@@ -4,6 +4,7 @@
     <attribute name="dev-mode" value-type="boolean" />
     <attribute name="version" value-type="int" />
     <entity-ref name="topic" type="list" names="topics" />
+    <entity-ref name="codec" type="list" names="codecs" />
     <entity-ref name="endpoint" type="list" names="endpoints" />
     <entity-ref name="storage" type="list" names="storages" />
   </entity>
@@ -14,12 +15,12 @@
     <attribute name="storage-type" value-type="String" />
     <attribute name="description" value-type="String" />
     <attribute name="status" value-type="String" />
-    <attribute name="create-time" value-type="Date" format="yyyy-MM-dd" />
-    <attribute name="last-modified-time" value-type="Date" format="yyyy-MM-dd" />
+    <attribute name="create-time" value-type="Date" format="yyyy-MM-dd HH:mm:ss" />
+    <attribute name="last-modified-time" value-type="Date" format="yyyy-MM-dd HH:mm:ss" />
     <attribute name="schema-id" value-type="int" />
+    <attribute name="codec-type" value-type="String" />
     <entity-ref name="partition" type="list" names="partitions" />
     <entity-ref name="property" type="list" names="properties" />
-    <entity-ref name="codec" />
   </entity>
   <entity name="partition">
     <attribute name="id" value-type="int" />

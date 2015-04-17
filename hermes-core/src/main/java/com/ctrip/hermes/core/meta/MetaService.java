@@ -56,7 +56,7 @@ public interface MetaService {
 	 * @param topic
 	 * @return
 	 */
-	Codec getCodec(String topic);
+	Codec getCodecByTopic(String topic);
 
 	/**
 	 * 
@@ -77,5 +77,7 @@ public interface MetaService {
 	Topic findTopic(long topicId);
 
 	int getAckTimeoutSeconds(String topic);
+
+	Codec getCodecByType(String codecType);
 
 }

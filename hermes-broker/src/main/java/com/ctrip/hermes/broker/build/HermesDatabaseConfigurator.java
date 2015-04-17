@@ -12,7 +12,7 @@ final class HermesDatabaseConfigurator extends AbstractJdbcResourceConfigurator 
       List<Component> all = new ArrayList<Component>();
 
 
-      defineSimpleTableProviderComponents(all, "hermes", com.ctrip.hermes.broker.dal.hermes._INDEX.getEntityClasses());
+//      defineSimpleTableProviderComponents(all, "hermes", com.ctrip.hermes.broker.dal.hermes._INDEX.getEntityClasses());
       defineDaoComponents(all, com.ctrip.hermes.broker.dal.hermes._INDEX.getDaoClasses());
 
       return all;

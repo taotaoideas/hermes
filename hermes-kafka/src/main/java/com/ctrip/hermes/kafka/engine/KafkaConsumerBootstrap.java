@@ -29,7 +29,6 @@ import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
-import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.transport.command.SubscribeCommand;
 import com.ctrip.hermes.kafka.message.KafkaConsumerMessage;
 import com.ctrip.hermes.meta.entity.Datasource;
@@ -48,6 +47,9 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 	@Inject
 	private ClientEnvironment m_environment;
+
+	@Inject
+	private MessageCodec m_messageCodec;
 
 	private Map<ConsumerContext, ConsumerConnector> consumers = new HashMap<>();
 
@@ -88,14 +90,11 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 		private ConsumerContext consumerContext;
 
-		private MessageCodec codec;
-
 		private long correlationId;
 
 		public KafkaConsumerThread(KafkaStream<byte[], byte[]> stream, ConsumerContext consumerContext, long correlationId) {
 			this.stream = stream;
 			this.consumerContext = consumerContext;
-			this.codec = MessageCodecFactory.getCodec(consumerContext.getTopic().getName());
 			this.correlationId = correlationId;
 		}
 
@@ -105,7 +104,7 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 				try {
 					ByteBuf byteBuf = Unpooled.wrappedBuffer(msgAndMetadata.message());
 
-					BaseConsumerMessage<?> baseMsg = codec.decode(byteBuf, consumerContext.getMessageClazz());
+					BaseConsumerMessage<?> baseMsg = m_messageCodec.decode(byteBuf, consumerContext.getMessageClazz());
 					@SuppressWarnings("rawtypes")
 					ConsumerMessage kafkaMsg = new KafkaConsumerMessage(baseMsg);
 					List<ConsumerMessage<?>> msgs = new ArrayList<>();

@@ -25,7 +25,6 @@ import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.message.ProducerMessage;
-import com.ctrip.hermes.core.message.codec.DefaultMessageCodec;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.core.result.SendResult;
@@ -41,7 +40,8 @@ public class KafkaMessageSender implements MessageSender {
 
 	private Map<String, KafkaProducer<String, byte[]>> m_producers = new HashMap<>();;
 
-	private Map<String, MessageCodec> m_codecs = new HashMap<>();
+	@Inject
+	private MessageCodec m_codec;
 
 	@Inject
 	private MetaService m_metaService;
@@ -100,16 +100,12 @@ public class KafkaMessageSender implements MessageSender {
 			Properties configs = getProduerProperties(topic);
 			KafkaProducer<String, byte[]> producer = new KafkaProducer<>(configs);
 			m_producers.put(topic, producer);
-
-			MessageCodec codec = new DefaultMessageCodec(topic);
-			m_codecs.put(topic, codec);
 		}
 
 		KafkaProducer<String, byte[]> producer = m_producers.get(topic);
-		MessageCodec codec = m_codecs.get(topic);
 
 		ByteBuf byteBuf = Unpooled.buffer();
-		codec.encode(msg, byteBuf);
+		m_codec.encode(msg, byteBuf);
 
 		ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, partition, byteBuf.array());
 		Future<RecordMetadata> sendResult = producer.send(record);

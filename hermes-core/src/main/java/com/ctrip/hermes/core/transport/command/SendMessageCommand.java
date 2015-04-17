@@ -3,6 +3,7 @@ package com.ctrip.hermes.core.transport.command;
 import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +14,9 @@ import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
-import com.ctrip.hermes.core.message.codec.MessageCodecFactory;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
+import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
@@ -106,7 +107,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 			codec.writeInt(-1);
 		}
 
-		List<TppIndex> tppInfos = writeTpps(m_msgs, codec, buf);
+		List<TppIndex> tppInfos = writeTpps(m_msgs.values(), codec, buf);
 
 		int writerIndex = buf.writerIndex();
 		buf.resetWriterIndex();
@@ -158,22 +159,22 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		return tppNames;
 	}
 
-	private List<TppIndex> writeTpps(Map<Tpp, List<ProducerMessage<?>>> msgs, HermesPrimitiveCodec codec, ByteBuf buf) {
+	private List<TppIndex> writeTpps(Collection<List<ProducerMessage<?>>> msgLists, HermesPrimitiveCodec codec,
+	      ByteBuf buf) {
 		List<TppIndex> tppIndexes = new ArrayList<>();
 
-		for (Map.Entry<Tpp, List<ProducerMessage<?>>> entry : msgs.entrySet()) {
-			Tpp tpp = entry.getKey();
-			MessageCodec msgCodec = MessageCodecFactory.getCodec(tpp.getTopic());
+		for (List<ProducerMessage<?>> msgList : msgLists) {
+			MessageCodec msgCodec = PlexusComponentLocator.lookup(MessageCodec.class);
 
 			// write msgSeqs
-			codec.writeInt(entry.getValue().size());
+			codec.writeInt(msgList.size());
 
-			for (ProducerMessage<?> msg : entry.getValue()) {
+			for (ProducerMessage<?> msg : msgList) {
 				codec.writeInt(msg.getMsgSeqNo());
 			}
 
 			int start = buf.writerIndex();
-			for (ProducerMessage<?> msg : entry.getValue()) {
+			for (ProducerMessage<?> msg : msgList) {
 				msgCodec.encode(msg, buf);
 			}
 			int length = buf.writerIndex() - start;
@@ -250,7 +251,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 						m_msgs = new ArrayList<>();
 
 						ByteBuf tmpBuf = m_rawData.duplicate();
-						MessageCodec messageCodec = MessageCodecFactory.getCodec(m_topic);
+						MessageCodec messageCodec = PlexusComponentLocator.lookup(MessageCodec.class);
 
 						while (tmpBuf.readableBytes() > 0) {
 							m_msgs.add(messageCodec.partialDecode(tmpBuf));
