@@ -16,13 +16,25 @@
 				<statement><![CDATA[SELECT <FIELDS/>
         FROM <TABLE/>
         WHERE <FIELD name='name'/> = ${name}
-        ORDER BY <FIELD name='id'/> DESC LIMIT 1]]></statement>
+        ORDER BY <FIELD name='id'/> DESC]]></statement>
 			</query>
 			<query name="findByName" type="SELECT" multiple="true">
 				<param name="name" />
 				<statement><![CDATA[SELECT <FIELDS/>
         FROM <TABLE/>
         WHERE <FIELD name='name'/> = ${name}]]></statement>
+			</query>
+			<query name="list" type="SELECT" multiple="true">
+				<statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        ORDER BY <FIELD name='id'/> DESC]]></statement>
+			</query>
+			<query name="listLatest" type="SELECT" multiple="true">
+				<statement><![CDATA[SELECT <FIELDS/>
+		FROM <TABLE/>
+		WHERE <FIELD name='id'/> IN 
+		(SELECT MAX(<FIELD name='id'/>) FROM <TABLE/> GROUP BY <FIELD name='name'/>)]]>
+				</statement>
 			</query>
 		</query-defs>
 	</entity>

@@ -1,5 +1,7 @@
 package com.ctrip.hermes.meta.resource;
 
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.entity.Codec;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.pojo.CodecView;
+import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.CodecService;
 
@@ -46,7 +49,9 @@ public class CodecResource {
 		List<Property> properties = new ArrayList<>();
 		Property prop = new Property();
 		prop.setName("schema.registry.url");
-		prop.setValue("http://10.3.8.63:8081");
+		String schemaServerHost = MetaPropertiesLoader.load().getProperty("schema-server-host");
+		String schemaServerPort = MetaPropertiesLoader.load().getProperty("schema-server-port");
+		prop.setValue("http://" + schemaServerHost + ":" + schemaServerPort);
 		avroCodec.setProperties(properties);
 		result.add(jsonCodec);
 		result.add(avroCodec);

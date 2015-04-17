@@ -53,7 +53,6 @@ public class MetaServerTest extends ComponentTestCase {
 		Builder request = webTarget.path("meta/").request();
 
 		Meta actual = request.get(Meta.class);
-		actual.setDevMode(!actual.getDevMode());
 		String json = JSON.toJSONString(actual);
 		System.out.println(json);
 		Assert.assertTrue(actual.getTopics().size() > 0);

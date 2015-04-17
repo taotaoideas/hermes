@@ -6,15 +6,17 @@ import java.util.Map;
 import com.ctrip.hermes.meta.dal.meta.Schema;
 
 public class SchemaView {
-	private long id;
+	private Long id;
 
 	private String name;
 
 	private String type;
 
-	private int version;
+	private Integer version;
 
 	private Date createTime;
+
+	private String compatibility;
 
 	private Map<String, Object> config;
 
@@ -28,13 +30,22 @@ public class SchemaView {
 		this.type = schema.getType();
 		this.version = schema.getVersion();
 		this.createTime = schema.getCreateTime();
+		this.compatibility = schema.getCompatibility();
+	}
+
+	public String getCompatibility() {
+		return compatibility;
+	}
+
+	public Map<String, Object> getConfig() {
+		return config;
 	}
 
 	public Date getCreateTime() {
 		return createTime;
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -50,11 +61,19 @@ public class SchemaView {
 		return version;
 	}
 
+	public void setCompatibility(String compatibility) {
+		this.compatibility = compatibility;
+	}
+
+	public void setConfig(Map<String, Object> config) {
+		this.config = config;
+	}
+
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -66,25 +85,22 @@ public class SchemaView {
 		this.type = type;
 	}
 
-	public void setVersion(Integer version) {
+	public void setVersion(int version) {
 		this.version = version;
-	}
-
-	public Map<String, Object> getConfig() {
-		return config;
-	}
-
-	public void setConfig(Map<String, Object> config) {
-		this.config = config;
 	}
 
 	public Schema toMetaSchema() {
 		Schema schema = new Schema();
-		schema.setId(this.id);
+		if (this.id != null) {
+			schema.setId(this.id);
+		}
 		schema.setName(this.name);
 		schema.setType(this.type);
-		schema.setVersion(this.version);
+		if (this.version != null) {
+			schema.setVersion(this.version);
+		}
 		schema.setCreateTime(this.createTime);
+		schema.setCompatibility(this.compatibility);
 		return schema;
 	}
 

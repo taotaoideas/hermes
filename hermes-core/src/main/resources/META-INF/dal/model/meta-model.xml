@@ -43,6 +43,10 @@
 				}
 				return m_retryPolicy;
 			}
+			
+			public void setRetryPolicy(com.ctrip.hermes.core.message.RetryPolicy retryPolicy){
+				m_retryPolicy = retryPolicy;
+			}
 		</snippet>		
 	</entity>
 	<entity name="codec">

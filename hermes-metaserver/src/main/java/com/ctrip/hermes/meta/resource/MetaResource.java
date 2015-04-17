@@ -28,12 +28,17 @@ public class MetaResource {
 
 	@GET
 	public Response getMeta(@QueryParam("hashCode") long hashCode) {
-		Meta meta = metaManager.getMeta();
-		if (meta == null) {
-			throw new RestException("Meta not found", Status.NOT_FOUND);
-		}
-		if (meta.hashCode() == hashCode) {
-			return Response.status(Status.NOT_MODIFIED).build();
+		Meta meta = null;
+		try {
+			meta = metaManager.getMeta();
+			if (meta == null) {
+				throw new RestException("Meta not found", Status.NOT_FOUND);
+			}
+			if (meta.hashCode() == hashCode) {
+				return Response.status(Status.NOT_MODIFIED).build();
+			}
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return Response.status(Status.OK).entity(meta).build();
 	}

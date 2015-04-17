@@ -50,11 +50,39 @@ public class SchemaService {
 
 	@Inject
 	private CompileService m_compileService;
-	
+
 	public SchemaService() {
 		String schemaServerHost = m_properties.getProperty("schema-server-host");
 		String schemaServerPort = m_properties.getProperty("schema-server-port");
 		avroSchemaRegistry = new CachedSchemaRegistryClient("http://" + schemaServerHost + ":" + schemaServerPort, 1000);
+	}
+
+	/**
+	 * 
+	 * @param metaSchema
+	 * @param avroSchema
+	 * @throws IOException
+	 * @throws DalException
+	 */
+	public void compileAvro(Schema metaSchema, org.apache.avro.Schema avroSchema) throws IOException, DalException {
+		final Path destDir = Files.createTempDirectory("avroschema");
+		SpecificCompiler compiler = new SpecificCompiler(avroSchema);
+		compiler.compileToDestination(null, destDir.toFile());
+
+		m_compileService.compile(destDir);
+		Path jarFile = Files.createTempFile(metaSchema.getName(), ".jar");
+		m_compileService.jar(destDir, jarFile);
+
+		byte[] jarContent = Files.readAllBytes(jarFile);
+		metaSchema.setJarContent(jarContent);
+		FormDataContentDisposition disposition = FormDataContentDisposition.name(metaSchema.getName())
+		      .creationDate(new Date(System.currentTimeMillis()))
+		      .fileName(metaSchema.getName() + "_" + metaSchema.getVersion() + ".jar").size(jarFile.toFile().length())
+		      .build();
+		metaSchema.setJarProperties(disposition.toString());
+		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		Files.delete(jarFile);
+		m_compileService.delete(destDir);
 	}
 
 	/**
@@ -64,7 +92,7 @@ public class SchemaService {
 	 * @throws DalException
 	 */
 	public SchemaView createSchema(SchemaView schemaView) throws DalException {
-		return createSchema(schemaView, 0);
+		return createSchema(schemaView, -1);
 	}
 
 	/**
@@ -77,15 +105,30 @@ public class SchemaService {
 	public SchemaView createSchema(SchemaView schemaView, long topicId) throws DalException {
 		Schema schema = schemaView.toMetaSchema();
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
-		schema.setVersion(1);
+
+		Topic topic = null;
+		if (topicId > 0) {
+			topic = m_metaService.findTopic(topicId);
+			schema.setName(topic.getName() + "-value");
+		}
 		m_schemaDao.insert(schema);
 
-		if (topicId > 0) {
-			Topic topic = m_metaService.findTopic(topicId);
+		if (topic != null) {
 			topic.setSchemaId(schema.getId());
 			m_topicService.updateTopic(topic);
 		}
 		return new SchemaView(schema);
+	}
+
+	public SchemaView updateSchemaFile(SchemaView schemaView, InputStream fileInputStream,
+	      FormDataContentDisposition fileHeader) throws IOException, DalException, RestClientException {
+		SchemaView result = null;
+		if (schemaView.getType().equals("json")) {
+			result = uploadJsonSchema(schemaView, null, null, fileInputStream, fileHeader);
+		} else if (schemaView.getType().equals("avro")) {
+			result = uploadAvroSchema(schemaView, fileInputStream, fileHeader, null, null);
+		}
+		return result;
 	}
 
 	/**
@@ -122,23 +165,6 @@ public class SchemaService {
 
 	/**
 	 * 
-	 * @param schemaName
-	 * @return
-	 * @throws IOException
-	 * @throws RestClientException
-	 * @throws DalException
-	 */
-	public org.apache.avro.Schema getAvroSchema(String schemaName) throws IOException, RestClientException, DalException {
-		Schema schema = m_schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
-		if (schema.getAvroid() > 0) {
-			org.apache.avro.Schema avroSchema = this.avroSchemaRegistry.getByID(schema.getAvroid());
-			return avroSchema;
-		}
-		return null;
-	}
-
-	/**
-	 * 
 	 * @param schemaId
 	 * @return
 	 * @throws DalException
@@ -164,18 +190,12 @@ public class SchemaService {
 
 	/**
 	 * 
-	 * @param schemaView
 	 * @return
 	 * @throws DalException
 	 */
-	public SchemaView updateSchemaView(SchemaView schemaView) throws DalException {
-		Schema schema = schemaView.toMetaSchema();
-		Schema oldSchema = m_schemaDao.findLatestByName(schema.getName(), SchemaEntity.READSET_FULL);
-		schema.setVersion(oldSchema.getVersion() + 1);
-		schema.setCreateTime(new Date(System.currentTimeMillis()));
-		schema.setId(0);
-		m_schemaDao.insert(schema);
-		return new SchemaView(schema);
+	public List<Schema> listLatestSchemaMeta() throws DalException {
+		List<Schema> schemas = m_schemaDao.listLatest(SchemaEntity.READSET_FULL);
+		return schemas;
 	}
 
 	/**
@@ -189,49 +209,37 @@ public class SchemaService {
 	 * @throws DalException
 	 * @throws RestClientException
 	 */
-	public void uploadAvroSchema(SchemaView schemaView, InputStream schemaInputStream,
+	public SchemaView uploadAvroSchema(SchemaView schemaView, InputStream schemaInputStream,
 	      FormDataContentDisposition schemaHeader, InputStream jarInputStream, FormDataContentDisposition jarHeader)
 	      throws IOException, DalException, RestClientException {
 		Schema metaSchema = schemaView.toMetaSchema();
+		Schema updatedSchema = new Schema();
+		updatedSchema.setName(metaSchema.getName());
+		updatedSchema.setCompatibility(metaSchema.getCompatibility());
+		updatedSchema.setCreateTime(new Date(System.currentTimeMillis()));
+		updatedSchema.setDescription(metaSchema.getDescription());
+		updatedSchema.setType(metaSchema.getType());
+		updatedSchema.setVersion(metaSchema.getVersion() + 1);
+
 		if (schemaInputStream != null) {
 			byte[] schemaContent = ByteStreams.toByteArray(schemaInputStream);
-			metaSchema.setSchemaContent(schemaContent);
-			metaSchema.setSchemaProperties(schemaHeader.toString());
+			updatedSchema.setSchemaContent(schemaContent);
+			updatedSchema.setSchemaProperties(schemaHeader.toString());
 
 			Parser parser = new Parser();
 			org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
-			int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
-			metaSchema.setAvroid(avroid);
+			int avroid = avroSchemaRegistry.register(updatedSchema.getName(), avroSchema);
+			updatedSchema.setAvroid(avroid);
 
-			compileAvro(metaSchema, avroSchema);
+			compileAvro(updatedSchema, avroSchema);
 		}
-		if (jarInputStream != null) { // will be replaced by automatic compile
+		if (jarInputStream != null) {
 			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
-			metaSchema.setJarContent(jarContent);
-			metaSchema.setJarProperties(jarHeader.toString());
+			updatedSchema.setJarContent(jarContent);
+			updatedSchema.setJarProperties(jarHeader.toString());
 		}
-		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
-	}
-
-	public void compileAvro(Schema metaSchema, org.apache.avro.Schema avroSchema) throws IOException, DalException {
-		final Path destDir = Files.createTempDirectory("avroschema");
-		SpecificCompiler compiler = new SpecificCompiler(avroSchema);
-		compiler.compileToDestination(null, destDir.toFile());
-
-		m_compileService.compile(destDir);
-		Path jarFile = Files.createTempFile(metaSchema.getName(), ".jar");
-		m_compileService.jar(destDir, jarFile);
-		
-		byte[] jarContent = Files.readAllBytes(jarFile);
-		metaSchema.setJarContent(jarContent);
-		FormDataContentDisposition disposition = FormDataContentDisposition.name(metaSchema.getName())
-		      .creationDate(new Date(System.currentTimeMillis()))
-		      .fileName(metaSchema.getName() + "_" + metaSchema.getVersion() + ".jar").size(jarFile.toFile().length())
-		      .build();
-		metaSchema.setJarProperties(disposition.toString());
-		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
-		Files.delete(jarFile);
-		m_compileService.delete(destDir);
+		m_schemaDao.insert(updatedSchema);
+		return new SchemaView(updatedSchema);
 	}
 
 	/**
@@ -244,22 +252,32 @@ public class SchemaService {
 	 * @throws IOException
 	 * @throws DalException
 	 */
-	public void uploadJsonSchema(SchemaView schemaView, InputStream schemaInputStream,
+	public SchemaView uploadJsonSchema(SchemaView schemaView, InputStream schemaInputStream,
 	      FormDataContentDisposition schemaHeader, InputStream jarInputStream, FormDataContentDisposition jarHeader)
 	      throws IOException, DalException {
 		Schema metaSchema = schemaView.toMetaSchema();
+		Schema updatedSchema = new Schema();
+		updatedSchema.setName(metaSchema.getName());
+		updatedSchema.setCompatibility(metaSchema.getCompatibility());
+		updatedSchema.setCreateTime(new Date(System.currentTimeMillis()));
+		updatedSchema.setDescription(metaSchema.getDescription());
+		updatedSchema.setType(metaSchema.getType());
+		updatedSchema.setAvroid(metaSchema.getAvroid());
+		updatedSchema.setVersion(metaSchema.getVersion() + 1);
+
 		if (schemaInputStream != null) {
 			byte[] schemaContent = ByteStreams.toByteArray(schemaInputStream);
-			metaSchema.setSchemaContent(schemaContent);
-			metaSchema.setSchemaProperties(schemaHeader.toString());
+			updatedSchema.setSchemaContent(schemaContent);
+			updatedSchema.setSchemaProperties(schemaHeader.toString());
 		}
 
 		if (jarInputStream != null) {
 			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
-			metaSchema.setJarContent(jarContent);
-			metaSchema.setJarProperties(jarHeader.toString());
+			updatedSchema.setJarContent(jarContent);
+			updatedSchema.setJarProperties(jarHeader.toString());
 		}
-		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		m_schemaDao.insert(updatedSchema);
+		return new SchemaView(updatedSchema);
 	}
 
 }

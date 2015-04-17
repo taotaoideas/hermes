@@ -48,6 +48,7 @@
     <member name="jar-content" field="jar_content" value-type="byte[]" length="65535" />
     <member name="jar-properties" field="jar_properties" value-type="String" length="65535" />
     <member name="avroid" field="avroid" value-type="int" length="10" />
+    <member name="compatibility" field="compatibility" value-type="String" length="50" />
     <var name="key-id" value-type="long" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
     <readsets>

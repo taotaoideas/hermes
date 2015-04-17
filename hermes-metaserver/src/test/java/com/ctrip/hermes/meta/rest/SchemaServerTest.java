@@ -2,6 +2,7 @@ package com.ctrip.hermes.meta.rest;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.client.Client;
@@ -9,6 +10,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -45,18 +47,25 @@ public class SchemaServerTest extends ComponentTestCase {
 	}
 
 	@Test
-	public void testGetSchema() {
+	public void testListSchemas() {
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
-		long schemaId = 1;
-		Builder request = webTarget.path("schemas/" + schemaId).request();
+		Builder request = webTarget.path("schemas").request();
+		Response response = request.get();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatusInfo().getStatusCode());
+		List<SchemaView> schemas = response.readEntity(new GenericType<List<SchemaView>>() {
+		});
+		System.out.println(schemas);
+		Assert.assertTrue(schemas.size() > 0);
+
+		request = webTarget.path("schemas/" + schemas.get(0).getId()).request();
 		SchemaView actual = request.get(SchemaView.class);
 		System.out.println(actual);
-		Assert.assertEquals(schemaId, actual.getId());
+		Assert.assertEquals(schemas.get(0).getId(), actual.getId());
 	}
 
 	@Test
-	public void testPostJsonSchema() throws IOException {
+	public void testPostNewJsonSchema() throws IOException {
 		String jsonString = Files.toString(new File("src/test/resources/schema-json-sample.json"), Charsets.UTF_8);
 		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
 		schemaView.setName(schemaView.getName() + "_" + UUID.randomUUID());
@@ -77,25 +86,23 @@ public class SchemaServerTest extends ComponentTestCase {
 	}
 
 	@Test
-	public void testPutJsonSchema() throws IOException {
-		Client client = ClientBuilder.newClient();
+	public void testPostExistingJsonSchema() throws IOException {
+		String jsonString = Files.toString(new File("src/test/resources/schema-json-sample.json"), Charsets.UTF_8);
+		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		Builder request = webTarget.path("schemas/").request();
 
-		long schemaId = 23;
-		Builder request = webTarget.path("schemas/" + schemaId).request();
-		SchemaView actual = request.get(SchemaView.class);
-		if (actual.getType().equals("json")) {
-			actual.setType("avro");
-		} else {
-			actual.setType("json");
-		}
-
-		request = webTarget.path("schemas/" + schemaId).request();
-		Response response = request.put(Entity.json(actual));
-		Assert.assertNotNull(response);
-		if (response.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) {
-			System.out.println(response.readEntity(SchemaView.class));
-		}
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-json-sample.json");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.field("schema", JSON.toJSONString(schemaView));
+		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.CONFLICT.getStatusCode(), response.getStatus());
+		System.out.println(response.readEntity(String.class));
 	}
 
 	@Test
@@ -105,19 +112,32 @@ public class SchemaServerTest extends ComponentTestCase {
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		long schemaId = 21;
-		Builder request = webTarget.path("schemas/" + schemaId).request();
-		SchemaView actual = request.get(SchemaView.class);
-		actual.setType("json");
+		Builder request = webTarget.path("schemas").request();
+		Response response = request.get();
+		List<SchemaView> schemas = response.readEntity(new GenericType<List<SchemaView>>() {
+		});
 
-		FormDataMultiPart form = new FormDataMultiPart();
-		File file = new File("src/test/resources/schema-json-sample.json");
-		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
-		request = webTarget.path("schemas/" + schemaId + "/upload").request();
-		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
-		System.out.println(response.getStatus());
+		SchemaView jsonSchema = null;
+		for (SchemaView schema : schemas) {
+			if (schema.getType().equals("json")) {
+				jsonSchema = schema;
+				break;
+			}
+		}
+
+		if (jsonSchema != null) {
+			FormDataMultiPart form = new FormDataMultiPart();
+			File file = new File("src/test/resources/schema-json-sample.json");
+			form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+			request = webTarget.path("schemas/" + jsonSchema.getId() + "/upload").request();
+			response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatusInfo().getStatusCode());
+
+			SchemaView updatedJsonSchema = response.readEntity(SchemaView.class);
+			Assert.assertEquals(jsonSchema.getVersion().intValue() + 1, updatedJsonSchema.getVersion().intValue());
+		}
 	}
-	
+
 	@Test
 	public void testUploadAvroFile() {
 		ResourceConfig rc = new ResourceConfig();
@@ -125,46 +145,62 @@ public class SchemaServerTest extends ComponentTestCase {
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		long schemaId = 19;
-		Builder request = webTarget.path("schemas/" + schemaId).request();
-		SchemaView actual = request.get(SchemaView.class);
-		actual.setType("avro");
+		Builder request = webTarget.path("schemas").request();
+		Response response = request.get();
+		List<SchemaView> schemas = response.readEntity(new GenericType<List<SchemaView>>() {
+		});
 
-		FormDataMultiPart form = new FormDataMultiPart();
-		File file = new File("src/test/resources/schema-avro-sample.avsc");
-		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
-		request = webTarget.path("schemas/" + schemaId + "/upload").request();
-		Response response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
-		System.out.println(response.getStatus());
+		SchemaView jsonSchema = null;
+		for (SchemaView schema : schemas) {
+			if (schema.getType().equals("avro")) {
+				jsonSchema = schema;
+				break;
+			}
+		}
+
+		if (jsonSchema != null) {
+			FormDataMultiPart form = new FormDataMultiPart();
+			File file = new File("src/test/resources/schema-avro-sample.avsc");
+			form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+			request = webTarget.path("schemas/" + jsonSchema.getId() + "/upload").request();
+			response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatusInfo().getStatusCode());
+
+			SchemaView updatedJsonSchema = response.readEntity(SchemaView.class);
+			Assert.assertEquals(jsonSchema.getVersion().intValue() + 1, updatedJsonSchema.getVersion().intValue());
+		}
 	}
 
 	@Test
-	public void testDownloadJsonSchemaFile() {
+	public void testDownloadFiles() {
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(MultiPartFeature.class);
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
 
-		long schemaId = 23;
-		Builder request = webTarget.path("schemas/" + schemaId + "/schema").request();
+		Builder request = webTarget.path("schemas").request();
 		Response response = request.get();
-		System.out.println(response.getStatus());
-		File downloadFile = response.readEntity(File.class);
-		Assert.assertTrue(downloadFile.length() > 0);
-	}
+		List<SchemaView> schemas = response.readEntity(new GenericType<List<SchemaView>>() {
+		});
 
-	@Test
-	public void testDownloadAvroSchemaFile() {
-		ResourceConfig rc = new ResourceConfig();
-		rc.register(MultiPartFeature.class);
-		Client client = ClientBuilder.newClient(rc);
-		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		request = webTarget.path("schemas/" + schemas.get(0).getId() + "/schema").request();
+		response = request.get();
+		if (response.getStatusInfo().getStatusCode() != Status.NOT_FOUND.getStatusCode()) {
+			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatusInfo().getStatusCode());
+			File schemaFile = response.readEntity(File.class);
+			System.out.println(schemaFile.getAbsolutePath());
+			Assert.assertTrue(schemaFile.length() > 0);
+			schemaFile.delete();
+		}
 
-		long schemaId = 23;
-		Builder request = webTarget.path("schemas/" + schemaId + "/schema").request();
-		Response response = request.get();
-		System.out.println(response.getStatus());
-		File downloadFile = response.readEntity(File.class);
-		Assert.assertTrue(downloadFile.length() > 0);
+		request = webTarget.path("schemas/" + schemas.get(0).getId() + "/jar").request();
+		response = request.get();
+		if (response.getStatusInfo().getStatusCode() != Status.NOT_FOUND.getStatusCode()) {
+			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatusInfo().getStatusCode());
+			File jarFile = response.readEntity(File.class);
+			System.out.println(jarFile.getAbsolutePath());
+			Assert.assertTrue(jarFile.length() > 0);
+			jarFile.delete();
+		}
 	}
 }
