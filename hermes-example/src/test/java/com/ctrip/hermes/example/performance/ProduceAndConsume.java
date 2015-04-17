@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -15,7 +16,11 @@ import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class ProduceAndConsume extends ComponentTestCase {
 
@@ -64,6 +69,12 @@ public class ProduceAndConsume extends ComponentTestCase {
 				lookup(NettyServer.class).start();
 			}
 		}).start();
+		try {
+	      TimeUnit.SECONDS.sleep(2);
+      } catch (InterruptedException e) {
+	      // TODO Auto-generated catch block
+	      e.printStackTrace();
+      }
 	}
 
 	private void startCountTimer() {
@@ -86,8 +97,21 @@ public class ProduceAndConsume extends ComponentTestCase {
 				Producer p = lookup(Producer.class);
 
 				for (;;) {
-					p.message(TOPIC, sendCount.get()).send();
-					sendCount.addAndGet(1);
+					SettableFuture<SendResult> future = (SettableFuture<SendResult>) p.message(TOPIC, sendCount.get())
+					      .send();
+					Futures.addCallback(future, new FutureCallback<SendResult>() {
+
+						@Override
+                  public void onSuccess(SendResult result) {
+							sendCount.addAndGet(1);
+                  }
+
+						@Override
+                  public void onFailure(Throwable t) {
+	                  
+                  }
+						
+					});
 				}
 			}
 		}).start();
