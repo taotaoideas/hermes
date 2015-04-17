@@ -23,6 +23,11 @@ public class CompileService {
 
 	private JavaCompiler jdkCompiler = ToolProvider.getSystemJavaCompiler();
 
+	/**
+	 * 
+	 * @param destDir
+	 * @throws IOException
+	 */
 	public void compile(final Path destDir) throws IOException {
 		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
 
@@ -39,10 +44,24 @@ public class CompileService {
 		});
 	}
 
+	/**
+	 * 
+	 * @param destDir
+	 * @param jarFile
+	 * @throws IOException
+	 */
 	public void jar(final Path destDir, Path jarFile) throws IOException {
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+		manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VENDOR, "com.ctrip");
+		manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_TITLE, "Avro Schema");
+		manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VERSION, "");
+		manifest.getMainAttributes().put(Attributes.Name.IMPLEMENTATION_VENDOR_ID, "com.ctrip");
+		manifest.getMainAttributes().put(Attributes.Name.SPECIFICATION_VENDOR, "com.ctrip");
+		manifest.getMainAttributes().put(Attributes.Name.SPECIFICATION_TITLE, "Avro Schema");
+		manifest.getMainAttributes().put(Attributes.Name.SPECIFICATION_VERSION, "");
 		final JarOutputStream target = new JarOutputStream(new FileOutputStream(jarFile.toFile()), manifest);
+
 		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
 
 			@Override
@@ -50,13 +69,14 @@ public class CompileService {
 				File file = path.toFile();
 				Path pathRelative = destDir.relativize(path);
 				String name = pathRelative.toString().replace("\\", "/");
+
 				JarEntry entry = new JarEntry(name);
 				entry.setTime(file.lastModified());
 				target.putNextEntry(entry);
-				byte[] readAllBytes = Files.readAllBytes(file.toPath());
+				byte[] readAllBytes = Files.readAllBytes(path);
 				target.write(readAllBytes);
 				target.closeEntry();
-				return FileVisitResult.CONTINUE;
+				return super.visitFile(path, attrs);
 			}
 
 			@Override
@@ -64,6 +84,7 @@ public class CompileService {
 				File file = path.toFile();
 				Path pathRelative = destDir.relativize(path);
 				String name = pathRelative.toString().replace("\\", "/");
+
 				if (!name.isEmpty()) {
 					if (!name.endsWith("/"))
 						name += "/";
@@ -79,13 +100,18 @@ public class CompileService {
 		target.close();
 	}
 
+	/**
+	 * 
+	 * @param destDir
+	 * @throws IOException
+	 */
 	public void delete(final Path destDir) throws IOException {
 		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
 				Files.delete(path);
-				return FileVisitResult.CONTINUE;
+				return super.visitFile(path, attrs);
 			}
 
 			@Override

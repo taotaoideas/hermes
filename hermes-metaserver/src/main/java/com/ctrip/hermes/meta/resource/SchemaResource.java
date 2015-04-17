@@ -10,7 +10,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -41,8 +40,8 @@ public class SchemaResource {
 
 	/**
 	 * 
-	 * @param schemaInputStream
-	 * @param schemaHeader
+	 * @param fileInputStream
+	 * @param fileHeader
 	 * @param jarInputStream
 	 * @param jarHeader
 	 * @param content
@@ -51,29 +50,38 @@ public class SchemaResource {
 	 */
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response createSchema(@FormDataParam("file") InputStream schemaInputStream,
-	      @FormDataParam("file") FormDataContentDisposition schemaHeader, @FormDataParam("schema") String content,
+	public Response createSchema(@FormDataParam("file") InputStream fileInputStream,
+	      @FormDataParam("file") FormDataContentDisposition fileHeader, @FormDataParam("schema") String content,
 	      @FormDataParam("topicId") @DefaultValue("0") long topicId) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
-		SchemaView schema = null;
+		SchemaView schemaView = null;
 		try {
-			schema = JSON.parseObject(content, SchemaView.class);
+			schemaView = JSON.parseObject(content, SchemaView.class);
 		} catch (Exception e) {
 			throw new RestException(e, Status.BAD_REQUEST);
 		}
+
+		Schema schemaMeta = null;
 		try {
-			schema = schemaService.createSchema(schema, topicId);
-			if (schema.getType().equals("json")) {
-				schemaService.uploadJsonSchema(schema, null, null, schemaInputStream, schemaHeader);
-			} else if (schema.getType().equals("avro")) {
-				schemaService.uploadAvroSchema(schema, schemaInputStream, schemaHeader, null, null);
-			}
+			schemaMeta = schemaService.findLatestSchemaMeta(schemaView.getName());
+		} catch (DalNotFoundException e) {
+			// Normal case
+		} catch (DalException e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		if (schemaMeta != null) {
+			throw new RestException("schema already exists, could not create again.", Status.CONFLICT);
+		}
+
+		try {
+			schemaView = schemaService.createSchema(schemaView, topicId);
+			schemaView = schemaService.updateSchemaFile(schemaView, fileInputStream, fileHeader);
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
-		return Response.status(Status.CREATED).entity(schema).build();
+		return Response.status(Status.CREATED).entity(schemaView).build();
 	}
 
 	/**
@@ -174,38 +182,20 @@ public class SchemaResource {
 	public List<SchemaView> findSchemas(@QueryParam("name") String schemaName) {
 		List<SchemaView> returnResult = new ArrayList<SchemaView>();
 		try {
-			List<Schema> schemaMetas = schemaService.findSchemaMeta(schemaName);
+			List<Schema> schemaMetas = null;
+			if (StringUtils.isEmpty(schemaName)) {
+				schemaMetas = schemaService.listLatestSchemaMeta();
+			} else {
+				schemaMetas = schemaService.findSchemaMeta(schemaName);
+			}
 			for (Schema schema : schemaMetas) {
 				SchemaView schemaView = new SchemaView(schema);
 				returnResult.add(schemaView);
 			}
-		} catch (DalException e) {
+		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return returnResult;
-	}
-
-	/**
-	 * 
-	 * @param schemaId
-	 * @param content
-	 * @return
-	 */
-	@PUT
-	@Path("{id}")
-	public Response updateSchema(@PathParam("id") long schemaId, String content) {
-		SchemaView schema = null;
-		try {
-			schema = JSON.parseObject(content, SchemaView.class);
-		} catch (Exception e) {
-			throw new RestException(e, Status.BAD_REQUEST);
-		}
-		try {
-			schema = schemaService.updateSchemaView(schema);
-		} catch (Exception e) {
-			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
-		}
-		return Response.status(Status.CREATED).entity(schema).build();
 	}
 
 	/**
@@ -220,21 +210,14 @@ public class SchemaResource {
 	@POST
 	@Path("{id}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@PathParam("id") long schemaId,
-	      @FormDataParam("schema-content") InputStream schemaInputStream,
-	      @FormDataParam("schema-content") FormDataContentDisposition schemaHeader,
-	      @FormDataParam("jar-content") InputStream jarInputStream,
-	      @FormDataParam("jar-content") FormDataContentDisposition jarHeader) {
+	public Response uploadFile(@PathParam("id") long schemaId, @FormDataParam("file") InputStream fileInputStream,
+	      @FormDataParam("file") FormDataContentDisposition fileHeader) {
 		SchemaView schemaView = getSchema(schemaId);
 		try {
-			if (schemaView.getType().equals("json")) {
-				schemaService.uploadJsonSchema(schemaView, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
-			} else if (schemaView.getType().equals("avro")) {
-				schemaService.uploadAvroSchema(schemaView, schemaInputStream, schemaHeader, jarInputStream, jarHeader);
-			}
+			schemaView = schemaService.updateSchemaFile(schemaView, fileInputStream, fileHeader);
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
-		return Response.status(Status.CREATED).build();
+		return Response.status(Status.CREATED).entity(schemaView).build();
 	}
 }

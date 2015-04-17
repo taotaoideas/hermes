@@ -6,4 +6,7 @@ public class RetryPolicy {
 		return 3;
 	}
 
+	public void setRetryTimes(int retryTimes) {
+
+	}
 }
