@@ -63,9 +63,10 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 	@Override
 	public Codec getCodecByTopic(String topicName) {
 		Topic topic = m_meta.findTopic(topicName);
-		if (topic != null)
-			return m_meta.findCodec(topic.getCodecType());
-		else
+		if (topic != null) {
+			String codeType = topic.getCodecType();
+			return m_meta.getCodecs().get(codeType);
+		} else
 			return null;
 	}
 

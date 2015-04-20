@@ -4,17 +4,17 @@ import java.io.IOException;
 
 import org.apache.curator.test.TestingServer;
 
-public class EmbeddedZookeeper {
+public class MockZookeeper {
 
 	public static final int ZK_PORT = 2181;
 
 	public static final String ZK_HOST = "localhost";
 
-	public static final String ZOOKEEPER_CONNECT = ZK_HOST + ":" + ZK_PORT;
+	public static String ZOOKEEPER_CONNECT = ZK_HOST + ":" + ZK_PORT;
 
 	private TestingServer zkTestServer;
 
-	public EmbeddedZookeeper() {
+	public MockZookeeper() {
 		try {
 			zkTestServer = new TestingServer(ZK_PORT, false);
 			start();

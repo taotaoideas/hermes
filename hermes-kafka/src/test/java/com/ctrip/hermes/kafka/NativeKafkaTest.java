@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import kafka.admin.AdminUtils;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
@@ -16,6 +18,7 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import kafka.serializer.StringDecoder;
 
+import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -28,14 +31,16 @@ import org.junit.Test;
 
 public class NativeKafkaTest {
 
-	private static EmbeddedZookeeper zookeeper;
+	private static MockZookeeper zookeeper;
 
-	private static EmbeddedKafka kafka;
+	private static MockKafka kafka;
 
 	@BeforeClass
 	public static void start() {
-		zookeeper = new EmbeddedZookeeper();
-		kafka = new EmbeddedKafka();
+		zookeeper = new MockZookeeper();
+		kafka = new MockKafka();
+		MockKafka.LOCALHOST_BROKER = "103.6.237:9092,10.3.6.239:9092,10.3.6.24:9092";
+		MockZookeeper.ZOOKEEPER_CONNECT = "10.3.6.90:2181,10.3.8.62:2181,10.3.8.63:2181";
 	}
 
 	@AfterClass
@@ -46,22 +51,29 @@ public class NativeKafkaTest {
 
 	@Test
 	public void testNative() throws IOException, InterruptedException, ExecutionException {
-		String topic = "TOPIC_" + RandomStringUtils.randomAlphabetic(5);
+		String topic = "kafka.SimpleTopic";
+		// ZkClient zkClient = new ZkClient(MockZookeeper.ZOOKEEPER_CONNECT);
+		// int partition = 1;
+		// int replication = 1;
+		// AdminUtils.createTopic(zkClient, topic, partition, replication, new Properties());
+		int msgNum = 100;
+		final CountDownLatch countDown = new CountDownLatch(msgNum);
 
-		Properties props = new Properties();
+		Properties produerProps = new Properties();
 		// Producer
-		props.put("metadata.broker.list", EmbeddedKafka.LOCALHOST_BROKER);
-		props.put("bootstrap.servers", EmbeddedKafka.LOCALHOST_BROKER);
-		props.put("value.serializer", StringSerializer.class.getCanonicalName());
-		props.put("key.serializer", StringSerializer.class.getCanonicalName());
+		produerProps.put("metadata.broker.list", MockKafka.LOCALHOST_BROKER);
+		produerProps.put("bootstrap.servers", MockKafka.LOCALHOST_BROKER);
+		produerProps.put("value.serializer", StringSerializer.class.getCanonicalName());
+		produerProps.put("key.serializer", StringSerializer.class.getCanonicalName());
 		// Consumer
-		props.put("zookeeper.connect", EmbeddedZookeeper.ZOOKEEPER_CONNECT);
-		props.put("group.id", "GROUP_" + RandomStringUtils.randomAlphabetic(5));
+		Properties consumerProps = new Properties();
+		consumerProps.put("zookeeper.connect", MockZookeeper.ZOOKEEPER_CONNECT);
+		consumerProps.put("group.id", "GROUP_" + RandomStringUtils.randomAlphabetic(5));
 
 		final List<String> actualResult = new ArrayList<>();
 		final List<String> expectedResult = new ArrayList<>();
 
-		ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
+		ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(new ConsumerConfig(consumerProps));
 		Map<String, Integer> topicCountMap = new HashMap<>();
 		topicCountMap.put(topic, 1);
 		final List<KafkaStream<String, String>> streams = consumerConnector.createMessageStreams(topicCountMap,
@@ -73,6 +85,7 @@ public class NativeKafkaTest {
 						try {
 							System.out.println("received: " + msgAndMetadata.message());
 							actualResult.add(msgAndMetadata.message());
+							countDown.countDown();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -81,23 +94,23 @@ public class NativeKafkaTest {
 			}.start();
 		}
 
-		KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
-		int i = 1;
-		while (i < 10) {
+		KafkaProducer<String, String> producer = new KafkaProducer<String, String>(produerProps);
+		int i = 0;
+		while (i < msgNum) {
 			ProducerRecord<String, String> data = new ProducerRecord<String, String>(topic, "test-message" + i++);
 			Future<RecordMetadata> send = producer.send(data);
 			send.get();
 			if (send.isDone()) {
-				System.out.println("sent: " + data.value());
+				System.out.println("sending: " + data.value());
 				expectedResult.add(data.value());
 			}
-			Thread.sleep(100);
 		}
+
+		countDown.await();
 
 		Assert.assertArrayEquals(expectedResult.toArray(), actualResult.toArray());
 
-		producer.close();
 		consumerConnector.shutdown();
+		producer.close();
 	}
-
 }

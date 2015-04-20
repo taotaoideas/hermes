@@ -2,13 +2,21 @@ package com.ctrip.hermes.meta.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
+import kafka.admin.AdminUtils;
+
+import org.I0Itec.zkclient.ZkClient;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Meta;
+import com.ctrip.hermes.meta.entity.Partition;
+import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
 
@@ -61,5 +69,46 @@ public class TopicService {
 		Meta meta = m_metaManager.getMeta();
 		meta.removeTopic(name);
 		m_metaManager.updateMeta(meta);
+	}
+
+	public void createTopicInKafka(Topic topic) {
+		List<Partition> partitions = m_metaService.getPartitions(topic.getName());
+		if (partitions == null || partitions.size() < 1) {
+			return;
+		}
+
+		String consumerDatasource = partitions.get(0).getReadDatasource();
+		Storage targetStorage = m_metaService.findStorage(topic.getName());
+		if (targetStorage == null) {
+			return;
+		}
+
+		String zkConnect = null;
+		for (Datasource datasource : targetStorage.getDatasources()) {
+			if (consumerDatasource.equals(datasource.getId())) {
+				Map<String, Property> properties = datasource.getProperties();
+				for (Map.Entry<String, Property> prop : properties.entrySet()) {
+					if ("zookeeper.connect".equals(prop.getValue().getName())) {
+						zkConnect = prop.getValue().getValue();
+						break;
+					}
+				}
+			}
+		}
+
+		ZkClient zkClient = new ZkClient(zkConnect);
+		int partition = 1;
+		int replication = 1;
+		Properties topicProp = new Properties();
+		for (Property prop : topic.getProperties()) {
+			if ("replication-factor".equals(prop.getName())) {
+				replication = Integer.parseInt(prop.getValue());
+			} else if ("partitions".equals(prop.getName())) {
+				partition = Integer.parseInt(prop.getValue());
+			} else {
+				topicProp.setProperty(prop.getName(), prop.getValue());
+			}
+		}
+		AdminUtils.createTopic(zkClient, topic.getName(), partition, replication, topicProp);
 	}
 }
