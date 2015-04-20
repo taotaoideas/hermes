@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.unidal.dal.jdbc.DalException;
@@ -31,14 +32,16 @@ import com.ctrip.hermes.broker.queue.storage.MessageQueueStorage;
 import com.ctrip.hermes.core.bo.Tpg;
 import com.ctrip.hermes.core.bo.Tpp;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
-import com.ctrip.hermes.core.message.RetryPolicy;
 import com.ctrip.hermes.core.message.TppConsumerMessageBatch;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.policy.retry.RetryPolicy;
+import com.ctrip.hermes.core.policy.retry.RetryPolicyFactory;
 import com.ctrip.hermes.core.transport.TransferCallback;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.core.utils.CollectionUtil;
 import com.ctrip.hermes.meta.entity.Storage;
+import com.ctrip.hermes.meta.entity.Topic;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -182,9 +185,13 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 	@Override
 	public void nack(Tpp tpp, String groupId, boolean resend, List<Pair<Long, Integer>> msgSeqs) {
 		if (CollectionUtil.isNotEmpty(msgSeqs)) {
-			// TODO retry policy should support per consumer?
-			RetryPolicy retryPolicy = m_metaService.findTopic(tpp.getTopic()).getRetryPolicy();
-			int initRemaingRetries = retryPolicy.getRetryTimes();
+			Topic topic = m_metaService.findTopic(tpp.getTopic());
+			String retryPolicyValue = topic.findConsumerGroup(groupId).getRetryPolicy();
+			if (retryPolicyValue == null || "".equals(retryPolicyValue.trim())) {
+				retryPolicyValue = topic.getConsumerRetryPolicy();
+			}
+
+			RetryPolicy retryPolicy = RetryPolicyFactory.create(retryPolicyValue);
 
 			List<Pair<Long, Integer>> toDeadLetter = new ArrayList<>();
 			List<Pair<Long, Integer>> toResend = new ArrayList<>();
@@ -192,7 +199,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 				if (resend) {
 					pair.setValue(pair.getValue() - 1);
 				} else {
-					pair.setValue(initRemaingRetries);
+					pair.setValue(retryPolicy.getRetryTimes());
 				}
 
 				if (pair.getValue() <= 0) {
@@ -205,7 +212,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 
 			try {
 				copyToDeadLetter(tpp, groupId, toDeadLetter, resend);
-				copyToResend(tpp, groupId, toResend, resend, initRemaingRetries);
+				copyToResend(tpp, groupId, toResend, resend, retryPolicy);
 			} catch (DalException e) {
 				// TODO
 				e.printStackTrace();
@@ -214,23 +221,39 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 	}
 
 	private void copyToResend(Tpp tpp, String groupId, List<Pair<Long, Integer>> msgSeqs, boolean resend,
-	      int initRemaingRetries) throws DalException {
+	      RetryPolicy retryPolicy) throws DalException {
 		if (CollectionUtil.isNotEmpty(msgSeqs)) {
-			ResendGroupId proto = new ResendGroupId();
-			proto.setTopic(tpp.getTopic());
-			proto.setPartition(tpp.getPartition());
-			proto.setPriority(tpp.getPriorityInt());
-			proto.setGroupId(m_metaService.getGroupIdInt(groupId));
-			// TODO schedule date and remaining retry should base on how much times has the message be resent
-			proto.setScheduleDate(new Date(System.currentTimeMillis() + 5000));
-			proto.setMessageIds(collectOffset(msgSeqs));
+			long now = System.currentTimeMillis();
 
-			if (resend) {
-				m_resendDao.copyFromResendTable(proto);
-			} else {
-				proto.setRemainingRetries(initRemaingRetries);
+			if (!resend) {
+				ResendGroupId proto = new ResendGroupId();
+				proto.setTopic(tpp.getTopic());
+				proto.setPartition(tpp.getPartition());
+				proto.setPriority(tpp.getPriorityInt());
+				proto.setGroupId(m_metaService.getGroupIdInt(groupId));
+				proto.setScheduleDate(new Date(retryPolicy.nextScheduleTimeMillis(0, now)));
+				proto.setMessageIds(collectOffset(msgSeqs));
+				proto.setRemainingRetries(retryPolicy.getRetryTimes());
+
 				m_resendDao.copyFromMessageTable(proto);
+			} else {
+				List<ResendGroupId> protos = new LinkedList<>();
+				for (Pair<Long, Integer> pair : msgSeqs) {
+					ResendGroupId proto = new ResendGroupId();
+					proto.setTopic(tpp.getTopic());
+					proto.setPartition(tpp.getPartition());
+					proto.setPriority(tpp.getPriorityInt());
+					proto.setGroupId(m_metaService.getGroupIdInt(groupId));
+					int retryTimes = retryPolicy.getRetryTimes() - pair.getValue();
+					proto.setScheduleDate(new Date(retryPolicy.nextScheduleTimeMillis(retryTimes, now)));
+					proto.setId(pair.getKey());
+
+					protos.add(proto);
+
+				}
+				m_resendDao.copyFromResendTable(protos.toArray(new ResendGroupId[protos.size()]));
 			}
+
 		}
 	}
 

@@ -6,6 +6,22 @@
 		<entity-ref name="endpoint" type="map" names="endpoints" />
 		<entity-ref name="storage" type="map" names="storages" />
 		<entity-ref name="codec" type="map" names="codecs" />
+		<entity-ref name="app" type="map" names="apps" />
+	</entity>
+
+	<entity name="consumer-group">
+		<attribute name="id" value-type="int" />
+		<attribute name="name" value-type="String" key="true" />
+		<attribute name="app-ids" value-type="String" />
+		<attribute name="retry-policy" value-type="String" />
+	</entity>
+
+	<entity name="producer">
+		<attribute name="app-id" value-type="long" />
+	</entity>
+
+	<entity name="app">
+		<attribute name="id" value-type="long" key="true" />
 	</entity>
 
 	<entity name="codec">
@@ -36,30 +52,8 @@
 		<attribute name="name" key='true' />
 		<attribute name="id" value-type="long" />
 		<attribute name="schema-id" value-type="long" />
-
-		<snippet lang="java">
-			private
-			com.ctrip.hermes.core.message.RetryPolicy m_retryPolicy;;
-			private
-			java.util.concurrent.atomic.AtomicBoolean m_retryPolicyParsed = new
-			java.util.concurrent.atomic.AtomicBoolean(false);
-
-			public
-			com.ctrip.hermes.core.message.RetryPolicy getRetryPolicy() {
-			if(m_retryPolicyParsed.compareAndSet(false, true)) {
-			// TODO retry
-			// policy should be per consumer?
-			m_retryPolicy = new
-			com.ctrip.hermes.core.message.RetryPolicy();
-			}
-			return m_retryPolicy;
-			}
-
-			public void setRetryPolicy(com.ctrip.hermes.core.message.RetryPolicy
-			retryPolicy){
-			m_retryPolicy = retryPolicy;
-			}
-		</snippet>
+		<attribute name="consumer-retry-policy" default-value="1:[3,6,9]"/>
+		<entity-ref name="consumer-group" type="list" names="consumer-groups" />
 	</entity>
 	<entity name="codec">
 		<attribute name="type" value-type="String" />

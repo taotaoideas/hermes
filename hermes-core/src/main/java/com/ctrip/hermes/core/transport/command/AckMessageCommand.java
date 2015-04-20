@@ -89,20 +89,20 @@ public class AckMessageCommand extends AbstractCommand {
 		return msgSeqMap;
 	}
 
-	public void addAckMsg(Tpp tpp, String groupId, boolean resend, long msgSeq, int remainRetries) {
+	public void addAckMsg(Tpp tpp, String groupId, boolean resend, long msgSeq, int remainingRetries) {
 		Triple<Tpp, String, Boolean> key = new Triple<>(tpp, groupId, resend);
 		if (!m_ackMsgSeqs.containsKey(key)) {
 			m_ackMsgSeqs.putIfAbsent(key, new ConcurrentHashMap<Long, Integer>());
 		}
-		m_ackMsgSeqs.get(key).put(msgSeq, remainRetries);
+		m_ackMsgSeqs.get(key).put(msgSeq, remainingRetries);
 	}
 
-	public void addNackMsg(Tpp tpp, String groupId, boolean resend, long msgSeq, int remainRetries) {
+	public void addNackMsg(Tpp tpp, String groupId, boolean resend, long msgSeq, int remainingRetries) {
 		Triple<Tpp, String, Boolean> key = new Triple<>(tpp, groupId, resend);
 		if (!m_nackMsgSeqs.containsKey(key)) {
 			m_nackMsgSeqs.putIfAbsent(key, new ConcurrentHashMap<Long, Integer>());
 		}
-		m_nackMsgSeqs.get(key).put(msgSeq, remainRetries);
+		m_nackMsgSeqs.get(key).put(msgSeq, remainingRetries);
 	}
 
 	public ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> getAckMsgs() {

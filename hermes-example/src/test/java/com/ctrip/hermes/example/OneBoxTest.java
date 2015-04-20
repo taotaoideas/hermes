@@ -141,7 +141,7 @@ public class OneBoxTest extends ComponentTestCase {
 		Engine engine = lookup(Engine.class);
 
 		Map<String, List<String>> subscribers = new HashMap<String, List<String>>();
-		subscribers.put("group1", Arrays.asList("1-a"));
+		subscribers.put("group2", Arrays.asList("1-a"));
 		// subscribers.put("group1", Arrays.asList("1-a", "1-b"));
 		// subscribers.put("group2", Arrays.asList("2-a", "2-b"));
 		// subscribers.put("group3", Arrays.asList("3-a", "3-b", "3-c"));

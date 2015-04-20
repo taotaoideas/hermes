@@ -11,6 +11,7 @@ import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.entity.Codec;
+import com.ctrip.hermes.meta.entity.ConsumerGroup;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
 import com.ctrip.hermes.meta.entity.Meta;
@@ -107,13 +108,23 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 	}
 
 	@Override
-	public int getGroupIdInt(String groupId) {
+	public int getGroupIdInt(String groupName) {
+		// TODO groupIdStr唯一
+		for (Topic topic : m_meta.getTopics().values()) {
+			for (ConsumerGroup group : topic.getConsumerGroups()) {
+				if (group.getName().equals(groupName)) {
+					return group.getId();
+				}
+			}
+		}
+
 		// TODO
 		return 100;
 	}
 
 	@Override
 	public List<Datasource> listMysqlDataSources() {
+		// TODO
 		final List<Datasource> dataSources = new ArrayList<>();
 
 		m_meta.accept(new BaseVisitor2() {
@@ -161,9 +172,9 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 		// TODO
 		return 2;
 	}
-	
+
 	@Override
-   public Codec getCodecByType(String codecType) {
-	   return m_meta.findCodec(codecType);
-   }
+	public Codec getCodecByType(String codecType) {
+		return m_meta.findCodec(codecType);
+	}
 }
