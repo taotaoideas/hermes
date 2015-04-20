@@ -112,7 +112,7 @@
 				<param name="message-ids" />
 				<param name="remaining-retries" />
 				<statement><![CDATA[INSERT INTO <TABLE/> (<FIELDS/>) 
-        		SELECT producer_ip,producer_id,ref_key,attributes,creation_date,payload,${schedule-date},${remaining-retries},codec_type
+        		SELECT producer_ip,producer_id,ref_key,attributes,codec_type,creation_date,payload,${schedule-date},${remaining-retries}
         		FROM <TABLE name="message-priority"/>
         		WHERE id IN <IN>${message-ids}</IN>]]>
 				</statement>
@@ -126,7 +126,7 @@
 				<param name="message-ids" />
 				<param name="creation-date" />
 				<statement><![CDATA[INSERT INTO <TABLE/> (<FIELDS/>) 
-        		SELECT producer_ip,producer_id,ref_key,attributes,now(),payload,${schedule-date},remaining_retries-1,codec_type
+        		SELECT producer_ip,producer_id,ref_key,attributes,codec_type,now(),payload,${schedule-date},remaining_retries-1
         		FROM <TABLE name="resend-group-id"/>
         		WHERE id IN <IN>${message-ids}</IN>]]>
 				</statement>
