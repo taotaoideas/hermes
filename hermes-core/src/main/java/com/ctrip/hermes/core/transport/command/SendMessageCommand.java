@@ -86,9 +86,9 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		m_msgCounter.set(codec.readInt());
 
 		List<Tpp> tppNames = readTppNames(buf);
-		List<TppIndex> tppIndexes = readTppIndexes(buf, tppNames.size());
+		List<TppIndex> tppIndices = readTppIndices(buf, tppNames.size());
 
-		readTpps(buf, codec, tppNames, tppIndexes);
+		readTpps(buf, codec, tppNames, tppIndices);
 
 	}
 
@@ -102,7 +102,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 		buf.markWriterIndex();
 
-		// placeholder for indexes
+		// placeholder for indices
 		for (int i = 0; i < m_msgs.size(); i++) {
 			codec.writeInt(-1);
 		}
@@ -112,18 +112,18 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 		int writerIndex = buf.writerIndex();
 		buf.resetWriterIndex();
 
-		writeTppIndexes(tppInfos, codec);
+		writeTppIndices(tppInfos, codec);
 
 		buf.writerIndex(writerIndex);
 	}
 
-	private void writeTppIndexes(List<TppIndex> tppIndexes, HermesPrimitiveCodec codec) {
-		for (TppIndex i : tppIndexes) {
+	private void writeTppIndices(List<TppIndex> tppIndices, HermesPrimitiveCodec codec) {
+		for (TppIndex i : tppIndices) {
 			codec.writeInt(i.getLength());
 		}
 	}
 
-	private List<TppIndex> readTppIndexes(ByteBuf buf, int size) {
+	private List<TppIndex> readTppIndices(ByteBuf buf, int size) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		List<TppIndex> tppInfos = new ArrayList<>(size);
@@ -161,7 +161,7 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 
 	private List<TppIndex> writeTpps(Collection<List<ProducerMessage<?>>> msgLists, HermesPrimitiveCodec codec,
 	      ByteBuf buf) {
-		List<TppIndex> tppIndexes = new ArrayList<>();
+		List<TppIndex> tppIndices = new ArrayList<>();
 
 		for (List<ProducerMessage<?>> msgList : msgLists) {
 			MessageCodec msgCodec = PlexusComponentLocator.lookup(MessageCodec.class);
@@ -178,16 +178,16 @@ public class SendMessageCommand extends AbstractCommand implements AckAware<Send
 				msgCodec.encode(msg, buf);
 			}
 			int length = buf.writerIndex() - start;
-			tppIndexes.add(new TppIndex(length));
+			tppIndices.add(new TppIndex(length));
 		}
 
-		return tppIndexes;
+		return tppIndices;
 	}
 
-	private void readTpps(ByteBuf buf, HermesPrimitiveCodec codec, List<Tpp> tppNames, List<TppIndex> tppIndexes) {
+	private void readTpps(ByteBuf buf, HermesPrimitiveCodec codec, List<Tpp> tppNames, List<TppIndex> tppIndices) {
 		for (int i = 0; i < tppNames.size(); i++) {
 			Tpp tppName = tppNames.get(i);
-			TppIndex tppInfo = tppIndexes.get(i);
+			TppIndex tppInfo = tppIndices.get(i);
 
 			int size = codec.readInt();
 			List<Integer> msgSeqs = new ArrayList<>();

@@ -15,7 +15,7 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
  * <pre>
  * Mapping to one physical channel belongs to one {@linkplain Tpg Tpg} .
  * TpgChannel can use as the key of Map/Set. 
- * Two TpgChannels are considered as same, while they have the same {@linkplain EndpointChannel physcial channel} and {@linkplain Tpg Tpg}.
+ * Two TpgChannels are considered as same, while they have the same {@linkplain EndpointChannel physcial channel} and {@linkplain Tpg Tpg} and correlationId.
  * </pre>
  * 
  * @author Leo Liang(jhliang@ctrip.com)
