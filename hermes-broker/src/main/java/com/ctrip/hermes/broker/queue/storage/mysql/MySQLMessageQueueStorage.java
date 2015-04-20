@@ -39,7 +39,6 @@ import com.ctrip.hermes.core.transport.TransferCallback;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.core.utils.CollectionUtil;
 import com.ctrip.hermes.meta.entity.Storage;
-import com.google.common.base.Charsets;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
@@ -76,7 +75,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 			List<PartialDecodedMessage> pdmsgs = batch.getMessages();
 			for (PartialDecodedMessage pdmsg : pdmsgs) {
 				MessagePriority msg = new MessagePriority();
-				msg.setAttributes(new String(pdmsg.readDurableProperties(), Charsets.ISO_8859_1));
+				msg.setAttributes(pdmsg.readDurableProperties());
 				msg.setCreationDate(new Date(pdmsg.getBornTime()));
 				msg.setPartition(tpp.getPartition());
 				msg.setPayload(pdmsg.readBody());
@@ -154,7 +153,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 						for (MessagePriority dataObj : dataObjs) {
 							PartialDecodedMessage partialMsg = new PartialDecodedMessage();
 							partialMsg.setRemainingRetries(0);
-							partialMsg.setDurableProperties(stringToByteBuf(dataObj.getAttributes()));
+							partialMsg.setDurableProperties(Unpooled.wrappedBuffer(dataObj.getAttributes()));
 							partialMsg.setBody(Unpooled.wrappedBuffer(dataObj.getPayload()));
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());
@@ -165,10 +164,6 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 						}
 					}
 
-					// TODO move to util
-					private ByteBuf stringToByteBuf(String str) {
-						return Unpooled.wrappedBuffer(str.getBytes(Charsets.ISO_8859_1));
-					}
 				});
 
 				batch.setResend(false);
@@ -366,7 +361,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 						for (ResendGroupId dataObj : dataObjs) {
 							PartialDecodedMessage partialMsg = new PartialDecodedMessage();
 							partialMsg.setRemainingRetries(dataObj.getRemainingRetries());
-							partialMsg.setDurableProperties(stringToByteBuf(dataObj.getAttributes()));
+							partialMsg.setDurableProperties(Unpooled.wrappedBuffer(dataObj.getAttributes()));
 							partialMsg.setBody(Unpooled.wrappedBuffer(dataObj.getPayload()));
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());
@@ -377,10 +372,6 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 						}
 					}
 
-					// TODO move to util
-					private ByteBuf stringToByteBuf(String str) {
-						return Unpooled.wrappedBuffer(str.getBytes(Charsets.ISO_8859_1));
-					}
 				});
 
 				batch.setResend(true);

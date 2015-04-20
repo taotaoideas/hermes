@@ -9,6 +9,7 @@ import java.util.UUID;
 import com.ctrip.hermes.broker.dal.hermes.DeadLetter;
 import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
 import com.ctrip.hermes.core.bo.Tpp;
+import com.google.common.base.Charsets;
 
 public class MessageUtil {
 
@@ -26,9 +27,9 @@ public class MessageUtil {
 		DeadLetter dl = new DeadLetter();
 		Random rnd = new Random();
 
-		String attributes = uuid();
+		byte[] attributes = uuid().getBytes(Charsets.UTF_8);
 		Date creationDate = new Date();
-		byte[] payload = uuid().getBytes();
+		byte[] payload = uuid().getBytes(Charsets.UTF_8);
 		int producerId = rnd.nextInt(1000);
 		String producerIp = uuid().substring(0, 10);
 
@@ -48,9 +49,9 @@ public class MessageUtil {
 		MessagePriority m = new MessagePriority();
 		Random rnd = new Random();
 
-		String attributes = uuid();
+		byte[] attributes = uuid().getBytes(Charsets.UTF_8);
 		Date creationDate = new Date();
-		byte[] payload = uuid().getBytes();
+		byte[] payload = uuid().getBytes(Charsets.UTF_8);
 		int producerId = rnd.nextInt(1000);
 		String producerIp = uuid().substring(0, 10);
 
