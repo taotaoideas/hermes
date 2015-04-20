@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LocalSchemaRegistryClient implements SchemaRegistryClient {
 
-  private static String DEFAULT_COMPATIBILITY = "FULL";
+  private String defaultCompability = "BACKWARD";
   private final Map<String, Map<Schema, Integer>> schemaCache;
   private final Map<Integer, Schema> idCache;
   private final Map<String, Map<Schema, Integer>> versionCache;
@@ -166,7 +166,11 @@ public class LocalSchemaRegistryClient implements SchemaRegistryClient {
       RestClientException {
     SchemaMetadata latestSchemaMetadata = getLatestSchemaMetadata(subject);
     Schema latestSchema = getSchemaByIdFromRegistry(latestSchemaMetadata.getId());
-    String config = configCache.getOrDefault(subject, DEFAULT_COMPATIBILITY);
+    String config = configCache.get(subject);
+    if(config==null){
+      config = defaultCompability;
+    }
+    
     SchemaValidator validator = null;
     if ("FULL".equals(config)) {
       validator = new SchemaValidatorBuilder().mutualReadStrategy().validateLatest();
@@ -198,12 +202,20 @@ public class LocalSchemaRegistryClient implements SchemaRegistryClient {
   @Override
   public String updateCompatibility(String subject, String compatibility) throws IOException,
       RestClientException {
+    if(subject==null){
+      defaultCompability = compatibility;
+      return compatibility;
+    }
     configCache.put(subject, compatibility);
     return compatibility;
   }
 
   @Override
   public String getCompatibility(String subject) throws IOException, RestClientException {
-    return configCache.get(subject);
+    String compability = configCache.get(subject);
+    if(compability == null) {
+      return defaultCompability;
+    }
+    return compability;
   }
 }
