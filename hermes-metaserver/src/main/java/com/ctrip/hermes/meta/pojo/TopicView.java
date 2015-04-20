@@ -126,6 +126,14 @@ public class TopicView {
 		this.id = id;
 	}
 
+	public String getCodecType() {
+		return codecType;
+	}
+
+	public void setCodecType(String codecType) {
+		this.codecType = codecType;
+	}
+
 	public Topic toMetaTopic() {
 		Topic topic = new Topic();
 		topic.setId(this.id);
