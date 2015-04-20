@@ -1,7 +1,5 @@
 package com.ctrip.hermes.meta.resource;
 
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -40,7 +40,7 @@ public class CodecServerTest extends ComponentTestCase {
 	public void testGetCodec() {
 		Client client = ClientBuilder.newClient();
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
-		String topic = "Sample.SampleTopic";
+		String topic = "kafka.SimpleTopic";
 		Builder request = webTarget.path("codecs/" + topic).request();
 		Response response = request.get();
 		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
