@@ -45,13 +45,17 @@ public abstract class AbstractMessageQueuePartitionDumper implements MessageQueu
 
 			@Override
 			public void run() {
+				List<FutureBatchPriorityWrapper> todos = new ArrayList<>();
+
 				while (!Thread.currentThread().isInterrupted()) {
 					try {
-						List<FutureBatchPriorityWrapper> todos = new ArrayList<>();
-						int todoCount = m_queue.drainTo(todos, batchSize);
+						if (todos.isEmpty()) {
+							m_queue.drainTo(todos, batchSize);
+						}
 
-						if (todoCount != 0) {
+						if (!todos.isEmpty()) {
 							appendMessageSync(todos);
+							todos.clear();
 						} else {
 							TimeUnit.MILLISECONDS.sleep(50);
 						}

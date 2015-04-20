@@ -117,18 +117,18 @@
         		WHERE id IN <IN>${message-ids}</IN>]]>
 				</statement>
 			</query>
-			<query name="copyFromResendTable" type="INSERT">
+			<query name="copyFromResendTable" type="INSERT" batch="true">
 				<param name="topic" />
 				<param name="partition" />
 				<param name="priority" />
 				<param name="group-id" />
 				<param name="schedule-date" />
-				<param name="message-ids" />
-				<param name="creation-date" />
-				<statement><![CDATA[INSERT INTO <TABLE/> (<FIELDS/>) 
-        		SELECT producer_ip,producer_id,ref_key,attributes,codec_type,now(),payload,${schedule-date},remaining_retries-1
+				<param name="id" />
+				<statement><![CDATA[INSERT INTO <TABLE/> 
+				(producer_ip,producer_id,ref_key,attributes,codec_type,creation_date,payload,schedule_date,remaining_retries) 
+        		SELECT producer_ip,producer_id,ref_key,attributes,codec_type,creation_date,payload,${schedule-date},remaining_retries-1
         		FROM <TABLE name="resend-group-id"/>
-        		WHERE id IN <IN>${message-ids}</IN>]]>
+        		WHERE id = ${id}]]>
 				</statement>
 			</query>
 			<query name="find-by-PK" type="SELECT">

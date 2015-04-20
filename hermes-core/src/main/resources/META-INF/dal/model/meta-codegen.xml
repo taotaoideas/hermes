@@ -4,6 +4,7 @@
     <attribute name="dev-mode" value-type="boolean" />
     <attribute name="version" value-type="int" />
     <entity-ref name="topic" type="list" names="topics" />
+    <entity-ref name="app" type="list" names="apps" />
     <entity-ref name="codec" type="list" names="codecs" />
     <entity-ref name="endpoint" type="list" names="endpoints" />
     <entity-ref name="storage" type="list" names="storages" />
@@ -18,9 +19,21 @@
     <attribute name="create-time" value-type="Date" format="yyyy-MM-dd HH:mm:ss" />
     <attribute name="last-modified-time" value-type="Date" format="yyyy-MM-dd HH:mm:ss" />
     <attribute name="schema-id" value-type="int" />
+    <attribute name="consumer-retry-policy" value-type="String" />
     <attribute name="codec-type" value-type="String" />
+    <entity-ref name="consumer-group" type="list" names="consumer-groups" />
+    <entity-ref name="producer" type="list" names="producers" />
     <entity-ref name="partition" type="list" names="partitions" />
     <entity-ref name="property" type="list" names="properties" />
+  </entity>
+  <entity name="consumer-group">
+    <attribute name="id" value-type="int" />
+    <attribute name="name" value-type="String" />
+    <attribute name="app-ids" value-type="String" />
+    <attribute name="retry-policy" value-type="String" />
+  </entity>
+  <entity name="producer">
+    <attribute name="app-id" value-type="int" />
   </entity>
   <entity name="partition">
     <attribute name="id" value-type="int" />
@@ -31,6 +44,9 @@
   <entity name="property">
     <attribute name="name" value-type="String" />
     <attribute name="value" value-type="String" />
+  </entity>
+  <entity name="app">
+    <attribute name="id" value-type="int" />
   </entity>
   <entity name="codec">
     <attribute name="type" value-type="String" />

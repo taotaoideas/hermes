@@ -52,12 +52,9 @@ public class DefaultAckManager implements AckManager, Initializable {
 
 			@Override
 			public void run() {
+				List<Operation> ops = new ArrayList<Operation>();
 				while (!Thread.currentThread().isInterrupted()) {
 					try {
-						// TODO config batchSize
-						List<Operation> ops = new ArrayList<Operation>();
-						m_opQueue.drainTo(ops);
-
 						handleOperations(ops);
 
 						for (Map.Entry<Triple<Tpp, String, Boolean>, AckHolder<Integer>> entry : m_holders.entrySet()) {
@@ -72,11 +69,19 @@ public class DefaultAckManager implements AckManager, Initializable {
 								ContinuousRange doneRange = result.getDoneRange();
 								EnumRange<Integer> failRange = result.getFailRange();
 								if (failRange != null) {
-									m_queueManager.nack(tpp, groupId, resend, failRange.getOffsets());
+									try {
+										m_queueManager.nack(tpp, groupId, resend, failRange.getOffsets());
+									} catch (Exception e) {
+										// TODO
+									}
 								}
 
 								if (doneRange != null) {
-									m_queueManager.ack(tpp, groupId, resend, doneRange.getEnd());
+									try {
+										m_queueManager.ack(tpp, groupId, resend, doneRange.getEnd());
+									} catch (Exception e) {
+
+									}
 								}
 							}
 						}
@@ -97,25 +102,37 @@ public class DefaultAckManager implements AckManager, Initializable {
 
 			@SuppressWarnings("unchecked")
 			private void handleOperations(List<Operation> ops) {
-				if (ops.isEmpty()) {
-					return;
-				}
-
-				for (Operation op : ops) {
-					switch (op.getType()) {
-					case ACK:
-						m_holders.get(op.getKey()).acked((Long) op.getData(), true);
-						break;
-					case NACK:
-						m_holders.get(op.getKey()).acked((Long) op.getData(), false);
-						break;
-					case DELIVERED:
-						m_holders.get(op.getKey()).delivered((List<Pair<Long, Integer>>) op.getData(), op.getCreateTime());
-						break;
-
-					default:
-						break;
+				try {
+					if (ops.isEmpty()) {
+						// TODO config batchSize
+						m_opQueue.drainTo(ops);
 					}
+
+					if (ops.isEmpty()) {
+						return;
+					}
+
+					for (Operation op : ops) {
+						switch (op.getType()) {
+						case ACK:
+							m_holders.get(op.getKey()).acked((Long) op.getData(), true);
+							break;
+						case NACK:
+							m_holders.get(op.getKey()).acked((Long) op.getData(), false);
+							break;
+						case DELIVERED:
+							m_holders.get(op.getKey()).delivered((List<Pair<Long, Integer>>) op.getData(), op.getCreateTime());
+							break;
+
+						default:
+							break;
+						}
+					}
+
+					ops.clear();
+				} catch (Exception e) {
+					// TODO
+					e.printStackTrace();
 				}
 			}
 		});
