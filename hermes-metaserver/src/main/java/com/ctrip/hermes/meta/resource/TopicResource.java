@@ -106,6 +106,7 @@ public class TopicResource {
 		}
 
 		TopicView topicView = new TopicView(topic);
+		
 		Storage storage = topicService.findStorage(topic.getName());
 		topicView.setStorage(storage);
 		if (topic.getSchemaId() != null) {

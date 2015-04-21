@@ -27,6 +27,7 @@ import org.unidal.lookup.ComponentTestCase;
 
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.meta.pojo.SchemaView;
+import com.ctrip.hermes.meta.pojo.TopicView;
 import com.ctrip.hermes.meta.server.MetaRestServer;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -105,7 +106,7 @@ public class SchemaServerTest extends ComponentTestCase {
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
 		System.out.println(response.getStatus());
 	}
-	
+
 	@Test
 	public void testPostExistingJsonSchema() throws IOException {
 		String jsonString = Files.toString(new File("src/test/resources/schema-json-sample.json"), Charsets.UTF_8);
@@ -254,5 +255,41 @@ public class SchemaServerTest extends ComponentTestCase {
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatusInfo().getStatusCode());
 			System.out.println(response.readEntity(String.class));
 		}
+	}
+
+	@Test
+	public void testCreatTopicAndSchema() throws IOException {
+		String jsonString = Files.toString(new File("src/test/resources/topic-sample.json"), Charsets.UTF_8);
+		TopicView topicView = JSON.parseObject(jsonString, TopicView.class);
+		topicView.setName(topicView.getName() + "_" + UUID.randomUUID());
+
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		Builder request = webTarget.path("topics/").request();
+		Response response = request.post(Entity.json(topicView));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		TopicView createdTopic = response.readEntity(TopicView.class);
+
+		request = webTarget.path("schemas/").request();
+		jsonString = Files.toString(new File("src/test/resources/schema-json-sample.json"), Charsets.UTF_8);
+		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+		schemaView.setName(schemaView.getName() + "_" + UUID.randomUUID());
+		FormDataMultiPart form = new FormDataMultiPart();
+		form.field("schema", JSON.toJSONString(schemaView));
+		form.field("topicId", String.valueOf(createdTopic.getId()));
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/").queryParam("topicId", createdTopic.getId()).request();
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		SchemaView createdSchema = response.readEntity(SchemaView.class);
+
+		request = webTarget.path("schemas/" + createdSchema.getId()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+
+		request = webTarget.path("topics/" + createdTopic.getName()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 	}
 }

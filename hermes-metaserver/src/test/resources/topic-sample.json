@@ -2,12 +2,25 @@
   "name": "Sample.SampleTopic",
   "storageType": "kafka",
   "description": "topic for Sample Test",
-  "config": {
-    "partitions": "5",
-    "replication-factor": "3"
-  },
-  "schemaName": "ClickEvent",
-  "codeType": "json",
+  "properties": [
+    {
+      "name": "partitions",
+      "value": "5"
+    },
+    {
+      "name": "replication-factor",
+      "value": "3"
+    },
+    {
+      "name": "trafficKBPerSecond",
+      "value": "100"
+    },
+    {
+      "name": "trafficIncreasePerMonth",
+      "value": "2"
+    }
+  ],
+  "codecType": "json",
   "retryPolicy": {
     "retryTimes": 3
   },

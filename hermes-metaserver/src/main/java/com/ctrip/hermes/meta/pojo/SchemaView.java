@@ -1,9 +1,10 @@
 package com.ctrip.hermes.meta.pojo;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 import com.ctrip.hermes.meta.dal.meta.Schema;
+import com.ctrip.hermes.meta.entity.Property;
 
 public class SchemaView {
 	private Long id;
@@ -18,7 +19,9 @@ public class SchemaView {
 
 	private String compatibility;
 
-	private Map<String, Object> config;
+	private String description;
+
+	private List<Property> properties;
 
 	public SchemaView() {
 
@@ -30,6 +33,7 @@ public class SchemaView {
 		this.type = schema.getType();
 		this.version = schema.getVersion();
 		this.createTime = schema.getCreateTime();
+		this.description = schema.getDescription();
 		this.compatibility = schema.getCompatibility();
 	}
 
@@ -37,12 +41,12 @@ public class SchemaView {
 		return compatibility;
 	}
 
-	public Map<String, Object> getConfig() {
-		return config;
-	}
-
 	public Date getCreateTime() {
 		return createTime;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	public Long getId() {
@@ -51,6 +55,10 @@ public class SchemaView {
 
 	public String getName() {
 		return name;
+	}
+
+	public List<Property> getProperties() {
+		return properties;
 	}
 
 	public String getType() {
@@ -65,12 +73,12 @@ public class SchemaView {
 		this.compatibility = compatibility;
 	}
 
-	public void setConfig(Map<String, Object> config) {
-		this.config = config;
-	}
-
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void setId(Long id) {
@@ -79,6 +87,10 @@ public class SchemaView {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public void setProperties(List<Property> properties) {
+		this.properties = properties;
 	}
 
 	public void setType(String type) {
@@ -101,6 +113,7 @@ public class SchemaView {
 		}
 		schema.setCreateTime(this.createTime);
 		schema.setCompatibility(this.compatibility);
+		schema.setDescription(this.description);
 		return schema;
 	}
 

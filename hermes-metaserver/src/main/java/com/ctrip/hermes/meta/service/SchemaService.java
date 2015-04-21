@@ -16,6 +16,7 @@ import org.apache.avro.Schema.Parser;
 import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.unidal.dal.jdbc.DalException;
+import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -90,8 +91,8 @@ public class SchemaService {
 	 * @param schemaView
 	 * @return
 	 * @throws DalException
-	 * @throws RestClientException 
-	 * @throws IOException 
+	 * @throws RestClientException
+	 * @throws IOException
 	 */
 	public SchemaView createSchema(SchemaView schemaView) throws DalException, IOException, RestClientException {
 		return createSchema(schemaView, -1);
@@ -103,29 +104,34 @@ public class SchemaService {
 	 * @param topicId
 	 * @return
 	 * @throws DalException
-	 * @throws RestClientException 
-	 * @throws IOException 
+	 * @throws RestClientException
+	 * @throws IOException
 	 */
-	public SchemaView createSchema(SchemaView schemaView, long topicId) throws DalException, IOException, RestClientException {
+	public SchemaView createSchema(SchemaView schemaView, long topicId) throws DalException, IOException,
+	      RestClientException {
 		Schema schema = schemaView.toMetaSchema();
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
+		try {
+			Schema latestSchemaMeta = findLatestSchemaMeta(schema.getName());
+			schema.setVersion(latestSchemaMeta.getVersion() + 1);
+		} catch (DalNotFoundException e) {
+			schema.setVersion(1);
+		}
+		m_schemaDao.insert(schema);
 
 		Topic topic = null;
 		if (topicId > 0) {
 			topic = m_metaService.findTopic(topicId);
-			schema.setName(topic.getName() + "-value");
 		}
-		m_schemaDao.insert(schema);
-
 		if (topic != null) {
 			topic.setSchemaId(schema.getId());
 			m_topicService.updateTopic(topic);
 		}
-		
-		if("avro".equals(schema.getType())){
+
+		if ("avro".equals(schema.getType())) {
 			this.avroSchemaRegistry.updateCompatibility(schema.getName(), schema.getCompatibility());
 		}
-		
+
 		return new SchemaView(schema);
 	}
 

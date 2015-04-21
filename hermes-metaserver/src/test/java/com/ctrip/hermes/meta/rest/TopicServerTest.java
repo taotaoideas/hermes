@@ -45,10 +45,10 @@ public class TopicServerTest extends ComponentTestCase {
   public void testGetTopic() {
     Client client = ClientBuilder.newClient();
     WebTarget webTarget = client.target(StandaloneRestServer.HOST);
-    String topic = "kafka.SimpleTopic";
+    String topic = "kafka.AvroTopic";
     Builder request = webTarget.path("topics/" + topic).request();
     TopicView actual = request.get(TopicView.class);
-    System.out.println(actual);
+    System.out.println(JSON.toJSONString(actual));
     Assert.assertEquals(topic, actual.getName());
   }
 
