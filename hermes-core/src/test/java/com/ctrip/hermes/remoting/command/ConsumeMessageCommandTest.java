@@ -32,6 +32,69 @@ import com.ctrip.hermes.core.transport.command.Header;
 public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 	@Test
+	public void testStrange() {
+		final String strangeString = "{\"1\":{\"str\":\"429bb071-7d14-4da7-9ef1-a6f5b17911b5\"}," +
+				  "\"2\":{\"str\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"},\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1},\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"},\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"},\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"},\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
+
+		Map<String, String> appProperties = new HashMap<>();
+		appProperties.put("app_key", "123");
+		appProperties.put("strange", strangeString);
+
+		Map<String, String> sysProperties = new HashMap<>();
+		sysProperties.put("sys_key", "abc");
+		sysProperties.put("strange", strangeString);
+
+		List<ProducerMessage<String>> msgs1_1 = new ArrayList<>();
+		msgs1_1.add(createProducerMessage("topic1", "t1_body1_1", "t1_key1_1", "t1_p1_1", 1, true, appProperties,
+				  sysProperties));
+
+		ConsumeMessageCommand cmd = new ConsumeMessageCommand();
+
+//		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L), 1, true, true)));
+
+		ByteBuf buf = Unpooled.buffer();
+		cmd.toBytes(buf);
+
+		ConsumeMessageCommand decodedCmd = new ConsumeMessageCommand();
+		Header header = new Header();
+		header.parse(buf);
+		decodedCmd.parse(buf, header);
+
+		Map<Long, List<ConsumerMessage<?>>> result = new HashMap<>();
+		for (Map.Entry<Long, List<TppConsumerMessageBatch>> entry : decodedCmd.getMsgs().entrySet()) {
+			long correlationId = entry.getKey();
+			List<TppConsumerMessageBatch> batches = entry.getValue();
+
+			List<ConsumerMessage<?>> msgs = decodeBatches(batches, String.class);
+			result.put(correlationId, msgs);
+		}
+
+		Assert.assertEquals(1, result.size());
+		Assert.assertTrue(result.containsKey(1L));
+
+		// batch 1
+		List<ConsumerMessage<?>> cmsgList1 = result.get(1L);
+
+		Assert.assertEquals(1, cmsgList1.size());
+
+		for (int i = 0; i < 1; i++) {
+			ConsumerMessage<?> cmsg = cmsgList1.get(i);
+			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isResend());
+			Assert.assertEquals("topic1", cmsg.getTopic());
+			Assert.assertEquals(1, ((BrokerConsumerMessage<?>) cmsg).getPartition());
+			Assert.assertEquals(true, ((BrokerConsumerMessage<?>) cmsg).isPriority());
+			Assert.assertNotNull(cmsg.getBornTime());
+			Assert.assertTrue(String.format("t1_body%d_1", (i + 1)).equals((String) cmsg.getBody()));
+			Assert.assertTrue(String.format("t1_key%d_1", (i + 1)).equals(cmsg.getKey()));
+			Assert.assertEquals(Long.valueOf(i + 1).longValue(), ((BrokerConsumerMessage<?>) cmsg).getMsgSeq());
+
+			Assert.assertEquals("123", cmsg.getProperty("app_key"));
+			Assert.assertEquals(strangeString, cmsg.getProperty("strange"));
+		}
+	}
+
+
+	@Test
 	public void testEncodeAndDecode() {
 		Map<String, String> appProperties = new HashMap<>();
 		appProperties.put("app_key", "123");

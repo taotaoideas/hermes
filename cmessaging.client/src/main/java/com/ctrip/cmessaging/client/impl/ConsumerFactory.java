@@ -25,7 +25,7 @@ public class ConsumerFactory implements IConsumerFactory {
 
 	public ISyncConsumer createConsumerAsSync(String identifier, String topic, String exchangeName, long receiveTimeout) throws IllegalTopic, IllegalExchangeName {
 
-		return new HermesSyncConsumer(topic, identifier);
+		return new HermesSyncConsumer(topic, identifier, receiveTimeout);
 	}
 
 }

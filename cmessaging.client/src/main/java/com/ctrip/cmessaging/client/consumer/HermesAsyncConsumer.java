@@ -1,6 +1,7 @@
 package com.ctrip.cmessaging.client.consumer;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.ctrip.cmessaging.client.IAsyncConsumer;
@@ -18,6 +19,7 @@ public class HermesAsyncConsumer implements IAsyncConsumer {
 
 	private String topic;
 	private String groupId;
+	private boolean isAutoAck;
 
 	public HermesAsyncConsumer(String topic, String groupId) {
 		this.topic = topic;
@@ -46,7 +48,7 @@ public class HermesAsyncConsumer implements IAsyncConsumer {
 
 	@Override
 	public void ConsumeAsync(int maxThread, Boolean autoAck) {
-
+		this.isAutoAck = autoAck;
 		Engine engine = PlexusComponentLocator.lookup(Engine.class);
 
 		List<Subscriber> subscribers = new ArrayList<>();
@@ -88,8 +90,9 @@ public class HermesAsyncConsumer implements IAsyncConsumer {
 		@Override
 		public void consume(List<ConsumerMessage<byte[]>> msgs) {
 			try {
+//				System.out.println("received " + msgs.size() + " msgs.");
 				for (ConsumerMessage<byte[]> msg : msgs) {
-					handler.callback(new HermesIMessage(msg));
+					handler.callback(new HermesIMessage(msg, isAutoAck));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

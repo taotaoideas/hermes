@@ -6,15 +6,13 @@ import static org.junit.Assert.assertNull;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
+import com.google.common.base.Charsets;
 
 @SuppressWarnings({ "rawtypes" })
 public class HermesPrimitiveCodecTest extends ComponentTestCase {
@@ -105,6 +103,13 @@ public class HermesPrimitiveCodecTest extends ComponentTestCase {
 		String a = null;
 		String b = "longer string";
 		String c = "中文字very very long string \n \r \n \b." + "very very long string \n" + " \n" + " \n" + " \b.";
+		String strangeString = "{\"1\":{\"str\":\"429bb071\"}," +
+				  "\"2\":{\"s\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"}," +
+				  "\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1}," +
+				  "\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"}," +
+				  "\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"}," +
+				  "\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"}," +
+				  "\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
 
 		ByteBuf bf = Unpooled.buffer();
 
@@ -112,10 +117,12 @@ public class HermesPrimitiveCodecTest extends ComponentTestCase {
 		codec.writeString(a);
 		codec.writeString(b);
 		codec.writeString(c);
+		codec.writeString(strangeString);
 		String nullA = codec.readString();
 		assertEquals(a, nullA);
 		assertEquals(b, codec.readString());
 		assertEquals(c, codec.readString());
+		assertEquals(strangeString, codec.readString());
 	}
 
 	@Test
@@ -282,6 +289,48 @@ public class HermesPrimitiveCodecTest extends ComponentTestCase {
 		codec.writeMap(map);
 		Map result = codec.readMap();
 		assertNotNull(result);
+		assertEquals(map, result);
+	}
+
+	@Test
+	public void testMapByStringString() {
+
+//		final String strangeString = "{\"1\":{\"str\":\"429bb071\"},\"2\":{\"str\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"},\"5\":{\"str\":\"cmessage-adapter 1.0\"},";
+
+		final String strangeString = "{\"1\":{\"str\":\"429bb071\"}," +
+				  "\"2\":{\"s\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"}," +
+				  "\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1}," +
+				  "\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"}," +
+				  "\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"}," +
+				  "\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"}," +
+				  "\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
+
+		Map<String, String> map = new HashMap<>();
+		map.put("string", strangeString);
+
+		ByteBuf bfInit = Unpooled.buffer();
+
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(bfInit);
+		codec.writeMap(map);
+
+		ByteBuf buf1 =codec.getBuf();
+		byte[] bytes = new byte[buf1.readableBytes()];
+		buf1.readBytes(bytes);
+		System.out.println(Arrays.toString(bytes));
+
+
+		// 由于UTF_8是变长的编码，对于HermesPrimitiveCodec的一些自定值会错误的展开，导致最后deCode失败。
+		// 改成ISO_8859_1可以通过该Test，因为ISO_8859_1是定长编码。
+		byte[] outBytes = new String(bytes, Charsets.UTF_8).getBytes(Charsets.UTF_8);
+
+		assertEquals(Arrays.toString(bytes), Arrays.toString(outBytes));
+
+		System.out.println(Arrays.toString(outBytes));
+		ByteBuf buf2 = (Unpooled.wrappedBuffer(outBytes));
+		HermesPrimitiveCodec codec2 = new HermesPrimitiveCodec(buf2);
+
+
+		Map result = codec2.readMap();
 		assertEquals(map, result);
 	}
 }

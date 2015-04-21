@@ -13,10 +13,17 @@
     <artifactId>old-cmessage</artifactId>
 
     <dependencies>
-    <dependency>
-        <groupId>com.ctrip.cmessaging</groupId>
-        <artifactId>cmessaging.client</artifactId>
-        <version>1.0.2-hermes-adapter</version>
-    </dependency>
+        <dependency>
+            <groupId>com.ctrip.cmessaging</groupId>
+            <artifactId>cmessaging.client</artifactId>
+            <!--<version>1.0.2-hermes-adapter</version>-->
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
