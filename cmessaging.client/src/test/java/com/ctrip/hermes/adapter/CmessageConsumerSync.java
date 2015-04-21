@@ -7,6 +7,7 @@ import com.ctrip.cmessaging.client.exception.ConsumeTimeoutException;
 import com.ctrip.cmessaging.client.exception.IllegalExchangeName;
 import com.ctrip.cmessaging.client.exception.IllegalTopic;
 import com.ctrip.cmessaging.client.impl.ConsumerFactory;
+import com.google.common.base.Charsets;
 
 public class CmessageConsumerSync {
 
@@ -19,23 +20,20 @@ public class CmessageConsumerSync {
 		ISyncConsumer consumer1 = ConsumerFactory.instance.createConsumerAsSync("922101_9dc4a4ff", "order_new",
 				  "ExchangeTest", 3000);
 		consumer1.setBatchSize(20);
-
-		try {
-
-			while(true) {
+		while (true) {
+			try {
 				IMessage message1 = consumer1.consumeOne();
-				System.out.println("MessageId:" + message1.getMessageID());
-				System.out.println("Body:" + new String(message1.getBody()));
-				System.out.println();
+				System.out.println("Body:" + new String(message1.getBody(), Charsets.ISO_8859_1));
+				System.out.println(message1);
 				//业务逻辑
 				//
 				//根据业务需求设置Ack或Nack
 				//message1.setAcks(AckMode.Ack);
 //				message1.setAcks(AckMode.Nack);
 				message1.dispose();
+			} catch (ConsumeTimeoutException e) {
+				System.out.println("ConsumeTimeoutException");
 			}
-		} catch (ConsumeTimeoutException e) {
-			e.printStackTrace();
 		}
 	}
 }

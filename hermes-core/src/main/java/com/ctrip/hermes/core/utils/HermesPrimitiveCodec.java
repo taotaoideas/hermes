@@ -85,7 +85,7 @@ public class HermesPrimitiveCodec {
 			writeNull();
 		} else {
 			m_buf.writeByte(Prefix.STRING);
-			int length = str.getBytes().length;
+			int length = str.getBytes(Charsets.UTF_8).length;
 			m_buf.writeInt(length);
 			m_buf.writeBytes(str.getBytes(Charsets.UTF_8));
 		}
@@ -363,24 +363,24 @@ public class HermesPrimitiveCodec {
 
 	private static class Prefix {
 
-		static final byte NULL = Byte.parseByte("01", 16); // 0x01
+		static final byte NULL = Byte.parseByte("01", 16); // 0x01 = "1"
 
-		static final byte TRUE = Byte.parseByte("11", 16); // 0x11
+		static final byte TRUE = Byte.parseByte("11", 16); // 0x11 = "17"
 
-		static final byte FALSE = Byte.parseByte("10", 16); // 0x10
+		static final byte FALSE = Byte.parseByte("10", 16); // 0x10 = "16"
 
-		static final byte CHAR = Byte.parseByte("20", 16); // "0x20"
+		static final byte CHAR = Byte.parseByte("20", 16); // "0x20" = "32"
 
-		static final byte BYTES = Byte.parseByte("24", 16); // "0x24"
+		static final byte BYTES = Byte.parseByte("24", 16); // "0x24" = "36"
 
-		static final byte INT = Byte.parseByte("30", 16); // "0x30"
+		static final byte INT = Byte.parseByte("30", 16); // "0x30" = "48"
 
-		static final byte LONG = Byte.parseByte("40", 16); // "0x40"
+		static final byte LONG = Byte.parseByte("40", 16); // "0x40" = "64"
 
-		static final byte STRING = Byte.parseByte("54", 16); // "0x54"
+		static final byte STRING = Byte.parseByte("54", 16); // "0x54" = "84"
 
-		static final byte LIST = Byte.parseByte("64", 16); // "0x64"
+		static final byte LIST = Byte.parseByte("64", 16); // "0x64" = "100"
 
-		static final byte MAP = Byte.parseByte("74", 16); // "0x74"
+		static final byte MAP = Byte.parseByte("74", 16); // "0x74" = "116"
 	}
 }

@@ -7,6 +7,7 @@ import com.ctrip.cmessaging.client.event.IConsumerCallbackEventHandler;
 import com.ctrip.cmessaging.client.exception.IllegalExchangeName;
 import com.ctrip.cmessaging.client.exception.IllegalTopic;
 import com.ctrip.cmessaging.client.impl.ConsumerFactory;
+import com.google.common.base.Charsets;
 
 public class CmessageConsumerAsync {
 
@@ -14,10 +15,8 @@ public class CmessageConsumerAsync {
 
 		@Override
 		public void callback(IMessage message) throws Exception{
-			System.out.println("MessageId:"+message.getMessageID());
-			System.out.println("Body:"+new String(message.getBody()));
-			System.out.println("header:"+message.getHeader());
-			System.out.println();
+			System.out.println("Receive: " + new String(message.getBody(), Charsets.UTF_8));
+			System.out.println(message);
 			message.setAcks(AckMode.Ack);
 			message.dispose();
 		}

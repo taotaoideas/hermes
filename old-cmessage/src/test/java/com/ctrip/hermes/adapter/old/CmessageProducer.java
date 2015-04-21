@@ -3,6 +3,7 @@ package com.ctrip.hermes.adapter.old;
 import com.ctrip.cmessaging.client.IProducer;
 import com.ctrip.cmessaging.client.exception.IllegalExchangeName;
 import com.ctrip.cmessaging.client.exception.IllegalSubject;
+import com.ctrip.cmessaging.client.impl.Config;
 import com.ctrip.cmessaging.client.impl.ProducerFactory;
 
 public class CmessageProducer {
@@ -19,6 +20,6 @@ public class CmessageProducer {
 		producer.PublishAsync("hello i23", "h.test.t");
 
 		System.out.println("Send done.");
-		System.exit(0);
+//		System.exit(0);
 	}
 }

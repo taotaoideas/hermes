@@ -4,18 +4,23 @@ import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.dal.hermes.MessagePriority;
-import com.ctrip.hermes.broker.dal.hermes.MessagePriorityDao;
-import com.ctrip.hermes.broker.dal.hermes.ResendGroupId;
-import com.ctrip.hermes.broker.dal.hermes.ResendGroupIdDao;
+import com.ctrip.hermes.broker.dal.hermes.*;
 import com.ctrip.hermes.core.bo.Tpp;
+import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
+import com.google.common.base.Charsets;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class MessageDaoTest extends ComponentTestCase {
 
@@ -86,6 +91,49 @@ public class MessageDaoTest extends ComponentTestCase {
 		long start = System.currentTimeMillis();
 		dao.insert(msgs);
 		System.out.println(System.currentTimeMillis() - start);
+	}
+
+	@Test
+	public void testDaoWithStrangeString() throws Exception {
+		final String stangeString = "{\"1\":{\"str\":\"429bb071-7d14-4da7-9ef1-a6f5b17911b5\"}," +
+				  "\"2\":{\"str\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"},\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1},\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"},\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"},\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"},\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
+
+		System.out.println(new String(stangeString.getBytes(Charsets.UTF_8), Charsets.UTF_8).equals(stangeString));
+
+		Map<String, String> map = new HashMap<>();
+		map.put("strange", stangeString);
+
+		ByteBuf buf = Unpooled.buffer();
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+		codec.writeMap(map);
+
+		byte[] bytes = new byte[buf.readableBytes()];
+		buf.readBytes(bytes);
+
+		MessagePriority mp = new MessagePriority();
+		mp.setTopic("order_new");
+		mp.setPartition(0);
+		mp.setPriority(0);
+		mp.setAttributes(bytes);
+
+		ByteBuf buf2 = (Unpooled.wrappedBuffer(mp.getAttributes()));
+
+		HermesPrimitiveCodec codec2 = new HermesPrimitiveCodec(buf2);
+
+		System.out.println(codec2.readMap());
+
+		MessagePriorityDao dao = lookup(MessagePriorityDao.class);
+
+		dao.insert(mp);
+
+		// 需要清空表，因为取第一个
+		List<MessagePriority> m = dao.findIdAfter("order_new", 0, 0, 0L, 1, MessagePriorityEntity.READSET_FULL);
+
+		ByteBuf buf3 = (Unpooled.wrappedBuffer(m.get(0).getAttributes()));
+
+		HermesPrimitiveCodec codec3 = new HermesPrimitiveCodec(buf3);
+
+		System.out.println(codec3.readMap());
 	}
 
 	@Test

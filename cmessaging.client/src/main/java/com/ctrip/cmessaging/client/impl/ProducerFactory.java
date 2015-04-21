@@ -10,8 +10,10 @@ public class ProducerFactory implements IProducerFactory {
 
 	private ProducerFactory() {}
 
+	Config appConfig = new Config();
+
 	@Override
 	public IProducer create(String exchangeName, String identifier) throws IllegalExchangeName {
-		return new HermesProducer();
+		return new HermesProducer(exchangeName, appConfig.getAppId());
 	}
 }

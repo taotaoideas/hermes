@@ -1,13 +1,23 @@
 package com.ctrip.cmessaging.client.producer;
 
-import java.lang.Override;
-import java.lang.String;
+import java.util.UUID;
+
 import com.ctrip.cmessaging.client.IProducer;
+import com.ctrip.cmessaging.client.constant.AdapterConstant;
 import com.ctrip.cmessaging.client.exception.IllegalSubject;
 import com.ctrip.cmessaging.client.impl.MessageHeader;
+import com.ctrip.cmessaging.client.message.MessageUtil;
 import com.ctrip.hermes.producer.api.Producer;
 
 public class HermesProducer implements IProducer {
+
+	private String exchangeName;
+	private String appId;
+
+	public HermesProducer(String exchangeName, String appId) {
+		this.exchangeName = exchangeName;
+		this.appId = appId;
+	}
 
 	@Override
 	public void PublishAsync(String content, String subject) throws IllegalSubject {
@@ -16,13 +26,16 @@ public class HermesProducer implements IProducer {
 
 	@Override
 	public void PublishAsync(String content, String subject, MessageHeader map) throws IllegalSubject {
-		/*
-		MessageHeader including the info like appid, correlationID, userHeaders...
-		Here we didn't write them into message, 'cus these info will be added in the
-		following progress.
-		 */
 		Producer p = Producer.getInstance();
 
-		p.message(subject, content).send();
+		// as cmessage-java-client: SimpleProducer generated messaged id.
+		String messageId = UUID.randomUUID().toString();
+
+		p.message(subject, content)
+				  .addProperty(AdapterConstant.CMESSAGING_EXCHANGENAME, exchangeName)
+				  .addProperty(AdapterConstant.CMESSAGING_MESSAGEID, messageId)
+				  .addProperty(AdapterConstant.CMESSAGING_HEADER,
+							 MessageUtil.buildHeader(exchangeName, messageId, subject, content, map))
+				  .send();
 	}
 }

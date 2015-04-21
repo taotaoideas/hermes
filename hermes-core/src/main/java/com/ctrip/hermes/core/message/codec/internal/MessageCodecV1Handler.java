@@ -154,6 +154,17 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		codec.writeMap(properties);
 		int mapLength = buf.writerIndex() - writeIndexBeforeMap;
 		int writeIndexEnd = buf.writerIndex();
+
+		// for debug
+//		byte[] bytes = buf.array();
+//		System.out.println(">>>>>>>>>writeProperties");
+//
+//
+//		byte[] tmp = new byte[mapLength];
+//		System.out.println(Arrays.asList(bytes).subList(writeIndexBeforeLength, writeIndexEnd));
+
+		// end
+
 		buf.writerIndex(writeIndexBeforeLength);
 		codec.writeInt(mapLength);
 		buf.writerIndex(writeIndexEnd);

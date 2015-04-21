@@ -1,8 +1,6 @@
 package com.ctrip.cmessaging.client.message;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Arrays;
 
 import com.ctrip.cmessaging.client.IMessage;
 import com.ctrip.cmessaging.client.content.AckMode;
@@ -22,18 +20,22 @@ public class HermesIMessage implements IMessage {
 
 	private AckMode ackMode;
 
-	public HermesIMessage(ConsumerMessage<byte[]> cmsg) {
+	private ConsumerMessage msg;
+
+	public HermesIMessage(ConsumerMessage<byte[]> cmsg, boolean isAutoAck) {
 		this.subject = cmsg.getTopic();
-		this.exchangeName = "Hermes_ExchangeName";
-		this.messageId = "Hermes_messageId";
-		Map<String, String> properties = new HashMap<>();
-		for (Iterator<String> iter = cmsg.getPropertyNames(); iter.hasNext();) {
-			String name = iter.next();
-			properties.put(name, cmsg.getProperty(name));
-		}
-		this.header = properties.toString();
+		this.exchangeName = MessageUtil.getExchangeName(cmsg);
+		this.messageId = MessageUtil.getMessageId(cmsg);
+		this.header = MessageUtil.getHeader(cmsg);
 		this.body = cmsg.getBody();
-		this.ackMode = AckMode.Ack;
+
+		if (isAutoAck) {
+			this.ackMode = AckMode.Ack;
+		} else {
+			this.ackMode = null;
+		}
+
+		this.msg = cmsg;
 	}
 
 	@Override
@@ -73,6 +75,22 @@ public class HermesIMessage implements IMessage {
 
 	@Override
 	public void dispose() {
-		// todo: dispose...
+		if (ackMode == AckMode.Nack) {
+			msg.nack();
+		} else if (ackMode == AckMode.Ack) {
+			msg.ack();
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "HermesIMessage{" +
+				  "\n\tsubject='" + subject + '\'' +
+				  ", \n\texchangeName='" + exchangeName + '\'' +
+				  ", \n\tmessageId='" + messageId + '\'' +
+				  ", \n\theader='" + header + '\'' +
+				  ", \n\tbody=" + Arrays.toString(body) +
+				  ", \n\tackMode=" + ackMode +
+				  '}';
 	}
 }

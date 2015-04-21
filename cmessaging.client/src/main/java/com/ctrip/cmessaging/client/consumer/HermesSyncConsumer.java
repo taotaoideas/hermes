@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import com.ctrip.cmessaging.client.IMessage;
 import com.ctrip.cmessaging.client.ISyncConsumer;
@@ -18,13 +19,14 @@ import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 public class HermesSyncConsumer implements ISyncConsumer {
 	private String topic;
 	private String groupId;
-
+	private long timeout;
 
 	BlockingDeque<ConsumerMessage<byte[]>> msgQueue = new LinkedBlockingDeque<>();
 
-	public HermesSyncConsumer(String topic, String groupId) {
+	public HermesSyncConsumer(String topic, String groupId, long timeout) {
 		this.topic = topic;
 		this.groupId = groupId;
+		this.timeout = timeout;
 
 		Engine engine = PlexusComponentLocator.lookup(Engine.class);
 
@@ -33,7 +35,7 @@ public class HermesSyncConsumer implements ISyncConsumer {
 		subscribers.add(new Subscriber(topic, groupId, new InnerConsumer()));
 
 		// todo: move engine.start() into consumeOne() step,
-		// need engine provides the interface to check whether it had been started.
+		// 暂时无法实现，需engine提供stop方法。
 		engine.start(subscribers);
 	}
 
@@ -41,17 +43,21 @@ public class HermesSyncConsumer implements ISyncConsumer {
 	@Override
 	public IMessage consumeOne() throws ConsumeTimeoutException {
 		try {
-			ConsumerMessage<byte[]> consumerMessage = msgQueue.take();
-			return new HermesIMessage(consumerMessage);
+			ConsumerMessage<byte[]> consumerMessage = msgQueue.poll(timeout, TimeUnit.MILLISECONDS);
+
+			if (null == consumerMessage) {
+				throw new ConsumeTimeoutException();
+			} else {
+				return new HermesIMessage(consumerMessage, true);
+			}
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return null;
 	}
 
 	@Override
 	public void setReceiveTimeout(long l) {
-		// todo
+		this.timeout = l;
 	}
 
 	@Override

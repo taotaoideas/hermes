@@ -1,6 +1,8 @@
 package com.ctrip.hermes.example.performance;
 
 import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
@@ -36,6 +38,8 @@ public class ProduceAndConsume extends ComponentTestCase {
 
 	final static String TOPIC = "order_new";
 
+	final static int threadNum = 1;
+
 	private void printAndClean() {
 		int secondInTimeInterval = (int) timeInterval / 1000;
 
@@ -52,8 +56,31 @@ public class ProduceAndConsume extends ComponentTestCase {
 		receiveCount.set(0);
 	}
 
+//	@Test
+	public void suddenDownTest() throws IOException, InterruptedException {
+		startBroker();
+		System.in.read();
+	}
+
+
+//	@Test
+	public void produceOne() throws IOException {
+		Producer p = lookup(Producer.class);
+
+			p.message(TOPIC, sendCount.get()).send();
+		System.in.read();
+	}
+
+//	@Test
+	public void consumeOne() throws IOException {
+		startConsumeThread();
+		System.in.read();
+	}
+
+
+
 	@Test
-	public void myTest() throws IOException {
+	public void myTest() throws IOException, InterruptedException {
 		startBroker();
 		startCountTimer();
 		startProduceThread();
@@ -62,7 +89,7 @@ public class ProduceAndConsume extends ComponentTestCase {
 		System.in.read();
 	}
 
-	private void startBroker() {
+	private void startBroker() throws InterruptedException {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -87,7 +114,9 @@ public class ProduceAndConsume extends ComponentTestCase {
 	}
 
 	private void startProduceThread() {
-		runProducer();
+		for (int i = 0; i < threadNum; i ++) {
+			runProducer();
+		}
 	}
 
 	private void runProducer() {
@@ -97,21 +126,26 @@ public class ProduceAndConsume extends ComponentTestCase {
 				Producer p = lookup(Producer.class);
 
 				for (;;) {
-					SettableFuture<SendResult> future = (SettableFuture<SendResult>) p.message(TOPIC, sendCount.get())
-					      .send();
+					SettableFuture<SendResult> future = (SettableFuture<SendResult>) p.message(TOPIC, sendCount.get()).send();
+
 					Futures.addCallback(future, new FutureCallback<SendResult>() {
+								  @Override
+								  public void onSuccess(SendResult result) {
+									  sendCount.addAndGet(1);
+								  }
 
-						@Override
-                  public void onSuccess(SendResult result) {
-							sendCount.addAndGet(1);
-                  }
+								  @Override
+								  public void onFailure(Throwable t) {
+									  sendCount.addAndGet(1);
+								  }
+							  }, Executors.newCachedThreadPool()
+					);
 
-						@Override
-                  public void onFailure(Throwable t) {
-	                  
-                  }
-						
-					});
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}).start();
@@ -121,16 +155,61 @@ public class ProduceAndConsume extends ComponentTestCase {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String topic = TOPIC;
 				Engine engine = lookup(Engine.class);
 
-				Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
+				Subscriber s = new Subscriber(TOPIC, "group1", new Consumer<String>() {
 					@Override
 					public void consume(List<ConsumerMessage<String>> msgs) {
 						receiveCount.addAndGet(msgs.size());
 						for (ConsumerMessage<?> msg : msgs) {
 							// TODO
 							msg.ack();
+						}
+					}
+				});
+
+				engine.start(Arrays.asList(s));
+			}
+		}).start();
+	}
+
+	final static String stangeString = "{\"1\":{\"str\":\"429bb071-7d14-4da7-9ef1-a6f5b17911b5\"}," +
+			  "\"2\":{\"str\":\"ExchangeTest\"},\"3\":33333{\"i32\":8},\"4\":{\"str\":\"uft-8\"}," +
+			  "\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1},\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"},\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"},\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"},\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
+
+	@Test
+	public void integratedTest() throws IOException, InterruptedException {
+		startBroker();
+		startConsumeThreadStrange();
+
+		Producer p = lookup(Producer.class);
+
+		p.message(TOPIC, "some content").
+				  addProperty("strangeString", stangeString).
+				  send();
+
+		System.in.read();
+	}
+
+
+	private void startConsumeThreadStrange() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				String topic = TOPIC;
+				Engine engine = lookup(Engine.class);
+
+				Subscriber s = new Subscriber(topic, "group1", new Consumer<String>() {
+					@Override
+					public void consume(List<ConsumerMessage<String>> msgs) {
+						for (ConsumerMessage<String> msg : msgs) {
+							Iterator<String> it = msg.getPropertyNames();
+							System.out.println("msg: " + msg.getBody());
+							while (it.hasNext()) {
+								String key = it.next();
+								System.out.println("key: " + key + ", value: " + msg.getProperty(key));
+							}
+
 						}
 					}
 				});
