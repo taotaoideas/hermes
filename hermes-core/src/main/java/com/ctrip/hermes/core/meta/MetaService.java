@@ -5,6 +5,7 @@ import java.util.List;
 import com.ctrip.hermes.meta.entity.Codec;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
+import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
@@ -79,5 +80,7 @@ public interface MetaService {
 	int getAckTimeoutSeconds(String topic);
 
 	Codec getCodecByType(String codecType);
+	
+	public void refreshMeta(Meta meta);
 
 }

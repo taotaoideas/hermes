@@ -89,61 +89,34 @@ public class SchemaService {
 	/**
 	 * 
 	 * @param schemaView
-	 * @return
-	 * @throws DalException
-	 * @throws RestClientException
-	 * @throws IOException
-	 */
-	public SchemaView createSchema(SchemaView schemaView) throws DalException, IOException, RestClientException {
-		return createSchema(schemaView, -1);
-	}
-
-	/**
-	 * 
-	 * @param schemaView
 	 * @param topicId
 	 * @return
 	 * @throws DalException
 	 * @throws RestClientException
 	 * @throws IOException
 	 */
-	public SchemaView createSchema(SchemaView schemaView, long topicId) throws DalException, IOException,
+	public SchemaView createSchema(SchemaView schemaView, Topic topic) throws DalException, IOException,
 	      RestClientException {
 		Schema schema = schemaView.toMetaSchema();
 		schema.setCreateTime(new Date(System.currentTimeMillis()));
+		schema.setName(topic.getName() + "-value");
+		schema.setTopicId(topic.getId());
 		try {
-			Schema latestSchemaMeta = findLatestSchemaMeta(schema.getName());
-			schema.setVersion(latestSchemaMeta.getVersion() + 1);
+			Schema maxVersionSchemaMeta = m_schemaDao.getMaxVersionByTopic(topic.getId(), SchemaEntity.READSET_FULL);
+			schema.setVersion(maxVersionSchemaMeta.getVersion() + 1);
 		} catch (DalNotFoundException e) {
 			schema.setVersion(1);
 		}
 		m_schemaDao.insert(schema);
 
-		Topic topic = null;
-		if (topicId > 0) {
-			topic = m_metaService.findTopic(topicId);
-		}
-		if (topic != null) {
-			topic.setSchemaId(schema.getId());
-			m_topicService.updateTopic(topic);
-		}
+		topic.setSchemaId(schema.getId());
+		m_topicService.updateTopic(topic);
 
 		if ("avro".equals(schema.getType())) {
 			this.avroSchemaRegistry.updateCompatibility(schema.getName(), schema.getCompatibility());
 		}
 
 		return new SchemaView(schema);
-	}
-
-	public SchemaView updateSchemaFile(SchemaView schemaView, InputStream fileInputStream,
-	      FormDataContentDisposition fileHeader) throws IOException, DalException, RestClientException {
-		SchemaView result = null;
-		if (schemaView.getType().equals("json")) {
-			result = uploadJsonSchema(schemaView, null, null, fileInputStream, fileHeader);
-		} else if (schemaView.getType().equals("avro")) {
-			result = uploadAvroSchema(schemaView, fileInputStream, fileHeader, null, null);
-		}
-		return result;
 	}
 
 	/**
@@ -154,28 +127,6 @@ public class SchemaService {
 	public void deleteSchema(long id) throws DalException {
 		Schema schema = m_schemaDao.findByPK(id, SchemaEntity.READSET_FULL);
 		m_schemaDao.deleteByPK(schema);
-	}
-
-	/**
-	 * 
-	 * @param schemaName
-	 * @return
-	 * @throws DalException
-	 */
-	public Schema findLatestSchemaMeta(String schemaName) throws DalException {
-		Schema schema = m_schemaDao.findLatestByName(schemaName, SchemaEntity.READSET_FULL);
-		return schema;
-	}
-
-	/**
-	 * 
-	 * @param schemaName
-	 * @return
-	 * @throws DalException
-	 */
-	public List<Schema> findSchemaMeta(String schemaName) throws DalException {
-		List<Schema> schemas = m_schemaDao.findByName(schemaName, SchemaEntity.READSET_FULL);
-		return schemas;
 	}
 
 	/**
@@ -215,6 +166,38 @@ public class SchemaService {
 
 	/**
 	 * 
+	 * @param topic
+	 * @return
+	 * @throws DalException
+	 */
+	public List<Schema> listSchemaView(Topic topic) throws DalException {
+		List<Schema> schemas = m_schemaDao.findByTopic(topic.getId(), SchemaEntity.READSET_FULL);
+		return schemas;
+	}
+
+	/**
+	 * 
+	 * @param schemaView
+	 * @param fileInputStream
+	 * @param fileHeader
+	 * @return
+	 * @throws IOException
+	 * @throws DalException
+	 * @throws RestClientException
+	 */
+	public SchemaView updateSchemaFile(SchemaView schemaView, InputStream fileInputStream,
+	      FormDataContentDisposition fileHeader) throws IOException, DalException, RestClientException {
+		SchemaView result = null;
+		if (schemaView.getType().equals("json")) {
+			result = uploadJsonSchema(schemaView, null, null, fileInputStream, fileHeader);
+		} else if (schemaView.getType().equals("avro")) {
+			result = uploadAvroSchema(schemaView, fileInputStream, fileHeader, null, null);
+		}
+		return result;
+	}
+
+	/**
+	 * 
 	 * @param schemaView
 	 * @param schemaInputStream
 	 * @param schemaHeader
@@ -227,34 +210,30 @@ public class SchemaService {
 	public SchemaView uploadAvroSchema(SchemaView schemaView, InputStream schemaInputStream,
 	      FormDataContentDisposition schemaHeader, InputStream jarInputStream, FormDataContentDisposition jarHeader)
 	      throws IOException, DalException, RestClientException {
-		Schema metaSchema = schemaView.toMetaSchema();
-		Schema updatedSchema = new Schema();
-		updatedSchema.setName(metaSchema.getName());
-		updatedSchema.setCompatibility(metaSchema.getCompatibility());
-		updatedSchema.setCreateTime(new Date(System.currentTimeMillis()));
-		updatedSchema.setDescription(metaSchema.getDescription());
-		updatedSchema.setType(metaSchema.getType());
-		updatedSchema.setVersion(metaSchema.getVersion() + 1);
+		if (schemaInputStream == null) {
+			return schemaView;
+		}
 
+		Schema metaSchema = schemaView.toMetaSchema();
 		if (schemaInputStream != null) {
 			byte[] schemaContent = ByteStreams.toByteArray(schemaInputStream);
-			updatedSchema.setSchemaContent(schemaContent);
-			updatedSchema.setSchemaProperties(schemaHeader.toString());
+			metaSchema.setSchemaContent(schemaContent);
+			metaSchema.setSchemaProperties(schemaHeader.toString());
 
 			Parser parser = new Parser();
 			org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
-			int avroid = avroSchemaRegistry.register(updatedSchema.getName(), avroSchema);
-			updatedSchema.setAvroid(avroid);
+			int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
+			metaSchema.setAvroid(avroid);
 
-			compileAvro(updatedSchema, avroSchema);
+			compileAvro(metaSchema, avroSchema);
 		}
 		if (jarInputStream != null) {
 			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
-			updatedSchema.setJarContent(jarContent);
-			updatedSchema.setJarProperties(jarHeader.toString());
+			metaSchema.setJarContent(jarContent);
+			metaSchema.setJarProperties(jarHeader.toString());
 		}
-		m_schemaDao.insert(updatedSchema);
-		return new SchemaView(updatedSchema);
+		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		return new SchemaView(metaSchema);
 	}
 
 	/**
@@ -270,29 +249,24 @@ public class SchemaService {
 	public SchemaView uploadJsonSchema(SchemaView schemaView, InputStream schemaInputStream,
 	      FormDataContentDisposition schemaHeader, InputStream jarInputStream, FormDataContentDisposition jarHeader)
 	      throws IOException, DalException {
-		Schema metaSchema = schemaView.toMetaSchema();
-		Schema updatedSchema = new Schema();
-		updatedSchema.setName(metaSchema.getName());
-		updatedSchema.setCompatibility(metaSchema.getCompatibility());
-		updatedSchema.setCreateTime(new Date(System.currentTimeMillis()));
-		updatedSchema.setDescription(metaSchema.getDescription());
-		updatedSchema.setType(metaSchema.getType());
-		updatedSchema.setAvroid(metaSchema.getAvroid());
-		updatedSchema.setVersion(metaSchema.getVersion() + 1);
+		if (jarInputStream == null) {
+			return schemaView;
+		}
 
+		Schema metaSchema = schemaView.toMetaSchema();
 		if (schemaInputStream != null) {
 			byte[] schemaContent = ByteStreams.toByteArray(schemaInputStream);
-			updatedSchema.setSchemaContent(schemaContent);
-			updatedSchema.setSchemaProperties(schemaHeader.toString());
+			metaSchema.setSchemaContent(schemaContent);
+			metaSchema.setSchemaProperties(schemaHeader.toString());
 		}
 
 		if (jarInputStream != null) {
 			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
-			updatedSchema.setJarContent(jarContent);
-			updatedSchema.setJarProperties(jarHeader.toString());
+			metaSchema.setJarContent(jarContent);
+			metaSchema.setJarProperties(jarHeader.toString());
 		}
-		m_schemaDao.insert(updatedSchema);
-		return new SchemaView(updatedSchema);
+		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+		return new SchemaView(metaSchema);
 	}
 
 	/**

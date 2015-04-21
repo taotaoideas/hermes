@@ -10,19 +10,20 @@
 		</query-defs>
 	</entity>
 	<entity name="schema">
+		<var name="tId" value-type="long" />
 		<query-defs>
-			<query name="findLatestByName" type="SELECT">
-				<param name="name" />
+			<query name="findByTopic" type="SELECT" multiple="true">
+				<param name="tId" />
 				<statement><![CDATA[SELECT <FIELDS/>
         FROM <TABLE/>
-        WHERE <FIELD name='name'/> = ${name}
-        ORDER BY <FIELD name='id'/> DESC]]></statement>
+        WHERE <FIELD name='topic-id'/> = ${tId}]]></statement>
 			</query>
-			<query name="findByName" type="SELECT" multiple="true">
-				<param name="name" />
+			<query name="getMaxVersionByTopic" type="SELECT">
+				<param name="tId" />
 				<statement><![CDATA[SELECT <FIELDS/>
-        FROM <TABLE/>
-        WHERE <FIELD name='name'/> = ${name}]]></statement>
+		FROM <TABLE/>
+		WHERE <FIELD name='topic-id'/> = ${tId} ORDER BY <FIELD name='version'/> DESC]]>
+				</statement>
 			</query>
 			<query name="list" type="SELECT" multiple="true">
 				<statement><![CDATA[SELECT <FIELDS/>
@@ -33,7 +34,7 @@
 				<statement><![CDATA[SELECT <FIELDS/>
 		FROM <TABLE/>
 		WHERE <FIELD name='id'/> IN 
-		(SELECT MAX(<FIELD name='id'/>) FROM <TABLE/> GROUP BY <FIELD name='name'/>)]]>
+		(SELECT MAX(<FIELD name='id'/>) FROM <TABLE/> GROUP BY <FIELD name='topic-id'/>)]]>
 				</statement>
 			</query>
 		</query-defs>

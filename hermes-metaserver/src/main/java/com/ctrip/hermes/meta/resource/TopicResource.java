@@ -106,7 +106,7 @@ public class TopicResource {
 		}
 
 		TopicView topicView = new TopicView(topic);
-		
+
 		Storage storage = topicService.findStorage(topic.getName());
 		topicView.setStorage(storage);
 		if (topic.getSchemaId() != null) {
@@ -129,7 +129,7 @@ public class TopicResource {
 		TopicView topic = getTopic(name);
 		if (topic.getSchema() != null) {
 			try {
-				List<Schema> schemaMetas = schemaService.findSchemaMeta(topic.getSchema().getName());
+				List<Schema> schemaMetas = schemaService.listSchemaView(topic.toMetaTopic());
 				for (Schema schema : schemaMetas) {
 					SchemaView schemaView = new SchemaView(schema);
 					returnResult.add(schemaView);

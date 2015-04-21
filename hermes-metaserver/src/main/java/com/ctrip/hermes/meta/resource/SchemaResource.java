@@ -9,13 +9,11 @@ import java.util.Map;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -29,9 +27,11 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.dal.meta.Schema;
+import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.SchemaService;
+import com.ctrip.hermes.meta.service.TopicService;
 
 @Path("/schemas/")
 @Singleton
@@ -39,6 +39,8 @@ import com.ctrip.hermes.meta.service.SchemaService;
 public class SchemaResource {
 
 	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
+
+	private static TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
 
 	/**
 	 * 
@@ -54,7 +56,7 @@ public class SchemaResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response createSchema(@FormDataParam("file") InputStream fileInputStream,
 	      @FormDataParam("file") FormDataContentDisposition fileHeader, @FormDataParam("schema") String content,
-	      @FormDataParam("topicId") @DefaultValue("0") long topicId) {
+	      @FormDataParam("topicId") long topicId) {
 		if (StringUtils.isEmpty(content)) {
 			throw new RestException("HTTP POST body is empty", Status.BAD_REQUEST);
 		}
@@ -65,20 +67,13 @@ public class SchemaResource {
 			throw new RestException(e, Status.BAD_REQUEST);
 		}
 
-		Schema schemaMeta = null;
-		try {
-			schemaMeta = schemaService.findLatestSchemaMeta(schemaView.getName());
-		} catch (DalNotFoundException e) {
-			// Normal case
-		} catch (DalException e) {
-			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
-		}
-		if (schemaMeta != null) {
-			throw new RestException("schema already exists, could not create again.", Status.CONFLICT);
+		Topic topic = topicService.getTopic(topicId);
+		if (topic == null) {
+			throw new RestException("Topic not found: " + topicId, Status.NOT_FOUND);
 		}
 
 		try {
-			schemaView = schemaService.createSchema(schemaView, topicId);
+			schemaView = schemaService.createSchema(schemaView, topic);
 			schemaView = schemaService.updateSchemaFile(schemaView, fileInputStream, fileHeader);
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
@@ -96,6 +91,8 @@ public class SchemaResource {
 	public Response deleteSchema(@PathParam("id") long schemaId) {
 		try {
 			schemaService.deleteSchema(schemaId);
+		} catch (DalNotFoundException e) {
+			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
 		} catch (DalException e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
@@ -181,15 +178,10 @@ public class SchemaResource {
 	 * @return
 	 */
 	@GET
-	public List<SchemaView> findSchemas(@QueryParam("name") String schemaName) {
+	public List<SchemaView> findSchemas() {
 		List<SchemaView> returnResult = new ArrayList<SchemaView>();
 		try {
-			List<Schema> schemaMetas = null;
-			if (StringUtils.isEmpty(schemaName)) {
-				schemaMetas = schemaService.listLatestSchemaMeta();
-			} else {
-				schemaMetas = schemaService.findSchemaMeta(schemaName);
-			}
+			List<Schema> schemaMetas = schemaService.listLatestSchemaMeta();
 			for (Schema schema : schemaMetas) {
 				SchemaView schemaView = new SchemaView(schema);
 				returnResult.add(schemaView);
@@ -198,29 +190,6 @@ public class SchemaResource {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return returnResult;
-	}
-
-	/**
-	 * 
-	 * @param schemaId
-	 * @param schemaInputStream
-	 * @param schemaHeader
-	 * @param jarInputStream
-	 * @param jarHeader
-	 * @return
-	 */
-	@POST
-	@Path("{id}/upload")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@PathParam("id") long schemaId, @FormDataParam("file") InputStream fileInputStream,
-	      @FormDataParam("file") FormDataContentDisposition fileHeader) {
-		SchemaView schemaView = getSchema(schemaId);
-		try {
-			schemaView = schemaService.updateSchemaFile(schemaView, fileInputStream, fileHeader);
-		} catch (Exception e) {
-			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
-		}
-		return Response.status(Status.CREATED).entity(schemaView).build();
 	}
 
 	@POST

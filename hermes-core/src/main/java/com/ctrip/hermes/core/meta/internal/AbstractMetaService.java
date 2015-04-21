@@ -146,7 +146,7 @@ public abstract class AbstractMetaService implements MetaService, Initializable 
 	}
 
 	// TODO add lock
-	protected void refreshMeta(Meta meta) {
+	public void refreshMeta(Meta meta) {
 		m_meta = meta;
 		m_topics = new HashMap<>();
 

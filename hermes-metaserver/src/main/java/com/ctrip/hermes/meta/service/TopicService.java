@@ -33,6 +33,10 @@ public class TopicService {
 		return m_metaService.findTopic(topic);
 	}
 
+	public Topic getTopic(long topicId) {
+		return m_metaService.findTopic(topicId);
+	}
+
 	public List<Topic> findTopics(String pattern) {
 		return m_metaService.findTopicsByPattern(pattern);
 	}
@@ -52,8 +56,9 @@ public class TopicService {
 		}
 		topic.setId(maxTopicId + 1);
 		meta.addTopic(topic);
-		
+
 		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
 		return topic;
 	}
 
@@ -63,6 +68,7 @@ public class TopicService {
 		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
 		meta.addTopic(topic);
 		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
 		return topic;
 	}
 
@@ -70,6 +76,7 @@ public class TopicService {
 		Meta meta = m_metaManager.getMeta();
 		meta.removeTopic(name);
 		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
 	}
 
 	public void createTopicInKafka(Topic topic) {
