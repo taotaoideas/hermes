@@ -52,6 +52,7 @@ public class TopicService {
 		}
 		topic.setId(maxTopicId + 1);
 		meta.addTopic(topic);
+		
 		m_metaManager.updateMeta(meta);
 		return topic;
 	}

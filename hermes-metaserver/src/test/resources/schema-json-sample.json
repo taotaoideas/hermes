@@ -1,5 +1,6 @@
 {
   "name" : "sample_json",
   "type" : "json",
-  "description" : "sample json description" 
+  "description" : "sample json description",
+  "compatibility": "FULL"
 }

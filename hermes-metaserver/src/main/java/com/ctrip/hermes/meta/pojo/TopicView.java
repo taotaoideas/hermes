@@ -24,8 +24,6 @@ public class TopicView {
 
 	private Date lastModifiedTime;
 
-	private Long schemaId;
-
 	private List<Partition> partitions;
 
 	private List<Property> properties;
@@ -48,10 +46,13 @@ public class TopicView {
 		this.status = topic.getStatus();
 		this.createTime = topic.getCreateTime();
 		this.lastModifiedTime = topic.getLastModifiedTime();
-		this.schemaId = topic.getSchemaId();
 		this.partitions = topic.getPartitions();
 		this.properties = topic.getProperties();
 		this.codecType = topic.getCodecType();
+	}
+
+	public String getCodecType() {
+		return codecType;
 	}
 
 	public Date getCreateTime() {
@@ -62,6 +63,10 @@ public class TopicView {
 		return description;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
 	public Date getLastModifiedTime() {
 		return lastModifiedTime;
 	}
@@ -70,8 +75,12 @@ public class TopicView {
 		return name;
 	}
 
-	public Long getSchemaId() {
-		return schemaId;
+	public List<Partition> getPartitions() {
+		return partitions;
+	}
+
+	public List<Property> getProperties() {
+		return properties;
 	}
 
 	public SchemaView getSchema() {
@@ -82,8 +91,16 @@ public class TopicView {
 		return status;
 	}
 
+	public Storage getStorage() {
+		return storage;
+	}
+
 	public String getStorageType() {
 		return storageType;
+	}
+
+	public void setCodecType(String codecType) {
+		this.codecType = codecType;
 	}
 
 	public void setCreateTime(Date createTime) {
@@ -94,6 +111,10 @@ public class TopicView {
 		this.description = description;
 	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public void setLastModifiedTime(Date lastModifiedTime) {
 		this.lastModifiedTime = lastModifiedTime;
 	}
@@ -102,8 +123,12 @@ public class TopicView {
 		this.name = name;
 	}
 
-	public void setSchemaId(Long schemaId) {
-		this.schemaId = schemaId;
+	public void setPartitions(List<Partition> partitions) {
+		this.partitions = partitions;
+	}
+
+	public void setProperties(List<Property> properties) {
+		this.properties = properties;
 	}
 
 	public void setSchema(SchemaView schemaView) {
@@ -114,24 +139,12 @@ public class TopicView {
 		this.status = status;
 	}
 
+	public void setStorage(Storage storage) {
+		this.storage = storage;
+	}
+
 	public void setStorageType(String type) {
 		this.storageType = type;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getCodecType() {
-		return codecType;
-	}
-
-	public void setCodecType(String codecType) {
-		this.codecType = codecType;
 	}
 
 	public Topic toMetaTopic() {
@@ -145,35 +158,15 @@ public class TopicView {
 				topic.addProperty(prop);
 			}
 		}
+		if (this.partitions != null) {
+			for (Partition partition : this.partitions) {
+				topic.addPartition(partition);
+			}
+		}
 		topic.setStatus(this.status);
 		topic.setCreateTime(this.createTime);
 		topic.setLastModifiedTime(this.lastModifiedTime);
-		topic.setSchemaId(this.schemaId);
 		topic.setCodecType(this.codecType);
 		return topic;
-	}
-
-	public List<Partition> getPartitions() {
-		return partitions;
-	}
-
-	public void setPartitions(List<Partition> partitions) {
-		this.partitions = partitions;
-	}
-
-	public List<Property> getProperties() {
-		return properties;
-	}
-
-	public void setProperties(List<Property> properties) {
-		this.properties = properties;
-	}
-
-	public Storage getStorage() {
-		return storage;
-	}
-
-	public void setStorage(Storage storage) {
-		this.storage = storage;
 	}
 }
