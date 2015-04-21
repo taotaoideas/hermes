@@ -28,7 +28,7 @@ public class CmessageProducer {
 		map.put("SOMETHING", "HERMES");
 		header.setUserHeader(map);
 
-		producer.PublishAsync("hello i3", "order_new", header);
+		producer.PublishAsync("hello i3中文 -][]", "order_new", header);
 //		producer.PublishAsync("hello i23", "order_new");
 
 		System.out.println("Send done.");

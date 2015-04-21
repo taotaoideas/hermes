@@ -12,7 +12,7 @@ public class CMessagingCodec implements Codec {
 	@Override
 	public byte[] encode(String topic, Object obj) {
 		if (obj instanceof String) {
-			return ((String) obj).getBytes(Charsets.ISO_8859_1);
+			return ((String) obj).getBytes(Charsets.UTF_8);
 		} else {
 			throw new IllegalArgumentException("CMessaging producer messages should be String type, illegal message type "
 			      + obj.getClass());

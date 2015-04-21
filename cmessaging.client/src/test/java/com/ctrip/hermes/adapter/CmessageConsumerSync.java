@@ -23,7 +23,7 @@ public class CmessageConsumerSync {
 		while (true) {
 			try {
 				IMessage message1 = consumer1.consumeOne();
-				System.out.println("Body:" + new String(message1.getBody(), Charsets.ISO_8859_1));
+				System.out.println("Body:" + new String(message1.getBody(), Charsets.UTF_8));
 				System.out.println(message1);
 				//业务逻辑
 				//
