@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.pojo.TopicView;
 import com.ctrip.hermes.meta.server.MetaRestServer;
@@ -99,34 +100,189 @@ public class SchemaServerTest extends ComponentTestCase {
 	}
 
 	@Test
-	public void testCompatibility() {
+	public void testForwardCompatibility() throws IOException {
+		String jsonString = Files.toString(new File("src/test/resources/topic-sample.json"), Charsets.UTF_8);
+		TopicView topicView = JSON.parseObject(jsonString, TopicView.class);
+		topicView.setName(topicView.getName() + "_" + UUID.randomUUID());
+
 		ResourceConfig rc = new ResourceConfig();
 		rc.register(MultiPartFeature.class);
 		Client client = ClientBuilder.newClient(rc);
 		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		Builder request = webTarget.path("topics/").request();
+		Response response = request.post(Entity.json(topicView));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		TopicView createdTopic = response.readEntity(TopicView.class);
 
-		Builder request = webTarget.path("schemas").request();
-		Response response = request.get();
-		List<SchemaView> schemas = response.readEntity(new GenericType<List<SchemaView>>() {
-		});
+		jsonString = Files.toString(new File("src/test/resources/schema-avro-sample.json"), Charsets.UTF_8);
+		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+		schemaView.setCompatibility("FORWARD");
 
-		SchemaView jsonSchema = null;
-		for (SchemaView schema : schemas) {
-			if (schema.getType().equals("avro")) {
-				jsonSchema = schema;
-				break;
-			}
-		}
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-avro-sample.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.field("schema", JSON.toJSONString(schemaView));
+		form.field("topicId", String.valueOf(createdTopic.getId()));
+		request = webTarget.path("schemas/").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		SchemaView createdView = response.readEntity(SchemaView.class);
 
-		if (jsonSchema != null) {
-			FormDataMultiPart form = new FormDataMultiPart();
-			File file = new File("src/test/resources/schema-avro-sample3.avsc");
-			form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
-			request = webTarget.path("schemas/" + jsonSchema.getName() + "/compatibility").request();
-			response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
-			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatusInfo().getStatusCode());
-			System.out.println(response.readEntity(String.class));
-		}
+		form = new FormDataMultiPart();
+		file = new File("src/test/resources/schema-avro-sample-more.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + createdView.getId() + "/compatibility").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		JSONObject parse = JSON.parseObject(response.readEntity(String.class), JSONObject.class);
+		boolean isCompatible = (boolean) parse.get("is_compatible");
+		Assert.assertEquals(true, isCompatible);
+
+		form = new FormDataMultiPart();
+		file = new File("src/test/resources/schema-avro-sample-less.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + createdView.getId() + "/compatibility").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		parse = JSON.parseObject(response.readEntity(String.class), JSONObject.class);
+		isCompatible = (boolean) parse.get("is_compatible");
+		Assert.assertEquals(false, isCompatible);
+
+		request = webTarget.path("schemas/" + createdView.getId()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+
+		request = webTarget.path("topics/" + createdTopic.getName()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+	}
+
+	@Test
+	public void testBackwardCompatibility() throws IOException {
+		String jsonString = Files.toString(new File("src/test/resources/topic-sample.json"), Charsets.UTF_8);
+		TopicView topicView = JSON.parseObject(jsonString, TopicView.class);
+		topicView.setName(topicView.getName() + "_" + UUID.randomUUID());
+
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		Builder request = webTarget.path("topics/").request();
+		Response response = request.post(Entity.json(topicView));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		TopicView createdTopic = response.readEntity(TopicView.class);
+
+		jsonString = Files.toString(new File("src/test/resources/schema-avro-sample.json"), Charsets.UTF_8);
+		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+		schemaView.setCompatibility("BACKWARD");
+
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-avro-sample.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.field("schema", JSON.toJSONString(schemaView));
+		form.field("topicId", String.valueOf(createdTopic.getId()));
+		request = webTarget.path("schemas/").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		SchemaView createdView = response.readEntity(SchemaView.class);
+
+		form = new FormDataMultiPart();
+		file = new File("src/test/resources/schema-avro-sample-more.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + createdView.getId() + "/compatibility").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		JSONObject parse = JSON.parseObject(response.readEntity(String.class), JSONObject.class);
+		boolean isCompatible = (boolean) parse.get("is_compatible");
+		Assert.assertEquals(false, isCompatible);
+
+		form = new FormDataMultiPart();
+		file = new File("src/test/resources/schema-avro-sample-less.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + createdView.getId() + "/compatibility").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		parse = JSON.parseObject(response.readEntity(String.class), JSONObject.class);
+		isCompatible = (boolean) parse.get("is_compatible");
+		Assert.assertEquals(true, isCompatible);
+
+		request = webTarget.path("schemas/" + createdView.getId()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+
+		request = webTarget.path("topics/" + createdTopic.getName()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+	}
+
+	@Test
+	public void testFullCompatibility() throws IOException {
+		String jsonString = Files.toString(new File("src/test/resources/topic-sample.json"), Charsets.UTF_8);
+		TopicView topicView = JSON.parseObject(jsonString, TopicView.class);
+		topicView.setName(topicView.getName() + "_" + UUID.randomUUID());
+
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		Builder request = webTarget.path("topics/").request();
+		Response response = request.post(Entity.json(topicView));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		TopicView createdTopic = response.readEntity(TopicView.class);
+
+		jsonString = Files.toString(new File("src/test/resources/schema-avro-sample.json"), Charsets.UTF_8);
+		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+		schemaView.setCompatibility("FULL");
+
+		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-avro-sample.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		form.field("schema", JSON.toJSONString(schemaView));
+		form.field("topicId", String.valueOf(createdTopic.getId()));
+		request = webTarget.path("schemas/").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		SchemaView createdView = response.readEntity(SchemaView.class);
+
+		form = new FormDataMultiPart();
+		file = new File("src/test/resources/schema-avro-sample-more.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + createdView.getId() + "/compatibility").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		JSONObject parse = JSON.parseObject(response.readEntity(String.class), JSONObject.class);
+		boolean isCompatible = (boolean) parse.get("is_compatible");
+		Assert.assertEquals(false, isCompatible);
+
+		form = new FormDataMultiPart();
+		file = new File("src/test/resources/schema-avro-sample-less.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/" + createdView.getId() + "/compatibility").request();
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+		System.out.println(response.getStatus());
+		parse = JSON.parseObject(response.readEntity(String.class), JSONObject.class);
+		isCompatible = (boolean) parse.get("is_compatible");
+		Assert.assertEquals(false, isCompatible);
+
+		request = webTarget.path("schemas/" + createdView.getId()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+
+		request = webTarget.path("topics/" + createdTopic.getName()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 	}
 
 	@Test
@@ -158,6 +314,39 @@ public class SchemaServerTest extends ComponentTestCase {
 		request = webTarget.path("schemas/" + createdSchema.getId()).request();
 		response = request.delete();
 		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+
+		request = webTarget.path("topics/" + createdTopic.getName()).request();
+		response = request.delete();
+		Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+	}
+
+	@Test
+	public void testCreatTopicAndBadSchema() throws IOException {
+		String jsonString = Files.toString(new File("src/test/resources/topic-sample.json"), Charsets.UTF_8);
+		TopicView topicView = JSON.parseObject(jsonString, TopicView.class);
+		topicView.setName(topicView.getName() + "_" + UUID.randomUUID());
+		topicView.setCodecType("avro");
+
+		ResourceConfig rc = new ResourceConfig();
+		rc.register(MultiPartFeature.class);
+		Client client = ClientBuilder.newClient(rc);
+		WebTarget webTarget = client.target(StandaloneRestServer.HOST);
+		Builder request = webTarget.path("topics/").request();
+		Response response = request.post(Entity.json(topicView));
+		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
+		TopicView createdTopic = response.readEntity(TopicView.class);
+
+		request = webTarget.path("schemas/").request();
+		jsonString = Files.toString(new File("src/test/resources/schema-avro-sample-bad.avsc"), Charsets.UTF_8);
+		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+		FormDataMultiPart form = new FormDataMultiPart();
+		form.field("schema", JSON.toJSONString(schemaView));
+		form.field("topicId", String.valueOf(createdTopic.getId()));
+		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		request = webTarget.path("schemas/").request();
+		Assert.assertEquals(Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+		String result = response.readEntity(String.class);
+		System.out.println(result);
 
 		request = webTarget.path("topics/" + createdTopic.getName()).request();
 		response = request.delete();
@@ -230,6 +419,7 @@ public class SchemaServerTest extends ComponentTestCase {
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
 		System.out.println(response.getStatus());
 		SchemaView createdView = response.readEntity(SchemaView.class);
+		System.out.println(createdView.getSchemaPreview());
 
 		request = webTarget.path("schemas/" + createdView.getId()).request();
 		response = request.delete();

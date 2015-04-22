@@ -23,6 +23,8 @@ public class SchemaView {
 
 	private List<Property> properties;
 
+	private String schemaPreview;
+
 	public SchemaView() {
 
 	}
@@ -35,6 +37,9 @@ public class SchemaView {
 		this.createTime = schema.getCreateTime();
 		this.description = schema.getDescription();
 		this.compatibility = schema.getCompatibility();
+		if (schema.getSchemaContent() != null) {
+			this.schemaPreview = new String(schema.getSchemaContent());
+		}
 	}
 
 	public String getCompatibility() {
@@ -59,6 +64,10 @@ public class SchemaView {
 
 	public List<Property> getProperties() {
 		return properties;
+	}
+
+	public String getSchemaPreview() {
+		return schemaPreview;
 	}
 
 	public String getType() {
@@ -91,6 +100,10 @@ public class SchemaView {
 
 	public void setProperties(List<Property> properties) {
 		this.properties = properties;
+	}
+
+	public void setSchemaPreview(String schemaPreview) {
+		this.schemaPreview = schemaPreview;
 	}
 
 	public void setType(String type) {

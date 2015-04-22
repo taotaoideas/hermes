@@ -32,6 +32,7 @@ import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.SchemaService;
 import com.ctrip.hermes.meta.service.TopicService;
+import com.google.common.io.ByteStreams;
 
 @Path("/schemas/")
 @Singleton
@@ -71,11 +72,23 @@ public class SchemaResource {
 		if (topic == null) {
 			throw new RestException("Topic not found: " + topicId, Status.NOT_FOUND);
 		}
+		Long oldSchemaId = topic.getSchemaId();
 
 		try {
+			byte[] fileContent = ByteStreams.toByteArray(fileInputStream);
+			if ("avro".equalsIgnoreCase(schemaView.getType())) {
+				schemaService.checkAvroSchema(topic.getName() + "-value", fileContent);
+			}
 			schemaView = schemaService.createSchema(schemaView, topic);
-			schemaView = schemaService.updateSchemaFile(schemaView, fileInputStream, fileHeader);
+			schemaView = schemaService.updateSchemaFile(schemaView, fileContent, fileHeader);
 		} catch (Exception e) {
+			if (schemaView.getId() != null) {
+				try {
+					schemaService.deleteSchema(schemaView.getId(), oldSchemaId);
+				} catch (DalException e1) {
+					throw new RestException(e1, Status.INTERNAL_SERVER_ERROR);
+				}
+			}
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return Response.status(Status.CREATED).entity(schemaView).build();
@@ -90,7 +103,7 @@ public class SchemaResource {
 	@Path("{id}")
 	public Response deleteSchema(@PathParam("id") long schemaId) {
 		try {
-			schemaService.deleteSchema(schemaId);
+			schemaService.deleteSchema(schemaId, null);
 		} catch (DalNotFoundException e) {
 			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
 		} catch (DalException e) {
@@ -193,13 +206,23 @@ public class SchemaResource {
 	}
 
 	@POST
-	@Path("{name}/compatibility")
+	@Path("{id}/compatibility")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response compatibility(@PathParam("name") String name, @FormDataParam("file") InputStream fileInputStream,
+	public Response compatibility(@PathParam("id") Long schemaId, @FormDataParam("file") InputStream fileInputStream,
 	      @FormDataParam("file") FormDataContentDisposition fileHeader) {
+		Schema schema = null;
+		try {
+			schema = schemaService.getSchemaMeta(schemaId);
+		} catch (DalNotFoundException e) {
+			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+
 		boolean result = false;
 		try {
-			result = schemaService.verifyCompatible(name, fileInputStream);
+			byte[] fileContent = ByteStreams.toByteArray(fileInputStream);
+			result = schemaService.verifyCompatible(schema, fileContent);
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
