@@ -1,6 +1,6 @@
 {"namespace": "com.ctrip.hermes.meta.avro",
  "type": "record",
- "name": "AvroVisitEvent3",
+ "name": "AvroVisitEventLess",
  "fields": [
      {"name": "ip", "type": "string"},
      {"name": "url", "type": "string"}

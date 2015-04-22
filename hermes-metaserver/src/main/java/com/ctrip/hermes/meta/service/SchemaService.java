@@ -5,7 +5,6 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
@@ -19,6 +18,7 @@ import org.unidal.dal.jdbc.DalException;
 import org.unidal.dal.jdbc.DalNotFoundException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
+import org.unidal.lookup.util.StringUtils;
 
 import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
@@ -28,10 +28,11 @@ import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
-import com.google.common.io.ByteStreams;
 
 @Named
 public class SchemaService {
+
+	private static final String DEFAULT_COMPABILITY = "FORWARD";
 
 	private SchemaRegistryClient avroSchemaRegistry;
 
@@ -56,6 +57,19 @@ public class SchemaService {
 		String schemaServerHost = m_properties.getProperty("schema-server-host");
 		String schemaServerPort = m_properties.getProperty("schema-server-port");
 		avroSchemaRegistry = new CachedSchemaRegistryClient("http://" + schemaServerHost + ":" + schemaServerPort, 1000);
+	}
+
+	/**
+	 * 
+	 * @param schemaName
+	 * @param schemaContent
+	 * @throws IOException
+	 * @throws RestClientException
+	 */
+	public void checkAvroSchema(String schemaName, byte[] schemaContent) throws IOException, RestClientException {
+		Parser parser = new Parser();
+		org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
+		avroSchemaRegistry.register(schemaName, avroSchema);
 	}
 
 	/**
@@ -113,6 +127,9 @@ public class SchemaService {
 		m_topicService.updateTopic(topic);
 
 		if ("avro".equals(schema.getType())) {
+			if (StringUtils.isEmpty(schema.getCompatibility())) {
+				schema.setCompatibility(DEFAULT_COMPABILITY);
+			}
 			this.avroSchemaRegistry.updateCompatibility(schema.getName(), schema.getCompatibility());
 		}
 
@@ -122,10 +139,14 @@ public class SchemaService {
 	/**
 	 * 
 	 * @param id
+	 * @param oldSchemaId
 	 * @throws DalException
 	 */
-	public void deleteSchema(long id) throws DalException {
+	public void deleteSchema(long id, Long oldSchemaId) throws DalException {
 		Schema schema = m_schemaDao.findByPK(id, SchemaEntity.READSET_FULL);
+		Topic topic = m_topicService.getTopic(schema.getTopicId());
+		topic.setSchemaId(oldSchemaId);
+		m_topicService.updateTopic(topic);
 		m_schemaDao.deleteByPK(schema);
 	}
 
@@ -178,20 +199,20 @@ public class SchemaService {
 	/**
 	 * 
 	 * @param schemaView
-	 * @param fileInputStream
+	 * @param fileContent
 	 * @param fileHeader
 	 * @return
 	 * @throws IOException
 	 * @throws DalException
 	 * @throws RestClientException
 	 */
-	public SchemaView updateSchemaFile(SchemaView schemaView, InputStream fileInputStream,
-	      FormDataContentDisposition fileHeader) throws IOException, DalException, RestClientException {
+	public SchemaView updateSchemaFile(SchemaView schemaView, byte[] fileContent, FormDataContentDisposition fileHeader)
+	      throws IOException, DalException, RestClientException {
 		SchemaView result = null;
 		if (schemaView.getType().equals("json")) {
-			result = uploadJsonSchema(schemaView, null, null, fileInputStream, fileHeader);
+			result = uploadJsonSchema(schemaView, null, null, fileContent, fileHeader);
 		} else if (schemaView.getType().equals("avro")) {
-			result = uploadAvroSchema(schemaView, fileInputStream, fileHeader, null, null);
+			result = uploadAvroSchema(schemaView, fileContent, fileHeader, null, null);
 		}
 		return result;
 	}
@@ -199,24 +220,23 @@ public class SchemaService {
 	/**
 	 * 
 	 * @param schemaView
-	 * @param schemaInputStream
+	 * @param schemaContent
 	 * @param schemaHeader
-	 * @param jarInputStream
+	 * @param jarContent
 	 * @param jarHeader
 	 * @throws IOException
 	 * @throws DalException
 	 * @throws RestClientException
 	 */
-	public SchemaView uploadAvroSchema(SchemaView schemaView, InputStream schemaInputStream,
-	      FormDataContentDisposition schemaHeader, InputStream jarInputStream, FormDataContentDisposition jarHeader)
+	public SchemaView uploadAvroSchema(SchemaView schemaView, byte[] schemaContent,
+	      FormDataContentDisposition schemaHeader, byte[] jarContent, FormDataContentDisposition jarHeader)
 	      throws IOException, DalException, RestClientException {
-		if (schemaInputStream == null) {
+		if (schemaContent == null) {
 			return schemaView;
 		}
 
 		Schema metaSchema = schemaView.toMetaSchema();
-		if (schemaInputStream != null) {
-			byte[] schemaContent = ByteStreams.toByteArray(schemaInputStream);
+		if (schemaContent != null) {
 			metaSchema.setSchemaContent(schemaContent);
 			metaSchema.setSchemaProperties(schemaHeader.toString());
 
@@ -227,8 +247,7 @@ public class SchemaService {
 
 			compileAvro(metaSchema, avroSchema);
 		}
-		if (jarInputStream != null) {
-			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
+		if (jarContent != null) {
 			metaSchema.setJarContent(jarContent);
 			metaSchema.setJarProperties(jarHeader.toString());
 		}
@@ -239,29 +258,27 @@ public class SchemaService {
 	/**
 	 * 
 	 * @param schemaView
-	 * @param schemaInputStream
+	 * @param schemaContent
 	 * @param schemaHeader
-	 * @param jarInputStream
+	 * @param jarContent
 	 * @param jarHeader
 	 * @throws IOException
 	 * @throws DalException
 	 */
-	public SchemaView uploadJsonSchema(SchemaView schemaView, InputStream schemaInputStream,
-	      FormDataContentDisposition schemaHeader, InputStream jarInputStream, FormDataContentDisposition jarHeader)
+	public SchemaView uploadJsonSchema(SchemaView schemaView, byte[] schemaContent,
+	      FormDataContentDisposition schemaHeader, byte[] jarContent, FormDataContentDisposition jarHeader)
 	      throws IOException, DalException {
-		if (jarInputStream == null) {
+		if (schemaContent == null) {
 			return schemaView;
 		}
 
 		Schema metaSchema = schemaView.toMetaSchema();
-		if (schemaInputStream != null) {
-			byte[] schemaContent = ByteStreams.toByteArray(schemaInputStream);
+		if (schemaContent != null) {
 			metaSchema.setSchemaContent(schemaContent);
 			metaSchema.setSchemaProperties(schemaHeader.toString());
 		}
 
-		if (jarInputStream != null) {
-			byte[] jarContent = ByteStreams.toByteArray(jarInputStream);
+		if (jarContent != null) {
 			metaSchema.setJarContent(jarContent);
 			metaSchema.setJarProperties(jarHeader.toString());
 		}
@@ -272,16 +289,18 @@ public class SchemaService {
 	/**
 	 * 
 	 * @param name
-	 * @param fileInputStream
+	 * @param schemaContent
 	 * @return
 	 * @throws IOException
 	 * @throws RestClientException
 	 */
-	public boolean verifyCompatible(String name, InputStream fileInputStream) throws IOException, RestClientException {
-		byte[] schemaContent = ByteStreams.toByteArray(fileInputStream);
+	public boolean verifyCompatible(Schema schema, byte[] schemaContent) throws IOException, RestClientException {
+		if (schemaContent == null) {
+			return false;
+		}
 		Parser parser = new Parser();
 		org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
-		boolean result = avroSchemaRegistry.testCompatibility(name, avroSchema);
+		boolean result = avroSchemaRegistry.testCompatibility(schema.getName(), avroSchema);
 		return result;
 	}
 

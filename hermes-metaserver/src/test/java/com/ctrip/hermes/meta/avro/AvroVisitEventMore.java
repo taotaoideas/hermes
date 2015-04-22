@@ -6,8 +6,8 @@
 package com.ctrip.hermes.meta.avro;  
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
-public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AvroVisitEvent2\",\"namespace\":\"com.ctrip.hermes.meta.avro\",\"fields\":[{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"tz\",\"type\":\"long\",\"java-class\":\"java.util.Date\"},{\"name\":\"who\",\"type\":\"string\"}]}");
+public class AvroVisitEventMore extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AvroVisitEventMore\",\"namespace\":\"com.ctrip.hermes.meta.avro\",\"fields\":[{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"tz\",\"type\":\"long\",\"java-class\":\"java.util.Date\"},{\"name\":\"who\",\"type\":\"string\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public java.lang.CharSequence ip;
   @Deprecated public java.lang.CharSequence url;
@@ -19,12 +19,12 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
    * to their default values from the schema.  If that is desired then
    * one should use <code>newBuilder()</code>. 
    */
-  public AvroVisitEvent2() {}
+  public AvroVisitEventMore() {}
 
   /**
    * All-args constructor.
    */
-  public AvroVisitEvent2(java.lang.CharSequence ip, java.lang.CharSequence url, java.lang.Long tz, java.lang.CharSequence who) {
+  public AvroVisitEventMore(java.lang.CharSequence ip, java.lang.CharSequence url, java.lang.Long tz, java.lang.CharSequence who) {
     this.ip = ip;
     this.url = url;
     this.tz = tz;
@@ -114,26 +114,26 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     this.who = value;
   }
 
-  /** Creates a new AvroVisitEvent2 RecordBuilder */
-  public static com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder newBuilder() {
-    return new com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder();
+  /** Creates a new AvroVisitEventMore RecordBuilder */
+  public static com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder newBuilder() {
+    return new com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder();
   }
   
-  /** Creates a new AvroVisitEvent2 RecordBuilder by copying an existing Builder */
-  public static com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder newBuilder(com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder other) {
-    return new com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder(other);
+  /** Creates a new AvroVisitEventMore RecordBuilder by copying an existing Builder */
+  public static com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder newBuilder(com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder other) {
+    return new com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder(other);
   }
   
-  /** Creates a new AvroVisitEvent2 RecordBuilder by copying an existing AvroVisitEvent2 instance */
-  public static com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder newBuilder(com.ctrip.hermes.meta.avro.AvroVisitEvent2 other) {
-    return new com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder(other);
+  /** Creates a new AvroVisitEventMore RecordBuilder by copying an existing AvroVisitEventMore instance */
+  public static com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder newBuilder(com.ctrip.hermes.meta.avro.AvroVisitEventMore other) {
+    return new com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder(other);
   }
   
   /**
-   * RecordBuilder for AvroVisitEvent2 instances.
+   * RecordBuilder for AvroVisitEventMore instances.
    */
-  public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<AvroVisitEvent2>
-    implements org.apache.avro.data.RecordBuilder<AvroVisitEvent2> {
+  public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<AvroVisitEventMore>
+    implements org.apache.avro.data.RecordBuilder<AvroVisitEventMore> {
 
     private java.lang.CharSequence ip;
     private java.lang.CharSequence url;
@@ -142,11 +142,11 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
 
     /** Creates a new Builder */
     private Builder() {
-      super(com.ctrip.hermes.meta.avro.AvroVisitEvent2.SCHEMA$);
+      super(com.ctrip.hermes.meta.avro.AvroVisitEventMore.SCHEMA$);
     }
     
     /** Creates a Builder by copying an existing Builder */
-    private Builder(com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder other) {
+    private Builder(com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.ip)) {
         this.ip = data().deepCopy(fields()[0].schema(), other.ip);
@@ -166,9 +166,9 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
       }
     }
     
-    /** Creates a Builder by copying an existing AvroVisitEvent2 instance */
-    private Builder(com.ctrip.hermes.meta.avro.AvroVisitEvent2 other) {
-            super(com.ctrip.hermes.meta.avro.AvroVisitEvent2.SCHEMA$);
+    /** Creates a Builder by copying an existing AvroVisitEventMore instance */
+    private Builder(com.ctrip.hermes.meta.avro.AvroVisitEventMore other) {
+            super(com.ctrip.hermes.meta.avro.AvroVisitEventMore.SCHEMA$);
       if (isValidValue(fields()[0], other.ip)) {
         this.ip = data().deepCopy(fields()[0].schema(), other.ip);
         fieldSetFlags()[0] = true;
@@ -193,7 +193,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Sets the value of the 'ip' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder setIp(java.lang.CharSequence value) {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder setIp(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.ip = value;
       fieldSetFlags()[0] = true;
@@ -206,7 +206,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Clears the value of the 'ip' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder clearIp() {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder clearIp() {
       ip = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -218,7 +218,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Sets the value of the 'url' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder setUrl(java.lang.CharSequence value) {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder setUrl(java.lang.CharSequence value) {
       validate(fields()[1], value);
       this.url = value;
       fieldSetFlags()[1] = true;
@@ -231,7 +231,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Clears the value of the 'url' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder clearUrl() {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder clearUrl() {
       url = null;
       fieldSetFlags()[1] = false;
       return this;
@@ -243,7 +243,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Sets the value of the 'tz' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder setTz(long value) {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder setTz(long value) {
       validate(fields()[2], value);
       this.tz = value;
       fieldSetFlags()[2] = true;
@@ -256,7 +256,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Clears the value of the 'tz' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder clearTz() {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder clearTz() {
       fieldSetFlags()[2] = false;
       return this;
     }
@@ -267,7 +267,7 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Sets the value of the 'who' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder setWho(java.lang.CharSequence value) {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder setWho(java.lang.CharSequence value) {
       validate(fields()[3], value);
       this.who = value;
       fieldSetFlags()[3] = true;
@@ -280,16 +280,16 @@ public class AvroVisitEvent2 extends org.apache.avro.specific.SpecificRecordBase
     }
     
     /** Clears the value of the 'who' field */
-    public com.ctrip.hermes.meta.avro.AvroVisitEvent2.Builder clearWho() {
+    public com.ctrip.hermes.meta.avro.AvroVisitEventMore.Builder clearWho() {
       who = null;
       fieldSetFlags()[3] = false;
       return this;
     }
 
     @Override
-    public AvroVisitEvent2 build() {
+    public AvroVisitEventMore build() {
       try {
-        AvroVisitEvent2 record = new AvroVisitEvent2();
+        AvroVisitEventMore record = new AvroVisitEventMore();
         record.ip = fieldSetFlags()[0] ? this.ip : (java.lang.CharSequence) defaultValue(fields()[0]);
         record.url = fieldSetFlags()[1] ? this.url : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.tz = fieldSetFlags()[2] ? this.tz : (java.lang.Long) defaultValue(fields()[2]);

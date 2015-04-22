@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LocalSchemaRegistryClient implements SchemaRegistryClient {
 
-  private String defaultCompability = "BACKWARD";
+  private String defaultCompability = "FORWARD";
   private final Map<String, Map<Schema, Integer>> schemaCache;
   private final Map<Integer, Schema> idCache;
   private final Map<String, Map<Schema, Integer>> versionCache;
