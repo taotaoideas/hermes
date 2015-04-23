@@ -1,12 +1,19 @@
 package com.ctrip.hermes.core.transport.endpoint;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoop;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager;
+import com.ctrip.hermes.core.transport.endpoint.event.EndpointChannelConnectFailedEvent;
+import com.ctrip.hermes.core.transport.endpoint.event.EndpointChannelEvent;
+import com.ctrip.hermes.core.transport.endpoint.event.EndpointChannelInactiveEvent;
 import com.ctrip.hermes.meta.entity.Endpoint;
 
 /**
@@ -21,11 +28,9 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 
 	private ConcurrentMap<Endpoint, EndpointChannel> channels = new ConcurrentHashMap<>();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.channel.EndpointChannelManager#getChannel(com.ctrip.hermes.meta.entity.Endpoint)
-	 */
+	// TODO configable delay or with some strategy
+	private int RECONNECT_DELAY_SECONDS = 1;
+
 	@Override
 	public EndpointChannel getChannel(Endpoint endpoint) {
 		switch (endpoint.getType()) {
@@ -35,6 +40,8 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 					if (!channels.containsKey(endpoint)) {
 						EndpointChannel channel = new NettyClientEndpointChannel(endpoint.getHost(), endpoint.getPort(),
 						      m_cmdProcessorManager);
+
+						channel.addListener(new AutoReconnectNettyChannelListener(channel, RECONNECT_DELAY_SECONDS));
 						channel.start();
 						channels.put(endpoint, channel);
 					}
@@ -45,5 +52,40 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 		default:
 			throw new IllegalArgumentException(String.format("unknow endpoint type: %s", endpoint.getType()));
 		}
+	}
+
+	protected static class AutoReconnectNettyChannelListener implements EndpointChannelEventListener {
+		private EndpointChannel m_channel;
+
+		private int m_reconnectDelaySeconds;
+
+		public AutoReconnectNettyChannelListener(EndpointChannel channel, int reconnectDelaySeconds) {
+			m_channel = channel;
+			m_reconnectDelaySeconds = reconnectDelaySeconds;
+		}
+
+		@Override
+		public void onEvent(EndpointChannelEvent event) {
+			if (event instanceof EndpointChannelConnectFailedEvent) {
+				EventLoop eventLoop = event.getCtx();
+				reconnect(eventLoop);
+			} else if (event instanceof EndpointChannelInactiveEvent) {
+				ChannelHandlerContext ctx = event.getCtx();
+				reconnect(ctx.channel().eventLoop());
+			}
+		}
+
+		private void reconnect(EventLoop eventLoop) {
+			eventLoop.schedule(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO log
+					System.out.println("Reconnect...");
+					m_channel.start();
+				}
+			}, m_reconnectDelaySeconds, TimeUnit.SECONDS);
+		}
+
 	}
 }

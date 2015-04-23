@@ -26,6 +26,8 @@ import com.google.common.util.concurrent.SettableFuture;
 @ManualRelease
 public class SendMessageCommand extends AbstractCommand implements AckAware<SendMessageAckCommand> {
 
+	private static final long serialVersionUID = 8443575812437722822L;
+
 	/**
 	 * msg counter within this command
 	 */

@@ -9,7 +9,10 @@ import java.nio.ByteBuffer;
  *
  */
 public abstract class AbstractCommand implements Command {
+	private static final long serialVersionUID = 1160178108416493829L;
+
 	protected Header m_header = new Header();
+
 	protected ByteBuf m_rawBuf;
 
 	public AbstractCommand(CommandType commandType) {
@@ -34,9 +37,9 @@ public abstract class AbstractCommand implements Command {
 		m_rawBuf = buf;
 		parse0(buf);
 	}
-	
+
 	public void release() {
-		if(m_rawBuf != null){
+		if (m_rawBuf != null) {
 			m_rawBuf.release();
 		}
 	}

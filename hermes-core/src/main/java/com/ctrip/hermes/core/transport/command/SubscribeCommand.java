@@ -10,6 +10,8 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  */
 public class SubscribeCommand extends AbstractCommand implements AckAware<SubscribeAckCommand> {
 
+	private static final long serialVersionUID = 3599083022933864580L;
+
 	private String m_groupId;
 
 	private String m_topic;
@@ -77,6 +79,12 @@ public class SubscribeCommand extends AbstractCommand implements AckAware<Subscr
 		codec.writeInt(m_partition);
 		codec.writeString(m_groupId);
 		codec.writeInt(m_window);
+	}
+
+	@Override
+	public String toString() {
+		return "SubscribeCommand [m_groupId=" + m_groupId + ", m_topic=" + m_topic + ", m_partition=" + m_partition
+		      + ", m_window=" + m_window + ", m_header=" + m_header + "]";
 	}
 
 }

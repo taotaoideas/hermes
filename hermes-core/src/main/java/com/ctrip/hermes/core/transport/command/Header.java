@@ -2,6 +2,7 @@ package com.ctrip.hermes.core.transport.command;
 
 import io.netty.buffer.ByteBuf;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -12,7 +13,9 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class Header {
+public class Header implements Serializable {
+	private static final long serialVersionUID = -8403214524035724226L;
+
 	private static AtomicLong CorrelationId = new AtomicLong(0);
 
 	private int m_version = 1;
@@ -75,4 +78,11 @@ public class Header {
 		codec.writeLong(m_correlationId);
 		codec.writeMap(m_properties);
 	}
+
+	@Override
+	public String toString() {
+		return "Header [m_version=" + m_version + ", m_type=" + m_type + ", m_correlationId=" + m_correlationId
+		      + ", m_properties=" + m_properties + "]";
+	}
+
 }

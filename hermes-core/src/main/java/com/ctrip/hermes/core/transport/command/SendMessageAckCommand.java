@@ -13,6 +13,8 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  */
 public class SendMessageAckCommand extends AbstractCommand implements Ack {
 
+	private static final long serialVersionUID = -2408812182538982540L;
+
 	private Map<Integer, Boolean> m_successes = new ConcurrentHashMap<>();
 
 	private int m_totalSize;
