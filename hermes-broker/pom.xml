@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>hermes-broker</artifactId>
 	<name>Hermes Broker</name>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>com.googlecode.javaewah</groupId>
@@ -118,6 +118,47 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!--build to tar plugin-->
+			<plugin>
+				<groupId>com.keyboardsamurais.maven</groupId>
+				<artifactId>maven-timestamp-plugin</artifactId>
+				<version>1.0</version>
+				<configuration>
+					<propertyName>build.time</propertyName>
+					<timestampPattern>MMdd-HH.mm</timestampPattern>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>compile</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<inherited>true</inherited>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<!-- not append assembly id in release file name -->
+					<appendAssemblyId>false</appendAssemblyId>
+					<finalName>${artifactId}-${project.version}-${build.time}</finalName>
+					<descriptors>
+						<descriptor>/assembly/hermes_broker.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 	<properties>
