@@ -41,7 +41,7 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 						EndpointChannel channel = new NettyClientEndpointChannel(endpoint.getHost(), endpoint.getPort(),
 						      m_cmdProcessorManager);
 
-						channel.addListener(new AutoReconnectNettyChannelListener(channel, RECONNECT_DELAY_SECONDS));
+						channel.addListener(new NettyChannelAutoReconnectListener(channel, RECONNECT_DELAY_SECONDS));
 						channel.start();
 						channels.put(endpoint, channel);
 					}
@@ -54,12 +54,12 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 		}
 	}
 
-	protected static class AutoReconnectNettyChannelListener implements EndpointChannelEventListener {
+	protected static class NettyChannelAutoReconnectListener implements EndpointChannelEventListener {
 		private EndpointChannel m_channel;
 
 		private int m_reconnectDelaySeconds;
 
-		public AutoReconnectNettyChannelListener(EndpointChannel channel, int reconnectDelaySeconds) {
+		public NettyChannelAutoReconnectListener(EndpointChannel channel, int reconnectDelaySeconds) {
 			m_channel = channel;
 			m_reconnectDelaySeconds = reconnectDelaySeconds;
 		}

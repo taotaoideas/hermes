@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
-import org.unidal.helper.Threads;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
@@ -28,14 +29,25 @@ public class DefaultConsumerNotifier implements ConsumerNotifier {
 	protected Pipeline<Void> m_pipeline;
 
 	@Override
-	public void register(long correlationId, ConsumerContext consumerContext) {
+	public void register(long correlationId, final ConsumerContext consumerContext) {
 		// TODO configable thread pool
-		if (!m_consumerContexs.containsKey(correlationId)) {
-			m_consumerContexs.putIfAbsent(
-			      correlationId,
-			      new Pair<>(consumerContext, Threads.forPool().getFixedThreadPool(
-			            "ConsumerThread-" + consumerContext.getTopic().getName(), 10)));
-		}
+		m_consumerContexs.putIfAbsent(correlationId,
+		      new Pair<>(consumerContext, Executors.newFixedThreadPool(10, new ThreadFactory() {
+
+			      @Override
+			      public Thread newThread(Runnable r) {
+				      Thread t = new Thread(r);
+				      t.setName("ConsumerThread-" + consumerContext.getTopic().getName());
+				      return t;
+			      }
+		      })));
+	}
+
+	@Override
+	public void deregister(long correlationId) {
+		Pair<ConsumerContext, ExecutorService> pair = m_consumerContexs.remove(correlationId);
+		pair.getValue().shutdown();
+		return;
 	}
 
 	@Override
@@ -47,7 +59,7 @@ public class DefaultConsumerNotifier implements ConsumerNotifier {
 		executorService.submit(new Runnable() {
 
 			@SuppressWarnings("rawtypes")
-         @Override
+			@Override
 			public void run() {
 				for (ConsumerMessage<?> msg : msgs) {
 					if (msg instanceof BrokerConsumerMessage) {
