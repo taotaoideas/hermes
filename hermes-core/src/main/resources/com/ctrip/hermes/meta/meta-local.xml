@@ -3,6 +3,9 @@
 
 	<endpoint id='br0' type="broker" host="127.0.0.1" port="4376" />
 
+	<!--Dev machine-->
+	<!--<endpoint id='br0' type="broker" host="10.3.6.237" port="4376" />-->
+
 	<endpoint id='kafka-endpoint' type="kafka" />
 
 	<topic name='order_new' id='100' partition-count='1'
@@ -58,15 +61,15 @@
 		<datasource id='ds0'>
 			<!--Dev Machine-->
 
-			 <!--<property name='url' value='jdbc:mysql://10.3.6.237/' />-->
-			 <!--<property name='user' value='root' />-->
-			 <!--<property name='password' value='Ctrip000' />-->
+			 <property name='url' value='jdbc:mysql://10.3.6.237/' />
+			 <property name='user' value='root' />
+			 <property name='password' value='Ctrip000' />
 
 			<!--Local Machine-->
 
-			<property name='url' value='jdbc:mysql://127.0.0.1/' />
-			<property name='user' value='root' />
-			<property name='password' value='123456' />
+			<!--<property name='url' value='jdbc:mysql://127.0.0.1/' />-->
+			<!--<property name='user' value='root' />-->
+			<!--<property name='password' value='123456' />-->
 		</datasource>
 	</storage>
 
