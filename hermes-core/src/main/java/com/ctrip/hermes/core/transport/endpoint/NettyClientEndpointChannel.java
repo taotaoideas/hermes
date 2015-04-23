@@ -1,6 +1,9 @@
 package com.ctrip.hermes.core.transport.endpoint;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -12,8 +15,12 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import com.ctrip.hermes.core.transport.codec.NettyDecoder;
 import com.ctrip.hermes.core.transport.codec.NettyEncoder;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorManager;
+import com.ctrip.hermes.core.transport.endpoint.event.EndpointChannelConnectFailedEvent;
 
+@Sharable
 public class NettyClientEndpointChannel extends NettyEndpointChannel {
+
+	private EventLoopGroup m_eventLoopGroup = new NioEventLoopGroup();
 
 	private String m_host;
 
@@ -25,18 +32,11 @@ public class NettyClientEndpointChannel extends NettyEndpointChannel {
 		m_port = port;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.channel.EndpointChannel#start()
-	 */
 	@Override
 	public void start() {
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-
 		try {
 			Bootstrap b = new Bootstrap();
-			b.group(workerGroup);
+			b.group(m_eventLoopGroup);
 			b.channel(NioSocketChannel.class);
 			b.option(ChannelOption.SO_KEEPALIVE, true);
 			b.handler(new ChannelInitializer<SocketChannel>() {
@@ -52,9 +52,19 @@ public class NettyClientEndpointChannel extends NettyEndpointChannel {
 				}
 			});
 
-			b.connect(m_host, m_port).sync();
+			ChannelFuture future = b.connect(m_host, m_port);
 
-			// TODO check connected, otherwise reconnect
+			future.addListener(new ChannelFutureListener() {
+
+				@Override
+				public void operationComplete(ChannelFuture future) throws Exception {
+					// TODO log
+					if (!future.isSuccess()) {
+						notifyListener(new EndpointChannelConnectFailedEvent(future.channel().eventLoop()));
+					}
+				}
+
+			});
 
 		} catch (Exception e) {
 			// TODO

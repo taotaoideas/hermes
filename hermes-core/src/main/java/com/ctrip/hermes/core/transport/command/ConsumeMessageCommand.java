@@ -20,6 +20,8 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 @ManualRelease
 public class ConsumeMessageCommand extends AbstractCommand {
 
+	private static final long serialVersionUID = 7746504198368995952L;
+
 	private Map<Long, List<TppConsumerMessageBatch>> m_msgs = new HashMap<>();
 
 	/**

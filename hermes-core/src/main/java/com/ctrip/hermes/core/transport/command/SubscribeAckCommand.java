@@ -9,6 +9,7 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  *
  */
 public class SubscribeAckCommand extends AbstractCommand implements Ack {
+	private static final long serialVersionUID = -5998870176247704594L;
 	private boolean m_success = true;
 
 	public SubscribeAckCommand() {

@@ -2,11 +2,13 @@ package com.ctrip.hermes.core.transport.command;
 
 import io.netty.buffer.ByteBuf;
 
+import java.io.Serializable;
+
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public interface Command {
+public interface Command extends Serializable {
 	public Header getHeader();
 
 	public void parse(ByteBuf buf, Header header);

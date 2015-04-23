@@ -18,6 +18,8 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
  *
  */
 public class AckMessageCommand extends AbstractCommand {
+	private static final long serialVersionUID = 7009170887490443292L;
+
 	// key: tpp, groupId, isResend
 	// value:msgSeq==>remainingRetries
 	private ConcurrentMap<Triple<Tpp, String, Boolean>, Map<Long, Integer>> m_ackMsgSeqs = new ConcurrentHashMap<>();
