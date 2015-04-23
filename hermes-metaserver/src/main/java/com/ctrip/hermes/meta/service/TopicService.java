@@ -1,5 +1,6 @@
 package com.ctrip.hermes.meta.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import java.util.Properties;
 import kafka.admin.AdminUtils;
 
 import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkMarshallingError;
+import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -105,6 +108,7 @@ public class TopicService {
 		}
 
 		ZkClient zkClient = new ZkClient(zkConnect);
+		zkClient.setZkSerializer(new ZKStringSerializer());
 		int partition = 1;
 		int replication = 1;
 		Properties topicProp = new Properties();
@@ -119,4 +123,31 @@ public class TopicService {
 		}
 		AdminUtils.createTopic(zkClient, topic.getName(), partition, replication, topicProp);
 	}
+}
+
+class ZKStringSerializer implements ZkSerializer {
+
+	@Override
+	public byte[] serialize(Object data) throws ZkMarshallingError {
+		byte[] bytes = null;
+		try {
+			bytes = data.toString().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new ZkMarshallingError(e);
+		}
+		return bytes;
+	}
+
+	@Override
+	public Object deserialize(byte[] bytes) throws ZkMarshallingError {
+		if (bytes == null)
+			return null;
+		else
+			try {
+				return new String(bytes, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new ZkMarshallingError(e);
+			}
+	}
+
 }

@@ -24,7 +24,7 @@ import com.ctrip.hermes.meta.service.CodecService;
 @Produces(MediaType.APPLICATION_JSON)
 public class CodecResource {
 
-	private static CodecService codecService = PlexusComponentLocator.lookup(CodecService.class);
+	private CodecService codecService = PlexusComponentLocator.lookup(CodecService.class);
 
 	@GET
 	@Path("{name}")

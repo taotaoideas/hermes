@@ -21,7 +21,7 @@ import org.unidal.lookup.ComponentTestCase;
 import com.ctrip.hermes.meta.pojo.CodecView;
 import com.ctrip.hermes.meta.server.MetaRestServer;
 
-public class CodecServerTest extends ComponentTestCase {
+public class CodecResourceTest extends ComponentTestCase {
 
 	private MetaRestServer server;
 

@@ -1,5 +1,6 @@
 package com.ctrip.hermes.meta.resource;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,9 +40,13 @@ import com.google.common.io.ByteStreams;
 @Produces(MediaType.APPLICATION_JSON)
 public class SchemaResource {
 
-	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
+	private SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
 
-	private static TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
+	private TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
+
+	public SchemaResource() {
+		System.out.println("Schema " + this.getClass().getClassLoader());
+	}
 
 	/**
 	 * 
@@ -74,8 +79,20 @@ public class SchemaResource {
 		}
 		Long oldSchemaId = topic.getSchemaId();
 
+		byte[] fileContent = null;
+		if (fileInputStream != null) {
+			try {
+				fileContent = ByteStreams.toByteArray(fileInputStream);
+			} catch (IOException e) {
+				throw new RestException(e, Status.BAD_REQUEST);
+			}
+		} else {
+			if ("avro".equalsIgnoreCase(schemaView.getType())) {
+				throw new RestException("avro schema file needed.", Status.BAD_REQUEST);
+			}
+		}
+
 		try {
-			byte[] fileContent = ByteStreams.toByteArray(fileInputStream);
 			if ("avro".equalsIgnoreCase(schemaView.getType())) {
 				schemaService.checkAvroSchema(topic.getName() + "-value", fileContent);
 			}

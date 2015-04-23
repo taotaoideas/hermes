@@ -24,7 +24,7 @@ import com.ctrip.hermes.meta.service.ServerMetaManager;
 @Produces(MediaType.APPLICATION_JSON)
 public class MetaResource {
 
-	private static MetaManager metaManager = PlexusComponentLocator.lookup(MetaManager.class, ServerMetaManager.ID);
+	private MetaManager metaManager = PlexusComponentLocator.lookup(MetaManager.class, ServerMetaManager.ID);
 
 	@GET
 	public Response getMeta(@QueryParam("hashCode") long hashCode) {
