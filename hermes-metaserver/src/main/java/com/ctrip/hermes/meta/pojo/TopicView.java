@@ -34,6 +34,8 @@ public class TopicView {
 
 	private String codecType;
 
+	private Long schemaId;
+
 	public TopicView() {
 
 	}
@@ -49,6 +51,7 @@ public class TopicView {
 		this.partitions = topic.getPartitions();
 		this.properties = topic.getProperties();
 		this.codecType = topic.getCodecType();
+		this.schemaId = topic.getSchemaId();
 	}
 
 	public String getCodecType() {
@@ -86,6 +89,10 @@ public class TopicView {
 	public SchemaView getSchema() {
 		return schemaView;
 	}
+
+	public Long getSchemaId() {
+	   return schemaId;
+   }
 
 	public String getStatus() {
 		return status;
@@ -135,6 +142,10 @@ public class TopicView {
 		this.schemaView = schemaView;
 	}
 
+	public void setSchemaId(Long schemaId) {
+	   this.schemaId = schemaId;
+   }
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
@@ -167,6 +178,7 @@ public class TopicView {
 		topic.setCreateTime(this.createTime);
 		topic.setLastModifiedTime(this.lastModifiedTime);
 		topic.setCodecType(this.codecType);
+		topic.setSchemaId(this.schemaId);
 		return topic;
 	}
 }

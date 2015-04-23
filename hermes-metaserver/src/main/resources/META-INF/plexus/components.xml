@@ -31,6 +31,7 @@
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.core.meta.MetaService</role>
+					<role-hint>server-meta</role-hint>
 				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.meta.service.TopicService</role>

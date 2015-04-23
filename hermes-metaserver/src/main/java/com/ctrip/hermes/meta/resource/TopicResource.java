@@ -39,9 +39,13 @@ import com.ctrip.hermes.meta.service.TopicService;
 @Produces(MediaType.APPLICATION_JSON)
 public class TopicResource {
 
-	private static TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
+	private TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
 
-	private static SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
+	private SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
+
+	public TopicResource() {
+		System.out.println("Topic " + this.getClass().getClassLoader());
+	}
 
 	@POST
 	public Response createTopic(String content) {
@@ -166,7 +170,7 @@ public class TopicResource {
 		} catch (Exception e) {
 			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
-		return Response.status(Status.CREATED).entity(topicView).build();
+		return Response.status(Status.OK).entity(topicView).build();
 	}
 
 	@DELETE

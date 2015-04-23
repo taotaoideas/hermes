@@ -44,7 +44,7 @@ public class SchemaService {
 	@Inject(ServerMetaManager.ID)
 	private MetaManager m_metaManager;
 
-	@Inject
+	@Inject(ServerMetaService.ID)
 	private MetaService m_metaService;
 
 	@Inject
@@ -235,6 +235,7 @@ public class SchemaService {
 			return schemaView;
 		}
 
+		boolean isUpdated = false;
 		Schema metaSchema = schemaView.toMetaSchema();
 		if (schemaContent != null) {
 			metaSchema.setSchemaContent(schemaContent);
@@ -246,13 +247,20 @@ public class SchemaService {
 			metaSchema.setAvroid(avroid);
 
 			compileAvro(metaSchema, avroSchema);
+			isUpdated = true;
 		}
 		if (jarContent != null) {
 			metaSchema.setJarContent(jarContent);
 			metaSchema.setJarProperties(jarHeader.toString());
+			isUpdated = true;
 		}
-		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
-		return new SchemaView(metaSchema);
+
+		if (isUpdated) {
+			m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+			return new SchemaView(metaSchema);
+		} else {
+			return schemaView;
+		}
 	}
 
 	/**
@@ -272,18 +280,26 @@ public class SchemaService {
 			return schemaView;
 		}
 
+		boolean isUpdated = false;
 		Schema metaSchema = schemaView.toMetaSchema();
 		if (schemaContent != null) {
 			metaSchema.setSchemaContent(schemaContent);
 			metaSchema.setSchemaProperties(schemaHeader.toString());
+			isUpdated = true;
 		}
 
 		if (jarContent != null) {
 			metaSchema.setJarContent(jarContent);
 			metaSchema.setJarProperties(jarHeader.toString());
+			isUpdated = true;
 		}
-		m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
-		return new SchemaView(metaSchema);
+
+		if (isUpdated) {
+			m_schemaDao.updateByPK(metaSchema, SchemaEntity.UPDATESET_FULL);
+			return new SchemaView(metaSchema);
+		} else {
+			return schemaView;
+		}
 	}
 
 	/**

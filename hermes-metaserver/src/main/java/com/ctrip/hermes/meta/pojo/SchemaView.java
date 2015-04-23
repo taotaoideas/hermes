@@ -25,6 +25,8 @@ public class SchemaView {
 
 	private String schemaPreview;
 
+	private Long topicId;
+
 	public SchemaView() {
 
 	}
@@ -37,6 +39,7 @@ public class SchemaView {
 		this.createTime = schema.getCreateTime();
 		this.description = schema.getDescription();
 		this.compatibility = schema.getCompatibility();
+		this.topicId = schema.getTopicId();
 		if (schema.getSchemaContent() != null) {
 			this.schemaPreview = new String(schema.getSchemaContent());
 		}
@@ -68,6 +71,10 @@ public class SchemaView {
 
 	public String getSchemaPreview() {
 		return schemaPreview;
+	}
+
+	public Long getTopicId() {
+		return topicId;
 	}
 
 	public String getType() {
@@ -106,6 +113,10 @@ public class SchemaView {
 		this.schemaPreview = schemaPreview;
 	}
 
+	public void setTopicId(Long topicId) {
+		this.topicId = topicId;
+	}
+
 	public void setType(String type) {
 		this.type = type;
 	}
@@ -127,6 +138,9 @@ public class SchemaView {
 		schema.setCreateTime(this.createTime);
 		schema.setCompatibility(this.compatibility);
 		schema.setDescription(this.description);
+		if (this.topicId != null) {
+			schema.setTopicId(this.topicId);
+		}
 		return schema;
 	}
 
