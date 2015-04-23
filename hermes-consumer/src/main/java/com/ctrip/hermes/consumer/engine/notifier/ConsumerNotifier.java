@@ -13,6 +13,8 @@ public interface ConsumerNotifier {
 
 	void register(long correlationId, ConsumerContext consumerContext);
 
+	void deregister(long correlationId);
+
 	void messageReceived(long correlationId, List<ConsumerMessage<?>> msgs);
 
 	ConsumerContext find(long correlationId);
