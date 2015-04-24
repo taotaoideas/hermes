@@ -1,7 +1,5 @@
 package com.ctrip.hermes.meta.service;
 
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 
 import java.io.IOException;
@@ -20,6 +18,7 @@ import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.lookup.util.StringUtils;
 
+import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.meta.MetaManager;
 import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.dal.meta.Schema;
@@ -27,7 +26,9 @@ import com.ctrip.hermes.meta.dal.meta.SchemaDao;
 import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
-import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
+
+import ctrip.io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import ctrip.io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 
 @Named
 public class SchemaService {
@@ -36,7 +37,8 @@ public class SchemaService {
 
 	private SchemaRegistryClient avroSchemaRegistry;
 
-	private Properties m_properties = MetaPropertiesLoader.load();
+	@Inject
+	private ClientEnvironment m_env;
 
 	@Inject
 	private SchemaDao m_schemaDao;
@@ -53,12 +55,6 @@ public class SchemaService {
 	@Inject
 	private CompileService m_compileService;
 
-	public SchemaService() {
-		String schemaServerHost = m_properties.getProperty("schema-server-host");
-		String schemaServerPort = m_properties.getProperty("schema-server-port");
-		avroSchemaRegistry = new CachedSchemaRegistryClient("http://" + schemaServerHost + ":" + schemaServerPort, 1000);
-	}
-
 	/**
 	 * 
 	 * @param schemaName
@@ -69,7 +65,7 @@ public class SchemaService {
 	public void checkAvroSchema(String schemaName, byte[] schemaContent) throws IOException, RestClientException {
 		Parser parser = new Parser();
 		org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
-		avroSchemaRegistry.register(schemaName, avroSchema);
+		getAvroSchemaRegistry().register(schemaName, avroSchema);
 	}
 
 	/**
@@ -130,7 +126,7 @@ public class SchemaService {
 			if (StringUtils.isEmpty(schema.getCompatibility())) {
 				schema.setCompatibility(DEFAULT_COMPABILITY);
 			}
-			this.avroSchemaRegistry.updateCompatibility(schema.getName(), schema.getCompatibility());
+			getAvroSchemaRegistry().updateCompatibility(schema.getName(), schema.getCompatibility());
 		}
 
 		return new SchemaView(schema);
@@ -148,6 +144,28 @@ public class SchemaService {
 		topic.setSchemaId(oldSchemaId);
 		m_topicService.updateTopic(topic);
 		m_schemaDao.deleteByPK(schema);
+	}
+
+	private SchemaRegistryClient getAvroSchemaRegistry() throws IOException {
+		if (avroSchemaRegistry == null) {
+			Properties m_properties = m_env.getGlobalConfig();
+			String schemaServerHost = m_properties.getProperty("schema-server-host");
+			String schemaServerPort = m_properties.getProperty("schema-server-port");
+			avroSchemaRegistry = new CachedSchemaRegistryClient("http://" + schemaServerHost + ":" + schemaServerPort,
+			      1000);
+		}
+		return avroSchemaRegistry;
+	}
+
+	/**
+	 * 
+	 * @param schema
+	 * @return
+	 * @throws IOException
+	 * @throws RestClientException
+	 */
+	public String getCompatible(Schema schema) throws IOException, RestClientException {
+		return getAvroSchemaRegistry().getCompatibility(schema.getName());
 	}
 
 	/**
@@ -243,7 +261,7 @@ public class SchemaService {
 
 			Parser parser = new Parser();
 			org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
-			int avroid = avroSchemaRegistry.register(metaSchema.getName(), avroSchema);
+			int avroid = getAvroSchemaRegistry().register(metaSchema.getName(), avroSchema);
 			metaSchema.setAvroid(avroid);
 
 			compileAvro(metaSchema, avroSchema);
@@ -316,7 +334,7 @@ public class SchemaService {
 		}
 		Parser parser = new Parser();
 		org.apache.avro.Schema avroSchema = parser.parse(new String(schemaContent));
-		boolean result = avroSchemaRegistry.testCompatibility(schema.getName(), avroSchema);
+		boolean result = getAvroSchemaRegistry().testCompatibility(schema.getName(), avroSchema);
 		return result;
 	}
 

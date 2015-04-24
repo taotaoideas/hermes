@@ -1,9 +1,10 @@
 package com.ctrip.hermes.meta.rest;
 
+import java.io.IOException;
 import java.util.Properties;
 
+import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
-import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
 import com.ctrip.hermes.meta.server.MetaRestServer;
 
 public class StandaloneRestServer {
@@ -11,13 +12,19 @@ public class StandaloneRestServer {
 	public static String HOST = null;
 
 	static {
-		Properties load = MetaPropertiesLoader.load();
-		String host = load.getProperty("meta-host");
-		String port = load.getProperty("meta-port");
-		HOST = "http://" + host + ":" + port + "/";
+		Properties load;
+		try {
+			load = PlexusComponentLocator.lookup(ClientEnvironment.class).getGlobalConfig();
+			String host = load.getProperty("meta-host");
+			String port = load.getProperty("meta-port");
+			HOST = "http://" + host + ":" + port + "/";
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, IOException {
 		MetaRestServer server = PlexusComponentLocator.lookup(MetaRestServer.class);
 		server.start();
 		Thread.currentThread().join();

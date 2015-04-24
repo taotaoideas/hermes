@@ -21,17 +21,15 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
+import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.resource.TopicResource;
 
 @Named
 public class MetaRestServer implements LogEnabled {
-	public static final String DEFAULT_PORT = "1248";
-
-	public static final String DEFAULT_HOST = "0.0.0.0";
-
 	public static final String META_HOST = "meta-host";
 
 	public static final String META_PORT = "meta-port";
@@ -40,7 +38,8 @@ public class MetaRestServer implements LogEnabled {
 
 	private HttpServer m_server;
 
-	private Properties m_properties = MetaPropertiesLoader.load();
+	@Inject
+	private ClientEnvironment m_env;
 
 	private ResourceConfig configResource() {
 		ResourceConfig rc = new ResourceConfig();
@@ -57,9 +56,10 @@ public class MetaRestServer implements LogEnabled {
 		m_logger = logger;
 	}
 
-	private URI getBaseURI() {
-		int port = Integer.valueOf(m_properties.getProperty(META_PORT, DEFAULT_PORT));
-		String host = m_properties.getProperty(META_HOST, DEFAULT_HOST);
+	private URI getBaseURI() throws IOException {
+		Properties m_properties = m_env.getGlobalConfig();
+		int port = Integer.valueOf(m_properties.getProperty(META_PORT));
+		String host = m_properties.getProperty(META_HOST);
 		URI result = UriBuilder.fromUri("http://" + host).port(port).build();
 		return result;
 	}
@@ -99,9 +99,14 @@ public class MetaRestServer implements LogEnabled {
 		}
 	}
 
-	public void start() {
+	public void start() throws IOException {
 		ResourceConfig rc = configResource();
 		URI baseURI = getBaseURI();
+		if (!baseURI.getHost().equals("localhost") && !baseURI.getHost().equals("0.0.0.0")
+		      && !baseURI.getHost().equals("127.0.0.1")) {
+			m_logger.info("invalid host: " + baseURI.getHost());
+			return;
+		}
 		m_server = GrizzlyHttpServerFactory.createHttpServer(baseURI, rc);
 		try {
 			m_server.start();
@@ -118,7 +123,7 @@ public class MetaRestServer implements LogEnabled {
 		}
 	}
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, IOException {
 		MetaRestServer server = PlexusComponentLocator.lookup(MetaRestServer.class);
 		server.start();
 

@@ -25,7 +25,7 @@ public class MetaServerTest extends ComponentTestCase {
 	private MetaRestServer server;
 
 	@Before
-	public void startServer() {
+	public void startServer() throws IOException {
 		server = lookup(MetaRestServer.class);
 		server.start();
 	}

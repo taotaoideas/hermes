@@ -2,5 +2,5 @@
   "name" : "sample_avro",
   "type" : "avro",
   "description" : "sample json description",
-  "compatibility" : "FULL"
+  "compatibility" : "FORWARD"
 }
