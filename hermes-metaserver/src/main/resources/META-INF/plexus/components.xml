@@ -3,6 +3,11 @@
 		<component>
 			<role>com.ctrip.hermes.meta.server.MetaRestServer</role>
 			<implementation>com.ctrip.hermes.meta.server.MetaRestServer</implementation>
+			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.env.ClientEnvironment</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.ctrip.hermes.meta.service.TopicService</role>
@@ -22,6 +27,9 @@
 			<role>com.ctrip.hermes.meta.service.SchemaService</role>
 			<implementation>com.ctrip.hermes.meta.service.SchemaService</implementation>
 			<requirements>
+				<requirement>
+					<role>com.ctrip.hermes.core.env.ClientEnvironment</role>
+				</requirement>
 				<requirement>
 					<role>com.ctrip.hermes.meta.dal.meta.SchemaDao</role>
 				</requirement>

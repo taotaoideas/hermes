@@ -38,7 +38,7 @@ public class SchemaResourceTest extends ComponentTestCase {
 	private MetaRestServer server;
 
 	@Before
-	public void startServer() {
+	public void startServer() throws IOException {
 		server = lookup(MetaRestServer.class);
 		server.start();
 	}
@@ -126,10 +126,13 @@ public class SchemaResourceTest extends ComponentTestCase {
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
 		TopicView createdTopic = response.readEntity(TopicView.class);
 
-		request = webTarget.path("schemas/").request();
-		jsonString = Files.toString(new File("src/test/resources/schema-avro-sample-bad.avsc"), Charsets.UTF_8);
+		jsonString = Files.toString(new File("src/test/resources/schema-avro-sample.json"), Charsets.UTF_8);
 		SchemaView schemaView = JSON.parseObject(jsonString, SchemaView.class);
+
+		request = webTarget.path("schemas/").request();
 		FormDataMultiPart form = new FormDataMultiPart();
+		File file = new File("src/test/resources/schema-avro-sample-bad.avsc");
+		form.bodyPart(new FileDataBodyPart("file", file, MediaType.MULTIPART_FORM_DATA_TYPE));
 		form.field("schema", JSON.toJSONString(schemaView));
 		form.field("topicId", String.valueOf(createdTopic.getId()));
 		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
@@ -238,6 +241,9 @@ public class SchemaResourceTest extends ComponentTestCase {
 		form.field("topicId", String.valueOf(createdTopic.getId()));
 		request = webTarget.path("schemas/").request();
 		response = request.post(Entity.entity(form, MediaType.MULTIPART_FORM_DATA_TYPE));
+		if (response.getStatus() != Status.CREATED.getStatusCode()) {
+			System.out.println(response.getStatusInfo().getReasonPhrase());
+		}
 		Assert.assertEquals(Status.CREATED.getStatusCode(), response.getStatus());
 		System.out.println(response.getStatus());
 		SchemaView createdView = response.readEntity(SchemaView.class);

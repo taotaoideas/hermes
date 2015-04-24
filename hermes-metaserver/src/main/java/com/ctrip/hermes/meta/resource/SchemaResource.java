@@ -44,10 +44,6 @@ public class SchemaResource {
 
 	private TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
 
-	public SchemaResource() {
-		System.out.println("Schema " + this.getClass().getClassLoader());
-	}
-
 	/**
 	 * 
 	 * @param fileInputStream
@@ -246,5 +242,26 @@ public class SchemaResource {
 		Map<String, Object> entity = new HashMap<>();
 		entity.put("is_compatible", result);
 		return Response.status(Status.OK).entity(entity).build();
+	}
+
+	@GET
+	@Path("{id}/compatibility")
+	public Response getCompatibility(@PathParam("id") Long schemaId) {
+		Schema schema = null;
+		try {
+			schema = schemaService.getSchemaMeta(schemaId);
+		} catch (DalNotFoundException e) {
+			throw new RestException("Schema not found: " + schemaId, Status.NOT_FOUND);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+
+		String result = null;
+		try {
+			result = schemaService.getCompatible(schema);
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.OK).entity(result).build();
 	}
 }

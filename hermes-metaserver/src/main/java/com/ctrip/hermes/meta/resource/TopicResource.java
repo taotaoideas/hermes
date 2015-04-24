@@ -43,10 +43,6 @@ public class TopicResource {
 
 	private SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
 
-	public TopicResource() {
-		System.out.println("Topic " + this.getClass().getClassLoader());
-	}
-
 	@POST
 	public Response createTopic(String content) {
 		if (StringUtils.isEmpty(content)) {
@@ -131,16 +127,14 @@ public class TopicResource {
 	public List<SchemaView> getSchemas(@PathParam("name") String name) {
 		List<SchemaView> returnResult = new ArrayList<SchemaView>();
 		TopicView topic = getTopic(name);
-		if (topic.getSchema() != null) {
-			try {
-				List<Schema> schemaMetas = schemaService.listSchemaView(topic.toMetaTopic());
-				for (Schema schema : schemaMetas) {
-					SchemaView schemaView = new SchemaView(schema);
-					returnResult.add(schemaView);
-				}
-			} catch (DalException e) {
-				throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		try {
+			List<Schema> schemaMetas = schemaService.listSchemaView(topic.toMetaTopic());
+			for (Schema schema : schemaMetas) {
+				SchemaView schemaView = new SchemaView(schema);
+				returnResult.add(schemaView);
 			}
+		} catch (DalException e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 		}
 		return returnResult;
 	}

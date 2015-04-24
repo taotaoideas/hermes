@@ -1,5 +1,6 @@
 package com.ctrip.hermes.meta.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class CodecResourceTest extends ComponentTestCase {
 	private MetaRestServer server;
 
 	@Before
-	public void startServer() {
+	public void startServer() throws IOException {
 		server = lookup(MetaRestServer.class);
 		server.start();
 	}

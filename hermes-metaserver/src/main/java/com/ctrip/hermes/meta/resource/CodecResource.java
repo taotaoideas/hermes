@@ -1,7 +1,9 @@
 package com.ctrip.hermes.meta.resource;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
@@ -11,11 +13,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.entity.Codec;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.pojo.CodecView;
-import com.ctrip.hermes.meta.server.MetaPropertiesLoader;
 import com.ctrip.hermes.meta.server.RestException;
 import com.ctrip.hermes.meta.service.CodecService;
 
@@ -25,6 +27,8 @@ import com.ctrip.hermes.meta.service.CodecService;
 public class CodecResource {
 
 	private CodecService codecService = PlexusComponentLocator.lookup(CodecService.class);
+
+	private ClientEnvironment m_env = PlexusComponentLocator.lookup(ClientEnvironment.class);
 
 	@GET
 	@Path("{name}")
@@ -37,7 +41,7 @@ public class CodecResource {
 	}
 
 	@GET
-	public List<CodecView> listCodecs() {
+	public List<CodecView> listCodecs() throws IOException {
 		// FIXME hard code two codecs
 		List<CodecView> result = new ArrayList<>();
 		CodecView jsonCodec = new CodecView();
@@ -47,8 +51,9 @@ public class CodecResource {
 		List<Property> properties = new ArrayList<>();
 		Property prop = new Property();
 		prop.setName("schema.registry.url");
-		String schemaServerHost = MetaPropertiesLoader.load().getProperty("schema-server-host");
-		String schemaServerPort = MetaPropertiesLoader.load().getProperty("schema-server-port");
+		Properties globalConfig = m_env.getGlobalConfig();
+		String schemaServerHost = globalConfig.getProperty("schema-server-host");
+		String schemaServerPort = globalConfig.getProperty("schema-server-port");
 		prop.setValue("http://" + schemaServerHost + ":" + schemaServerPort);
 		avroCodec.setProperties(properties);
 		result.add(jsonCodec);

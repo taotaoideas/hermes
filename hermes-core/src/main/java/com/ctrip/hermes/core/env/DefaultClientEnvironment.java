@@ -1,7 +1,11 @@
 package com.ctrip.hermes.core.env;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -15,23 +19,23 @@ public class DefaultClientEnvironment implements ClientEnvironment, Initializabl
 	private final static String PRODUCER_DEFAULT_FILE = "/hermes-producer.properties";
 
 	private final static String PRODUCER_PATTERN = "/hermes-producer-%s.properties";
-	
+
 	private final static String CONSUMER_DEFAULT_FILE = "/hermes-consumer.properties";
-	
+
 	private final static String CONSUMER_PATTERN = "/hermes-consumer-%s.properties";
-	
+
 	private final static String GLOBAL_DEFAULT_FILE = "/hermes.properties";
-	
+
 	private ConcurrentMap<String, Properties> m_producerCache = new ConcurrentHashMap<>();
 
 	private ConcurrentMap<String, Properties> m_consumerCache = new ConcurrentHashMap<>();
-	
+
 	private Properties m_producerDefault;
 
 	private Properties m_consumerDefault;
 
 	private Properties m_globalDefault;
-	
+
 	@Override
 	public Properties getProducerConfig(String topic) throws IOException {
 		Properties properties = m_producerCache.get(topic);
@@ -53,18 +57,24 @@ public class DefaultClientEnvironment implements ClientEnvironment, Initializabl
 
 		return properties;
 	}
-	
+
 	@Override
 	public Properties getGlobalConfig() throws IOException {
 		return m_globalDefault;
 	}
-	
+
 	private Properties readConfigFile(String configPath) throws IOException {
 		return readConfigFile(configPath, null);
 	}
 
 	private Properties readConfigFile(String configPath, Properties defaults) throws IOException {
 		InputStream in = this.getClass().getResourceAsStream(configPath);
+		if (in == null) {
+			// load outside resource under current user path
+			Path path = new File(System.getProperty("user.dir") + configPath).toPath();
+			if (Files.isReadable(path))
+				in = new FileInputStream(path.toFile());
+		}
 		Properties props = new Properties(defaults);
 
 		if (in != null) {
