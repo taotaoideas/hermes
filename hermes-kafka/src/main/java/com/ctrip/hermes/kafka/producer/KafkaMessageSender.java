@@ -27,6 +27,7 @@ import com.ctrip.hermes.core.env.ClientEnvironment;
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.message.codec.MessageCodec;
 import com.ctrip.hermes.core.meta.MetaService;
+import com.ctrip.hermes.core.result.Callback;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.meta.entity.Datasource;
 import com.ctrip.hermes.meta.entity.Endpoint;
@@ -81,6 +82,7 @@ public class KafkaMessageSender implements MessageSender {
 		}
 		configs.put("value.serializer", ByteArraySerializer.class.getCanonicalName());
 		configs.put("key.serializer", StringSerializer.class.getCanonicalName());
+
 		if (!configs.containsKey("client.id")) {
 			try {
 				configs.put("client.id", InetAddress.getLocalHost().getHostAddress() + "_" + topic);
@@ -106,28 +108,53 @@ public class KafkaMessageSender implements MessageSender {
 
 		ByteBuf byteBuf = Unpooled.buffer();
 		m_codec.encode(msg, byteBuf);
+		byte[] bytes = new byte[byteBuf.readableBytes()];
+		System.arraycopy(byteBuf.array(), 0, bytes, 0, bytes.length);
+		ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, partition, bytes);
 
-		ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, partition, byteBuf.array());
-		Future<RecordMetadata> sendResult = producer.send(record);
+		Future<RecordMetadata> sendResult = null;
+		if (msg.getCallback() != null) {
+			sendResult = producer.send(record, new KafkaCallback(msg.getCallback()));
+		} else {
+			sendResult = producer.send(record);
+		}
+
 		return new KafkaFuture(sendResult);
+	}
+
+	class KafkaCallback implements org.apache.kafka.clients.producer.Callback {
+
+		private Callback m_callback;
+
+		public KafkaCallback(Callback callback) {
+			this.m_callback = callback;
+		}
+
+		@Override
+		public void onCompletion(RecordMetadata metadata, Exception exception) {
+			if (this.m_callback != null) {
+				SendResult sendResult = new SendResult(true);
+				this.m_callback.onCompletion(sendResult, exception);
+			}
+		}
 	}
 
 	class KafkaFuture implements Future<SendResult> {
 
-		private Future<RecordMetadata> recordMetadata;
+		private Future<RecordMetadata> m_recordMetadata;
 
 		public KafkaFuture(Future<RecordMetadata> recordMetadata) {
-			this.recordMetadata = recordMetadata;
+			this.m_recordMetadata = recordMetadata;
 		}
 
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			return this.recordMetadata.cancel(mayInterruptIfRunning);
+			return this.m_recordMetadata.cancel(mayInterruptIfRunning);
 		}
 
 		@Override
 		public SendResult get() throws InterruptedException, ExecutionException {
-			this.recordMetadata.get();
+			this.m_recordMetadata.get();
 			SendResult sendResult = new SendResult(true);
 			return sendResult;
 		}
@@ -135,19 +162,19 @@ public class KafkaMessageSender implements MessageSender {
 		@Override
 		public SendResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
 		      TimeoutException {
-			this.recordMetadata.get(timeout, unit);
+			this.m_recordMetadata.get(timeout, unit);
 			SendResult sendResult = new SendResult(true);
 			return sendResult;
 		}
 
 		@Override
 		public boolean isCancelled() {
-			return this.recordMetadata.isCancelled();
+			return this.m_recordMetadata.isCancelled();
 		}
 
 		@Override
 		public boolean isDone() {
-			return this.recordMetadata.isDone();
+			return this.m_recordMetadata.isDone();
 		}
 
 	}

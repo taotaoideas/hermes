@@ -146,6 +146,18 @@ public class SchemaService {
 		m_schemaDao.deleteByPK(schema);
 	}
 
+	/**
+	 * 
+	 * @param topic
+	 * @throws DalException
+	 */
+	public void deleteSchemas(Topic topic) throws DalException {
+		List<Schema> schemas = m_schemaDao.findByTopic(topic.getId(), SchemaEntity.READSET_FULL);
+		for (Schema schema : schemas) {
+			m_schemaDao.deleteByPK(schema);
+		}
+	}
+
 	private SchemaRegistryClient getAvroSchemaRegistry() throws IOException {
 		if (avroSchemaRegistry == null) {
 			Properties m_properties = m_env.getGlobalConfig();
