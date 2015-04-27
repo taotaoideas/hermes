@@ -8,6 +8,6 @@ import com.ctrip.hermes.meta.entity.Endpoint;
  */
 public interface EndpointChannelManager {
 
-   EndpointChannel getChannel(Endpoint endpoint);
+	EndpointChannel getChannel(Endpoint endpoint, EndpointChannelEventListener... listeners);
 
 }
