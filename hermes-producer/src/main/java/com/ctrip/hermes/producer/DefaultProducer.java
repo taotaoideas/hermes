@@ -7,6 +7,7 @@ import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.message.ProducerMessage;
 import com.ctrip.hermes.core.pipeline.Pipeline;
+import com.ctrip.hermes.core.result.Callback;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
 import com.ctrip.hermes.producer.build.BuildConstants;
@@ -19,6 +20,13 @@ public class DefaultProducer extends Producer {
 	@Override
 	public DefaultMessageHolder message(String topic, Object body) {
 		return new DefaultMessageHolder(topic, body);
+	}
+
+	@Override
+	public DefaultMessageHolder message(String topic, Object body, Callback callback) {
+		DefaultMessageHolder msgHolder = new DefaultMessageHolder(topic, body);
+		msgHolder.setCallback(callback);
+		return msgHolder;
 	}
 
 	class DefaultMessageHolder implements MessageHolder {
@@ -55,6 +63,12 @@ public class DefaultProducer extends Producer {
 		@Override
 		public MessageHolder addProperty(String key, String value) {
 			m_msg.addDurableAppProperty(key, value);
+			return this;
+		}
+
+		@Override
+		public MessageHolder setCallback(Callback callback) {
+			m_msg.setCallback(callback);
 			return this;
 		}
 	}

@@ -177,4 +177,34 @@ public class TopicResource {
 		}
 		return Response.status(Status.OK).build();
 	}
+
+	@POST
+	@Path("{name}/deploy")
+	public Response deployTopic(@PathParam("name") String name) {
+		TopicView topicView = getTopic(name);
+		try {
+			Topic topic = topicView.toMetaTopic();
+			if ("kafka".equalsIgnoreCase(topic.getStorageType())) {
+				topicService.createTopicInKafka(topic);
+			}
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.OK).build();
+	}
+
+	@POST
+	@Path("{name}/undeploy")
+	public Response undeployTopic(@PathParam("name") String name) {
+		TopicView topicView = getTopic(name);
+		try {
+			Topic topic = topicView.toMetaTopic();
+			if ("kafka".equalsIgnoreCase(topic.getStorageType())) {
+				topicService.deleteTopicInKafka(topic);
+			}
+		} catch (Exception e) {
+			throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
+		}
+		return Response.status(Status.OK).build();
+	}
 }

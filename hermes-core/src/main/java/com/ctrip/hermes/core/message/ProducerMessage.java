@@ -1,5 +1,7 @@
 package com.ctrip.hermes.core.message;
 
+import com.ctrip.hermes.core.result.Callback;
+
 public class ProducerMessage<T> {
 	private String m_topic;
 
@@ -18,6 +20,8 @@ public class ProducerMessage<T> {
 	private long m_bornTime;
 
 	private PropertiesHolder m_propertiesHolder = new PropertiesHolder();
+
+	private Callback callback;
 
 	public ProducerMessage() {
 
@@ -125,4 +129,11 @@ public class ProducerMessage<T> {
 		return m_propertiesHolder.getVolatileProperty(name);
 	}
 
+	public void setCallback(Callback callback) {
+		this.callback = callback;
+	}
+
+	public Callback getCallback() {
+		return this.callback;
+	}
 }

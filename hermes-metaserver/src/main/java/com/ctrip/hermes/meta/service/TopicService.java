@@ -11,6 +11,7 @@ import kafka.admin.AdminUtils;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.exception.ZkMarshallingError;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
+import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -32,22 +33,14 @@ public class TopicService {
 	@Inject(ServerMetaService.ID)
 	private MetaService m_metaService;
 
-	public Topic getTopic(String topic) {
-		return m_metaService.findTopic(topic);
-	}
+	@Inject
+	private SchemaService m_schemaService;
 
-	public Topic getTopic(long topicId) {
-		return m_metaService.findTopic(topicId);
-	}
-
-	public List<Topic> findTopics(String pattern) {
-		return m_metaService.findTopicsByPattern(pattern);
-	}
-
-	public Storage findStorage(String topic) {
-		return m_metaService.findStorage(topic);
-	}
-
+	/**
+	 * 
+	 * @param topic
+	 * @return
+	 */
 	public Topic createTopic(Topic topic) {
 		Meta meta = m_metaManager.getMeta();
 		topic.setCreateTime(new Date(System.currentTimeMillis()));
@@ -65,23 +58,10 @@ public class TopicService {
 		return topic;
 	}
 
-	public Topic updateTopic(Topic topic) {
-		Meta meta = m_metaManager.getMeta();
-		meta.removeTopic(topic.getName());
-		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
-		meta.addTopic(topic);
-		m_metaManager.updateMeta(meta);
-		m_metaService.refreshMeta(meta);
-		return topic;
-	}
-
-	public void deleteTopic(String name) {
-		Meta meta = m_metaManager.getMeta();
-		meta.removeTopic(name);
-		m_metaManager.updateMeta(meta);
-		m_metaService.refreshMeta(meta);
-	}
-
+	/**
+	 * 
+	 * @param topic
+	 */
 	public void createTopicInKafka(Topic topic) {
 		List<Partition> partitions = m_metaService.getPartitions(topic.getName());
 		if (partitions == null || partitions.size() < 1) {
@@ -123,20 +103,91 @@ public class TopicService {
 		}
 		AdminUtils.createTopic(zkClient, topic.getName(), partition, replication, topicProp);
 	}
+
+	/**
+	 * 
+	 * @param topic
+	 */
+	public void deleteTopicInKafka(Topic topic) {
+		List<Partition> partitions = m_metaService.getPartitions(topic.getName());
+		if (partitions == null || partitions.size() < 1) {
+			return;
+		}
+
+		String consumerDatasource = partitions.get(0).getReadDatasource();
+		Storage targetStorage = m_metaService.findStorage(topic.getName());
+		if (targetStorage == null) {
+			return;
+		}
+
+		String zkConnect = null;
+		for (Datasource datasource : targetStorage.getDatasources()) {
+			if (consumerDatasource.equals(datasource.getId())) {
+				Map<String, Property> properties = datasource.getProperties();
+				for (Map.Entry<String, Property> prop : properties.entrySet()) {
+					if ("zookeeper.connect".equals(prop.getValue().getName())) {
+						zkConnect = prop.getValue().getValue();
+						break;
+					}
+				}
+			}
+		}
+
+		ZkClient zkClient = new ZkClient(zkConnect);
+		zkClient.setZkSerializer(new ZKStringSerializer());
+		AdminUtils.deleteTopic(zkClient, topic.getName());
+	}
+
+	/**
+	 * 
+	 * @param name
+	 * @throws DalException
+	 */
+	public void deleteTopic(String name) throws DalException {
+		Meta meta = m_metaManager.getMeta();
+		Topic topic = meta.findTopic(name);
+		if (topic == null)
+			return;
+		meta.removeTopic(name);
+		// Remove related schemas
+		m_schemaService.deleteSchemas(topic);
+		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
+	}
+
+	public Storage findStorage(String topic) {
+		return m_metaService.findStorage(topic);
+	}
+
+	public List<Topic> findTopics(String pattern) {
+		return m_metaService.findTopicsByPattern(pattern);
+	}
+
+	public Topic getTopic(long topicId) {
+		return m_metaService.findTopic(topicId);
+	}
+
+	public Topic getTopic(String topic) {
+		return m_metaService.findTopic(topic);
+	}
+
+	/**
+	 * 
+	 * @param topic
+	 * @return
+	 */
+	public Topic updateTopic(Topic topic) {
+		Meta meta = m_metaManager.getMeta();
+		meta.removeTopic(topic.getName());
+		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
+		meta.addTopic(topic);
+		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
+		return topic;
+	}
 }
 
 class ZKStringSerializer implements ZkSerializer {
-
-	@Override
-	public byte[] serialize(Object data) throws ZkMarshallingError {
-		byte[] bytes = null;
-		try {
-			bytes = data.toString().getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new ZkMarshallingError(e);
-		}
-		return bytes;
-	}
 
 	@Override
 	public Object deserialize(byte[] bytes) throws ZkMarshallingError {
@@ -148,6 +199,17 @@ class ZKStringSerializer implements ZkSerializer {
 			} catch (UnsupportedEncodingException e) {
 				throw new ZkMarshallingError(e);
 			}
+	}
+
+	@Override
+	public byte[] serialize(Object data) throws ZkMarshallingError {
+		byte[] bytes = null;
+		try {
+			bytes = data.toString().getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new ZkMarshallingError(e);
+		}
+		return bytes;
 	}
 
 }
