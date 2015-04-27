@@ -1,9 +1,11 @@
 package com.ctrip.hermes.core.transport.endpoint;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,6 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.ctrip.hermes.core.transport.command.Ack;
 import com.ctrip.hermes.core.transport.command.AckAware;
@@ -28,48 +31,72 @@ import com.ctrip.hermes.core.transport.endpoint.event.EndpointChannelInactiveEve
 public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<Command> implements EndpointChannel {
 	private ConcurrentMap<Long, AckAware<Ack>> m_pendingCommands = new ConcurrentHashMap<>();
 
-	private Channel m_channel;
+	private AtomicReference<Channel> m_channel = new AtomicReference<>(null);
+
+	private AtomicBoolean m_writerStarted = new AtomicBoolean(false);
+
+	private Thread m_writer;
 
 	protected CommandProcessorManager m_cmdProcessorManager;
 
 	protected List<EndpointChannelEventListener> m_listeners = new CopyOnWriteArrayList<>();
 
-	protected AtomicBoolean m_active = new AtomicBoolean(false);
-
-	protected AtomicBoolean m_writable = new AtomicBoolean(true);
-
 	// TODO config size
-	private BlockingQueue<Command> m_delayWQueue = new LinkedBlockingQueue<Command>();
+	private BlockingQueue<Command> m_writeQueue = new LinkedBlockingQueue<Command>();
 
 	public NettyEndpointChannel(CommandProcessorManager cmdProcessorManager) {
 		m_cmdProcessorManager = cmdProcessorManager;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.ctrip.hermes.channel.EndpointChannel#write(com.ctrip.hermes.remoting.command.Command)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void writeCommand(Command command) {
+		if (m_writerStarted.compareAndSet(false, true)) {
+			startWriter();
+		}
+
 		if (command instanceof AckAware) {
 			m_pendingCommands.put(command.getHeader().getCorrelationId(), (AckAware<Ack>) command);
 		}
 
-		if (isWritable()) {
-			// TODO
-			System.out.println("Write through...");
-			m_channel.writeAndFlush(command);
-		} else {
-			// TODO if full?
-			System.out.println("Delay write...");
-			m_delayWQueue.offer(command);
-		}
+		// TODO if full?
+		m_writeQueue.offer(command);
 	}
 
-	private boolean isWritable() {
-		return m_channel != null && m_active.get() && m_channel.isWritable();
+	private void startWriter() {
+		m_writer = new Thread() {
+			@Override
+			public void run() {
+				Command cmd = null;
+				while (!Thread.currentThread().isInterrupted()) {
+					try {
+
+						if (cmd == null) {
+							cmd = m_writeQueue.take();
+						}
+
+						Channel channel = m_channel.get();
+
+						if (channel != null && channel.isWritable()) {
+							ChannelFuture future = channel.writeAndFlush(cmd).sync();
+							if (future.isSuccess()) {
+								cmd = null;
+							}
+						}
+
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					} catch (Exception e) {
+						// TODO
+					}
+				}
+			}
+		};
+
+		// TODO
+		m_writer.setDaemon(true);
+		m_writer.setName("NettyWriter");
+		m_writer.start();
 	}
 
 	@Override
@@ -92,44 +119,31 @@ public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<C
 		// TODO log
 		System.out.println("Writablity changed..." + ctx.channel().isWritable());
 		super.channelWritabilityChanged(ctx);
-		m_writable.set(ctx.channel().isWritable());
-		purgeDelayWQueue();
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		// TODO log
 		System.out.println("Channel inactive...");
-		m_active.set(false);
-		notifyListener(new EndpointChannelInactiveEvent(ctx));
+		m_channel.set(null);
+		notifyListener(new EndpointChannelInactiveEvent(ctx, this));
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		// TODO log
 		System.out.println("Channel active...");
-		m_channel = ctx.channel();
+		m_channel.set(ctx.channel());
+		notifyListener(new EndpointChannelActiveEvent(ctx, this));
 		super.channelActive(ctx);
-		m_active.set(true);
-		purgeDelayWQueue();
-		notifyListener(new EndpointChannelActiveEvent(ctx));
 
-	}
-
-	protected void purgeDelayWQueue() {
-		if (isWritable()) {
-			while (!m_delayWQueue.isEmpty()) {
-				Command cmd = m_delayWQueue.poll();
-				if (cmd != null) {
-					m_channel.writeAndFlush(cmd);
-				}
-			}
-		}
 	}
 
 	@Override
-	public void addListener(EndpointChannelEventListener listener) {
-		m_listeners.add(listener);
+	public void addListener(EndpointChannelEventListener... listeners) {
+		if (listeners != null) {
+			m_listeners.addAll(Arrays.asList(listeners));
+		}
 	}
 
 	protected void notifyListener(EndpointChannelEvent event) {

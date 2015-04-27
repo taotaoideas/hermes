@@ -12,6 +12,6 @@ public interface EndpointChannel {
 
 	void start();
 
-	void addListener(EndpointChannelEventListener listener);
+	void addListener(EndpointChannelEventListener... listeners);
 
 }

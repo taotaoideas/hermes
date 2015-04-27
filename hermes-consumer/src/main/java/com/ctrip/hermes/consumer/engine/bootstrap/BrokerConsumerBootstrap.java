@@ -36,10 +36,7 @@ public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 		for (final Partition partition : partitions) {
 
 			Endpoint endpoint = m_endpointManager.getEndpoint(consumerContext.getTopic().getName(), partition.getId());
-			final EndpointChannel channel = m_endpointChannelManager.getChannel(endpoint);
-
-			channel.addListener(new ConsumerAutoReconnectListener(consumerContext, channel, partition));
-
+			m_endpointChannelManager.getChannel(endpoint, new ConsumerAutoReconnectListener(consumerContext, partition));
 		}
 
 	}
@@ -47,23 +44,19 @@ public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 	private class ConsumerAutoReconnectListener implements EndpointChannelEventListener {
 		private final ConsumerContext m_consumerContext;
 
-		private final EndpointChannel m_channel;
-
 		private final Partition m_partition;
 
 		private AtomicReference<Long> m_correlationId = new AtomicReference<>(null);
 
-		private ConsumerAutoReconnectListener(ConsumerContext consumerContext, EndpointChannel channel,
-		      Partition partition) {
+		private ConsumerAutoReconnectListener(ConsumerContext consumerContext, Partition partition) {
 			m_consumerContext = consumerContext;
-			m_channel = channel;
 			m_partition = partition;
 		}
 
 		@Override
 		public void onEvent(EndpointChannelEvent event) {
 			if (event instanceof EndpointChannelActiveEvent) {
-				channelActive();
+				channelActive(event.getChannel());
 			} else if (event instanceof EndpointChannelInactiveEvent) {
 				Long correlationId = m_correlationId.getAndSet(null);
 				if (correlationId != null) {
@@ -74,7 +67,7 @@ public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 			}
 		}
 
-		private void channelActive() {
+		private void channelActive(EndpointChannel channel) {
 			SubscribeCommand subscribeCommand = new SubscribeCommand();
 			subscribeCommand.setGroupId(m_consumerContext.getGroupId());
 			subscribeCommand.setTopic(m_consumerContext.getTopic().getName());
@@ -85,7 +78,7 @@ public class BrokerConsumerBootstrap extends BaseConsumerBootstrap {
 			long correlationId = subscribeCommand.getHeader().getCorrelationId();
 			if (m_correlationId.compareAndSet(null, correlationId)) {
 				m_consumerNotifier.register(correlationId, m_consumerContext);
-				m_channel.writeCommand(subscribeCommand);
+				channel.writeCommand(subscribeCommand);
 
 				// TODO
 				System.out.println("Subscribe command writed..." + subscribeCommand);

@@ -32,7 +32,7 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 	private int RECONNECT_DELAY_SECONDS = 1;
 
 	@Override
-	public EndpointChannel getChannel(Endpoint endpoint) {
+	public EndpointChannel getChannel(Endpoint endpoint, EndpointChannelEventListener... listeners) {
 		switch (endpoint.getType()) {
 		case Endpoint.BROKER:
 			if (!channels.containsKey(endpoint)) {
@@ -42,6 +42,7 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 						      m_cmdProcessorManager);
 
 						channel.addListener(new NettyChannelAutoReconnectListener(channel, RECONNECT_DELAY_SECONDS));
+						channel.addListener(listeners);
 						channel.start();
 						channels.put(endpoint, channel);
 					}
@@ -55,12 +56,10 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 	}
 
 	protected static class NettyChannelAutoReconnectListener implements EndpointChannelEventListener {
-		private EndpointChannel m_channel;
 
 		private int m_reconnectDelaySeconds;
 
 		public NettyChannelAutoReconnectListener(EndpointChannel channel, int reconnectDelaySeconds) {
-			m_channel = channel;
 			m_reconnectDelaySeconds = reconnectDelaySeconds;
 		}
 
@@ -68,21 +67,21 @@ public class DefaultEndpointChannelManager implements EndpointChannelManager {
 		public void onEvent(EndpointChannelEvent event) {
 			if (event instanceof EndpointChannelConnectFailedEvent) {
 				EventLoop eventLoop = event.getCtx();
-				reconnect(eventLoop);
+				reconnect(eventLoop, event.getChannel());
 			} else if (event instanceof EndpointChannelInactiveEvent) {
 				ChannelHandlerContext ctx = event.getCtx();
-				reconnect(ctx.channel().eventLoop());
+				reconnect(ctx.channel().eventLoop(), event.getChannel());
 			}
 		}
 
-		private void reconnect(EventLoop eventLoop) {
+		private void reconnect(EventLoop eventLoop, final EndpointChannel channel) {
 			eventLoop.schedule(new Runnable() {
 
 				@Override
 				public void run() {
 					// TODO log
 					System.out.println("Reconnect...");
-					m_channel.start();
+					channel.start();
 				}
 			}, m_reconnectDelaySeconds, TimeUnit.SECONDS);
 		}

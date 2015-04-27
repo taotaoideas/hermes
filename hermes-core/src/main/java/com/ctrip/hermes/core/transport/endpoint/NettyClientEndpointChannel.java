@@ -60,7 +60,8 @@ public class NettyClientEndpointChannel extends NettyEndpointChannel {
 				public void operationComplete(ChannelFuture future) throws Exception {
 					// TODO log
 					if (!future.isSuccess()) {
-						notifyListener(new EndpointChannelConnectFailedEvent(future.channel().eventLoop()));
+						notifyListener(new EndpointChannelConnectFailedEvent(future.channel().eventLoop(),
+						      NettyClientEndpointChannel.this));
 					}
 				}
 
