@@ -20,4 +20,6 @@ public interface MessageCodecHandler {
 
 	void encode(PartialDecodedMessage msg, ByteBuf buf);
 
+	byte[] encode(ProducerMessage<?> msg, byte version);
+
 }

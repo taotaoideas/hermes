@@ -10,6 +10,8 @@ public interface MessageCodec {
 
 	public void encode(ProducerMessage<?> msg, ByteBuf buf);
 
+	public byte[] encode(ProducerMessage<?> msg);
+
 	public PartialDecodedMessage partialDecode(ByteBuf buf);
 
 	public BaseConsumerMessage<?> decode(ByteBuf buf, Class<?> bodyClazz);
