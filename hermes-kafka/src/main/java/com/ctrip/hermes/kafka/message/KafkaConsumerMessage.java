@@ -4,8 +4,10 @@ import java.util.Iterator;
 
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage;
+import com.ctrip.hermes.core.message.PropertiesHolder;
+import com.ctrip.hermes.core.message.PropertiesHolderAware;
 
-public class KafkaConsumerMessage<T> implements ConsumerMessage<T> {
+public class KafkaConsumerMessage<T> implements ConsumerMessage<T>, PropertiesHolderAware {
 
 	private BaseConsumerMessage<T> m_baseMsg;
 
@@ -75,4 +77,9 @@ public class KafkaConsumerMessage<T> implements ConsumerMessage<T> {
 	public MessageStatus getStatus() {
 		return m_baseMsg.getStatus();
 	}
+
+	@Override
+   public PropertiesHolder getPropertiesHolder() {
+	   return m_baseMsg.getPropertiesHolder();
+   }
 }

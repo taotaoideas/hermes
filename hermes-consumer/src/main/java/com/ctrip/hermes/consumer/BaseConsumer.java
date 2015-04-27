@@ -5,6 +5,8 @@ import java.util.List;
 import com.ctrip.hermes.core.constants.CatConstants;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.message.ConsumerMessage.MessageStatus;
+import com.ctrip.hermes.core.message.PropertiesHolder;
+import com.ctrip.hermes.core.message.PropertiesHolderAware;
 import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.cat.message.Event;
@@ -21,12 +23,19 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 			for (ConsumerMessage<T> msg : msgs) {
 				Transaction t = Cat.newTransaction("Message.Consumed", topic);
 				MessageTree tree = Cat.getManager().getThreadLocalMessageTree();
-				String rootMsgId = msg.getProperty(CatConstants.ROOT_MESSAGE_ID);
-				String parentMsgId = msg.getProperty(CatConstants.CURRENT_MESSAGE_ID);
-				String msgId = msg.getProperty(CatConstants.SERVER_MESSAGE_ID);
-				tree.setRootMessageId(rootMsgId);
-				tree.setParentMessageId(parentMsgId);
-				tree.setMessageId(msgId);
+
+				if (msg instanceof PropertiesHolderAware) {
+					PropertiesHolder holder = ((PropertiesHolderAware) msg).getPropertiesHolder();
+					String rootMsgId = holder.getDurableSysProperty(CatConstants.ROOT_MESSAGE_ID);
+					String parentMsgId = holder.getDurableSysProperty(CatConstants.CURRENT_MESSAGE_ID);
+					String msgId = holder.getDurableSysProperty(CatConstants.SERVER_MESSAGE_ID);
+
+					System.out.println(rootMsgId + parentMsgId + msgId);
+
+					tree.setRootMessageId(rootMsgId);
+					tree.setParentMessageId(parentMsgId);
+					tree.setMessageId(msgId);
+				}
 
 				try {
 					t.addData("topic", topic);
