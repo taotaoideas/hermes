@@ -12,6 +12,7 @@ import com.ctrip.framework.clogging.agent.log.ILog;
 import com.ctrip.framework.clogging.agent.log.LogManager;
 import com.ctrip.hermes.rest.common.Configuration;
 import com.ctrip.hermes.rest.filter.CORSFilter;
+import com.dianping.cat.Cat;
 import com.google.common.base.Preconditions;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
@@ -58,7 +59,9 @@ public class HermesRestServer {
 
 		LogConfig.setAppID(Configuration.get("hermes.rest.appid", "900777"));
 		LogConfig.setLoggingServerIP(Configuration.get("clog.collector.ip", "collector.logging.sh.ctriptravel.com"));
-		LogConfig.setLoggingServerPort(Configuration.get("clog.collector.port","63100"));
+		LogConfig.setLoggingServerPort(Configuration.get("clog.collector.port", "63100"));
+
+		Cat.initializeByDomain("900777", 2280, 80, Configuration.get("cat.url", "cat.ctripcorp.com"));
 	}
 
 	public static void main(String[] args) throws ServerException, InterruptedException {
