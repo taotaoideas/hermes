@@ -10,7 +10,7 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
-public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
+public class BrokerConsumerMessage<T> implements ConsumerMessage<T>, PropertiesHolderAware {
 
 	private BaseConsumerMessage<T> m_baseMsg;
 
@@ -145,4 +145,9 @@ public class BrokerConsumerMessage<T> implements ConsumerMessage<T> {
 	public int getRemainingRetries() {
 		return m_baseMsg.getRemainingRetries();
 	}
+
+	@Override
+   public PropertiesHolder getPropertiesHolder() {
+	   return m_baseMsg.getPropertiesHolder();
+   }
 }

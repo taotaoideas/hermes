@@ -108,4 +108,8 @@ public class BaseConsumerMessage<T> {
 		return m_propertiesHolder.getRawDurableAppPropertyNames().iterator();
 	}
 
+	public PropertiesHolder getPropertiesHolder() {
+	   return m_propertiesHolder;
+   }
+
 }

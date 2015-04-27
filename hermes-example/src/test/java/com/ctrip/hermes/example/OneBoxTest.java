@@ -20,7 +20,6 @@ import org.unidal.lookup.LookupException;
 
 import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
 import com.ctrip.hermes.consumer.BaseConsumer;
-import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
@@ -35,7 +34,7 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@BeforeClass
 	public static void beforeClass() {
-		System.setProperty("devMode", "false");
+		System.setProperty("devMode", "true");
 	}
 
 	@Test
@@ -95,7 +94,7 @@ public class OneBoxTest extends ComponentTestCase {
 			t.start();
 		}
 
-//		latch.await(30, TimeUnit.SECONDS);
+		// latch.await(30, TimeUnit.SECONDS);
 		latch.await();
 
 		long progressTime = System.currentTimeMillis() - start;
@@ -217,7 +216,7 @@ public class OneBoxTest extends ComponentTestCase {
 
 	}
 
-	static class MyConsumer implements Consumer<String> {
+	static class MyConsumer extends BaseConsumer<String> {
 
 		private Map<String, Integer> m_nacks;
 
@@ -229,33 +228,32 @@ public class OneBoxTest extends ComponentTestCase {
 		}
 
 		@Override
-		public void consume(List<ConsumerMessage<String>> msgs) {
-			for (ConsumerMessage<String> msg : msgs) {
-				String body = msg.getBody();
-				System.out.println(m_id + "<<< " + body);
+		public void consume(ConsumerMessage<String> msg) {
+			String body = msg.getBody();
+			System.out.println(m_id + "<<< " + body);
 
-				// TODO
-				if (body.startsWith("NACK-")) {
-					int totalNackCnt = Integer.parseInt(body.substring(5, body.indexOf("-", 5)));
+			// TODO
+			if (body.startsWith("NACK-")) {
+				int totalNackCnt = Integer.parseInt(body.substring(5, body.indexOf("-", 5)));
 
-					if (!m_nacks.containsKey(body)) {
-						m_nacks.put(body, 1);
+				if (!m_nacks.containsKey(body)) {
+					m_nacks.put(body, 1);
+					msg.nack();
+				} else {
+					int curNackCnt = m_nacks.get(body);
+					if (curNackCnt < totalNackCnt) {
+						m_nacks.put(body, curNackCnt + 1);
 						msg.nack();
 					} else {
-						int curNackCnt = m_nacks.get(body);
-						if (curNackCnt < totalNackCnt) {
-							m_nacks.put(body, curNackCnt + 1);
-							msg.nack();
-						} else {
-							m_nacks.remove(body);
-							msg.ack();
-						}
+						m_nacks.remove(body);
+						msg.ack();
 					}
-				} else {
-					msg.ack();
 				}
+			} else {
+				msg.ack();
 			}
 		}
+
 	}
 
 	private void startBroker() throws Exception {
