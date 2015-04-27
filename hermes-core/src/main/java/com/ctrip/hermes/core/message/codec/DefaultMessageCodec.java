@@ -1,8 +1,8 @@
 package com.ctrip.hermes.core.message.codec;
 
-import org.unidal.lookup.annotation.Named;
-
 import io.netty.buffer.ByteBuf;
+
+import org.unidal.lookup.annotation.Named;
 
 import com.ctrip.hermes.core.message.BaseConsumerMessage;
 import com.ctrip.hermes.core.message.PartialDecodedMessage;
@@ -13,7 +13,7 @@ import com.ctrip.hermes.core.message.ProducerMessage;
  *
  */
 @Named(type = MessageCodec.class)
-public class VersioningMessageCodec implements MessageCodec {
+public class DefaultMessageCodec implements MessageCodec {
 	private static MessageCodecVersion VERSION = MessageCodecVersion.V1;
 
 	@Override
@@ -21,6 +21,11 @@ public class VersioningMessageCodec implements MessageCodec {
 		buf.writeByte(VERSION.getVersion());
 
 		VERSION.getHandler().encode(msg, buf);
+	}
+
+	@Override
+	public byte[] encode(ProducerMessage<?> msg) {
+		return VERSION.getHandler().encode(msg, VERSION.getVersion());
 	}
 
 	@Override

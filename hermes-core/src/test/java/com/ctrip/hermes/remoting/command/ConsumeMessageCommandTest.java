@@ -33,8 +33,8 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 	@Test
 	public void testStrange() {
-		final String strangeString = "{\"1\":{\"str\":\"429bb071-7d14-4da7-9ef1-a6f5b17911b5\"}," +
-				  "\"2\":{\"str\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"},\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1},\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"},\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"},\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"},\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
+		final String strangeString = "{\"1\":{\"str\":\"429bb071-7d14-4da7-9ef1-a6f5b17911b5\"},"
+		      + "\"2\":{\"str\":\"ExchangeTest\"},\"3\":{\"i32\":8},\"4\":{\"str\":\"uft-8\"},\"5\":{\"str\":\"cmessage-adapter 1.0\"},\"6\":{\"i32\":3},\"7\":{\"i32\":1},\"8\":{\"i32\":0},\"9\":{\"str\":\"order_new\"},\"10\":{\"str\":\"\"},\"11\":{\"str\":\"1\"},\"12\":{\"str\":\"DST56615\"},\"13\":{\"str\":\"555555\"},\"14\":{\"str\":\"169.254.142.159\"},\"15\":{\"str\":\"java.lang.String\"},\"16\":{\"i64\":1429168996889},\"17\":{\"map\":[\"str\",\"str\",0,{}]}}";
 
 		Map<String, String> appProperties = new HashMap<>();
 		appProperties.put("app_key", "123");
@@ -46,11 +46,11 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 
 		List<ProducerMessage<String>> msgs1_1 = new ArrayList<>();
 		msgs1_1.add(createProducerMessage("topic1", "t1_body1_1", "t1_key1_1", "t1_p1_1", 1, true, appProperties,
-				  sysProperties));
+		      sysProperties));
 
 		ConsumeMessageCommand cmd = new ConsumeMessageCommand();
 
-//		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(1L), 1, true, true)));
+		cmd.addMessage(1, Arrays.asList(createBatch("topic1", msgs1_1, Arrays.asList(new Pair<>(1L, 0)), 1, true, true)));
 
 		ByteBuf buf = Unpooled.buffer();
 		cmd.toBytes(buf);
@@ -92,7 +92,6 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			Assert.assertEquals(strangeString, cmsg.getProperty("strange"));
 		}
 	}
-
 
 	@Test
 	public void testEncodeAndDecode() {

@@ -1,6 +1,7 @@
 package com.ctrip.hermes.core.message.codec.internal;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.Map;
 
@@ -20,9 +21,30 @@ import com.ctrip.hermes.core.utils.HermesPrimitiveCodec;
 public class MessageCodecV1Handler implements MessageCodecHandler {
 
 	@Override
-	public void encode(ProducerMessage<?> msg, ByteBuf buf) {
-		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+	public byte[] encode(ProducerMessage<?> msg, byte version) {
 		Codec bodyCodec = CodecFactory.getCodecByTopicName(msg.getTopic());
+		byte[] body = bodyCodec.encode(msg.getTopic(), msg.getBody());
+		ByteBuf buf = Unpooled.buffer(body.length + 100);
+		buf.writeByte(version);
+
+		encode(msg, buf, body, bodyCodec.getType());
+
+		byte[] res = new byte[buf.readableBytes()];
+
+		buf.readBytes(res);
+
+		return res;
+	}
+
+	@Override
+	public void encode(ProducerMessage<?> msg, ByteBuf buf) {
+		Codec bodyCodec = CodecFactory.getCodecByTopicName(msg.getTopic());
+		byte[] body = bodyCodec.encode(msg.getTopic(), msg.getBody());
+		encode(msg, buf, body, bodyCodec.getType());
+	}
+
+	private void encode(ProducerMessage<?> msg, ByteBuf buf, byte[] body, String codecType) {
+		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		int indexBeginning = buf.writerIndex();
 
@@ -33,7 +55,7 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		codec.writeLong(msg.getBornTime());
 		// remaining retries
 		codec.writeInt(0);
-		codec.writeString(bodyCodec.getType());
+		codec.writeString(codecType);
 		codec.writeString(msg.getTopic());
 
 		PropertiesHolder propertiesHolder = msg.getPropertiesHolder();
@@ -41,7 +63,6 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		writeProperties(propertiesHolder.getVolatileProperties(), buf, codec);
 
 		// TODO pass buf to m_codec
-		byte[] body = bodyCodec.encode(msg.getTopic(), msg.getBody());
 		int indexBeforeLen = buf.writerIndex();
 		codec.writeInt(-1);
 		int indexBeforeBody = buf.writerIndex();
