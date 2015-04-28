@@ -24,7 +24,7 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 	public byte[] encode(ProducerMessage<?> msg, byte version) {
 		Codec bodyCodec = CodecFactory.getCodecByTopicName(msg.getTopic());
 		byte[] body = bodyCodec.encode(msg.getTopic(), msg.getBody());
-		ByteBuf buf = Unpooled.buffer(body.length + 100);
+		ByteBuf buf = Unpooled.buffer(body.length + 150);
 		buf.writeByte(version);
 
 		encode(msg, buf, body, bodyCodec.getType());
@@ -56,7 +56,6 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		// remaining retries
 		codec.writeInt(0);
 		codec.writeString(codecType);
-		codec.writeString(msg.getTopic());
 
 		PropertiesHolder propertiesHolder = msg.getPropertiesHolder();
 		writeProperties(propertiesHolder.getDurableProperties(), buf, codec);
@@ -88,7 +87,6 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		msg.setBornTime(codec.readLong());
 		msg.setRemainingRetries(codec.readInt());
 		msg.setBodyCodecType(codec.readString());
-		msg.setTopic(codec.readString());
 
 		int len = codec.readInt();
 		msg.setDurableProperties(buf.readSlice(len));
@@ -104,11 +102,11 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public BaseConsumerMessage<?> decode(ByteBuf buf, Class<?> bodyClazz) {
+	public BaseConsumerMessage<?> decode(String topic, ByteBuf buf, Class<?> bodyClazz) {
 		BaseConsumerMessage msg = new BaseConsumerMessage();
 
 		PartialDecodedMessage decodedMessage = partialDecode(buf);
-		msg.setTopic(decodedMessage.getTopic());
+		msg.setTopic(topic);
 		msg.setKey(decodedMessage.getKey());
 		msg.setBornTime(decodedMessage.getBornTime());
 		msg.setRemainingRetries(decodedMessage.getRemainingRetries());
@@ -134,7 +132,6 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		codec.writeLong(msg.getBornTime());
 		codec.writeInt(msg.getRemainingRetries());
 		codec.writeString(msg.getBodyCodecType());
-		codec.writeString(msg.getTopic());
 
 		writeProperties(msg.getDurableProperties(), buf, codec);
 		writeProperties(msg.getVolatileProperties(), buf, codec);

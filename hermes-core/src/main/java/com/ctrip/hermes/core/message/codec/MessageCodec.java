@@ -14,7 +14,7 @@ public interface MessageCodec {
 
 	public PartialDecodedMessage partialDecode(ByteBuf buf);
 
-	public BaseConsumerMessage<?> decode(ByteBuf buf, Class<?> bodyClazz);
+	public BaseConsumerMessage<?> decode(String topic, ByteBuf buf, Class<?> bodyClazz);
 
 	void encode(PartialDecodedMessage msg, ByteBuf buf);
 }

@@ -222,7 +222,7 @@ public class ConsumeMessageCommandTest extends ComponentTestCase {
 			MessageCodec codec = lookup(MessageCodec.class);
 
 			for (int j = 0; j < msgSeqs.size(); j++) {
-				BaseConsumerMessage baseMsg = codec.decode(batchData, bodyClazz);
+				BaseConsumerMessage baseMsg = codec.decode(batch.getTopic(), batchData, bodyClazz);
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
 				brokerMsg.setPartition(batch.getPartition());
 				brokerMsg.setPriority(batch.isPriority());

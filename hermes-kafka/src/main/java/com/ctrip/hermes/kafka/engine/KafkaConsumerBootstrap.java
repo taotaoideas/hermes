@@ -104,7 +104,8 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 				try {
 					ByteBuf byteBuf = Unpooled.wrappedBuffer(msgAndMetadata.message());
 
-					BaseConsumerMessage<?> baseMsg = m_messageCodec.decode(byteBuf, consumerContext.getMessageClazz());
+					BaseConsumerMessage<?> baseMsg = m_messageCodec.decode(consumerContext.getTopic().getName(), byteBuf,
+					      consumerContext.getMessageClazz());
 					@SuppressWarnings("rawtypes")
 					ConsumerMessage kafkaMsg = new KafkaConsumerMessage(baseMsg);
 					List<ConsumerMessage<?>> msgs = new ArrayList<>();

@@ -8,11 +8,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 import org.unidal.tuple.Pair;
+import org.unidal.tuple.Triple;
 
 import com.ctrip.hermes.broker.dal.hermes.DeadLetter;
 import com.ctrip.hermes.broker.dal.hermes.DeadLetterDao;
@@ -70,6 +73,10 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 
 	@Inject
 	private MetaService m_metaService;
+
+	private Map<Triple<String, Integer, Integer>, OffsetResend> m_offsetResendCache = new ConcurrentHashMap<>();
+
+	private Map<Pair<Tpp, Integer>, OffsetMessage> m_offsetMessageCache = new ConcurrentHashMap<>();
 
 	@Override
 	public void appendMessages(Tpp tpp, Collection<MessageRawDataBatch> batches) throws Exception {
@@ -161,7 +168,6 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());
 							partialMsg.setBodyCodecType(dataObj.getCodecType());
-							partialMsg.setTopic(topic);
 
 							m_messageCodec.encode(partialMsg, out);
 						}
@@ -294,14 +300,11 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 			int partition = tpp.getPartition();
 			int intGroupId = m_metaService.getGroupIdInt(groupId);
 			if (resend) {
-				// TODO cache OffsetResend's id
+				OffsetResend proto = getOffsetResend(topic, partition, intGroupId);
+
 				ResendGroupId resendRow = m_resendDao.findByPK(msgSeq, topic, partition, intGroupId,
 				      ResendGroupIdEntity.READSET_FULL);
-				List<OffsetResend> offsetResendRow = m_offsetResendDao.top(topic, partition, intGroupId,
-				      OffsetResendEntity.READSET_FULL);
 
-				// TODO ensure offsetResendRow is inserted by findLastResendOffset
-				OffsetResend proto = CollectionUtil.first(offsetResendRow);
 				proto.setTopic(topic);
 				proto.setPartition(partition);
 				proto.setLastScheduleDate(resendRow.getScheduleDate());
@@ -309,12 +312,7 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 
 				m_offsetResendDao.updateByPK(proto, OffsetResendEntity.UPDATESET_OFFSET);
 			} else {
-				// TODO cache OffsetMessage's id
-				List<OffsetMessage> offsetMessageRow = m_offsetMessageDao.find(topic, partition, tpp.getPriorityInt(),
-				      intGroupId, OffsetMessageEntity.READSET_FULL);
-
-				// TODO ensure offsetMessageRow is inserted by findLastOffset
-				OffsetMessage proto = CollectionUtil.first(offsetMessageRow);
+				OffsetMessage proto = getOffsetMessage(tpp, intGroupId);
 				proto.setTopic(topic);
 				proto.setPartition(partition);
 				proto.setOffset(msgSeq);
@@ -325,6 +323,42 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private OffsetMessage getOffsetMessage(Tpp tpp, int intGroupId) throws DalException {
+		Pair<Tpp, Integer> key = new Pair<>(tpp, intGroupId);
+
+		if (!m_offsetMessageCache.containsKey(key)) {
+			synchronized (m_offsetMessageCache) {
+				if (!m_offsetMessageCache.containsKey(key)) {
+					List<OffsetMessage> offsetMessageRow = m_offsetMessageDao.find(tpp.getTopic(), tpp.getPartition(),
+					      tpp.getPriorityInt(), intGroupId, OffsetMessageEntity.READSET_FULL);
+
+					// TODO ensure offsetMessageRow is inserted by findLastOffset
+					OffsetMessage proto = CollectionUtil.first(offsetMessageRow);
+					m_offsetMessageCache.put(key, proto);
+				}
+			}
+		}
+		return m_offsetMessageCache.get(key);
+	}
+
+	private OffsetResend getOffsetResend(String topic, int partition, int intGroupId) throws DalException {
+		Triple<String, Integer, Integer> tpg = new Triple<String, Integer, Integer>(topic, partition, intGroupId);
+
+		if (!m_offsetResendCache.containsKey(tpg)) {
+			synchronized (m_offsetResendCache) {
+				if (!m_offsetResendCache.containsKey(tpg)) {
+					List<OffsetResend> offsetResendRow = m_offsetResendDao.top(tpg.getFirst(), tpg.getMiddle(),
+					      tpg.getLast(), OffsetResendEntity.READSET_FULL);
+
+					// TODO ensure offsetResendRow is inserted by findLastResendOffset
+					OffsetResend proto = CollectionUtil.first(offsetResendRow);
+					m_offsetResendCache.put(tpg, proto);
+				}
+			}
+		}
+		return m_offsetResendCache.get(tpg);
 	}
 
 	@Override
@@ -389,7 +423,6 @@ public class MySQLMessageQueueStorage implements MessageQueueStorage {
 							partialMsg.setBornTime(dataObj.getCreationDate().getTime());
 							partialMsg.setKey(dataObj.getRefKey());
 							partialMsg.setBodyCodecType(dataObj.getCodecType());
-							partialMsg.setTopic(topic);
 
 							m_messageCodec.encode(partialMsg, out);
 						}
