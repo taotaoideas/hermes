@@ -41,6 +41,8 @@ public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<C
 
 	protected List<EndpointChannelEventListener> m_listeners = new CopyOnWriteArrayList<>();
 
+	protected AtomicBoolean m_closed = new AtomicBoolean(false);
+
 	// TODO config size
 	private BlockingQueue<Command> m_writeQueue = new LinkedBlockingQueue<Command>();
 
@@ -155,4 +157,10 @@ public abstract class NettyEndpointChannel extends SimpleChannelInboundHandler<C
 			}
 		}
 	}
+
+	@Override
+	public boolean isClosed() {
+		return m_channel.get() == null;
+	}
+
 }

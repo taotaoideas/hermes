@@ -54,7 +54,7 @@ public class TpgChannel {
 	}
 
 	public boolean isClosed() {
-		return m_closed.get();
+		return m_closed.get() || m_channel.isClosed();
 	}
 
 	public void close() {

@@ -22,4 +22,6 @@ public interface TpgRelayer {
 	void addChannel(TpgChannel channel);
 
 	boolean containsChannel(TpgChannel channel);
+	
+	int channleCount();
 }
