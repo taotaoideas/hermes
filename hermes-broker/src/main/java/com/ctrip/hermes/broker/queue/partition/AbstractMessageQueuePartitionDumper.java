@@ -79,7 +79,7 @@ public abstract class AbstractMessageQueuePartitionDumper implements MessageQueu
 	}
 
 	public void submit(SettableFuture<Map<Integer, Boolean>> future, MessageRawDataBatch batch, boolean isPriority) {
-		m_queue.add(new FutureBatchPriorityWrapper(future, batch, isPriority));
+		m_queue.offer(new FutureBatchPriorityWrapper(future, batch, isPriority));
 	}
 
 	public void startIfNecessary() {

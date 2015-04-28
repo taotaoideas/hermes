@@ -15,10 +15,17 @@ import com.ctrip.hermes.core.transport.command.SendMessageCommand;
 import com.ctrip.hermes.core.transport.command.SendMessageCommand.MessageRawDataBatch;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
+import com.ctrip.hermes.core.transport.command.processor.SingleThreaded;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
+/**
+ * 
+ * @author Leo Liang(jhliang@ctrip.com)
+ *
+ */
+@SingleThreaded
 public class SendMessageCommandProcessor implements CommandProcessor {
 
 	@Inject

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,52 +26,55 @@ public class CommandProcessorManager implements Initializable, LogEnabled {
 	@Inject
 	private CommandProcessorRegistry m_registry;
 
-	private Map<CommandType, ExecutorService> m_executors = new ConcurrentHashMap<>();
+	private Map<CommandProcessor, ExecutorService> m_executors = new ConcurrentHashMap<>();
 
+	// TODO
 	private Logger m_logger;
-
-	private void process(CommandProcessorContext ctx) {
-		Command cmd = ctx.getCommand();
-		CommandType type = cmd.getHeader().getType();
-		CommandProcessor processor = m_registry.findProcessor(type);
-
-		if (processor == null) {
-			m_logger.error(String.format("Command processor for type %s is not found", type));
-		} else {
-			try {
-				processor.process(ctx);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	public void offer(final CommandProcessorContext ctx) {
 		Command cmd = ctx.getCommand();
 		CommandType type = cmd.getHeader().getType();
-		ExecutorService executorService = m_executors.get(type);
-
-		if (executorService == null) {
-			throw new IllegalArgumentException(String.format("Unknown command type[%s]", type));
+		final CommandProcessor processor = m_registry.findProcessor(type);
+		if (processor == null) {
+			m_logger.error(String.format("Command processor not found for type %s", type));
 		} else {
-			executorService.submit(new Runnable() {
+			ExecutorService executorService = m_executors.get(processor);
 
-				@Override
-				public void run() {
-					process(ctx);
-				}
-			});
+			if (executorService == null) {
+				throw new IllegalArgumentException(String.format("No executor associated to processor %s", processor
+				      .getClass().getSimpleName()));
+			} else {
+				executorService.submit(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							processor.process(ctx);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
 		}
 	}
 
 	@Override
 	public void initialize() throws InitializationException {
-		// TODO
-		Set<CommandType> commandTypes = m_registry.listAllCommandTypes();
+		Set<CommandProcessor> cmdProcessors = m_registry.listAllProcessors();
 
-		for (CommandType type : commandTypes) {
+		for (CommandProcessor cmdProcessor : cmdProcessors) {
 			BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
-			m_executors.put(type, new ThreadPoolExecutor(10, 10, Integer.MAX_VALUE, TimeUnit.SECONDS, workQueue));
+
+			if (cmdProcessor.getClass().isAnnotationPresent(SingleThreaded.class)) {
+				// TODO config ThreadFactory
+				// TODO when do we need to shutdown executorService;
+				m_executors.put(cmdProcessor, Executors.newSingleThreadExecutor());
+			} else {
+				// TODO config thread pool
+				m_executors.put(cmdProcessor,
+				      new ThreadPoolExecutor(10, 10, Integer.MAX_VALUE, TimeUnit.SECONDS, workQueue));
+			}
 		}
 
 	}

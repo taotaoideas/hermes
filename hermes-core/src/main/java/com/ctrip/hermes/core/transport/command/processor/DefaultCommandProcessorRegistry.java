@@ -1,5 +1,6 @@
 package com.ctrip.hermes.core.transport.command.processor;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,8 +44,8 @@ public class DefaultCommandProcessorRegistry extends ContainerHolder implements 
 	}
 
 	@Override
-	public Set<CommandType> listAllCommandTypes() {
-		return m_processors.keySet();
+	public Set<CommandProcessor> listAllProcessors() {
+		return new HashSet<>(m_processors.values());
 	}
 
 }

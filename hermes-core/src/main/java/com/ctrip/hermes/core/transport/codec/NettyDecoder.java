@@ -35,7 +35,7 @@ public class NettyDecoder extends LengthFieldBasedFrameDecoder {
 		} finally {
 			if (null != frame) {
 				// TODO
-				if (cmd != null && cmd.getClass().getAnnotation(ManualRelease.class) == null) {
+				if (cmd != null && !cmd.getClass().isAnnotationPresent(ManualRelease.class)) {
 					frame.release();
 				}
 			}
