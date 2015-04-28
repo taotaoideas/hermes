@@ -16,7 +16,7 @@ public class TopicTest {
 
 	@Test
 	public void createTopicInTestEnv() {
-		String LOCALHOST_BROKER = "103.6.237:9092,10.3.6.239:9092,10.3.6.24:9092";
+		// String LOCALHOST_BROKER = "10.3.6.237:9092,10.3.6.239:9092,10.3.6.24:9092";
 		String ZOOKEEPER_CONNECT = "10.3.6.90:2181,10.3.8.62:2181,10.3.8.63:2181";
 		ZkClient zkClient = new ZkClient(ZOOKEEPER_CONNECT);
 		zkClient.setZkSerializer(new ZKStringSerializer());

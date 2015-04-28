@@ -51,11 +51,11 @@ public class NativeKafkaTest {
 
 	@Test
 	public void testNative() throws IOException, InterruptedException, ExecutionException {
-		String topic = "kafka.SimpleTopic";
-		// ZkClient zkClient = new ZkClient(MockZookeeper.ZOOKEEPER_CONNECT);
-		// int partition = 1;
-		// int replication = 1;
-		// AdminUtils.createTopic(zkClient, topic, partition, replication, new Properties());
+		String topic = RandomStringUtils.randomAlphabetic(5);
+		ZkClient zkClient = new ZkClient(MockZookeeper.ZOOKEEPER_CONNECT);
+		int partition = 1;
+		int replication = 1;
+		AdminUtils.createTopic(zkClient, topic, partition, replication, new Properties());
 		int msgNum = 100;
 		final CountDownLatch countDown = new CountDownLatch(msgNum);
 
@@ -112,5 +112,6 @@ public class NativeKafkaTest {
 
 		consumerConnector.shutdown();
 		producer.close();
+		AdminUtils.deleteTopic(zkClient, topic);
 	}
 }

@@ -49,6 +49,17 @@
 		<partition id='0' read-datasource='kafka-consumer'
 			write-datasource='kafka-produer' endpoint='kafka-endpoint' />
 	</topic>
+	
+	<topic name='kafka.OneBox' partition-count='1' storage-type='kafka' id='102' 
+		description='topic for OneBox Test' status='valid'
+		createTime='2015-05-01 00:00:00' lastModifiedTime='2015-04-01 00:00:00'
+		codec-type="json">
+		<property name='replication-factor' value='2' />
+		<property name='partitions' value='3' />
+		<partition id='0' read-datasource='kafka-consumer'
+			write-datasource='kafka-produer' endpoint='kafka-endpoint' />
+	</topic>
+	
 	<codec type="json" />
 	<codec type="cmessaging" />
 	<codec type="avro">
