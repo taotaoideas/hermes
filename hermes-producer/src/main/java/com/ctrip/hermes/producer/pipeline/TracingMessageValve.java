@@ -28,7 +28,7 @@ public class TracingMessageValve implements Valve {
 		try {
 			String childMsgId = Cat.createMessageId();
 			String rootMsgId = tree.getRootMessageId();
-			String msgId = tree.getMessageId();
+			String msgId = Cat.getCurrentMessageId();
 			rootMsgId = rootMsgId == null ? msgId : rootMsgId;
 
 			String ip = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();

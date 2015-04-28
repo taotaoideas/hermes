@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.unidal.helper.Threads;
 import org.unidal.lookup.ComponentTestCase;
 import org.unidal.lookup.LookupException;
 
@@ -25,6 +26,7 @@ import com.ctrip.hermes.consumer.engine.Subscriber;
 import com.ctrip.hermes.core.message.ConsumerMessage;
 import com.ctrip.hermes.core.result.SendResult;
 import com.ctrip.hermes.producer.api.Producer;
+import com.dianping.cat.Cat;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -133,6 +135,7 @@ public class OneBoxTest extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
+		Cat.initialize("cat.fws.qa.nt.ctripcorp.com");
 		startBroker();
 
 		String topic = "order_new";
@@ -271,6 +274,7 @@ public class OneBoxTest extends ComponentTestCase {
 				}
 			};
 		}.start();
+		
 
 		Thread.sleep(2000);
 	}
