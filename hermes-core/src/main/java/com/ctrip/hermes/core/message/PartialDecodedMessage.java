@@ -4,8 +4,6 @@ import io.netty.buffer.ByteBuf;
 
 public class PartialDecodedMessage {
 
-	private String m_topic;
-
 	private String m_bodyCodecType;
 
 	private ByteBuf m_body;
@@ -19,14 +17,6 @@ public class PartialDecodedMessage {
 	private ByteBuf m_durableProperties;
 
 	private ByteBuf m_volatileProperties;
-
-	public String getTopic() {
-		return m_topic;
-	}
-
-	public void setTopic(String topic) {
-		m_topic = topic;
-	}
 
 	public String getBodyCodecType() {
 		return m_bodyCodecType;

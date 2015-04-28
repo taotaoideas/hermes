@@ -1,19 +1,19 @@
 package com.ctrip.hermes.example.performance;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.transport.NettyServer;
+import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -93,7 +93,12 @@ public class ProduceAndConsume extends ComponentTestCase {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				lookup(NettyServer.class).start();
+				try {
+					lookup(BrokerBootstrap.class).start();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}).start();
 		try {

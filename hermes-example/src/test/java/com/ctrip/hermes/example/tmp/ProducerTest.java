@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.alibaba.fastjson.JSON;
-import com.ctrip.hermes.broker.transport.NettyServer;
+import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
 import com.ctrip.hermes.consumer.BaseConsumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -26,7 +26,12 @@ public class ProducerTest extends ComponentTestCase {
 	public void test() throws Exception {
 		new Thread() {
 			public void run() {
-				lookup(NettyServer.class).start();
+				try {
+					lookup(BrokerBootstrap.class).start();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}.start();
 

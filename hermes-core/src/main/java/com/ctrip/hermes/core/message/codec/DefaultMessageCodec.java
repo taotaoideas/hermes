@@ -35,9 +35,9 @@ public class DefaultMessageCodec implements MessageCodec {
 	}
 
 	@Override
-	public BaseConsumerMessage<?> decode(ByteBuf buf, Class<?> bodyClazz) {
+	public BaseConsumerMessage<?> decode(String topic, ByteBuf buf, Class<?> bodyClazz) {
 		MessageCodecVersion version = getVersion(buf);
-		return version.getHandler().decode(buf, bodyClazz);
+		return version.getHandler().decode(topic, buf, bodyClazz);
 	}
 
 	@Override

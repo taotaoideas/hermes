@@ -81,7 +81,7 @@ public class ConsumeMessageCommandProcessor implements CommandProcessor {
 			boolean priority = batch.isPriority();
 
 			for (int j = 0; j < msgSeqs.size(); j++) {
-				BaseConsumerMessage baseMsg = m_messageCodec.decode(batchData, bodyClazz);
+				BaseConsumerMessage baseMsg = m_messageCodec.decode(batch.getTopic(), batchData, bodyClazz);
 				BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
 				brokerMsg.setPartition(partition);
 				brokerMsg.setPriority(priority);
