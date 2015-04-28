@@ -46,7 +46,7 @@ public class KafkaConsumerPerf {
 			long elapsedMs = endMs - startMs;
 			double totalMBRead = (bytesRead * 1.0) / (1024 * 1024);
 			double mbRead = ((bytesRead - lastBytesRead) * 1.0) / (1024 * 1024);
-			System.out.println(("%s, %d, %d, %.4f, %.4f, %d, %.4f").format(config.dateFormat.format(endMs), id,
+			System.out.println(String.format("%s, %d, %d, %.4f, %.4f, %d, %.4f", config.dateFormat.format(endMs), id,
 			      config.consumerConfig.fetchMessageMaxBytes(), totalMBRead, 1000.0 * (mbRead / elapsedMs), messagesRead,
 			      ((messagesRead - lastMessagesRead) / elapsedMs) * 1000.0));
 		}
@@ -134,7 +134,7 @@ public class KafkaConsumerPerf {
 		double elapsedSecs = (endMs - startMs - config.consumerConfig.consumerTimeoutMs()) / 1000.0;
 		if (!config.showDetailedStats) {
 			double totalMBRead = (totalBytesRead.get() * 1.0) / (1024 * 1024);
-			System.out.println(("%s, %s, %d, %.4f, %.4f, %d, %.4f").format(config.dateFormat.format(startMs),
+			System.out.println(String.format("%s, %s, %d, %.4f, %.4f, %d, %.4f", config.dateFormat.format(startMs),
 			      config.dateFormat.format(endMs), config.consumerConfig.fetchMessageMaxBytes(), totalMBRead, totalMBRead
 			            / elapsedSecs, totalMessagesRead.get(), totalMessagesRead.get() / elapsedSecs));
 		}

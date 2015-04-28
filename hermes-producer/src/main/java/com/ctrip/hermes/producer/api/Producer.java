@@ -9,8 +9,6 @@ import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 public abstract class Producer {
 	public abstract MessageHolder message(String topic, Object body);
 	
-	public abstract MessageHolder message(String topic, Object body, Callback callback);
-
 	public static Producer getInstance() {
 		return PlexusComponentLocator.lookup(Producer.class);
 	}

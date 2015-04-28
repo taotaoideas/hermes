@@ -30,8 +30,6 @@ public abstract class BaseConsumer<T> implements Consumer<T> {
 					String parentMsgId = holder.getDurableSysProperty(CatConstants.CURRENT_MESSAGE_ID);
 					String msgId = holder.getDurableSysProperty(CatConstants.SERVER_MESSAGE_ID);
 
-					System.out.println(rootMsgId + parentMsgId + msgId);
-
 					tree.setRootMessageId(rootMsgId);
 					tree.setParentMessageId(parentMsgId);
 					tree.setMessageId(msgId);

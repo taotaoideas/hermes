@@ -38,7 +38,8 @@ public class HermesProducerPerf {
 		for (int i = 0; i < numRecords; i++) {
 			long sendStart = System.currentTimeMillis();
 			Callback cb = stats.nextCompletion(sendStart, payload.length, stats);
-			MessageHolder message = producer.message(topicName, payload, cb);
+			MessageHolder message = producer.message(topicName, payload);
+			message.setCallback(cb);
 			message.send();
 
 			/*

@@ -22,13 +22,6 @@ public class DefaultProducer extends Producer {
 		return new DefaultMessageHolder(topic, body);
 	}
 
-	@Override
-	public DefaultMessageHolder message(String topic, Object body, Callback callback) {
-		DefaultMessageHolder msgHolder = new DefaultMessageHolder(topic, body);
-		msgHolder.setCallback(callback);
-		return msgHolder;
-	}
-
 	class DefaultMessageHolder implements MessageHolder {
 		private ProducerMessage<Object> m_msg;
 

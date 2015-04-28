@@ -24,6 +24,10 @@
 	</topic>
 	<topic name='kafka.SimpleTopic1' />
 	<topic name='kafka.SimpleTopic2' />
+	<topic name='kafka.OneBox' partition-count='1' codec-type="json">
+		<partition id='0' read-datasource='kafka-ds-read'
+			write-datasource='kafka-ds-write' endpoint='kafka-endpoint1' />
+	</topic>"
 
 	<app id='1' />
 	<app id='2' />
@@ -57,15 +61,13 @@
 	</storage>
 	<storage type='kafka'>
 		<datasource id='kafka-ds-read'>
-			<property name='zk' value='1.1.1.1:2181,2.2.2.2:2181' />
 			<property name='zookeeper.connect'
-				value='fx-message04:2181,fx-message05:2181,fx-message06:2181' />
+				value='10.3.6.90:2181,10.3.8.62:2181,10.3.8.63:2181' />
 			<property name='offsets.storage' value='kafka' />
 		</datasource>
 		<datasource id='kafka-ds-write'>
-			<property name='zk' value='1.1.1.1:2181,2.2.2.2:2181' />
 			<property name='bootstrap.servers'
-				value='fx-message01:9092,fx-message02:9092,fx-message03:9092' />
+				value='10.3.6.237:9092,10.3.6.239:9092,10.3.6.24:9092' />
 			<property name='request.required.acks' value='1' />
 			<property name='offsets.storage' value='kafka' />
 		</datasource>
