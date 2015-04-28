@@ -10,6 +10,6 @@ public interface CommandProcessorRegistry {
 
 	public CommandProcessor findProcessor(CommandType type);
 
-	public Set<CommandType> listAllCommandTypes();
+	public Set<CommandProcessor> listAllProcessors();
 
 }

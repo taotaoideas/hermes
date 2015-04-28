@@ -21,12 +21,14 @@ import com.ctrip.hermes.core.transport.command.CommandType;
 import com.ctrip.hermes.core.transport.command.ConsumeMessageCommand;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessor;
 import com.ctrip.hermes.core.transport.command.processor.CommandProcessorContext;
+import com.ctrip.hermes.core.transport.command.processor.SingleThreaded;
 import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
 
 /**
  * @author Leo Liang(jhliang@ctrip.com)
  *
  */
+@SingleThreaded
 public class ConsumeMessageCommandProcessor implements CommandProcessor {
 
 	@Inject
