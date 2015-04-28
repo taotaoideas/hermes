@@ -1,8 +1,5 @@
 package com.ctrip.hermes.kafka.producer;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -106,10 +103,8 @@ public class KafkaMessageSender implements MessageSender {
 
 		KafkaProducer<String, byte[]> producer = m_producers.get(topic);
 
-		ByteBuf byteBuf = Unpooled.buffer();
-		m_codec.encode(msg, byteBuf);
-		byte[] bytes = new byte[byteBuf.readableBytes()];
-		System.arraycopy(byteBuf.array(), 0, bytes, 0, bytes.length);
+		byte[] bytes = m_codec.encode(msg);
+		
 		ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, partition, bytes);
 
 		Future<RecordMetadata> sendResult = null;
