@@ -53,6 +53,8 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 
 	private Map<ConsumerContext, ConsumerConnector> consumers = new HashMap<>();
 
+	private Map<ConsumerContext, SubscribeCommand> commands = new HashMap<>();
+
 	@Override
 	protected void doStart(ConsumerContext consumerContext) {
 		Topic topic = consumerContext.getTopic();
@@ -74,12 +76,16 @@ public class KafkaConsumerBootstrap extends BaseConsumerBootstrap implements Log
 		m_executor.submit(new KafkaConsumerThread(stream, consumerContext, subscribeCommand.getHeader()
 		      .getCorrelationId()));
 		consumers.put(consumerContext, consumerConnector);
+		commands.put(consumerContext, subscribeCommand);
 	}
 
 	@Override
 	protected void doStop(ConsumerContext consumerContext) {
 		ConsumerConnector consumerConnector = consumers.remove(consumerContext);
 		consumerConnector.shutdown();
+
+		SubscribeCommand subscribeCommand = commands.remove(consumerContext);
+		m_consumerNotifier.deregister(subscribeCommand.getHeader().getCorrelationId());
 
 		super.doStop(consumerContext);
 	}
