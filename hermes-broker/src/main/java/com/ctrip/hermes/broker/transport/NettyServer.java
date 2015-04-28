@@ -30,7 +30,8 @@ public class NettyServer extends ContainerHolder {
 
 		try {
 			ServerBootstrap b = new ServerBootstrap();
-			b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+			b.group(bossGroup, workerGroup)//
+			      .channel(NioServerSocketChannel.class)//
 			      .childHandler(new ChannelInitializer<SocketChannel>() {
 				      @Override
 				      public void initChannel(SocketChannel ch) throws Exception {
@@ -48,7 +49,7 @@ public class NettyServer extends ContainerHolder {
 			ChannelFuture f = b.bind(m_serverConfig.getListenPort()).sync();
 
 			// Wait until the server socket is closed.
-			 f.channel().closeFuture().sync();
+			f.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
 			// TODO
 			e.printStackTrace();

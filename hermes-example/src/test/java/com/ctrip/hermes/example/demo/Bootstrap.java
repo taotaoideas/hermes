@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.transport.NettyServer;
+import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.Subscribe;
 import com.ctrip.hermes.consumer.engine.Engine;
@@ -17,19 +17,19 @@ public class Bootstrap extends ComponentTestCase {
 
 	@Test
 	public void start() throws Exception {
-//		System.setProperty("devMode", "true");
-//		
-//		startBroker();
-//		startLocalDevServer();
-//
-//		startConsumers();
-//
-//		OrderProducer p = new OrderProducer();
-//
-//		while (true) {
-//			System.in.read();
-//			p.send("order_new");
-//		}
+		// System.setProperty("devMode", "true");
+		//
+		// startBroker();
+		// startLocalDevServer();
+		//
+		// startConsumers();
+		//
+		// OrderProducer p = new OrderProducer();
+		//
+		// while (true) {
+		// System.in.read();
+		// p.send("order_new");
+		// }
 	}
 
 	private void startConsumers() {
@@ -58,13 +58,18 @@ public class Bootstrap extends ComponentTestCase {
 	}
 
 	private void startLocalDevServer() throws Exception {
-//		LocalDevServer.getInstance().start();
+		// LocalDevServer.getInstance().start();
 	}
 
 	private void startBroker() {
 		new Thread() {
 			public void run() {
-				lookup(NettyServer.class).start();
+				try {
+					lookup(BrokerBootstrap.class).start();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}.start();
 	}

@@ -12,7 +12,7 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.transport.NettyServer;
+import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
 import com.ctrip.hermes.consumer.Consumer;
 import com.ctrip.hermes.consumer.engine.Engine;
 import com.ctrip.hermes.consumer.engine.Subscriber;
@@ -28,7 +28,12 @@ public class OneProducer extends ComponentTestCase {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                lookup(NettyServer.class).start();
+				try {
+					lookup(BrokerBootstrap.class).start();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             }
         }).start();
     }

@@ -4,7 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
-import com.ctrip.hermes.broker.transport.NettyServer;
+import com.ctrip.hermes.broker.bootstrap.BrokerBootstrap;
 
 public class TestBroker extends ComponentTestCase {
 
@@ -15,7 +15,7 @@ public class TestBroker extends ComponentTestCase {
 
 	@Test
 	public void test() throws Exception {
-		lookup(NettyServer.class).start();
+		lookup(BrokerBootstrap.class).start();
 	}
 
 }
