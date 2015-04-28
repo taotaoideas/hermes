@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -16,6 +18,7 @@ import java.util.jar.Manifest;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import org.unidal.helper.Joiners;
 import org.unidal.lookup.annotation.Named;
 
 @Named
@@ -29,19 +32,22 @@ public class CompileService {
 	 * @throws IOException
 	 */
 	public void compile(final Path destDir) throws IOException {
+		final Set<String> filesPath = new HashSet<String>();
 		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
 
 			@Override
-			public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-				int result = jdkCompiler.run(null, null, null, "-d", destDir.toAbsolutePath().toString(), "-classpath",
-				      System.getProperty("java.class.path"), path.toAbsolutePath().toString());
-				if (result != 0) {
-					return FileVisitResult.TERMINATE;
-				}
-				return FileVisitResult.CONTINUE;
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (file.toString().endsWith(".java"))
+					filesPath.add(file.getParent().toAbsolutePath().toString() + "\\*.java");
+				return super.visitFile(file, attrs);
 			}
 
 		});
+
+		System.out.println(String.format("javac -d %s -classpath %s %s", destDir.toAbsolutePath().toString(),
+		      System.getProperty("java.class.path"), Joiners.by(" ").join(filesPath)));
+		jdkCompiler.run(System.in, System.out, System.err, "-d", destDir.toAbsolutePath().toString(), "-classpath",
+		      System.getProperty("java.class.path"), Joiners.by(" ").join(filesPath));
 	}
 
 	/**

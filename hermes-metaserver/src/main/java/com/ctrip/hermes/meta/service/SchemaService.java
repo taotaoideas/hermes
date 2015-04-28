@@ -24,6 +24,7 @@ import com.ctrip.hermes.core.meta.MetaService;
 import com.ctrip.hermes.meta.dal.meta.Schema;
 import com.ctrip.hermes.meta.dal.meta.SchemaDao;
 import com.ctrip.hermes.meta.dal.meta.SchemaEntity;
+import com.ctrip.hermes.meta.entity.Meta;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 
@@ -48,9 +49,6 @@ public class SchemaService {
 
 	@Inject(ServerMetaService.ID)
 	private MetaService m_metaService;
-
-	@Inject
-	private TopicService m_topicService;
 
 	@Inject
 	private CompileService m_compileService;
@@ -120,7 +118,12 @@ public class SchemaService {
 		m_schemaDao.insert(schema);
 
 		topic.setSchemaId(schema.getId());
-		m_topicService.updateTopic(topic);
+		Meta meta = m_metaManager.getMeta();
+		meta.removeTopic(topic.getName());
+		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
+		meta.addTopic(topic);
+		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
 
 		if ("avro".equals(schema.getType())) {
 			if (StringUtils.isEmpty(schema.getCompatibility())) {
@@ -140,9 +143,14 @@ public class SchemaService {
 	 */
 	public void deleteSchema(long id, Long oldSchemaId) throws DalException {
 		Schema schema = m_schemaDao.findByPK(id, SchemaEntity.READSET_FULL);
-		Topic topic = m_topicService.getTopic(schema.getTopicId());
+		Topic topic = m_metaService.findTopic(schema.getTopicId());
 		topic.setSchemaId(oldSchemaId);
-		m_topicService.updateTopic(topic);
+		Meta meta = m_metaManager.getMeta();
+		meta.removeTopic(topic.getName());
+		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
+		meta.addTopic(topic);
+		m_metaManager.updateMeta(meta);
+		m_metaService.refreshMeta(meta);
 		m_schemaDao.deleteByPK(schema);
 	}
 
