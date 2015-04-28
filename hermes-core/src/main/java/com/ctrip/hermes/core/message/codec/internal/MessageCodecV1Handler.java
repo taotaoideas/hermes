@@ -47,40 +47,56 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		int indexBeginning = buf.writerIndex();
+		codec.writeInt(-1);// placeholder for whole length
+		int indexAfterWholeLen = buf.writerIndex();
+		codec.writeInt(-1);// placeholder for header length
+		int indexBeforeHeader = buf.writerIndex();
 
-		// placeholder for length
-		codec.writeInt(-1);
-
+		// header begin
 		codec.writeString(msg.getKey());
 		codec.writeLong(msg.getBornTime());
-		// remaining retries
-		codec.writeInt(0);
+		codec.writeInt(0);// remaining retries
 		codec.writeString(codecType);
-
 		PropertiesHolder propertiesHolder = msg.getPropertiesHolder();
 		writeProperties(propertiesHolder.getDurableProperties(), buf, codec);
 		writeProperties(propertiesHolder.getVolatileProperties(), buf, codec);
+		// header end
 
-		// TODO pass buf to m_codec
-		int indexBeforeLen = buf.writerIndex();
-		codec.writeInt(-1);
+		int headerLen = buf.writerIndex() - indexBeforeHeader;
+
+		int indexBeforeBodyLen = buf.writerIndex();
+		codec.writeInt(-1);// placeholder for body length
+
+		// body begin
 		int indexBeforeBody = buf.writerIndex();
 		buf.writeBytes(body);
-		int indexAfterBody = buf.writerIndex();
-		int len = indexAfterBody - indexBeforeBody;
-		buf.writerIndex(indexBeforeLen);
-		codec.writeInt(len);
+		int indexEnd = buf.writerIndex();
+		// body end
 
+		int bodyLen = indexEnd - indexBeforeBody;
+		int wholeLen = indexEnd - indexAfterWholeLen;
+
+		// refill body length
+		buf.writerIndex(indexBeforeBodyLen);
+		codec.writeInt(bodyLen);
+
+		// refill whole length
 		buf.writerIndex(indexBeginning);
-		codec.writeInt(indexAfterBody - indexBeginning);
+		codec.writeInt(wholeLen);
 
-		buf.writerIndex(indexAfterBody);
+		// refill header length
+		codec.writeInt(headerLen);
+
+		buf.writerIndex(indexEnd);
 	}
 
 	@Override
 	public PartialDecodedMessage partialDecode(ByteBuf buf) {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
+		// skip whole length
+		codec.readInt();
+		// skip header length
 		codec.readInt();
 		PartialDecodedMessage msg = new PartialDecodedMessage();
 		msg.setKey(codec.readString());
@@ -124,27 +140,35 @@ public class MessageCodecV1Handler implements MessageCodecHandler {
 		HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
 
 		int indexBeginning = buf.writerIndex();
+		codec.writeInt(-1);// placeholder for whole length
+		int indexAfterWholeLen = buf.writerIndex();
+		codec.writeInt(-1);// placeholder for header length
+		int indexBeforeHeader = buf.writerIndex();
 
-		// placeholder for length
-		codec.writeInt(-1);
-
+		// header begin
 		codec.writeString(msg.getKey());
 		codec.writeLong(msg.getBornTime());
 		codec.writeInt(msg.getRemainingRetries());
 		codec.writeString(msg.getBodyCodecType());
-
 		writeProperties(msg.getDurableProperties(), buf, codec);
 		writeProperties(msg.getVolatileProperties(), buf, codec);
+		// header end
 
-		// TODO pass buf to m_codec
+		int headerLen = buf.writerIndex() - indexBeforeHeader;
+
+		// body begin
 		ByteBuf body = msg.getBody();
 		codec.writeInt(body.readableBytes());
 		buf.writeBytes(body);
+		// body end
 
 		int indexAfterBody = buf.writerIndex();
 
+		// refill whole length
 		buf.writerIndex(indexBeginning);
-		codec.writeInt(indexAfterBody - indexBeginning);
+		codec.writeInt(indexAfterBody - indexAfterWholeLen);
+		// refill header length
+		codec.writeInt(headerLen);
 
 		buf.writerIndex(indexAfterBody);
 	}
