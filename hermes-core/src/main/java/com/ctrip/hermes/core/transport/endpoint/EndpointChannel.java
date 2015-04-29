@@ -13,5 +13,7 @@ public interface EndpointChannel {
 	void start();
 
 	void addListener(EndpointChannelEventListener... listeners);
+	
+	boolean isClosed();
 
 }

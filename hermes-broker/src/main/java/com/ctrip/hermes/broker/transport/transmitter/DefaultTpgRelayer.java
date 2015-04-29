@@ -37,9 +37,20 @@ public class DefaultTpgRelayer implements TpgRelayer {
 	public int availableSize() {
 		m_rwLock.writeLock().lock();
 		try {
-			m_currentChannel = m_channels.get(m_pos);
-			m_pos = (m_pos + 1) % m_channels.size();
-			return m_currentChannel.availableSize();
+			while (true) {
+				if (isClosed() || m_channels.isEmpty()) {
+					return 0;
+				}
+
+				m_pos = m_pos % m_channels.size();
+				m_currentChannel = m_channels.get(m_pos);
+				if (m_currentChannel.isClosed()) {
+					m_channels.remove(m_pos);
+				} else {
+					m_pos = (m_pos + 1) % m_channels.size();
+					return m_currentChannel.availableSize();
+				}
+			}
 		} finally {
 			m_rwLock.writeLock().unlock();
 		}
@@ -72,6 +83,11 @@ public class DefaultTpgRelayer implements TpgRelayer {
 		} finally {
 			m_rwLock.readLock().unlock();
 		}
+	}
+
+	@Override
+	public synchronized int channleCount() {
+		return m_channels.size();
 	}
 
 }

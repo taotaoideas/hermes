@@ -1,12 +1,15 @@
 package com.ctrip.hermes.broker.transport.transmitter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.unidal.helper.Threads;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.lookup.annotation.Named;
 
@@ -24,13 +27,13 @@ import com.ctrip.hermes.core.transport.endpoint.EndpointChannel;
  *
  */
 @Named(type = MessageTransmitter.class)
-public class DefaultMessageTransmitter implements MessageTransmitter {
+public class DefaultMessageTransmitter implements MessageTransmitter, Initializable {
 	// one physical channel mapping to one woker
 	// one tpg mapping to one relayer
 	// one physical channel mapping to multiple tpg, but each <physcal channel, tpg> only mapping to one <tpgchannel, correlationId>
-	private Map<EndpointChannel, TransmitterWorker> m_channel2Worker = new HashMap<>();
+	private Map<EndpointChannel, TransmitterWorker> m_channel2Worker = new ConcurrentHashMap<>();
 
-	private Map<Tpg, TpgRelayer> m_tpg2Relayer = new HashMap<>();
+	private Map<Tpg, TpgRelayer> m_tpg2Relayer = new ConcurrentHashMap<>();
 
 	@Inject
 	private AckManager m_ackManager;
@@ -104,6 +107,11 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 					int startPos = 0;
 
 					while (!Thread.currentThread().isInterrupted()) {
+						if (m_channel.isClosed()) {
+							m_channel2Worker.remove(m_channel);
+							break;
+						}
+
 						try {
 							if (m_tpgChannels.isEmpty()) {
 								TimeUnit.SECONDS.sleep(1);
@@ -164,5 +172,35 @@ public class DefaultMessageTransmitter implements MessageTransmitter {
 			m_workerThread.setName(String.format("TransmitterWorker-%s", m_channel));
 			m_workerThread.start();
 		}
+	}
+
+	private class HouseKeepingTask implements Runnable {
+
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				for (Map.Entry<Tpg, TpgRelayer> entry : m_tpg2Relayer.entrySet()) {
+					closeIdleTpgRelayer(entry.getKey(), entry.getValue());
+				}
+
+				try {
+					TimeUnit.SECONDS.sleep(1);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+	}
+
+	private synchronized void closeIdleTpgRelayer(Tpg tpg, TpgRelayer tpgRelayer) {
+		if (tpgRelayer.channleCount() == 0) {
+			tpgRelayer.close();
+			m_tpg2Relayer.remove(tpg);
+		}
+	}
+
+	@Override
+	public void initialize() throws InitializationException {
+		Threads.forGroup("TransmitterHouseKeeping").start(new HouseKeepingTask());
 	}
 }
