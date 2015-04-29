@@ -144,13 +144,15 @@ public class SchemaService {
 	public void deleteSchema(long id, Long oldSchemaId) throws DalException {
 		Schema schema = m_schemaDao.findByPK(id, SchemaEntity.READSET_FULL);
 		Topic topic = m_metaService.findTopic(schema.getTopicId());
-		topic.setSchemaId(oldSchemaId);
-		Meta meta = m_metaManager.getMeta();
-		meta.removeTopic(topic.getName());
-		topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
-		meta.addTopic(topic);
-		m_metaManager.updateMeta(meta);
-		m_metaService.refreshMeta(meta);
+		if (topic != null) {
+			topic.setSchemaId(oldSchemaId);
+			Meta meta = m_metaManager.getMeta();
+			meta.removeTopic(topic.getName());
+			topic.setLastModifiedTime(new Date(System.currentTimeMillis()));
+			meta.addTopic(topic);
+			m_metaManager.updateMeta(meta);
+			m_metaService.refreshMeta(meta);
+		}
 		m_schemaDao.deleteByPK(schema);
 	}
 

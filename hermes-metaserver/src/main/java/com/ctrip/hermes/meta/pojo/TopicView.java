@@ -7,6 +7,7 @@ import com.ctrip.hermes.meta.entity.Partition;
 import com.ctrip.hermes.meta.entity.Property;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
+import com.ctrip.hermes.meta.entity.Codec;
 
 public class TopicView {
 
@@ -30,11 +31,13 @@ public class TopicView {
 
 	private Storage storage;
 
+	private Long schemaId;
+	
 	private SchemaView schemaView;
 
 	private String codecType;
 
-	private Long schemaId;
+	private Codec codec;
 
 	public TopicView() {
 
@@ -53,6 +56,10 @@ public class TopicView {
 		this.codecType = topic.getCodecType();
 		this.schemaId = topic.getSchemaId();
 	}
+
+	public Codec getCodec() {
+	   return codec;
+   }
 
 	public String getCodecType() {
 		return codecType;
@@ -105,6 +112,10 @@ public class TopicView {
 	public String getStorageType() {
 		return storageType;
 	}
+
+	public void setCodec(Codec codec) {
+	   this.codec = codec;
+   }
 
 	public void setCodecType(String codecType) {
 		this.codecType = codecType;
