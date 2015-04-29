@@ -8,23 +8,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-import org.unidal.helper.Joiners;
 import org.unidal.lookup.annotation.Named;
 
 @Named
 public class CompileService {
 
-	private JavaCompiler jdkCompiler = ToolProvider.getSystemJavaCompiler();
+	private JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 	/**
 	 * 
@@ -32,22 +35,26 @@ public class CompileService {
 	 * @throws IOException
 	 */
 	public void compile(final Path destDir) throws IOException {
-		final Set<String> filesPath = new HashSet<String>();
+		final List<File> files = new ArrayList<File>();
 		Files.walkFileTree(destDir, new SimpleFileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (file.toString().endsWith(".java"))
-					filesPath.add(file.getParent().toAbsolutePath().toString() + "\\*.java");
+					files.add(file.toFile());
 				return super.visitFile(file, attrs);
 			}
 
 		});
 
-		System.out.println(String.format("javac -d %s -classpath %s %s", destDir.toAbsolutePath().toString(),
-		      System.getProperty("java.class.path"), Joiners.by(" ").join(filesPath)));
-		jdkCompiler.run(System.in, System.out, System.err, "-d", destDir.toAbsolutePath().toString(), "-classpath",
-		      System.getProperty("java.class.path"), Joiners.by(" ").join(filesPath));
+		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+		Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(files);
+		compiler.getTask(null, fileManager, diagnostics, null, null, compilationUnits).call();
+		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics())
+			System.out.format("%s on line %d in %s: %s%n", diagnostic.getKind().toString(), diagnostic.getLineNumber(),
+			      diagnostic.getSource().toUri(), diagnostic.getMessage(null));
+		fileManager.close();
 	}
 
 	/**

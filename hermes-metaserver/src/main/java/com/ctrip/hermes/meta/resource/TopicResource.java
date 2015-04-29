@@ -26,11 +26,13 @@ import org.unidal.dal.jdbc.DalNotFoundException;
 import com.alibaba.fastjson.JSON;
 import com.ctrip.hermes.core.utils.PlexusComponentLocator;
 import com.ctrip.hermes.meta.dal.meta.Schema;
+import com.ctrip.hermes.meta.entity.Codec;
 import com.ctrip.hermes.meta.entity.Storage;
 import com.ctrip.hermes.meta.entity.Topic;
 import com.ctrip.hermes.meta.pojo.SchemaView;
 import com.ctrip.hermes.meta.pojo.TopicView;
 import com.ctrip.hermes.meta.server.RestException;
+import com.ctrip.hermes.meta.service.CodecService;
 import com.ctrip.hermes.meta.service.SchemaService;
 import com.ctrip.hermes.meta.service.TopicService;
 
@@ -42,6 +44,8 @@ public class TopicResource {
 	private TopicService topicService = PlexusComponentLocator.lookup(TopicService.class);
 
 	private SchemaService schemaService = PlexusComponentLocator.lookup(SchemaService.class);
+
+	private CodecService codecService = PlexusComponentLocator.lookup(CodecService.class);
 
 	@POST
 	public Response createTopic(String content) {
@@ -80,8 +84,10 @@ public class TopicResource {
 		try {
 			for (Topic topic : topics) {
 				TopicView topicView = new TopicView(topic);
+				
 				Storage storage = topicService.findStorage(topic.getName());
 				topicView.setStorage(storage);
+				
 				if (topic.getSchemaId() != null) {
 					try {
 						SchemaView schemaView = schemaService.getSchemaView(topic.getSchemaId());
@@ -89,6 +95,10 @@ public class TopicResource {
 					} catch (DalNotFoundException e) {
 					}
 				}
+				
+				Codec codec = codecService.getCodec(topic.getName());
+				topicView.setCodec(codec);
+				
 				returnResult.add(topicView);
 			}
 		} catch (DalException | IOException | RestClientException e) {
@@ -107,8 +117,11 @@ public class TopicResource {
 
 		TopicView topicView = new TopicView(topic);
 
+		//Fill Storage
 		Storage storage = topicService.findStorage(topic.getName());
 		topicView.setStorage(storage);
+		
+		//Fill Schema
 		if (topic.getSchemaId() != null) {
 			SchemaView schemaView;
 			try {
@@ -118,7 +131,11 @@ public class TopicResource {
 				throw new RestException(e, Status.INTERNAL_SERVER_ERROR);
 			}
 		}
-
+		
+		//Fill Codec
+		Codec codec = codecService.getCodec(topic.getName());
+		topicView.setCodec(codec);
+		
 		return topicView;
 	}
 
